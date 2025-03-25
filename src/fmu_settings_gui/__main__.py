@@ -1,5 +1,6 @@
 """The main entry point for fmu-settings-gui."""
 
+import asyncio
 from pathlib import Path
 
 import uvicorn
@@ -32,7 +33,10 @@ async def health_check() -> dict[str, str]:
 
 def run_server(host: str = "127.0.0.1", port: int = 8000) -> None:
     """Starts the GUI server."""
-    uvicorn.run(app, host=host, port=port)
+    server_config = uvicorn.Config(app=app, host=host, port=port)
+    server = uvicorn.Server(server_config)
+
+    asyncio.run(server.serve())
 
 
 if __name__ == "__main__":

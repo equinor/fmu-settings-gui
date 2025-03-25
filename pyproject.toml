@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-write_to = "src/fmu/settings/gui/_version.py"
+write_to = "src/fmu_settings_gui/_version.py"
 
 [project]
 name = "fmu-settings-gui"
