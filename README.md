@@ -2,9 +2,17 @@
 
 [![ci](https://github.com/equinor/fmu-settings-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/equinor/fmu-settings-gui/actions/workflows/ci.yml)
 
-**fmu-settings-gui** is the React frontend for fmu-settings.
+**fmu-settings-gui** is the web frontend for fmu-settings. There are two parts to this
+repo:
+- The code for the React application, located in the `frontend` directory. This is the
+  main application, containing the web frontend
+- The code for the Python application, located in the root and in the `src` directory.
+  This serves the built and deployed React application
 
-## Developing
+
+## Python application
+
+### Developing
 
 Clone and install into a virtual environment.
 
@@ -35,3 +43,8 @@ mypy src tests
 ```
 
 See the [contributing document](CONTRIBUTING.md) for more.
+
+
+## React application
+
+See the application's [README](frontend/README.md) file for information.
