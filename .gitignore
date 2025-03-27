@@ -91,7 +91,8 @@ venv.bak/
 /site
 
 # vscode
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 
 # setuptools_scm version
 _version.py
