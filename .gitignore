@@ -93,6 +93,7 @@ venv.bak/
 # vscode
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 
 # setuptools_scm version
 _version.py
