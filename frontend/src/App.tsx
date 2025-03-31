@@ -1,5 +1,5 @@
-import fmuLogo from './assets/fmu_logo_full.svg'
-import './App.css'
+import fmuLogo from "./assets/fmu_logo_full.svg";
+import "./App.css";
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       </div>
       <h1>FMU Settings</h1>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
