@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI(title="FMU Settings GUI")
 
 current_dir = Path(__file__).parent.absolute()
-static_dir = current_dir.parent.parent / "static"
+static_dir = current_dir / "static"
 
 app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
 

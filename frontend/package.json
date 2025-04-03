@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build --outDir ../static --emptyOutDir",
+    "build": "tsc -b && vite build --outDir ../src/fmu_settings_gui/static --emptyOutDir",
     "lint": "tools/biome check src && eslint .",
     "preview": "vite preview"
   },
