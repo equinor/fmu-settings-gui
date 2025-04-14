@@ -1,4 +1,16 @@
 {
+    "files.readonlyInclude": {
+        "**/routeTree.gen.ts": true
+    },
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/routeTree.gen.ts": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/routeTree.gen.ts": true
+    },
     "editor.codeActionsOnSave": {
         "source.organizeImports.biome": "explicit"
     },

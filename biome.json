@@ -6,6 +6,7 @@
     "useIgnoreFile": false
   },
   "files": {
+    "includes": ["frontend/src/**", "!frontend/src/routeTree.gen.ts", "!frontend/src/client/**"],
     "ignoreUnknown": false
   },
   "formatter": {

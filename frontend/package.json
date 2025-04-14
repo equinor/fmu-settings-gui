@@ -6,15 +6,26 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build --outDir ../src/fmu_settings_gui/static --emptyOutDir",
-    "lint": "tools/biome check src && eslint .",
-    "preview": "vite preview"
+    "lint": "tools/biome check && eslint .",
+    "preview": "vite preview",
+    "openapi-ts": "openapi-ts"
   },
   "dependencies": {
+    "@hey-api/client-axios": "^0.7.0",
+    "@tanstack/react-query": "^5.71.5",
+    "@tanstack/react-query-devtools": "^5.71.5",
+    "@tanstack/react-router": "^1.114.32",
+    "axios": "^1.8.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@hey-api/openapi-ts": "^0.66.2",
+    "@tanstack/eslint-plugin-query": "^5.71.5",
+    "@tanstack/eslint-plugin-router": "^1.114.29",
+    "@tanstack/react-router-devtools": "^1.114.32",
+    "@tanstack/router-plugin": "^1.114.32",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
