@@ -11,8 +11,8 @@ import axios from "axios";
 import { useEffect } from "react";
 
 import {
-  v1GetCwdFmuDirectorySessionOptions,
-  v1GetCwdFmuDirectorySessionQueryKey,
+  v1GetProjectOptions,
+  v1GetProjectQueryKey,
 } from "../client/@tanstack/react-query.gen";
 import { client } from "../client/client.gen";
 import { Header } from "../components/Header";
@@ -41,7 +41,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       }
 
       const projectDirQueryState = context.queryClient.getQueryState(
-        v1GetCwdFmuDirectorySessionQueryKey(),
+        v1GetProjectQueryKey(),
       );
       if (
         projectDirQueryState !== undefined &&
@@ -53,7 +53,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       }
       if (projectDirQueryState === undefined || !projectDirNotFound) {
         await context.queryClient
-          .fetchQuery(v1GetCwdFmuDirectorySessionOptions())
+          .fetchQuery(v1GetProjectOptions())
           .catch((error: unknown) => {
             if (axios.isAxiosError(error)) {
               if (error.status === 404) {
