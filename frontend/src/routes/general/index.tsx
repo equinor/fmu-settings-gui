@@ -2,7 +2,7 @@ import { Typography } from "@equinor/eds-core-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { v1GetCwdFmuDirectorySessionOptions } from "../../client/@tanstack/react-query.gen";
+import { v1GetProjectOptions } from "../../client/@tanstack/react-query.gen";
 import { displayDateTime } from "../../utils/datetime";
 
 export const Route = createFileRoute("/general/")({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/general/")({
 });
 
 function RouteComponent() {
-  const { data } = useQuery(v1GetCwdFmuDirectorySessionOptions());
+  const { data } = useQuery(v1GetProjectOptions());
 
   return (
     <>

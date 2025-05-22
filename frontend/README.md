@@ -151,8 +151,8 @@ This error has been observed when using the `*Options` functions from the Hey AP
 openapi-ts generated code, such as this:
 
 ```typescript
-  queryClient.ensureQueryData(v1GetCwdFmuDirectorySessionOptions());
+  queryClient.fetchQuery(v1GetProjectOptions());
 ```
-In this example, `v1GetCwdFmuDirectorySessionOptions()` would be marked with the errors
+In this example, `v1GetProjectOptions()` would be marked with the errors
 `@typescript-eslint/no-unsafe-argument` and `@typescript-eslint/no-unsafe-call`. This is
 a false positive, as running the command `pnpm lint` will indicate.
