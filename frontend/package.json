@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build --outDir ../src/fmu_settings_gui/static --emptyOutDir",
     "lint": "tools/biome check && eslint .",
+    "ci-lint": "biome ci && eslint .",
     "preview": "vite preview",
     "openapi-ts": "openapi-ts"
   },

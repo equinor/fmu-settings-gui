@@ -27,13 +27,24 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Install build dependencies
         run: |
           pip install -U pip
           pip install build
 
       - name: Build distributions
-        run: python -m build
+        run: python -m build -vv
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
