@@ -8,6 +8,9 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "src/fmu_settings_gui/_version.py"
 
+[tool.setuptools.package-data]
+"*" = ["static/**/*"]
+
 [project]
 name = "fmu-settings-gui"
 description = "The GUI for fmu-settings"
@@ -40,6 +43,7 @@ dev = [
     "pytest-mock",
     "pytest-xdist",
     "ruff",
+    "types-setuptools",
 ]
 
 [project.urls]
