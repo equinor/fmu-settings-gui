@@ -16,7 +16,7 @@ import {
 } from "react";
 import ReactDOM from "react-dom/client";
 
-import { Options, SessionResponse, V1CreateSessionData } from "./client";
+import { Message, Options, V1CreateSessionData } from "./client";
 import { v1CreateSessionMutation } from "./client/@tanstack/react-query.gen";
 import { client } from "./client/client.gen";
 import { routeTree } from "./routeTree.gen";
@@ -37,7 +37,7 @@ export interface RouterContext {
   hasResponseInterceptor: boolean;
   projectDirNotFound: boolean;
   createSessionMutateAsync: UseMutateAsyncFunction<
-    SessionResponse,
+    Message,
     AxiosError,
     Options<V1CreateSessionData>
   >;

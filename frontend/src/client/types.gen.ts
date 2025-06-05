@@ -16,6 +16,21 @@ export type ApiKeyWritable = {
 };
 
 /**
+ * A key-value pair for a known and supported access scope.
+ */
+export type AccessTokenReadable = {
+    id: string;
+};
+
+/**
+ * A key-value pair for a known and supported access scope.
+ */
+export type AccessTokenWritable = {
+    id: string;
+    key: string;
+};
+
+/**
  * Contains the coordinate system known to SMDA.
  */
 export type CoordinateSystem = {
@@ -68,13 +83,6 @@ export type HttpValidationError = {
 };
 
 /**
- * Returns "ok" if the route is functioning correctly.
- */
-export type HealthCheck = {
-    status?: 'ok';
-};
-
-/**
  * The ``masterdata`` block contains information related to masterdata.
  *
  * Currently, SMDA holds the masterdata.
@@ -91,6 +99,13 @@ export type Message = {
 };
 
 /**
+ * Returns "ok" if the route is functioning correctly.
+ */
+export type Ok = {
+    status?: 'ok';
+};
+
+/**
  * The configuration file in a .fmu directory.
  *
  * Stored as config.json.
@@ -100,14 +115,6 @@ export type ProjectConfig = {
     created_at: string;
     created_by: string;
     masterdata: Masterdata;
-};
-
-/**
- * Information returned when a session is initially created.
- */
-export type SessionResponse = {
-    user_config: UserConfig;
-    fmu_project?: FmuProject | null;
 };
 
 /**
@@ -368,6 +375,10 @@ export type V1PatchApiKeyData = {
 
 export type V1PatchApiKeyErrors = {
     /**
+     * Occurs when trying to save a key to an unknown API. An API is unknown if it is not a predefined field in the fmu-settings UserAPIKeys model.
+     */
+    400: unknown;
+    /**
      * No active or valid session was found
      */
     401: unknown;
@@ -380,14 +391,16 @@ export type V1PatchApiKeyErrors = {
      */
     404: unknown;
     /**
-     * Occurs when trying to save a key to an unknown API. An API is unknown if it is not a predefined field in the fmu-settings UserAPIKeys model.
+     * Validation Error
      */
-    422: unknown;
+    422: HttpValidationError;
     /**
      * Something unexpected has happened
      */
     500: unknown;
 };
+
+export type V1PatchApiKeyError = V1PatchApiKeyErrors[keyof V1PatchApiKeyErrors];
 
 export type V1PatchApiKeyResponses = {
     /**
@@ -398,44 +411,11 @@ export type V1PatchApiKeyResponses = {
 
 export type V1PatchApiKeyResponse = V1PatchApiKeyResponses[keyof V1PatchApiKeyResponses];
 
-export type V1V1HealthCheckData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/health';
-};
-
-export type V1V1HealthCheckErrors = {
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-    /**
-     * Something unexpected has happened
-     */
-    500: unknown;
-};
-
-export type V1V1HealthCheckError = V1V1HealthCheckErrors[keyof V1V1HealthCheckErrors];
-
-export type V1V1HealthCheckResponses = {
-    /**
-     * Successful Response
-     */
-    200: HealthCheck;
-};
-
-export type V1V1HealthCheckResponse = V1V1HealthCheckResponses[keyof V1V1HealthCheckResponses];
-
 export type V1CreateSessionData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/session';
+    url: '/api/v1/session/';
 };
 
 export type V1CreateSessionErrors = {
@@ -469,10 +449,113 @@ export type V1CreateSessionResponses = {
     /**
      * Successful Response
      */
-    200: SessionResponse;
+    200: Message;
 };
 
 export type V1CreateSessionResponse = V1CreateSessionResponses[keyof V1CreateSessionResponses];
+
+export type V1PatchAccessTokenData = {
+    body: AccessTokenWritable;
+    path?: never;
+    query?: never;
+    url: '/api/v1/session/access_token';
+};
+
+export type V1PatchAccessTokenErrors = {
+    /**
+     * Occurs when trying to save a key to an unknown access scope. An access scope/token is unknown if it is not a predefined field in the the session manager's 'AccessTokens' model.
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type V1PatchAccessTokenError = V1PatchAccessTokenErrors[keyof V1PatchAccessTokenErrors];
+
+export type V1PatchAccessTokenResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type V1PatchAccessTokenResponse = V1PatchAccessTokenResponses[keyof V1PatchAccessTokenResponses];
+
+export type V1GetCheckData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/smda/check';
+};
+
+export type V1GetCheckErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type V1GetCheckError = V1GetCheckErrors[keyof V1GetCheckErrors];
+
+export type V1GetCheckResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ok;
+};
+
+export type V1GetCheckResponse = V1GetCheckResponses[keyof V1GetCheckResponses];
+
+export type V1V1HealthCheckData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/health';
+};
+
+export type V1V1HealthCheckErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type V1V1HealthCheckError = V1V1HealthCheckErrors[keyof V1V1HealthCheckErrors];
+
+export type V1V1HealthCheckResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ok;
+};
+
+export type V1V1HealthCheckResponse = V1V1HealthCheckResponses[keyof V1V1HealthCheckResponses];
 
 export type AppHealthCheckData = {
     body?: never;
@@ -485,7 +568,7 @@ export type AppHealthCheckResponses = {
     /**
      * Successful Response
      */
-    200: HealthCheck;
+    200: Ok;
 };
 
 export type AppHealthCheckResponse = AppHealthCheckResponses[keyof AppHealthCheckResponses];

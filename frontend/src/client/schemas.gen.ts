@@ -19,6 +19,25 @@ export const APIKeySchema = {
     description: 'A key-value pair for a known and supported API.'
 } as const;
 
+export const AccessTokenSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            title: 'Id'
+        },
+        key: {
+            type: 'string',
+            format: 'password',
+            title: 'Key',
+            writeOnly: true
+        }
+    },
+    type: 'object',
+    required: ['id', 'key'],
+    title: 'AccessToken',
+    description: 'A key-value pair for a known and supported access scope.'
+} as const;
+
 export const CoordinateSystemSchema = {
     properties: {
         identifier: {
@@ -151,20 +170,6 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
-export const HealthCheckSchema = {
-    properties: {
-        status: {
-            type: 'string',
-            const: 'ok',
-            title: 'Status',
-            default: 'ok'
-        }
-    },
-    type: 'object',
-    title: 'HealthCheck',
-    description: 'Returns "ok" if the route is functioning correctly.'
-} as const;
-
 export const MasterdataSchema = {
     properties: {
         smda: {
@@ -198,6 +203,20 @@ export const MessageSchema = {
     description: 'A generic message to return to the GUI.'
 } as const;
 
+export const OkSchema = {
+    properties: {
+        status: {
+            type: 'string',
+            const: 'ok',
+            title: 'Status',
+            default: 'ok'
+        }
+    },
+    type: 'object',
+    title: 'Ok',
+    description: 'Returns "ok" if the route is functioning correctly.'
+} as const;
+
 export const ProjectConfigSchema = {
     properties: {
         version: {
@@ -224,28 +243,6 @@ export const ProjectConfigSchema = {
     description: `The configuration file in a .fmu directory.
 
 Stored as config.json.`
-} as const;
-
-export const SessionResponseSchema = {
-    properties: {
-        user_config: {
-            '$ref': '#/components/schemas/UserConfig'
-        },
-        fmu_project: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/FMUProject'
-                },
-                {
-                    type: 'null'
-                }
-            ]
-        }
-    },
-    type: 'object',
-    required: ['user_config'],
-    title: 'SessionResponse',
-    description: 'Information returned when a session is initially created.'
 } as const;
 
 export const SmdaSchema = {

@@ -1,12 +1,12 @@
 import { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
-import { Options, SessionResponse, V1CreateSessionData } from "../client";
+import { Message, Options, V1CreateSessionData } from "../client";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
 const STORAGETOKEN_NAME = "apiToken";
 const APITOKEN_HEADER = "x-fmu-settings-api";
-const APIURL_SESSION = "/api/v1/session";
+const APIURL_SESSION = "/api/v1/session/";
 
 export type TokenStatus = {
   present?: boolean;
@@ -62,7 +62,7 @@ export function isApiUrlSession(url?: string): boolean {
 
 export async function createSessionAsync(
   createSessionMutateAsync: UseMutateAsyncFunction<
-    SessionResponse,
+    Message,
     AxiosError,
     Options<V1CreateSessionData>
   >,
