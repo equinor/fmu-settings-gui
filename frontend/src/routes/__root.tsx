@@ -49,12 +49,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
               // Don't retry query if it resulted in a failed session creation
               return false;
             }
-            return failureCount < 3;
+            // Specify at most 2 retries
+            return failureCount < 2;
+          },
+          meta: {
+            errorMessage: "Error getting initial user data",
           },
         })
-        .catch(() => {
-          console.error("Error getting initial user data");
-        });
+        .catch(() => undefined);
     }
 
     return {

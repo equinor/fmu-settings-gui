@@ -6,7 +6,7 @@ import {
   useMutation,
 } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { AxiosError, AxiosResponse, isAxiosError } from "axios";
+import { AxiosError, isAxiosError } from "axios";
 import {
   Dispatch,
   SetStateAction,
@@ -21,10 +21,9 @@ import { v1CreateSessionMutation } from "./client/@tanstack/react-query.gen";
 import { client } from "./client/client.gen";
 import { routeTree } from "./routeTree.gen";
 import {
-  createSessionAsync,
   isApiTokenNonEmpty,
-  isApiUrlSession,
-  removeTokenFromStorage,
+  responseInterceptorFulfilled,
+  responseInterceptorRejected,
   TokenStatus,
 } from "./utils/authentication";
 
@@ -43,11 +42,28 @@ export interface RouterContext {
   >;
 }
 
+// Register the router instance for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+interface QueryMeta extends Record<string, unknown> {
+  errorMessage?: string;
+}
+
+declare module "@tanstack/react-query" {
+  interface Register {
+    queryMeta: QueryMeta;
+  }
+}
+
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
-    onError: (error) => {
+    onError: (error, query) => {
       console.error(
-        "Error getting data:",
+        `${query.meta?.errorMessage ?? "Error getting data"}:`,
         isAxiosError(error) &&
           error.response?.data &&
           "detail" in error.response.data
@@ -87,13 +103,6 @@ const router = createRouter({
   notFoundMode: "root",
 });
 
-// Register the router instance for type safety
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
 export function App() {
   const [apiToken, setApiToken] = useState<string>("");
   const [apiTokenStatus, setApiTokenStatus] = useState<TokenStatus>({});
@@ -110,31 +119,17 @@ export function App() {
     let id: number | undefined = undefined;
     if (isApiTokenNonEmpty(apiToken)) {
       id = client.instance.interceptors.response.use(
-        (response: AxiosResponse) => {
-          if (isApiUrlSession(response.config.url) && !apiTokenStatus.valid) {
-            setApiTokenStatus((apiTokenStatus) => ({
-              ...apiTokenStatus,
-              valid: true,
-            }));
-          }
-          return response;
-        },
-        async (error: AxiosError) => {
-          if (error.status === 401) {
-            if (isApiUrlSession(error.response?.config.url)) {
-              if (isApiTokenNonEmpty(apiToken)) {
-                setApiToken(() => "");
-                removeTokenFromStorage();
-              }
-              if (apiTokenStatus.valid) {
-                setApiTokenStatus(() => ({}));
-              }
-            } else {
-              await createSessionAsync(createSessionMutateAsync, apiToken);
-            }
-          }
-          return Promise.reject(error);
-        },
+        responseInterceptorFulfilled(
+          apiTokenStatus.valid ?? false,
+          setApiTokenStatus,
+        ),
+        responseInterceptorRejected(
+          apiToken,
+          setApiToken,
+          apiTokenStatus.valid ?? false,
+          setApiTokenStatus,
+          createSessionMutateAsync,
+        ),
       );
       setHasResponseInterceptor(true);
     }

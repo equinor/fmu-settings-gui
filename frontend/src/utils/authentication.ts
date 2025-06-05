@@ -1,5 +1,6 @@
 import { UseMutateAsyncFunction } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
+import { Dispatch, SetStateAction } from "react";
 
 import { Message, Options, V1CreateSessionData } from "../client";
 
@@ -26,7 +27,7 @@ function getTokenFromStorage(): string {
   return sessionStorage.getItem(STORAGETOKEN_NAME) ?? "";
 }
 
-export function setTokenInStorage(token: string): void {
+function setTokenInStorage(token: string): void {
   sessionStorage.setItem(STORAGETOKEN_NAME, token);
 }
 
@@ -60,7 +61,7 @@ export function isApiUrlSession(url?: string): boolean {
   return url === APIURL_SESSION;
 }
 
-export async function createSessionAsync(
+async function createSessionAsync(
   createSessionMutateAsync: UseMutateAsyncFunction<
     Message,
     AxiosError,
@@ -72,3 +73,47 @@ export async function createSessionAsync(
     headers: { [APITOKEN_HEADER]: apiToken },
   });
 }
+
+export const responseInterceptorFulfilled =
+  (
+    apiTokenStatusValid: boolean,
+    setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>,
+  ) =>
+  (response: AxiosResponse): AxiosResponse => {
+    if (isApiUrlSession(response.config.url) && !apiTokenStatusValid) {
+      setApiTokenStatus((apiTokenStatus) => ({
+        ...apiTokenStatus,
+        valid: true,
+      }));
+    }
+    return response;
+  };
+
+export const responseInterceptorRejected =
+  (
+    apiToken: string,
+    setApiToken: Dispatch<SetStateAction<string>>,
+    apiTokenStatusValid: boolean,
+    setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>,
+    createSessionMutateAsync: UseMutateAsyncFunction<
+      Message,
+      AxiosError,
+      Options<V1CreateSessionData>
+    >,
+  ) =>
+  async (error: AxiosError) => {
+    if (error.status === 401) {
+      if (isApiUrlSession(error.response?.config.url)) {
+        if (isApiTokenNonEmpty(apiToken)) {
+          setApiToken(() => "");
+          removeTokenFromStorage();
+        }
+        if (apiTokenStatusValid) {
+          setApiTokenStatus(() => ({}));
+        }
+      } else {
+        await createSessionAsync(createSessionMutateAsync, apiToken);
+      }
+    }
+    return Promise.reject(error);
+  };
