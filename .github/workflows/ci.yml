@@ -15,7 +15,7 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  checkv:
+  check:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -56,3 +56,84 @@ jobs:
       - name: Run tests
         if: ${{ always() }}
         run: pytest -n auto tests --cov=src/ --cov-report term-missing
+
+  check-sdist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout commit locally
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+          cache-dependency-path: "frontend"
+
+      - name: Install with dependencies
+        if: ${{ always() }}
+        run: |
+          pip install -U pip build
+          pip install -e ".[dev]"
+
+      - name: List all installed packages
+        run: pip freeze
+
+      - name: Ensure pip builds React app
+        run: python -m build -vv
+
+  check-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout commit locally
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+          cache-dependency-path: "frontend"
+
+      - name: Setup Biome CLI
+        uses: biomejs/setup-biome@v2
+        with:
+          version: 2.0.0-beta.1
+
+      - name: Install packages
+        run: |
+          cd frontend
+          pnpm install
+
+      - name: Lint
+        run: |
+          cd frontend
+          pnpm run ci-lint
+
+      - name: Build
+        run: |
+          cd frontend
+          pnpm run build
