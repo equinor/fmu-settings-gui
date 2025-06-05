@@ -68,6 +68,13 @@ export type HttpValidationError = {
 };
 
 /**
+ * Returns "ok" if the route is functioning correctly.
+ */
+export type HealthCheck = {
+    status?: 'ok';
+};
+
+/**
  * The ``masterdata`` block contains information related to masterdata.
  *
  * Currently, SMDA holds the masterdata.
@@ -156,9 +163,17 @@ export type V1DeleteProjectSessionData = {
 
 export type V1DeleteProjectSessionErrors = {
     /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
 };
 
 export type V1DeleteProjectSessionError = V1DeleteProjectSessionErrors[keyof V1DeleteProjectSessionErrors];
@@ -181,9 +196,25 @@ export type V1GetProjectData = {
 
 export type V1GetProjectErrors = {
     /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     */
+    404: unknown;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
 };
 
 export type V1GetProjectError = V1GetProjectErrors[keyof V1GetProjectErrors];
@@ -206,9 +237,29 @@ export type V1PostProjectData = {
 
 export type V1PostProjectErrors = {
     /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     */
+    404: unknown;
+    /**
+     * A project .fmu directory already exist at a given location, or may possibly not be a directory, i.e. it may be a .fmu file.
+     */
+    409: unknown;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
 };
 
 export type V1PostProjectError = V1PostProjectErrors[keyof V1PostProjectErrors];
@@ -231,9 +282,29 @@ export type V1InitProjectData = {
 
 export type V1InitProjectErrors = {
     /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     */
+    404: unknown;
+    /**
+     * A project .fmu directory already exist at a given location, or may possibly not be a directory, i.e. it may be a .fmu file.
+     */
+    409: unknown;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
 };
 
 export type V1InitProjectError = V1InitProjectErrors[keyof V1InitProjectErrors];
@@ -247,55 +318,85 @@ export type V1InitProjectResponses = {
 
 export type V1InitProjectResponse = V1InitProjectResponses[keyof V1InitProjectResponses];
 
-export type V1GetFmuDirectoryConfigData = {
+export type V1GetUserData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/v1/user/';
 };
 
-export type V1GetFmuDirectoryConfigErrors = {
+export type V1GetUserErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     */
+    404: unknown;
     /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
 };
 
-export type V1GetFmuDirectoryConfigError = V1GetFmuDirectoryConfigErrors[keyof V1GetFmuDirectoryConfigErrors];
+export type V1GetUserError = V1GetUserErrors[keyof V1GetUserErrors];
 
-export type V1GetFmuDirectoryConfigResponses = {
+export type V1GetUserResponses = {
     /**
      * Successful Response
      */
     200: UserConfig;
 };
 
-export type V1GetFmuDirectoryConfigResponse = V1GetFmuDirectoryConfigResponses[keyof V1GetFmuDirectoryConfigResponses];
+export type V1GetUserResponse = V1GetUserResponses[keyof V1GetUserResponses];
 
-export type V1PatchApiTokenKeyData = {
+export type V1PatchApiKeyData = {
     body: ApiKeyWritable;
     path?: never;
     query?: never;
     url: '/api/v1/user/api_key';
 };
 
-export type V1PatchApiTokenKeyErrors = {
+export type V1PatchApiKeyErrors = {
     /**
-     * Validation Error
+     * No active or valid session was found
      */
-    422: HttpValidationError;
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     */
+    404: unknown;
+    /**
+     * Occurs when trying to save a key to an unknown API. An API is unknown if it is not a predefined field in the fmu-settings UserAPIKeys model.
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
 };
 
-export type V1PatchApiTokenKeyError = V1PatchApiTokenKeyErrors[keyof V1PatchApiTokenKeyErrors];
-
-export type V1PatchApiTokenKeyResponses = {
+export type V1PatchApiKeyResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type V1PatchApiTokenKeyResponse = V1PatchApiTokenKeyResponses[keyof V1PatchApiTokenKeyResponses];
+export type V1PatchApiKeyResponse = V1PatchApiKeyResponses[keyof V1PatchApiKeyResponses];
 
 export type V1V1HealthCheckData = {
     body?: never;
@@ -306,9 +407,17 @@ export type V1V1HealthCheckData = {
 
 export type V1V1HealthCheckErrors = {
     /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
      * Validation Error
      */
     422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
 };
 
 export type V1V1HealthCheckError = V1V1HealthCheckErrors[keyof V1V1HealthCheckErrors];
@@ -317,9 +426,7 @@ export type V1V1HealthCheckResponses = {
     /**
      * Successful Response
      */
-    200: {
-        [key: string]: string;
-    };
+    200: HealthCheck;
 };
 
 export type V1V1HealthCheckResponse = V1V1HealthCheckResponses[keyof V1V1HealthCheckResponses];
@@ -330,6 +437,33 @@ export type V1CreateSessionData = {
     query?: never;
     url: '/api/v1/session';
 };
+
+export type V1CreateSessionErrors = {
+    /**
+     * Occurs when no token or an invalid token is or is not provided with the x-fmu-settings-api header.
+     */
+    401: unknown;
+    /**
+     * Will occur if the operating system claims the user does not have permission to create $HOME/.fmu. If returned something very wrong is happening.
+     */
+    403: unknown;
+    /**
+     * Occurs in two cases:
+     * - When attempting to create a session when one already exists
+     * - When trying to create a user .fmu directory, but it already exists. Typically means that .fmu exists as a file.
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type V1CreateSessionError = V1CreateSessionErrors[keyof V1CreateSessionErrors];
 
 export type V1CreateSessionResponses = {
     /**
@@ -351,9 +485,7 @@ export type AppHealthCheckResponses = {
     /**
      * Successful Response
      */
-    200: {
-        [key: string]: string;
-    };
+    200: HealthCheck;
 };
 
 export type AppHealthCheckResponse = AppHealthCheckResponses[keyof AppHealthCheckResponses];

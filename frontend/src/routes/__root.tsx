@@ -4,84 +4,62 @@ import {
   createRootRouteWithContext,
   ErrorComponent,
   Outlet,
-  redirect,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import axios from "axios";
+import { isAxiosError } from "axios";
 import { useEffect } from "react";
 
-import {
-  v1GetProjectOptions,
-  v1GetProjectQueryKey,
-} from "../client/@tanstack/react-query.gen";
-import { client } from "../client/client.gen";
+import { v1GetUserOptions } from "../client/@tanstack/react-query.gen";
 import { Header } from "../components/Header";
 import { Sidebar } from "../components/Sidebar";
-import { TokenStatus } from "../enums";
 import { RouterContext } from "../main";
 import GlobalStyle from "../styles/global";
-import { getApiToken, isApiToken } from "../utils/authentication";
+import {
+  getApiToken,
+  isApiTokenNonEmpty,
+  isApiUrlSession,
+} from "../utils/authentication";
 import { AppContainer } from "./index.style";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-  beforeLoad: async ({ context, location, matches }) => {
-    let apiTokenStatus: TokenStatus;
-    let projectDirNotFound = false;
+  beforeLoad: async ({ context }) => {
+    let apiTokenStatus = context.apiTokenStatus;
 
     const apiToken = context.apiToken || getApiToken();
-    if (isApiToken(apiToken)) {
-      apiTokenStatus = TokenStatus.OK;
+    if (isApiTokenNonEmpty(apiToken)) {
+      apiTokenStatus = { present: true, valid: true };
       if (apiToken !== context.apiToken) {
-        client.setConfig({
-          headers: {
-            "x-fmu-settings-api": apiToken,
-          },
-        });
         context.setApiToken(apiToken);
       }
-
-      const projectDirQueryState = context.queryClient.getQueryState(
-        v1GetProjectQueryKey(),
-      );
-      if (
-        projectDirQueryState !== undefined &&
-        projectDirQueryState.status === "error" &&
-        axios.isAxiosError(projectDirQueryState.error) &&
-        projectDirQueryState.error.status === 404
-      ) {
-        projectDirNotFound = true;
-      }
-      if (projectDirQueryState === undefined || !projectDirNotFound) {
-        await context.queryClient
-          .fetchQuery(v1GetProjectOptions())
-          .catch((error: unknown) => {
-            if (axios.isAxiosError(error)) {
-              if (error.status === 404) {
-                projectDirNotFound = true;
-              } else if (error.status === 401) {
-                apiTokenStatus = TokenStatus.INVALID;
-              } else {
-                console.error("      GET /fmu error =", error);
-              }
-            } else {
-              console.error("Unknown error getting FMU directory: ", error);
-            }
-          });
-      }
-      if (
-        projectDirNotFound &&
-        matches.length > 1 && // don't redirect when route not found (when matching only root route)
-        location.pathname !== "/directory"
-      ) {
-        redirect({ to: "/directory", throw: true });
-      }
     } else {
-      apiTokenStatus = TokenStatus.MISSING;
+      apiTokenStatus = { present: false, valid: false };
+    }
+    context.setApiTokenStatus(apiTokenStatus);
+
+    if (context.hasResponseInterceptor) {
+      await context.queryClient
+        .fetchQuery({
+          ...v1GetUserOptions(),
+          retry: (failureCount, error) => {
+            if (
+              isAxiosError(error) &&
+              isApiUrlSession(error.response?.config.url) &&
+              error.status === 401
+            ) {
+              // Don't retry query if it resulted in a failed session creation
+              return false;
+            }
+            return failureCount < 3;
+          },
+        })
+        .catch(() => {
+          console.error("Error getting initial user data");
+        });
     }
 
     return {
+      apiToken,
       apiTokenStatus,
-      projectDirNotFound,
     };
   },
   component: RootComponent,
@@ -106,12 +84,16 @@ function StandardErrorComponent(error: Error) {
 function RootComponent() {
   const { apiTokenStatus } = Route.useRouteContext();
 
-  if ([TokenStatus.MISSING, TokenStatus.INVALID].includes(apiTokenStatus)) {
+  if (!apiTokenStatus.present || !apiTokenStatus.valid) {
     return (
-      <div>
-        {apiTokenStatus === TokenStatus.MISSING ? "Missing" : "Invalid"} token,
-        please close browser tab and open URL again
-      </div>
+      <>
+        <div>
+          {!apiTokenStatus.present ? "Missing" : "Invalid"} token, please close
+          browser tab and open URL again
+        </div>
+        <TanStackRouterDevtools />
+        <ReactQueryDevtools />
+      </>
     );
   }
 

@@ -151,6 +151,20 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const HealthCheckSchema = {
+    properties: {
+        status: {
+            type: 'string',
+            const: 'ok',
+            title: 'Status',
+            default: 'ok'
+        }
+    },
+    type: 'object',
+    title: 'HealthCheck',
+    description: 'Returns "ok" if the route is functioning correctly.'
+} as const;
+
 export const MasterdataSchema = {
     properties: {
         smda: {

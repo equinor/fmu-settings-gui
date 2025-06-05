@@ -1,5 +1,17 @@
+import { UseMutateAsyncFunction } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+
+import { Options, SessionResponse, V1CreateSessionData } from "../client";
+
 const FRAGMENTTOKEN_PREFIX = "#token=";
 const STORAGETOKEN_NAME = "apiToken";
+const APITOKEN_HEADER = "x-fmu-settings-api";
+const APIURL_SESSION = "/api/v1/session";
+
+export type TokenStatus = {
+  present?: boolean;
+  valid?: boolean;
+};
 
 function getTokenFromFragment(): string {
   const fragment = location.hash;
@@ -10,11 +22,23 @@ function getTokenFromFragment(): string {
   }
 }
 
+function getTokenFromStorage(): string {
+  return sessionStorage.getItem(STORAGETOKEN_NAME) ?? "";
+}
+
+export function setTokenInStorage(token: string): void {
+  sessionStorage.setItem(STORAGETOKEN_NAME, token);
+}
+
+export function removeTokenFromStorage(): void {
+  sessionStorage.removeItem(STORAGETOKEN_NAME);
+}
+
 export function getApiToken(): string {
   const fragmentToken = getTokenFromFragment();
-  const storageToken = sessionStorage.getItem(STORAGETOKEN_NAME) ?? "";
+  const storageToken = getTokenFromStorage();
   if (fragmentToken !== "") {
-    sessionStorage.setItem(STORAGETOKEN_NAME, fragmentToken);
+    setTokenInStorage(fragmentToken);
     history.pushState(
       null,
       "",
@@ -28,6 +52,23 @@ export function getApiToken(): string {
   }
 }
 
-export function isApiToken(apiToken: string): boolean {
+export function isApiTokenNonEmpty(apiToken: string): boolean {
   return apiToken !== "";
+}
+
+export function isApiUrlSession(url?: string): boolean {
+  return url === APIURL_SESSION;
+}
+
+export async function createSessionAsync(
+  createSessionMutateAsync: UseMutateAsyncFunction<
+    SessionResponse,
+    AxiosError,
+    Options<V1CreateSessionData>
+  >,
+  apiToken: string,
+) {
+  await createSessionMutateAsync({
+    headers: { [APITOKEN_HEADER]: apiToken },
+  });
 }

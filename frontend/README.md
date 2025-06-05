@@ -49,6 +49,12 @@ version is available, it can be installed manually, and the documentation with t
 command updated to refer to the new version. Note that linting rules might change between
 versions, so care should be taken when upgrading the program.
 
+Furthermore, the `package.json` contains the script `lint`, which calls `biome` from the
+`tools` subdirectory. This script is for checking the code when developing, where `biome`
+has been installed manually. There is also the script `ci-lint`, but this script calls
+`biome` from the base directory (ie. not from a subdirectory). This script is meant to be
+called from the CI actions, which is executed in a GitHub runner environment and where
+installation has been done through a workflow action.
 
 ### Visual Studio Code
 

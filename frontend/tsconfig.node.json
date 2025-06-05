@@ -20,5 +20,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "openapi-ts.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "openapi-ts.config.ts",
+    "openapi-ts-axios.config.ts"
+  ]
 }

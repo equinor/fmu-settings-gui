@@ -9,7 +9,10 @@ export default defineConfig({
   },
   plugins: [
     ...defaultPlugins,
-    "@hey-api/client-axios",
+    {
+      name: "@hey-api/client-axios",
+      runtimeConfigPath: "./openapi-ts-axios.config.ts",
+    },
     "@hey-api/schemas",
     "@tanstack/react-query",
   ],
