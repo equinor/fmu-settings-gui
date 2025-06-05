@@ -12,6 +12,14 @@ repo:
 
 ## Python application
 
+Doing a local pip install will attempt to build the React application behind
+the scenes. This requires a few dependencies (Node, pnpm, ..) that are not
+installable via pip. View the [frontend README](/frontend/README.md) for
+instructions.
+
+Be sure to include a verbose flag or two (`pip install . -vv`) if you need to
+observe the frontend installation output.
+
 ### Developing
 
 Clone and install into a virtual environment.
