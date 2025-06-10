@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { isAxiosError } from "axios";
 import { useEffect } from "react";
+import { ToastContainer } from "react-toastify";
 
 import { v1GetUserOptions } from "../client/@tanstack/react-query.gen";
 import { Header } from "../components/Header";
@@ -102,6 +103,7 @@ function RootComponent() {
   return (
     <>
       <GlobalStyle />
+      <ToastContainer theme="colored" />
 
       <AppContainer>
         <div className="header">

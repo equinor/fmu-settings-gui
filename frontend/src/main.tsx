@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import ReactDOM from "react-dom/client";
+import { toast } from "react-toastify";
 
 import { Message, Options, V1CreateSessionData } from "./client";
 import { v1CreateSessionMutation } from "./client/@tanstack/react-query.gen";
@@ -62,15 +63,16 @@ declare module "@tanstack/react-query" {
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
-      console.error(
-        `${query.meta?.errorMessage ?? "Error getting data"}:`,
-        isAxiosError(error) &&
-          error.response?.data &&
-          "detail" in error.response.data
+      const message =
+        `${query.meta?.errorMessage ?? "Error getting data"}: ` +
+        (isAxiosError(error) &&
+        error.response?.data &&
+        "detail" in error.response.data
           ? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            error.response.data.detail
-          : error.message,
-      );
+            String(error.response.data.detail)
+          : error.message);
+      console.error(message);
+      toast.error(message);
     },
   }),
   defaultOptions: {
@@ -79,7 +81,9 @@ const queryClient = new QueryClient({
     },
     mutations: {
       onError: (error) => {
-        console.error("Error updating data:", error);
+        const message = "Error updating data:" + String(error);
+        console.error(message);
+        toast.error(message);
       },
     },
   },
@@ -111,7 +115,9 @@ export function App() {
   const { mutateAsync: createSessionMutateAsync } = useMutation({
     ...v1CreateSessionMutation(),
     onError: (error) => {
-      console.error("Error creating session:", error.message);
+      const message = "Error creating session: " + error.message;
+      console.error(message);
+      toast.error(message);
     },
   });
 
