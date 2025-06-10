@@ -81,7 +81,7 @@ const queryClient = new QueryClient({
     },
     mutations: {
       onError: (error) => {
-        const message = "Error updating data:" + String(error);
+        const message = "Error updating data: " + String(error);
         console.error(message);
         toast.error(message);
       },
