@@ -1,8 +1,8 @@
-import { Typography } from "@equinor/eds-core-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { v1GetProjectOptions } from "../../client/@tanstack/react-query.gen";
+import { PageHeader, PageText } from "../../styles/common";
 import { displayDateTime } from "../../utils/datetime";
 
 export const Route = createFileRoute("/general/")({
@@ -14,9 +14,9 @@ function RouteComponent() {
 
   return (
     <>
-      <Typography variant="h2">General</Typography>
+      <PageHeader>General</PageHeader>
 
-      <Typography>
+      <PageText>
         Project: <strong>{data?.project_dir_name}</strong>
         <br />
         Path: {data?.path}
@@ -25,7 +25,7 @@ function RouteComponent() {
         {data?.config.created_by}
         <br />
         Version: {data?.config.version}
-      </Typography>
+      </PageText>
     </>
   );
 }

@@ -1,8 +1,9 @@
-import { Button, Typography } from "@equinor/eds-core-react";
+import { Button } from "@equinor/eds-core-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { v1GetProjectOptions } from "../../client/@tanstack/react-query.gen";
+import { PageHeader, PageText } from "../../styles/common";
 
 export const Route = createFileRoute("/directory/")({
   component: RouteComponent,
@@ -10,20 +11,20 @@ export const Route = createFileRoute("/directory/")({
 
 function ProjectDirSelection() {
   return (
-    <Typography>
+    <PageText>
       Enter project directory: <input /> <Button>Submit</Button>
-    </Typography>
+    </PageText>
   );
 }
 
 function ProjectDirInfo() {
   const { data } = useQuery(v1GetProjectOptions());
   return (
-    <Typography>
+    <PageText>
       Current project: <strong>{data?.project_dir_name}</strong>
       <br />
       Current path: {data?.path}
-    </Typography>
+    </PageText>
   );
 }
 
@@ -32,7 +33,7 @@ function RouteComponent() {
 
   return (
     <>
-      <Typography variant="h2">Directory</Typography>
+      <PageHeader>Directory</PageHeader>
 
       {projectDirNotFound && <ProjectDirSelection />}
 
