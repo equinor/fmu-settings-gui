@@ -1,19 +1,26 @@
-import { useQueryErrorResetBoundary } from "@tanstack/react-query";
+import { Button } from "@equinor/eds-core-react";
+import {
+  QueryErrorResetBoundary,
+  useQueryErrorResetBoundary,
+} from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   createRootRouteWithContext,
   ErrorComponent,
   Outlet,
+  useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { isAxiosError } from "axios";
 import { useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { ToastContainer } from "react-toastify";
 
 import { v1GetUserOptions } from "../client/@tanstack/react-query.gen";
 import { Header } from "../components/Header";
 import { Sidebar } from "../components/Sidebar";
 import { RouterContext } from "../main";
+import { PageHeader, PageText } from "../styles/common";
 import GlobalStyle from "../styles/global";
 import {
   getApiToken,
@@ -84,7 +91,28 @@ function StandardErrorComponent(error: Error) {
   return <ErrorComponent error={error} />;
 }
 
+function ErrorFallbackComponent({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) {
+  return (
+    <>
+      <PageHeader>Error</PageHeader>
+
+      <PageText>An error occured: {error.message}</PageText>
+
+      <PageText>Please try again, or go to another page.</PageText>
+
+      <Button onClick={resetErrorBoundary}>Retry</Button>
+    </>
+  );
+}
+
 function RootComponent() {
+  const location = useLocation();
   const { apiTokenStatus } = Route.useRouteContext();
 
   if (!apiTokenStatus.present || !apiTokenStatus.valid) {
@@ -113,7 +141,17 @@ function RootComponent() {
           <Sidebar />
         </div>
         <div className="content">
-          <Outlet />
+          <QueryErrorResetBoundary>
+            {({ reset }) => (
+              <ErrorBoundary
+                resetKeys={[location.pathname]}
+                onReset={reset}
+                FallbackComponent={ErrorFallbackComponent}
+              >
+                <Outlet />
+              </ErrorBoundary>
+            )}
+          </QueryErrorResetBoundary>
         </div>
       </AppContainer>
 
