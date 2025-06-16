@@ -1,5 +1,11 @@
 import { SideBar as EdsSideBar } from "@equinor/eds-core-react";
-import { dashboard, folder, settings, shuffle } from "@equinor/eds-icons";
+import {
+  account_circle,
+  dashboard,
+  folder,
+  settings,
+  shuffle,
+} from "@equinor/eds-icons";
 import { Link } from "@tanstack/react-router";
 
 export function Sidebar() {
@@ -7,6 +13,13 @@ export function Sidebar() {
     <EdsSideBar open>
       <EdsSideBar.Content>
         <EdsSideBar.Link label="Home" icon={dashboard} as={Link} to="/" />
+        <EdsSideBar.Accordion label="User" icon={account_circle}>
+          <EdsSideBar.AccordionItem
+            label="API keys"
+            as={Link}
+            to="/user/keys"
+          />
+        </EdsSideBar.Accordion>
         <EdsSideBar.Link
           label="Directory"
           icon={folder}

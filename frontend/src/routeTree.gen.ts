@@ -15,6 +15,7 @@ import { Route as IndexImport } from "./routes/index";
 import { Route as MappingsIndexImport } from "./routes/mappings/index";
 import { Route as GeneralIndexImport } from "./routes/general/index";
 import { Route as DirectoryIndexImport } from "./routes/directory/index";
+import { Route as UserKeysImport } from "./routes/user/keys";
 import { Route as GeneralSmdaImport } from "./routes/general/smda";
 
 // Create/Update Routes
@@ -43,6 +44,12 @@ const DirectoryIndexRoute = DirectoryIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
+const UserKeysRoute = UserKeysImport.update({
+  id: "/user/keys",
+  path: "/user/keys",
+  getParentRoute: () => rootRoute,
+} as any);
+
 const GeneralSmdaRoute = GeneralSmdaImport.update({
   id: "/general/smda",
   path: "/general/smda",
@@ -65,6 +72,13 @@ declare module "@tanstack/react-router" {
       path: "/general/smda";
       fullPath: "/general/smda";
       preLoaderRoute: typeof GeneralSmdaImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/user/keys": {
+      id: "/user/keys";
+      path: "/user/keys";
+      fullPath: "/user/keys";
+      preLoaderRoute: typeof UserKeysImport;
       parentRoute: typeof rootRoute;
     };
     "/directory/": {
@@ -96,6 +110,7 @@ declare module "@tanstack/react-router" {
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/general/smda": typeof GeneralSmdaRoute;
+  "/user/keys": typeof UserKeysRoute;
   "/directory": typeof DirectoryIndexRoute;
   "/general": typeof GeneralIndexRoute;
   "/mappings": typeof MappingsIndexRoute;
@@ -104,6 +119,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/general/smda": typeof GeneralSmdaRoute;
+  "/user/keys": typeof UserKeysRoute;
   "/directory": typeof DirectoryIndexRoute;
   "/general": typeof GeneralIndexRoute;
   "/mappings": typeof MappingsIndexRoute;
@@ -113,6 +129,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
   "/general/smda": typeof GeneralSmdaRoute;
+  "/user/keys": typeof UserKeysRoute;
   "/directory/": typeof DirectoryIndexRoute;
   "/general/": typeof GeneralIndexRoute;
   "/mappings/": typeof MappingsIndexRoute;
@@ -120,13 +137,26 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/general/smda" | "/directory" | "/general" | "/mappings";
+  fullPaths:
+    | "/"
+    | "/general/smda"
+    | "/user/keys"
+    | "/directory"
+    | "/general"
+    | "/mappings";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/general/smda" | "/directory" | "/general" | "/mappings";
+  to:
+    | "/"
+    | "/general/smda"
+    | "/user/keys"
+    | "/directory"
+    | "/general"
+    | "/mappings";
   id:
     | "__root__"
     | "/"
     | "/general/smda"
+    | "/user/keys"
     | "/directory/"
     | "/general/"
     | "/mappings/";
@@ -136,6 +166,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   GeneralSmdaRoute: typeof GeneralSmdaRoute;
+  UserKeysRoute: typeof UserKeysRoute;
   DirectoryIndexRoute: typeof DirectoryIndexRoute;
   GeneralIndexRoute: typeof GeneralIndexRoute;
   MappingsIndexRoute: typeof MappingsIndexRoute;
@@ -144,6 +175,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GeneralSmdaRoute: GeneralSmdaRoute,
+  UserKeysRoute: UserKeysRoute,
   DirectoryIndexRoute: DirectoryIndexRoute,
   GeneralIndexRoute: GeneralIndexRoute,
   MappingsIndexRoute: MappingsIndexRoute,
@@ -161,6 +193,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/general/smda",
+        "/user/keys",
         "/directory/",
         "/general/",
         "/mappings/"
@@ -171,6 +204,9 @@ export const routeTree = rootRoute
     },
     "/general/smda": {
       "filePath": "general/smda.tsx"
+    },
+    "/user/keys": {
+      "filePath": "user/keys.tsx"
     },
     "/directory/": {
       "filePath": "directory/index.tsx"
