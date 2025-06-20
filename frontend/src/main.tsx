@@ -1,4 +1,5 @@
 import {
+  MutationCache,
   QueryCache,
   QueryClient,
   QueryClientProvider,
@@ -64,7 +65,29 @@ const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       const message =
-        `${query.meta?.errorMessage ?? "Error getting data"}: ` +
+        `${
+          query.meta && "errorMessage" in query.meta
+            ? String(query.meta.errorMessage)
+            : "Error getting data"
+        }: ` +
+        (isAxiosError(error) &&
+        error.response?.data &&
+        "detail" in error.response.data
+          ? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            String(error.response.data.detail)
+          : error.message);
+      console.error(message);
+      toast.error(message);
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _context, mutation) => {
+      const message =
+        `${
+          mutation.meta && "errorMessage" in mutation.meta
+            ? String(mutation.meta.errorMessage)
+            : "Error updating data"
+        }: ` +
         (isAxiosError(error) &&
         error.response?.data &&
         "detail" in error.response.data
@@ -78,13 +101,6 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 300000,
-    },
-    mutations: {
-      onError: (error) => {
-        const message = "Error updating data: " + String(error);
-        console.error(message);
-        toast.error(message);
-      },
     },
   },
 });
