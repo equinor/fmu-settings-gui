@@ -12,8 +12,14 @@ export function TextField({
   const field = useFieldContext<string>();
 
   useEffect(() => {
-    setSubmitDisabled(field.state.meta.isDefaultValue);
-  }, [setSubmitDisabled, field.state.meta.isDefaultValue]);
+    setSubmitDisabled(
+      field.state.meta.isDefaultValue || !field.state.meta.isValid,
+    );
+  }, [
+    setSubmitDisabled,
+    field.state.meta.isDefaultValue,
+    field.state.meta.isValid,
+  ]);
 
   return (
     <>
