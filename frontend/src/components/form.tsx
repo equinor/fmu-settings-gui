@@ -20,7 +20,7 @@ import {
   useState,
 } from "react";
 import { toast } from "react-toastify";
-import z from "zod/v4";
+import z, { ZodString } from "zod/v4";
 
 import { UserApiKeys } from "../client";
 import {
@@ -121,12 +121,14 @@ export function EditableTextFieldForm({
   label,
   queryClient,
   placeholder,
+  length,
   minLength,
 }: {
   apiKey: keyof UserApiKeys;
   label: string;
   queryClient: QueryClient;
   placeholder?: string;
+  length?: number;
   minLength?: number;
 }) {
   const [isReadonly, setIsReadonly] = useState(true);
@@ -136,6 +138,21 @@ export function EditableTextFieldForm({
     ...v1PatchApiKeyMutation(),
     meta: { errorMessage: "Error updating API key" },
   });
+
+  let validator: ZodString | undefined;
+  if (length !== undefined) {
+    validator = z
+      .string()
+      .refine((val: string) => val === "" || val.length === length, {
+        error: `Value must be exactly ${String(length)} characters long`,
+      });
+  } else if (minLength !== undefined) {
+    validator = z
+      .string()
+      .refine((val) => val === "" || val.length >= minLength, {
+        error: `Value must be at least ${String(minLength)} characters long`,
+      });
+  }
 
   const form = useAppFormEditableTextField({
     defaultValues: {
@@ -171,13 +188,9 @@ export function EditableTextFieldForm({
       >
         <form.AppField
           name={apiKey}
-          {...(minLength && {
+          {...(validator && {
             validators: {
-              onBlur: z
-                .string()
-                .refine((val) => val === "" || val.length >= minLength, {
-                  error: `Value must be at least ${String(minLength)} characters long`,
-                }),
+              onBlur: validator,
             },
           })}
         >

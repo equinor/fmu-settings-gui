@@ -63,7 +63,7 @@ function Content() {
           label="SMDA subscription primary key"
           queryClient={queryClient}
           placeholder="(not set)"
-          minLength={32}
+          length={32}
         />
       </KeysForm>
     </>
