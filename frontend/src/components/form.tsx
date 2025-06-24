@@ -103,7 +103,7 @@ export function SubmitButton({
           }
         }}
       >
-        {isPending ? <DotProgress /> : "Submit"}
+        {isPending ? <DotProgress /> : "Save"}
       </Button>
     </Tooltip>
   );
