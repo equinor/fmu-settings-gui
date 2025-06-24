@@ -17,7 +17,7 @@ function Content() {
     <>
       <PageText $variant="ingress">
         For managing some of the settings, this application needs to know the
-        keys for some external APIs. These are keys that each users needs to
+        keys for some external APIs. These are keys that each user needs to
         acquire, and which can then be stored through this application.
       </PageText>
 
