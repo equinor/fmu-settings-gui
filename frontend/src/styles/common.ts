@@ -12,3 +12,7 @@ export const PageText = styled(Typography).attrs<{ $variant?: string }>(
 )`
   margin-bottom: 1em;
 `;
+
+export const PageSectionSpacer = styled.div`
+  height: 1em;
+`;

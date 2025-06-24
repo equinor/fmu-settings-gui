@@ -1,9 +1,10 @@
+import { Typography } from "@equinor/eds-core-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { Loading } from "../../components/common";
 import { EditableTextFieldForm } from "../../components/form";
-import { PageHeader, PageText } from "../../styles/common";
+import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
 import { KeysForm } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
@@ -30,7 +31,8 @@ function Content() {
         </a>{" "}
         API. This key can be created as follows:
       </PageText>
-      <ol>
+
+      <Typography as="ol">
         <li>
           Go to the{" "}
           <a href="https://api.equinor.com/" target="_blank" rel="noreferrer">
@@ -55,7 +57,9 @@ function Content() {
           Add the copied key value to the edit field here. After saving the
           value will be shown masked with &quot;***...&quot;
         </li>
-      </ol>
+      </Typography>
+
+      <PageSectionSpacer />
 
       <KeysForm>
         <EditableTextFieldForm
