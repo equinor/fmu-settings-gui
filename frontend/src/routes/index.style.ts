@@ -21,6 +21,7 @@ export const AppContainer = styled.div`
   .content {
     grid-area: content;
     overflow: scroll;
+    max-width: 45em;
     padding: 24px;
   }
 `;
