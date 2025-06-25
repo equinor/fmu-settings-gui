@@ -137,6 +137,11 @@ export function EditableTextFieldForm({
   const { data } = useSuspenseQuery(v1GetUserOptions());
   const { mutate, isPending } = useMutation({
     ...v1PatchApiKeyMutation(),
+    onSuccess: () => {
+      void queryClient.refetchQueries({
+        queryKey: v1GetUserQueryKey(),
+      });
+    },
     retry: (failureCount, error) => queryMutationRetry(failureCount, error),
     meta: { errorPrefix: "Error updating API key" },
   });
@@ -168,9 +173,6 @@ export function EditableTextFieldForm({
         {
           onSuccess: (data) => {
             toast.info(data.message);
-            void queryClient.refetchQueries({
-              queryKey: v1GetUserQueryKey(),
-            });
             formApi.reset();
             setIsReadonly(true);
           },
