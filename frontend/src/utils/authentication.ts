@@ -1,5 +1,5 @@
 import { UseMutateAsyncFunction } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
 
 import { Message, Options, V1CreateSessionData } from "../client";
@@ -117,3 +117,16 @@ export const responseInterceptorRejected =
     }
     return Promise.reject(error);
   };
+
+export const queryMutationRetry = (failureCount: number, error: Error) => {
+  if (
+    isAxiosError(error) &&
+    isApiUrlSession(error.response?.config.url) &&
+    error.status === 401
+  ) {
+    // Don't retry query if it resulted in a failed session creation
+    return false;
+  }
+  // Specify at most 2 retries
+  return failureCount < 2;
+};

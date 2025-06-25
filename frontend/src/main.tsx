@@ -51,13 +51,14 @@ declare module "@tanstack/react-router" {
   }
 }
 
-interface QueryMeta extends Record<string, unknown> {
-  errorMessage?: string;
+interface QueryMutationMeta extends Record<string, unknown> {
+  errorPrefix?: string;
 }
 
 declare module "@tanstack/react-query" {
   interface Register {
-    queryMeta: QueryMeta;
+    queryMeta: QueryMutationMeta;
+    mutationMeta: QueryMutationMeta;
   }
 }
 
@@ -66,8 +67,8 @@ const queryClient = new QueryClient({
     onError: (error, query) => {
       const message =
         `${
-          query.meta && "errorMessage" in query.meta
-            ? String(query.meta.errorMessage)
+          query.meta && "errorPrefix" in query.meta
+            ? String(query.meta.errorPrefix)
             : "Error getting data"
         }: ` +
         (isAxiosError(error) &&
@@ -84,8 +85,8 @@ const queryClient = new QueryClient({
     onError: (error, _variables, _context, mutation) => {
       const message =
         `${
-          mutation.meta && "errorMessage" in mutation.meta
-            ? String(mutation.meta.errorMessage)
+          mutation.meta && "errorPrefix" in mutation.meta
+            ? String(mutation.meta.errorPrefix)
             : "Error updating data"
         }: ` +
         (isAxiosError(error) &&
@@ -130,11 +131,7 @@ export function App() {
     useState<boolean>(false);
   const { mutateAsync: createSessionMutateAsync } = useMutation({
     ...v1CreateSessionMutation(),
-    onError: (error) => {
-      const message = "Error creating session: " + error.message;
-      console.error(message);
-      toast.error(message);
-    },
+    meta: { errorPrefix: "Error creating session" },
   });
 
   useEffect(() => {

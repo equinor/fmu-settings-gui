@@ -11,7 +11,6 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { isAxiosError } from "axios";
 import { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { ToastContainer } from "react-toastify";
@@ -25,7 +24,7 @@ import GlobalStyle from "../styles/global";
 import {
   getApiToken,
   isApiTokenNonEmpty,
-  isApiUrlSession,
+  queryMutationRetry,
 } from "../utils/authentication";
 import { AppContainer } from "./index.style";
 
@@ -48,21 +47,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       await context.queryClient
         .fetchQuery({
           ...v1GetUserOptions(),
-          retry: (failureCount, error) => {
-            if (
-              isAxiosError(error) &&
-              isApiUrlSession(error.response?.config.url) &&
-              error.status === 401
-            ) {
-              // Don't retry query if it resulted in a failed session creation
-              return false;
-            }
-            // Specify at most 2 retries
-            return failureCount < 2;
-          },
-          meta: {
-            errorMessage: "Error getting initial user data",
-          },
+          retry: (failureCount, error) =>
+            queryMutationRetry(failureCount, error),
+          meta: { errorPrefix: "Error getting initial user data" },
         })
         .catch(() => undefined);
     }
