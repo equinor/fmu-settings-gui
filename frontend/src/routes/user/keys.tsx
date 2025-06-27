@@ -22,7 +22,7 @@ import {
 } from "../../components/form";
 import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
 import { queryMutationRetry } from "../../utils/authentication";
-import { KeysForm } from "./keys.style";
+import { KeysFormContainer } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
   component: RouteComponent,
@@ -82,11 +82,11 @@ function KeysTextFieldForm({
       name={name}
       label={label}
       value={data.user_api_keys[apiKey] ?? ""}
-      mutationCallback={mutationCallback}
-      mutationIsPending={isPending}
       placeholder={placeholder}
       length={length}
       minLength={minLength}
+      mutationCallback={mutationCallback}
+      mutationIsPending={isPending}
     />
   );
 }
@@ -141,15 +141,15 @@ function Content() {
 
       <PageSectionSpacer />
 
-      <KeysForm>
+      <KeysFormContainer>
         <KeysTextFieldForm
           apiKey="smda_subscription"
           label="SMDA subscription primary key"
-          queryClient={queryClient}
           placeholder="(not set)"
           length={32}
+          queryClient={queryClient}
         />
-      </KeysForm>
+      </KeysFormContainer>
     </>
   );
 }

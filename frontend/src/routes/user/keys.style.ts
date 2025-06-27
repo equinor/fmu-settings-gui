@@ -1,5 +1,5 @@
 import styled from "styled-components";
 
-export const KeysForm = styled.div`
+export const KeysFormContainer = styled.div`
   width: 24em;
 `;

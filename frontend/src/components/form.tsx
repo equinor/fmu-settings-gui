@@ -138,11 +138,11 @@ export function EditableTextFieldForm({
   name,
   label,
   value,
-  mutationCallback,
-  mutationIsPending,
   placeholder,
   length,
   minLength,
+  mutationCallback,
+  mutationIsPending,
 }: EditableTextFieldFormProps) {
   const [isReadonly, setIsReadonly] = useState(true);
   const [submitDisabled, setSubmitDisabled] = useState(true);
