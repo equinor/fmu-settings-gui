@@ -1,15 +1,95 @@
 import { Typography } from "@equinor/eds-core-react";
+import {
+  QueryClient,
+  useMutation,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
+import { UserApiKeys } from "../../client";
+import {
+  v1GetUserOptions,
+  v1GetUserQueryKey,
+  v1PatchApiKeyMutation,
+} from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
-import { EditableTextFieldForm } from "../../components/form";
+import {
+  CommonTextFieldFormProps,
+  EditableTextFieldForm,
+  MutationCallbackProps,
+  StringObject,
+} from "../../components/form";
 import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
+import { queryMutationRetry } from "../../utils/authentication";
 import { KeysForm } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
   component: RouteComponent,
 });
+
+type KeysTextFieldFormProps = Omit<
+  CommonTextFieldFormProps,
+  "name" | "value"
+> & {
+  apiKey: keyof UserApiKeys;
+  queryClient: QueryClient;
+};
+
+function KeysTextFieldForm({
+  apiKey,
+  label,
+  queryClient,
+  placeholder,
+  length,
+  minLength,
+}: KeysTextFieldFormProps) {
+  const { data } = useSuspenseQuery(v1GetUserOptions());
+  const { mutate, isPending } = useMutation({
+    ...v1PatchApiKeyMutation(),
+    onSuccess: () => {
+      void queryClient.refetchQueries({
+        queryKey: v1GetUserQueryKey(),
+      });
+    },
+    retry: (failureCount: number, error: Error) =>
+      queryMutationRetry(failureCount, error),
+    meta: { errorPrefix: "Error updating API key" },
+  });
+
+  const name = String(apiKey);
+
+  const mutationCallback = ({
+    formValue,
+    formSubmitCallback,
+    formReset,
+  }: MutationCallbackProps<StringObject>) => {
+    mutate(
+      { body: { id: name, key: formValue[name] } },
+      {
+        onSuccess: (data) => {
+          formSubmitCallback({
+            message: data.message,
+            formReset,
+          });
+        },
+      },
+    );
+  };
+
+  return (
+    <EditableTextFieldForm
+      name={name}
+      label={label}
+      value={data.user_api_keys[apiKey] ?? ""}
+      mutationCallback={mutationCallback}
+      mutationIsPending={isPending}
+      placeholder={placeholder}
+      length={length}
+      minLength={minLength}
+    />
+  );
+}
 
 function Content() {
   const { queryClient } = Route.useRouteContext();
@@ -62,7 +142,7 @@ function Content() {
       <PageSectionSpacer />
 
       <KeysForm>
-        <EditableTextFieldForm
+        <KeysTextFieldForm
           apiKey="smda_subscription"
           label="SMDA subscription primary key"
           queryClient={queryClient}
