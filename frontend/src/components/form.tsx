@@ -8,11 +8,6 @@ import {
 import { error_filled } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import {
-  QueryClient,
-  useMutation,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import {
   ChangeEvent,
   Dispatch,
   SetStateAction,
@@ -22,17 +17,37 @@ import {
 import { toast } from "react-toastify";
 import z, { ZodString } from "zod/v4";
 
-import { UserApiKeys } from "../client";
-import {
-  v1GetUserOptions,
-  v1GetUserQueryKey,
-  v1PatchApiKeyMutation,
-} from "../client/@tanstack/react-query.gen";
-import { queryMutationRetry } from "../utils/authentication";
 import { fieldContext, formContext, useFieldContext } from "../utils/form";
 import { EditableTextFieldFormContainer } from "./form.style";
 
 Icon.add({ error_filled });
+
+export type StringObject = { [x: string]: string };
+
+interface FormSubmitCallbackProps {
+  message: string;
+  formReset: () => void;
+}
+
+export interface MutationCallbackProps<T> {
+  formValue: T;
+  formSubmitCallback: (props: FormSubmitCallbackProps) => void;
+  formReset: () => void;
+}
+
+export interface CommonTextFieldFormProps {
+  name: string;
+  label: string;
+  value: string;
+  placeholder?: string;
+  length?: number;
+  minLength?: number;
+}
+
+interface MutationFormProps {
+  mutationCallback: (props: MutationCallbackProps<StringObject>) => void;
+  mutationIsPending: boolean;
+}
 
 export function TextField({
   label,
@@ -117,67 +132,55 @@ const { useAppForm: useAppFormEditableTextField } = createFormHook({
   formComponents: { SubmitButton },
 });
 
+type EditableTextFieldFormProps = CommonTextFieldFormProps & MutationFormProps;
+
 export function EditableTextFieldForm({
-  apiKey,
+  name,
   label,
-  queryClient,
+  value,
   placeholder,
   length,
   minLength,
-}: {
-  apiKey: keyof UserApiKeys;
-  label: string;
-  queryClient: QueryClient;
-  placeholder?: string;
-  length?: number;
-  minLength?: number;
-}) {
+  mutationCallback,
+  mutationIsPending,
+}: EditableTextFieldFormProps) {
   const [isReadonly, setIsReadonly] = useState(true);
   const [submitDisabled, setSubmitDisabled] = useState(true);
-  const { data } = useSuspenseQuery(v1GetUserOptions());
-  const { mutate, isPending } = useMutation({
-    ...v1PatchApiKeyMutation(),
-    onSuccess: () => {
-      void queryClient.refetchQueries({
-        queryKey: v1GetUserQueryKey(),
-      });
-    },
-    retry: (failureCount, error) => queryMutationRetry(failureCount, error),
-    meta: { errorPrefix: "Error updating API key" },
-  });
 
   let validator: ZodString | undefined;
   if (length !== undefined) {
     validator = z
       .string()
       .refine((val: string) => val === "" || val.length === length, {
-        error: `Value must be exactly ${String(length)} characters long`,
+        error: `Value must be empty or exactly ${String(length)} characters long`,
       });
   } else if (minLength !== undefined) {
     validator = z
       .string()
       .refine((val) => val === "" || val.length >= minLength, {
-        error: `Value must be at least ${String(minLength)} characters long`,
+        error: `Value must be empty or at least ${String(minLength)} characters long`,
       });
   }
 
+  const formSubmitCallback = ({
+    message,
+    formReset,
+  }: FormSubmitCallbackProps) => {
+    toast.info(message);
+    formReset();
+    setIsReadonly(true);
+  };
+
   const form = useAppFormEditableTextField({
     defaultValues: {
-      [apiKey]: data.user_api_keys[apiKey] ?? "",
+      [name]: value,
     },
     onSubmit: ({ formApi, value }) => {
-      mutate(
-        {
-          body: { id: apiKey, key: value[apiKey] },
-        },
-        {
-          onSuccess: (data) => {
-            toast.info(data.message);
-            formApi.reset();
-            setIsReadonly(true);
-          },
-        },
-      );
+      mutationCallback({
+        formValue: value,
+        formSubmitCallback,
+        formReset: formApi.reset,
+      });
     },
   });
 
@@ -191,7 +194,7 @@ export function EditableTextFieldForm({
         }}
       >
         <form.AppField
-          name={apiKey}
+          name={name}
           {...(validator && {
             validators: {
               onBlur: validator,
@@ -221,7 +224,7 @@ export function EditableTextFieldForm({
             <>
               <form.SubmitButton
                 disabled={submitDisabled}
-                isPending={isPending}
+                isPending={mutationIsPending}
               />
               <Button
                 type="reset"

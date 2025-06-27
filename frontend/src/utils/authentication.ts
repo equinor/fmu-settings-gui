@@ -57,7 +57,7 @@ export function isApiTokenNonEmpty(apiToken: string): boolean {
   return apiToken !== "";
 }
 
-export function isApiUrlSession(url?: string): boolean {
+function isApiUrlSession(url?: string): boolean {
   return url === APIURL_SESSION;
 }
 
@@ -124,7 +124,7 @@ export const queryMutationRetry = (failureCount: number, error: Error) => {
     isApiUrlSession(error.response?.config.url) &&
     error.status === 401
   ) {
-    // Don't retry query if it resulted in a failed session creation
+    // Don't retry query or mutation if it resulted in a failed session creation
     return false;
   }
   // Specify at most 2 retries
