@@ -2,7 +2,7 @@ import { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
 
-import { Message, Options, V1CreateSessionData } from "../client";
+import { Message, Options, SessionCreateSessionData } from "../client";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
 const STORAGETOKEN_NAME = "apiToken";
@@ -65,7 +65,7 @@ async function createSessionAsync(
   createSessionMutateAsync: UseMutateAsyncFunction<
     Message,
     AxiosError,
-    Options<V1CreateSessionData>
+    Options<SessionCreateSessionData>
   >,
   apiToken: string,
 ) {
@@ -98,7 +98,7 @@ export const responseInterceptorRejected =
     createSessionMutateAsync: UseMutateAsyncFunction<
       Message,
       AxiosError,
-      Options<V1CreateSessionData>
+      Options<SessionCreateSessionData>
     >,
   ) =>
   async (error: AxiosError) => {
