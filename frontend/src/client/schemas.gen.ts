@@ -281,6 +281,110 @@ export const SmdaSchema = {
     description: 'Contains SMDA-related attributes.'
 } as const;
 
+export const SmdaFieldSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['TROLL']
+        }
+    },
+    type: 'object',
+    required: ['identifier'],
+    title: 'SmdaField',
+    description: 'An identifier for a field to be searched for.'
+} as const;
+
+export const SmdaFieldSearchResultSchema = {
+    properties: {
+        hits: {
+            type: 'integer',
+            title: 'Hits'
+        },
+        pages: {
+            type: 'integer',
+            title: 'Pages'
+        },
+        results: {
+            items: {
+                '$ref': '#/components/schemas/SmdaFieldUUID'
+            },
+            type: 'array',
+            title: 'Results'
+        }
+    },
+    type: 'object',
+    required: ['hits', 'pages', 'results'],
+    title: 'SmdaFieldSearchResult',
+    description: 'The search result of a field identifier result.'
+} as const;
+
+export const SmdaFieldUUIDSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['TROLL']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid'
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'SmdaFieldUUID',
+    description: 'Name-UUID identifier for a field as known by SMDA.'
+} as const;
+
+export const SmdaMasterdataResultSchema = {
+    properties: {
+        field: {
+            items: {
+                '$ref': '#/components/schemas/FieldItem'
+            },
+            type: 'array',
+            title: 'Field'
+        },
+        country: {
+            items: {
+                '$ref': '#/components/schemas/CountryItem'
+            },
+            type: 'array',
+            title: 'Country'
+        },
+        discovery: {
+            items: {
+                '$ref': '#/components/schemas/DiscoveryItem'
+            },
+            type: 'array',
+            title: 'Discovery'
+        },
+        stratigraphic_columns: {
+            items: {
+                '$ref': '#/components/schemas/StratigraphicColumn'
+            },
+            type: 'array',
+            title: 'Stratigraphic Columns'
+        },
+        field_coordinate_system: {
+            '$ref': '#/components/schemas/CoordinateSystem'
+        },
+        coordinate_systems: {
+            items: {
+                '$ref': '#/components/schemas/CoordinateSystem'
+            },
+            type: 'array',
+            title: 'Coordinate Systems'
+        }
+    },
+    type: 'object',
+    required: ['field', 'country', 'discovery', 'stratigraphic_columns', 'field_coordinate_system', 'coordinate_systems'],
+    title: 'SmdaMasterdataResult',
+    description: 'Contains SMDA-related attributes.'
+} as const;
+
 export const StratigraphicColumnSchema = {
     properties: {
         identifier: {

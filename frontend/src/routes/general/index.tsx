@@ -2,7 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-import { v1GetProjectOptions } from "../../client/@tanstack/react-query.gen";
+import { projectGetProjectOptions } from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
 import { PageHeader, PageText } from "../../styles/common";
 import { displayDateTime } from "../../utils/datetime";
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/general/")({
 });
 
 function Overview() {
-  const { data } = useSuspenseQuery(v1GetProjectOptions());
+  const { data } = useSuspenseQuery(projectGetProjectOptions());
 
   return (
     <>

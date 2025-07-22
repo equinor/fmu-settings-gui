@@ -129,6 +129,42 @@ export type Smda = {
 };
 
 /**
+ * An identifier for a field to be searched for.
+ */
+export type SmdaField = {
+    identifier: string;
+};
+
+/**
+ * The search result of a field identifier result.
+ */
+export type SmdaFieldSearchResult = {
+    hits: number;
+    pages: number;
+    results: Array<SmdaFieldUuid>;
+};
+
+/**
+ * Name-UUID identifier for a field as known by SMDA.
+ */
+export type SmdaFieldUuid = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * Contains SMDA-related attributes.
+ */
+export type SmdaMasterdataResult = {
+    field: Array<FieldItem>;
+    country: Array<CountryItem>;
+    discovery: Array<DiscoveryItem>;
+    stratigraphic_columns: Array<StratigraphicColumn>;
+    field_coordinate_system: CoordinateSystem;
+    coordinate_systems: Array<CoordinateSystem>;
+};
+
+/**
  * Contains the stratigraphic column known to SMDA.
  */
 export type StratigraphicColumn = {
@@ -161,14 +197,14 @@ export type ValidationError = {
     type: string;
 };
 
-export type V1DeleteProjectSessionData = {
+export type ProjectDeleteProjectSessionData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/v1/project/';
 };
 
-export type V1DeleteProjectSessionErrors = {
+export type ProjectDeleteProjectSessionErrors = {
     /**
      * No active or valid session was found
      */
@@ -183,25 +219,25 @@ export type V1DeleteProjectSessionErrors = {
     500: unknown;
 };
 
-export type V1DeleteProjectSessionError = V1DeleteProjectSessionErrors[keyof V1DeleteProjectSessionErrors];
+export type ProjectDeleteProjectSessionError = ProjectDeleteProjectSessionErrors[keyof ProjectDeleteProjectSessionErrors];
 
-export type V1DeleteProjectSessionResponses = {
+export type ProjectDeleteProjectSessionResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type V1DeleteProjectSessionResponse = V1DeleteProjectSessionResponses[keyof V1DeleteProjectSessionResponses];
+export type ProjectDeleteProjectSessionResponse = ProjectDeleteProjectSessionResponses[keyof ProjectDeleteProjectSessionResponses];
 
-export type V1GetProjectData = {
+export type ProjectGetProjectData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/v1/project/';
 };
 
-export type V1GetProjectErrors = {
+export type ProjectGetProjectErrors = {
     /**
      * No active or valid session was found
      */
@@ -211,7 +247,10 @@ export type V1GetProjectErrors = {
      */
     403: unknown;
     /**
-     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
      */
     404: unknown;
     /**
@@ -224,25 +263,25 @@ export type V1GetProjectErrors = {
     500: unknown;
 };
 
-export type V1GetProjectError = V1GetProjectErrors[keyof V1GetProjectErrors];
+export type ProjectGetProjectError = ProjectGetProjectErrors[keyof ProjectGetProjectErrors];
 
-export type V1GetProjectResponses = {
+export type ProjectGetProjectResponses = {
     /**
      * Successful Response
      */
     200: FmuProject;
 };
 
-export type V1GetProjectResponse = V1GetProjectResponses[keyof V1GetProjectResponses];
+export type ProjectGetProjectResponse = ProjectGetProjectResponses[keyof ProjectGetProjectResponses];
 
-export type V1PostProjectData = {
+export type ProjectPostProjectData = {
     body: FmuDirPath;
     path?: never;
     query?: never;
     url: '/api/v1/project/';
 };
 
-export type V1PostProjectErrors = {
+export type ProjectPostProjectErrors = {
     /**
      * No active or valid session was found
      */
@@ -252,11 +291,17 @@ export type V1PostProjectErrors = {
      */
     403: unknown;
     /**
-     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
      */
     404: unknown;
     /**
-     * A project .fmu directory already exist at a given location, or may possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
      */
     409: unknown;
     /**
@@ -269,25 +314,25 @@ export type V1PostProjectErrors = {
     500: unknown;
 };
 
-export type V1PostProjectError = V1PostProjectErrors[keyof V1PostProjectErrors];
+export type ProjectPostProjectError = ProjectPostProjectErrors[keyof ProjectPostProjectErrors];
 
-export type V1PostProjectResponses = {
+export type ProjectPostProjectResponses = {
     /**
      * Successful Response
      */
     200: FmuProject;
 };
 
-export type V1PostProjectResponse = V1PostProjectResponses[keyof V1PostProjectResponses];
+export type ProjectPostProjectResponse = ProjectPostProjectResponses[keyof ProjectPostProjectResponses];
 
-export type V1InitProjectData = {
+export type ProjectInitProjectData = {
     body: FmuDirPath;
     path?: never;
     query?: never;
     url: '/api/v1/project/init';
 };
 
-export type V1InitProjectErrors = {
+export type ProjectInitProjectErrors = {
     /**
      * No active or valid session was found
      */
@@ -297,11 +342,17 @@ export type V1InitProjectErrors = {
      */
     403: unknown;
     /**
-     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
      */
     404: unknown;
     /**
-     * A project .fmu directory already exist at a given location, or may possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
      */
     409: unknown;
     /**
@@ -314,25 +365,25 @@ export type V1InitProjectErrors = {
     500: unknown;
 };
 
-export type V1InitProjectError = V1InitProjectErrors[keyof V1InitProjectErrors];
+export type ProjectInitProjectError = ProjectInitProjectErrors[keyof ProjectInitProjectErrors];
 
-export type V1InitProjectResponses = {
+export type ProjectInitProjectResponses = {
     /**
      * Successful Response
      */
     200: FmuProject;
 };
 
-export type V1InitProjectResponse = V1InitProjectResponses[keyof V1InitProjectResponses];
+export type ProjectInitProjectResponse = ProjectInitProjectResponses[keyof ProjectInitProjectResponses];
 
-export type V1GetUserData = {
+export type UserGetUserData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/v1/user/';
 };
 
-export type V1GetUserErrors = {
+export type UserGetUserErrors = {
     /**
      * No active or valid session was found
      */
@@ -342,7 +393,10 @@ export type V1GetUserErrors = {
      */
     403: unknown;
     /**
-     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
      */
     404: unknown;
     /**
@@ -355,27 +409,30 @@ export type V1GetUserErrors = {
     500: unknown;
 };
 
-export type V1GetUserError = V1GetUserErrors[keyof V1GetUserErrors];
+export type UserGetUserError = UserGetUserErrors[keyof UserGetUserErrors];
 
-export type V1GetUserResponses = {
+export type UserGetUserResponses = {
     /**
      * Successful Response
      */
     200: UserConfig;
 };
 
-export type V1GetUserResponse = V1GetUserResponses[keyof V1GetUserResponses];
+export type UserGetUserResponse = UserGetUserResponses[keyof UserGetUserResponses];
 
-export type V1PatchApiKeyData = {
+export type UserPatchApiKeyData = {
     body: ApiKeyWritable;
     path?: never;
     query?: never;
     url: '/api/v1/user/api_key';
 };
 
-export type V1PatchApiKeyErrors = {
+export type UserPatchApiKeyErrors = {
     /**
-     * Occurs when trying to save a key to an unknown API. An API is unknown if it is not a predefined field in the fmu-settings UserAPIKeys model.
+     *
+     * Occurs when trying to save a key to an unknown API. An API is unknown
+     * if it is not a predefined field in the fmu-settings UserAPIKeys model.
+     *
      */
     400: unknown;
     /**
@@ -387,7 +444,10 @@ export type V1PatchApiKeyErrors = {
      */
     403: unknown;
     /**
-     * The .fmu directory was unable to be found at or above a given path, or the requested path to create a project .fmu directory at does not exist.
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
      */
     404: unknown;
     /**
@@ -400,37 +460,48 @@ export type V1PatchApiKeyErrors = {
     500: unknown;
 };
 
-export type V1PatchApiKeyError = V1PatchApiKeyErrors[keyof V1PatchApiKeyErrors];
+export type UserPatchApiKeyError = UserPatchApiKeyErrors[keyof UserPatchApiKeyErrors];
 
-export type V1PatchApiKeyResponses = {
+export type UserPatchApiKeyResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type V1PatchApiKeyResponse = V1PatchApiKeyResponses[keyof V1PatchApiKeyResponses];
+export type UserPatchApiKeyResponse = UserPatchApiKeyResponses[keyof UserPatchApiKeyResponses];
 
-export type V1CreateSessionData = {
+export type SessionCreateSessionData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/v1/session/';
 };
 
-export type V1CreateSessionErrors = {
+export type SessionCreateSessionErrors = {
     /**
-     * Occurs when no token or an invalid token is or is not provided with the x-fmu-settings-api header.
+     *
+     * Occurs when no token or an invalid token is or is not provided
+     * with the x-fmu-settings-api header.
+     *
      */
     401: unknown;
     /**
-     * Will occur if the operating system claims the user does not have permission to create $HOME/.fmu. If returned something very wrong is happening.
+     *
+     * Will occur if the operating system claims the user does not have
+     * permission to create $HOME/.fmu. If returned something very wrong
+     * is happening.
+     *
      */
     403: unknown;
     /**
+     *
      * Occurs in two cases:
+     *
      * - When attempting to create a session when one already exists
-     * - When trying to create a user .fmu directory, but it already exists. Typically means that .fmu exists as a file.
+     * - When trying to create a user .fmu directory, but it already
+     * exists. Typically means that .fmu exists as a file.
+     *
      */
     409: unknown;
     /**
@@ -443,27 +514,31 @@ export type V1CreateSessionErrors = {
     500: unknown;
 };
 
-export type V1CreateSessionError = V1CreateSessionErrors[keyof V1CreateSessionErrors];
+export type SessionCreateSessionError = SessionCreateSessionErrors[keyof SessionCreateSessionErrors];
 
-export type V1CreateSessionResponses = {
+export type SessionCreateSessionResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type V1CreateSessionResponse = V1CreateSessionResponses[keyof V1CreateSessionResponses];
+export type SessionCreateSessionResponse = SessionCreateSessionResponses[keyof SessionCreateSessionResponses];
 
-export type V1PatchAccessTokenData = {
+export type SessionPatchAccessTokenData = {
     body: AccessTokenWritable;
     path?: never;
     query?: never;
     url: '/api/v1/session/access_token';
 };
 
-export type V1PatchAccessTokenErrors = {
+export type SessionPatchAccessTokenErrors = {
     /**
-     * Occurs when trying to save a key to an unknown access scope. An access scope/token is unknown if it is not a predefined field in the the session manager's 'AccessTokens' model.
+     *
+     * Occurs when trying to save a key to an unknown access scope. An
+     * access scope/token is unknown if it is not a predefined field in the
+     * the session manager's 'AccessTokens' model.
+     *
      */
     400: unknown;
     /**
@@ -480,25 +555,25 @@ export type V1PatchAccessTokenErrors = {
     500: unknown;
 };
 
-export type V1PatchAccessTokenError = V1PatchAccessTokenErrors[keyof V1PatchAccessTokenErrors];
+export type SessionPatchAccessTokenError = SessionPatchAccessTokenErrors[keyof SessionPatchAccessTokenErrors];
 
-export type V1PatchAccessTokenResponses = {
+export type SessionPatchAccessTokenResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type V1PatchAccessTokenResponse = V1PatchAccessTokenResponses[keyof V1PatchAccessTokenResponses];
+export type SessionPatchAccessTokenResponse = SessionPatchAccessTokenResponses[keyof SessionPatchAccessTokenResponses];
 
-export type V1GetCheckData = {
+export type SmdaGetHealthData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/smda/check';
+    url: '/api/v1/smda/health';
 };
 
-export type V1GetCheckErrors = {
+export type SmdaGetHealthErrors = {
     /**
      * No active or valid session was found
      */
@@ -513,25 +588,95 @@ export type V1GetCheckErrors = {
     500: unknown;
 };
 
-export type V1GetCheckError = V1GetCheckErrors[keyof V1GetCheckErrors];
+export type SmdaGetHealthError = SmdaGetHealthErrors[keyof SmdaGetHealthErrors];
 
-export type V1GetCheckResponses = {
+export type SmdaGetHealthResponses = {
     /**
      * Successful Response
      */
     200: Ok;
 };
 
-export type V1GetCheckResponse = V1GetCheckResponses[keyof V1GetCheckResponses];
+export type SmdaGetHealthResponse = SmdaGetHealthResponses[keyof SmdaGetHealthResponses];
 
-export type V1V1HealthCheckData = {
+export type SmdaPostFieldData = {
+    body: SmdaField;
+    path?: never;
+    query?: never;
+    url: '/api/v1/smda/field';
+};
+
+export type SmdaPostFieldErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type SmdaPostFieldError = SmdaPostFieldErrors[keyof SmdaPostFieldErrors];
+
+export type SmdaPostFieldResponses = {
+    /**
+     * Successful Response
+     */
+    200: SmdaFieldSearchResult;
+};
+
+export type SmdaPostFieldResponse = SmdaPostFieldResponses[keyof SmdaPostFieldResponses];
+
+export type SmdaPostMasterdataData = {
+    body: Array<SmdaField>;
+    path?: never;
+    query?: never;
+    url: '/api/v1/smda/masterdata';
+};
+
+export type SmdaPostMasterdataErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * Occurs when an API call to SMDA times out.
+     */
+    503: unknown;
+};
+
+export type SmdaPostMasterdataError = SmdaPostMasterdataErrors[keyof SmdaPostMasterdataErrors];
+
+export type SmdaPostMasterdataResponses = {
+    /**
+     * Successful Response
+     */
+    200: SmdaMasterdataResult;
+};
+
+export type SmdaPostMasterdataResponse = SmdaPostMasterdataResponses[keyof SmdaPostMasterdataResponses];
+
+export type HealthV1HealthCheckData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/v1/health';
 };
 
-export type V1V1HealthCheckErrors = {
+export type HealthV1HealthCheckErrors = {
     /**
      * No active or valid session was found
      */
@@ -546,32 +691,32 @@ export type V1V1HealthCheckErrors = {
     500: unknown;
 };
 
-export type V1V1HealthCheckError = V1V1HealthCheckErrors[keyof V1V1HealthCheckErrors];
+export type HealthV1HealthCheckError = HealthV1HealthCheckErrors[keyof HealthV1HealthCheckErrors];
 
-export type V1V1HealthCheckResponses = {
+export type HealthV1HealthCheckResponses = {
     /**
      * Successful Response
      */
     200: Ok;
 };
 
-export type V1V1HealthCheckResponse = V1V1HealthCheckResponses[keyof V1V1HealthCheckResponses];
+export type HealthV1HealthCheckResponse = HealthV1HealthCheckResponses[keyof HealthV1HealthCheckResponses];
 
-export type AppHealthCheckData = {
+export type HealthHealthCheckData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/health';
 };
 
-export type AppHealthCheckResponses = {
+export type HealthHealthCheckResponses = {
     /**
      * Successful Response
      */
     200: Ok;
 };
 
-export type AppHealthCheckResponse = AppHealthCheckResponses[keyof AppHealthCheckResponses];
+export type HealthHealthCheckResponse = HealthHealthCheckResponses[keyof HealthHealthCheckResponses];
 
 export type ClientOptions = {
     baseURL: 'http://localhost:8001' | (string & {});

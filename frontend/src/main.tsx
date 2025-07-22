@@ -18,8 +18,8 @@ import {
 import ReactDOM from "react-dom/client";
 import { toast } from "react-toastify";
 
-import { Message, Options, V1CreateSessionData } from "./client";
-import { v1CreateSessionMutation } from "./client/@tanstack/react-query.gen";
+import { Message, Options, SessionCreateSessionData } from "./client";
+import { sessionCreateSessionMutation } from "./client/@tanstack/react-query.gen";
 import { client } from "./client/client.gen";
 import { routeTree } from "./routeTree.gen";
 import {
@@ -40,7 +40,7 @@ export interface RouterContext {
   createSessionMutateAsync: UseMutateAsyncFunction<
     Message,
     AxiosError,
-    Options<V1CreateSessionData>
+    Options<SessionCreateSessionData>
   >;
 }
 
@@ -130,7 +130,7 @@ export function App() {
   const [hasResponseInterceptor, setHasResponseInterceptor] =
     useState<boolean>(false);
   const { mutateAsync: createSessionMutateAsync } = useMutation({
-    ...v1CreateSessionMutation(),
+    ...sessionCreateSessionMutation(),
     meta: { errorPrefix: "Error creating session" },
   });
 

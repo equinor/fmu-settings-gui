@@ -9,9 +9,9 @@ import { Suspense } from "react";
 
 import { UserApiKeys } from "../../client";
 import {
-  v1GetUserOptions,
-  v1GetUserQueryKey,
-  v1PatchApiKeyMutation,
+  userGetUserOptions,
+  userGetUserQueryKey,
+  userPatchApiKeyMutation,
 } from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
 import {
@@ -44,12 +44,12 @@ function KeysTextFieldForm({
   length,
   minLength,
 }: KeysTextFieldFormProps) {
-  const { data } = useSuspenseQuery(v1GetUserOptions());
+  const { data } = useSuspenseQuery(userGetUserOptions());
   const { mutate, isPending } = useMutation({
-    ...v1PatchApiKeyMutation(),
+    ...userPatchApiKeyMutation(),
     onSuccess: () => {
       void queryClient.refetchQueries({
-        queryKey: v1GetUserQueryKey(),
+        queryKey: userGetUserQueryKey(),
       });
     },
     retry: (failureCount: number, error: Error) =>

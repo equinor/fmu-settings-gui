@@ -2,7 +2,7 @@ import { Button } from "@equinor/eds-core-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { v1GetProjectOptions } from "../../client/@tanstack/react-query.gen";
+import { projectGetProjectOptions } from "../../client/@tanstack/react-query.gen";
 import { PageHeader, PageText } from "../../styles/common";
 
 export const Route = createFileRoute("/directory/")({
@@ -18,7 +18,7 @@ function ProjectDirSelection() {
 }
 
 function ProjectDirInfo() {
-  const { data } = useQuery(v1GetProjectOptions());
+  const { data } = useQuery(projectGetProjectOptions());
   return (
     <PageText>
       Current project: <strong>{data?.project_dir_name}</strong>
