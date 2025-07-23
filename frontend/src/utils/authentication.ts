@@ -61,6 +61,10 @@ function isApiUrlSession(url?: string): boolean {
   return url === APIURL_SESSION;
 }
 
+function isExternalApi(source?: string): boolean {
+  return source === "SMDA";
+}
+
 async function createSessionAsync(
   createSessionMutateAsync: UseMutateAsyncFunction<
     Message,
@@ -111,7 +115,9 @@ export const responseInterceptorRejected =
         if (apiTokenStatusValid) {
           setApiTokenStatus(() => ({}));
         }
-      } else {
+      } else if (
+        !isExternalApi(String(error.response?.headers["x-upstream-source"]))
+      ) {
         await createSessionAsync(createSessionMutateAsync, apiToken);
       }
     }
