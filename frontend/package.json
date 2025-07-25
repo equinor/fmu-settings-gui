@@ -12,6 +12,8 @@
     "openapi-ts": "openapi-ts"
   },
   "dependencies": {
+    "@azure/msal-browser": "^4.15.0",
+    "@azure/msal-react": "^3.0.15",
     "@equinor/eds-core-react": "^0.45.1",
     "@equinor/eds-icons": "^0.22.0",
     "@hey-api/client-axios": "^0.7.1",

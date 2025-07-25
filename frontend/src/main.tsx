@@ -1,4 +1,11 @@
 import {
+  AuthenticationResult,
+  EventMessage,
+  EventType,
+  PublicClientApplication,
+} from "@azure/msal-browser";
+import { MsalProvider } from "@azure/msal-react";
+import {
   MutationCache,
   QueryCache,
   QueryClient,
@@ -21,6 +28,7 @@ import { toast } from "react-toastify";
 import { Message, Options, SessionCreateSessionData } from "./client";
 import { sessionCreateSessionMutation } from "./client/@tanstack/react-query.gen";
 import { client } from "./client/client.gen";
+import { msalConfig } from "./config";
 import { routeTree } from "./routeTree.gen";
 import {
   isApiTokenNonEmpty,
@@ -42,6 +50,7 @@ export interface RouterContext {
     AxiosError,
     Options<SessionCreateSessionData>
   >;
+  hasSentAccessToken: boolean;
 }
 
 // Register the router instance for type safety
@@ -117,6 +126,7 @@ const router = createRouter({
     hasResponseInterceptor: false,
     projectDirNotFound: false,
     createSessionMutateAsync: undefined!,
+    hasSentAccessToken: false,
   },
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
@@ -180,14 +190,43 @@ export function App() {
   );
 }
 
-const rootElement = document.getElementById("root");
-if (rootElement && !rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </StrictMode>,
-  );
-}
+const msalInstance = new PublicClientApplication(msalConfig);
+
+await msalInstance.initialize().then(() => {
+  console.log("!!!! has initialized msalInstance");
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    console.log(
+      "|| msal settings active account due to accounts list, accounts =",
+      accounts,
+    );
+    msalInstance.setActiveAccount(accounts[0]);
+  }
+
+  msalInstance.addEventCallback((event: EventMessage) => {
+    console.log("|||| msal event type =", event.eventType);
+    if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
+      console.log(
+        "|| msal settings active account due to login event, event =",
+        event,
+      );
+      const payload = event.payload as AuthenticationResult;
+      const account = payload.account;
+      msalInstance.setActiveAccount(account);
+    }
+  });
+
+  const rootElement = document.getElementById("root");
+  if (rootElement && !rootElement.innerHTML) {
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(
+      <StrictMode>
+        <MsalProvider instance={msalInstance}>
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
+        </MsalProvider>
+      </StrictMode>,
+    );
+  }
+});
