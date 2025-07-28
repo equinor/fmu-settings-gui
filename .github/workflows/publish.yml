@@ -1,10 +1,8 @@
 name: Publish to PyPI
 
 on:
-  workflow_dispatch:
-  # Disabled until if/when it becomes open source.
-  # release:
-  #   types: [published]
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -21,34 +19,34 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: false
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+        run_install: false
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
 
-      - name: Install build dependencies
-        run: |
-          pip install -U pip
-          pip install build
+    - name: Install build dependencies
+      run: |
+        pip install -U pip
+        pip install build
 
-      - name: Build distributions
-        run: python -m build -vv
+    - name: Build distributions
+      run: python -m build -vv
 
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
