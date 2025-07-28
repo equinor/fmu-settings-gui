@@ -21,7 +21,7 @@ import {
   StringObject,
 } from "../../components/form";
 import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
-import { queryMutationRetry } from "../../utils/authentication";
+import { queryOrMutationRetry } from "../../utils/authentication";
 import { KeysFormContainer } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
@@ -53,7 +53,7 @@ function KeysTextFieldForm({
       });
     },
     retry: (failureCount: number, error: Error) =>
-      queryMutationRetry(failureCount, error),
+      queryOrMutationRetry(failureCount, error),
     meta: { errorPrefix: "Error updating API key" },
   });
 

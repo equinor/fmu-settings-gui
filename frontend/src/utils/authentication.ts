@@ -3,9 +3,11 @@ import { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
 
 import { Message, Options, SessionCreateSessionData } from "../client";
+import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
-const STORAGETOKEN_NAME = "apiToken";
+const STORAGENAME_TOKEN = "apiToken";
+const STORAGENAME_HASADDEDACCESSTOKEN = "hasAddedAccessToken";
 const APITOKEN_HEADER = "x-fmu-settings-api";
 const APIURL_SESSION = "/api/v1/session/";
 
@@ -14,7 +16,7 @@ export type TokenStatus = {
   valid?: boolean;
 };
 
-function getTokenFromFragment(): string {
+function getTokenFromFragment() {
   const fragment = location.hash;
   if (fragment !== "" && fragment.startsWith(FRAGMENTTOKEN_PREFIX)) {
     return fragment.substring(FRAGMENTTOKEN_PREFIX.length);
@@ -23,19 +25,19 @@ function getTokenFromFragment(): string {
   }
 }
 
-function getTokenFromStorage(): string {
-  return sessionStorage.getItem(STORAGETOKEN_NAME) ?? "";
+function getTokenFromStorage() {
+  return getStorageItem(sessionStorage, STORAGENAME_TOKEN) ?? "";
 }
 
-function setTokenInStorage(token: string): void {
-  sessionStorage.setItem(STORAGETOKEN_NAME, token);
+function setTokenInStorage(token: string) {
+  setStorageItem(sessionStorage, STORAGENAME_TOKEN, token);
 }
 
-export function removeTokenFromStorage(): void {
-  sessionStorage.removeItem(STORAGETOKEN_NAME);
+export function removeTokenFromStorage() {
+  removeStorageItem(sessionStorage, STORAGENAME_TOKEN);
 }
 
-export function getApiToken(): string {
+export function getApiToken() {
   const fragmentToken = getTokenFromFragment();
   const storageToken = getTokenFromStorage();
   if (fragmentToken !== "") {
@@ -53,7 +55,7 @@ export function getApiToken(): string {
   }
 }
 
-export function isApiTokenNonEmpty(apiToken: string): boolean {
+export function isApiTokenNonEmpty(apiToken: string) {
   return apiToken !== "";
 }
 
@@ -76,6 +78,18 @@ async function createSessionAsync(
   await createSessionMutateAsync({
     headers: { [APITOKEN_HEADER]: apiToken },
   });
+}
+
+export function getHasAddedAccessToken(): boolean {
+  return getStorageItem(
+    sessionStorage,
+    STORAGENAME_HASADDEDACCESSTOKEN,
+    "boolean",
+  );
+}
+
+export function setHasAddedAccessToken(value: boolean) {
+  setStorageItem(sessionStorage, STORAGENAME_HASADDEDACCESSTOKEN, value);
 }
 
 export const responseInterceptorFulfilled =
@@ -124,7 +138,7 @@ export const responseInterceptorRejected =
     return Promise.reject(error);
   };
 
-export const queryMutationRetry = (failureCount: number, error: Error) => {
+export const queryOrMutationRetry = (failureCount: number, error: Error) => {
   if (
     isAxiosError(error) &&
     isApiUrlSession(error.response?.config.url) &&

@@ -50,7 +50,6 @@ export interface RouterContext {
     AxiosError,
     Options<SessionCreateSessionData>
   >;
-  hasSentAccessToken: boolean;
 }
 
 // Register the router instance for type safety
@@ -126,7 +125,6 @@ const router = createRouter({
     hasResponseInterceptor: false,
     projectDirNotFound: false,
     createSessionMutateAsync: undefined!,
-    hasSentAccessToken: false,
   },
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
