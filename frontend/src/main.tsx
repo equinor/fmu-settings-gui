@@ -129,7 +129,7 @@ const router = createRouter({
     apiTokenStatus: undefined!,
     setApiTokenStatus: undefined!,
     hasResponseInterceptor: false,
-    accessToken: "",
+    accessToken: undefined!,
     projectDirNotFound: false,
     createSessionMutateAsync: undefined!,
   },
