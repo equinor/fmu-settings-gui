@@ -9,6 +9,7 @@ import { Suspense } from "react";
 
 import { UserApiKeys } from "../../client";
 import {
+  smdaGetHealthQueryKey,
   userGetUserOptions,
   userGetUserQueryKey,
   userPatchApiKeyMutation,
@@ -21,7 +22,7 @@ import {
   StringObject,
 } from "../../components/form";
 import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
-import { queryOrMutationRetry } from "../../utils/authentication";
+import { queryAndMutationRetry } from "../../utils/authentication";
 import { KeysFormContainer } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
@@ -51,9 +52,12 @@ function KeysTextFieldForm({
       void queryClient.refetchQueries({
         queryKey: userGetUserQueryKey(),
       });
+      void queryClient.invalidateQueries({
+        queryKey: smdaGetHealthQueryKey(),
+      });
     },
     retry: (failureCount: number, error: Error) =>
-      queryOrMutationRetry(failureCount, error),
+      queryAndMutationRetry(failureCount, error),
     meta: { errorPrefix: "Error updating API key" },
   });
 
@@ -102,7 +106,9 @@ function Content() {
         acquire, and which can then be stored through this application.
       </PageText>
 
-      <PageHeader $variant="h3">SMDA</PageHeader>
+      <PageHeader $variant="h3">
+        <span id="smda_subscription">SMDA</span>
+      </PageHeader>
 
       <PageText>
         An SMDA subscription key is needed for querying the{" "}

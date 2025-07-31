@@ -4,7 +4,7 @@ import {
   EventType,
   PublicClientApplication,
 } from "@azure/msal-browser";
-import { MsalProvider } from "@azure/msal-react";
+import { MsalProvider, useMsal } from "@azure/msal-react";
 import {
   MutationCache,
   QueryCache,
@@ -26,12 +26,17 @@ import ReactDOM from "react-dom/client";
 import { toast } from "react-toastify";
 
 import { Message, Options, SessionCreateSessionData } from "./client";
-import { sessionCreateSessionMutation } from "./client/@tanstack/react-query.gen";
+import {
+  sessionCreateSessionMutation,
+  sessionPatchAccessTokenMutation,
+  smdaGetHealthQueryKey,
+} from "./client/@tanstack/react-query.gen";
 import { client } from "./client/client.gen";
 import { msalConfig } from "./config";
 import { routeTree } from "./routeTree.gen";
 import {
   isApiTokenNonEmpty,
+  queryAndMutationRetry,
   responseInterceptorFulfilled,
   responseInterceptorRejected,
   TokenStatus,
@@ -44,6 +49,7 @@ export interface RouterContext {
   apiTokenStatus: TokenStatus;
   setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>;
   hasResponseInterceptor: boolean;
+  accessToken: string;
   projectDirNotFound: boolean;
   createSessionMutateAsync: UseMutateAsyncFunction<
     Message,
@@ -59,14 +65,14 @@ declare module "@tanstack/react-router" {
   }
 }
 
-interface QueryMutationMeta extends Record<string, unknown> {
+interface QueryAndMutationMeta extends Record<string, unknown> {
   errorPrefix?: string;
 }
 
 declare module "@tanstack/react-query" {
   interface Register {
-    queryMeta: QueryMutationMeta;
-    mutationMeta: QueryMutationMeta;
+    queryMeta: QueryAndMutationMeta;
+    mutationMeta: QueryAndMutationMeta;
   }
 }
 
@@ -123,6 +129,7 @@ const router = createRouter({
     apiTokenStatus: undefined!,
     setApiTokenStatus: undefined!,
     hasResponseInterceptor: false,
+    accessToken: "",
     projectDirNotFound: false,
     createSessionMutateAsync: undefined!,
   },
@@ -133,13 +140,26 @@ const router = createRouter({
 });
 
 export function App() {
+  const { instance: msalInstance } = useMsal();
   const [apiToken, setApiToken] = useState<string>("");
   const [apiTokenStatus, setApiTokenStatus] = useState<TokenStatus>({});
   const [hasResponseInterceptor, setHasResponseInterceptor] =
     useState<boolean>(false);
+  const [accessToken, setAccessToken] = useState<string>("");
   const { mutateAsync: createSessionMutateAsync } = useMutation({
     ...sessionCreateSessionMutation(),
     meta: { errorPrefix: "Error creating session" },
+  });
+  const { mutate: patchAccessTokenMutate } = useMutation({
+    ...sessionPatchAccessTokenMutation(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: smdaGetHealthQueryKey(),
+      });
+    },
+    retry: (failureCount: number, error: Error) =>
+      queryAndMutationRetry(failureCount, error),
+    meta: { errorPrefix: "Error adding access token to session" },
   });
 
   useEffect(() => {
@@ -167,11 +187,30 @@ export function App() {
     };
   }, [createSessionMutateAsync, apiToken, apiTokenStatus.valid]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Invalidate router context when some of the content changes
   useEffect(() => {
-    if (hasResponseInterceptor) {
-      void router.invalidate();
-    }
-  }, [hasResponseInterceptor]);
+    void router.invalidate();
+  }, [hasResponseInterceptor, accessToken]);
+
+  useEffect(() => {
+    const id = msalInstance.addEventCallback(
+      (event: EventMessage) => {
+        if (event.payload) {
+          const payload = event.payload as AuthenticationResult;
+          setAccessToken(payload.accessToken);
+          patchAccessTokenMutate({
+            body: { id: "smda_api", key: payload.accessToken },
+          });
+        }
+        return () => {
+          if (id !== null) {
+            msalInstance.removeEventCallback(id);
+          }
+        };
+      },
+      [EventType.ACQUIRE_TOKEN_SUCCESS],
+    );
+  }, [msalInstance, patchAccessTokenMutate]);
 
   return (
     <RouterProvider
@@ -182,6 +221,7 @@ export function App() {
         apiTokenStatus,
         setApiTokenStatus,
         hasResponseInterceptor,
+        accessToken,
         createSessionMutateAsync,
       }}
     />
@@ -191,28 +231,21 @@ export function App() {
 const msalInstance = new PublicClientApplication(msalConfig);
 
 await msalInstance.initialize().then(() => {
-  console.log("!!!! has initialized msalInstance");
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length > 0) {
-    console.log(
-      "|| msal settings active account due to accounts list, accounts =",
-      accounts,
-    );
     msalInstance.setActiveAccount(accounts[0]);
   }
 
-  msalInstance.addEventCallback((event: EventMessage) => {
-    console.log("|||| msal event type =", event.eventType);
-    if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
-      console.log(
-        "|| msal settings active account due to login event, event =",
-        event,
-      );
-      const payload = event.payload as AuthenticationResult;
-      const account = payload.account;
-      msalInstance.setActiveAccount(account);
-    }
-  });
+  msalInstance.addEventCallback(
+    (event: EventMessage) => {
+      if (event.payload) {
+        const payload = event.payload as AuthenticationResult;
+        const account = payload.account;
+        msalInstance.setActiveAccount(account);
+      }
+    },
+    [EventType.LOGIN_SUCCESS],
+  );
 
   const rootElement = document.getElementById("root");
   if (rootElement && !rootElement.innerHTML) {

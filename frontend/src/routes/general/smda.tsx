@@ -11,22 +11,20 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AxiosError } from "axios";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
+import { toast } from "react-toastify";
 
 import { Message, Options, SessionPatchAccessTokenData } from "../../client";
 import {
   sessionPatchAccessTokenMutation,
+  smdaGetHealthQueryKey,
   userGetUserOptions,
 } from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
-import { scopeSmda } from "../../config";
+import { scopes } from "../../config";
 import { useSmdaHealthCheck } from "../../services/smda";
 import { PageCode, PageHeader, PageText } from "../../styles/common";
-import {
-  getHasAddedAccessToken,
-  queryOrMutationRetry,
-  setHasAddedAccessToken,
-} from "../../utils/authentication";
+import { queryAndMutationRetry } from "../../utils/authentication";
 
 export const Route = createFileRoute("/general/smda")({
   component: RouteComponent,
@@ -48,7 +46,9 @@ function SubscriptionKeyPresence() {
       ) : (
         <>
           ⛔ An SMDA <strong>subscription key</strong> is not present, please{" "}
-          <Link to="/user/keys">add this key</Link>
+          <Link to="/user/keys" hash="smda_subscription">
+            add this key
+          </Link>
         </>
       )}
     </PageText>
@@ -57,131 +57,79 @@ function SubscriptionKeyPresence() {
 
 function handleLogin(msalInstance: IPublicClientApplication) {
   try {
-    const loginResponse = msalInstance.loginRedirect();
-    console.log("   ... loginResponse =", loginResponse);
+    void msalInstance.loginRedirect({ scopes });
   } catch (error) {
-    console.log("    .... error =", error);
+    console.error("Error when logging in to SSO: ", error);
+    toast.error(String(error));
   }
 }
 
 function handleAddAccessToken(
   accessToken: string,
-  mutate: UseMutateFunction<
+  patchAccessTokenMutate: UseMutateFunction<
     Message,
     AxiosError,
     Options<SessionPatchAccessTokenData>
   >,
 ) {
-  mutate(
-    { body: { id: "smda_api", key: accessToken } },
-    {
-      onSuccess: () => {
-        setHasAddedAccessToken(true);
-      },
-    },
-  );
+  patchAccessTokenMutate({ body: { id: "smda_api", key: accessToken } });
 }
 
 function AccessTokenPresence() {
+  const { queryClient, accessToken } = Route.useRouteContext();
   const { instance: msalInstance } = useMsal();
   const isAuthenticated = useIsAuthenticated();
-  const { mutate, isPending } = useMutation({
+  const { mutate: patchAccessTokenMutate, isPending } = useMutation({
     ...sessionPatchAccessTokenMutation(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: smdaGetHealthQueryKey(),
+      });
+    },
     retry: (failureCount: number, error: Error) =>
-      queryOrMutationRetry(failureCount, error),
+      queryAndMutationRetry(failureCount, error),
     meta: { errorPrefix: "Error adding access token to session" },
   });
-  const [accessToken, setAccessToken] = useState<string | undefined>();
-  const [hasScope, setHasScope] = useState<boolean | undefined>(undefined);
-  console.log("|||| AccessTokenPresence isAuthenticated =", isAuthenticated);
 
   useEffect(() => {
     if (isAuthenticated) {
-      msalInstance
-        .acquireTokenSilent({
-          scopes: [],
-        })
-        .then((tokenResponse) => {
-          console.log("|||| acquireTokenSilent tokenResponse =", tokenResponse);
-          setAccessToken(tokenResponse.accessToken);
-          if (tokenResponse.scopes.includes(scopeSmda)) {
-            setHasScope(true);
-          } else {
-            setHasScope(false);
-          }
-        })
-        .catch((error: unknown) => {
-          console.log("|||| acquireTokenSilent error =", error);
-          if (error instanceof InteractionRequiredAuthError) {
-            return msalInstance.acquireTokenRedirect({
-              scopes: [],
-            });
-          }
-        });
+      msalInstance.acquireTokenSilent({ scopes }).catch((error: unknown) => {
+        if (error instanceof InteractionRequiredAuthError) {
+          return msalInstance.acquireTokenRedirect({ scopes });
+        }
+      });
     }
   }, [isAuthenticated, msalInstance]);
 
-  if (!isAuthenticated) {
-    return (
-      <PageText>
-        ⛔ An SSO <strong>access token</strong> is not present, please log in:{" "}
-        <Button
-          onClick={() => {
-            handleLogin(msalInstance);
-          }}
-        >
-          Log in
-        </Button>
-      </PageText>
-    );
-  }
-
   return (
     <>
-      {accessToken !== undefined && (
-        <>
-          <PageText>
+      <PageText>
+        {isAuthenticated ? (
+          <>
             ✅ You are logged in with SSO and an <strong>access token</strong>{" "}
-            is present
-          </PageText>
-
-          {hasScope !== undefined && (
-            <>
-              <PageText>
-                {hasScope ? (
-                  <>
-                    ✅ Access token contains required <strong>scope</strong>
-                  </>
-                ) : (
-                  <>
-                    ⛔ Access token is missing required <strong>scope</strong>,
-                    access to SMDA is not granted
-                  </>
-                )}
-              </PageText>
-
-              {hasScope && (
-                <PageText>
-                  {getHasAddedAccessToken() ? (
-                    "✅ Access token has been added to session"
-                  ) : (
-                    <>
-                      ⛔ Access token has not been added to session:{" "}
-                      <Button
-                        onClick={() => {
-                          handleAddAccessToken(accessToken, mutate);
-                        }}
-                      >
-                        {isPending ? <DotProgress /> : "Add to session"}
-                      </Button>
-                    </>
-                  )}
-                </PageText>
-              )}
-            </>
-          )}
-        </>
-      )}
+            is present. Try adding it to the session:{" "}
+            <Button
+              onClick={() => {
+                handleAddAccessToken(accessToken, patchAccessTokenMutate);
+              }}
+            >
+              {isPending ? <DotProgress /> : "Add to session"}
+            </Button>
+          </>
+        ) : (
+          <>
+            ⛔ An SSO <strong>access token</strong> is not present, please log
+            in:{" "}
+            <Button
+              onClick={() => {
+                handleLogin(msalInstance);
+              }}
+            >
+              Log in
+            </Button>
+          </>
+        )}
+      </PageText>
     </>
   );
 }

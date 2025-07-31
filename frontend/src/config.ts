@@ -9,5 +9,6 @@ export const msalConfig: Configuration = {
   },
 };
 
-export const scopeSmda: string =
-  "//691a29c5-8199-4e87-80a2-16bd71e831cd/user_impersonation";
+export const scopes = [
+  "691a29c5-8199-4e87-80a2-16bd71e831cd/user_impersonation", // SMDA
+];

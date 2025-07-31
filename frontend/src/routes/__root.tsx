@@ -24,7 +24,7 @@ import GlobalStyle from "../styles/global";
 import {
   getApiToken,
   isApiTokenNonEmpty,
-  queryOrMutationRetry,
+  queryAndMutationRetry,
 } from "../utils/authentication";
 import { AppContainer } from "./index.style";
 
@@ -48,7 +48,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         .fetchQuery({
           ...userGetUserOptions(),
           retry: (failureCount, error) =>
-            queryOrMutationRetry(failureCount, error),
+            queryAndMutationRetry(failureCount, error),
           meta: { errorPrefix: "Error getting initial user data" },
         })
         .catch(() => undefined);

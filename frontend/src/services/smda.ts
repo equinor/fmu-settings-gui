@@ -13,15 +13,18 @@ export function useSmdaHealthCheck() {
   return useSuspenseQuery(
     queryOptions({
       queryFn: async ({ queryKey, signal }) => {
+        let status: boolean;
         let text = "";
         try {
-          await smdaGetHealth({
+          const response = await smdaGetHealth({
             ...queryKey[0],
             signal,
             throwOnError: true,
           });
-          return { status: true, text } as HealthCheck;
+          status = true;
+          text = response.data.status ?? "";
         } catch (error) {
+          status = false;
           if (
             isAxiosError(error) &&
             error.response?.data &&
@@ -30,8 +33,8 @@ export function useSmdaHealthCheck() {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             text = String(error.response.data.detail);
           }
-          return { status: false, text } as HealthCheck;
         }
+        return { status, text } as HealthCheck;
       },
       queryKey: smdaGetHealthQueryKey(),
       retry: false,

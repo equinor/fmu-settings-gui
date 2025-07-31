@@ -7,7 +7,6 @@ import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
 const STORAGENAME_TOKEN = "apiToken";
-const STORAGENAME_HASADDEDACCESSTOKEN = "hasAddedAccessToken";
 const APITOKEN_HEADER = "x-fmu-settings-api";
 const APIURL_SESSION = "/api/v1/session/";
 
@@ -80,18 +79,6 @@ async function createSessionAsync(
   });
 }
 
-export function getHasAddedAccessToken(): boolean {
-  return getStorageItem(
-    sessionStorage,
-    STORAGENAME_HASADDEDACCESSTOKEN,
-    "boolean",
-  );
-}
-
-export function setHasAddedAccessToken(value: boolean) {
-  setStorageItem(sessionStorage, STORAGENAME_HASADDEDACCESSTOKEN, value);
-}
-
 export const responseInterceptorFulfilled =
   (
     apiTokenStatusValid: boolean,
@@ -138,7 +125,7 @@ export const responseInterceptorRejected =
     return Promise.reject(error);
   };
 
-export const queryOrMutationRetry = (failureCount: number, error: Error) => {
+export const queryAndMutationRetry = (failureCount: number, error: Error) => {
   if (
     isAxiosError(error) &&
     isApiUrlSession(error.response?.config.url) &&
