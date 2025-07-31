@@ -76,6 +76,8 @@ declare module "@tanstack/react-query" {
   }
 }
 
+const msalInstance = new PublicClientApplication(msalConfig);
+
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
@@ -198,10 +200,15 @@ export function App() {
       (event: EventMessage) => {
         if (event.payload) {
           const payload = event.payload as AuthenticationResult;
-          setAccessToken(payload.accessToken);
-          patchAccessTokenMutate({
-            body: { id: "smda_api", key: payload.accessToken },
-          });
+          if (event.eventType === EventType.LOGIN_SUCCESS) {
+            const account = payload.account;
+            msalInstance.setActiveAccount(account);
+          } else if (event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
+            setAccessToken(payload.accessToken);
+            patchAccessTokenMutate({
+              body: { id: "smda_api", key: payload.accessToken },
+            });
+          }
         }
         return () => {
           if (id !== null) {
@@ -209,7 +216,7 @@ export function App() {
           }
         };
       },
-      [EventType.ACQUIRE_TOKEN_SUCCESS],
+      [EventType.LOGIN_SUCCESS, EventType.ACQUIRE_TOKEN_SUCCESS],
     );
   }, [msalInstance, patchAccessTokenMutate]);
 
@@ -229,36 +236,16 @@ export function App() {
   );
 }
 
-const msalInstance = new PublicClientApplication(msalConfig);
-
-await msalInstance.initialize().then(() => {
-  const accounts = msalInstance.getAllAccounts();
-  if (accounts.length > 0) {
-    msalInstance.setActiveAccount(accounts[0]);
-  }
-
-  msalInstance.addEventCallback(
-    (event: EventMessage) => {
-      if (event.payload) {
-        const payload = event.payload as AuthenticationResult;
-        const account = payload.account;
-        msalInstance.setActiveAccount(account);
-      }
-    },
-    [EventType.LOGIN_SUCCESS],
+const rootElement = document.getElementById("root");
+if (rootElement && !rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <StrictMode>
+      <MsalProvider instance={msalInstance}>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </MsalProvider>
+    </StrictMode>,
   );
-
-  const rootElement = document.getElementById("root");
-  if (rootElement && !rootElement.innerHTML) {
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(
-      <StrictMode>
-        <MsalProvider instance={msalInstance}>
-          <QueryClientProvider client={queryClient}>
-            <App />
-          </QueryClientProvider>
-        </MsalProvider>
-      </StrictMode>,
-    );
-  }
-});
+}
