@@ -146,6 +146,7 @@ export function App() {
   const [hasResponseInterceptor, setHasResponseInterceptor] =
     useState<boolean>(false);
   const [accessToken, setAccessToken] = useState<string>("");
+
   const { mutateAsync: createSessionMutateAsync } = useMutation({
     ...sessionCreateSessionMutation(),
     meta: { errorPrefix: "Error creating session" },

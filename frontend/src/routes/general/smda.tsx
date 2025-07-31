@@ -21,7 +21,7 @@ import {
   userGetUserOptions,
 } from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
-import { scopes } from "../../config";
+import { ssoScopes } from "../../config";
 import { useSmdaHealthCheck } from "../../services/smda";
 import { PageCode, PageHeader, PageText } from "../../styles/common";
 import { queryAndMutationRetry } from "../../utils/authentication";
@@ -57,7 +57,7 @@ function SubscriptionKeyPresence() {
 
 function handleLogin(msalInstance: IPublicClientApplication) {
   try {
-    void msalInstance.loginRedirect({ scopes });
+    void msalInstance.loginRedirect({ scopes: ssoScopes });
   } catch (error) {
     console.error("Error when logging in to SSO: ", error);
     toast.error(String(error));
@@ -79,6 +79,7 @@ function AccessTokenPresence() {
   const { queryClient, accessToken } = Route.useRouteContext();
   const { instance: msalInstance } = useMsal();
   const isAuthenticated = useIsAuthenticated();
+
   const { mutate: patchAccessTokenMutate, isPending } = useMutation({
     ...sessionPatchAccessTokenMutation(),
     onSuccess: () => {
@@ -93,11 +94,13 @@ function AccessTokenPresence() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      msalInstance.acquireTokenSilent({ scopes }).catch((error: unknown) => {
-        if (error instanceof InteractionRequiredAuthError) {
-          return msalInstance.acquireTokenRedirect({ scopes });
-        }
-      });
+      msalInstance
+        .acquireTokenSilent({ scopes: ssoScopes })
+        .catch((error: unknown) => {
+          if (error instanceof InteractionRequiredAuthError) {
+            return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
+          }
+        });
     }
   }, [isAuthenticated, msalInstance]);
 
