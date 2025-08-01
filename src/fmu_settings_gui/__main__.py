@@ -16,14 +16,16 @@ app = FastAPI(title="FMU Settings GUI")
 current_dir = Path(__file__).parent.absolute()
 static_dir = current_dir / "static"
 
+
 @app.get("/{full_path:path}")
-async def serve_spa_catchall(full_path: str):
+async def serve_spa_catchall(full_path: str) -> FileResponse:
     """Ensures internal paths to the GUI are served by the SPA."""
     if full_path == "":
         full_path = "index.html"
     if Path(static_dir / full_path).exists():
         return FileResponse(Path(static_dir / full_path))
     return FileResponse(static_dir / "index.html")
+
 
 app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
 
