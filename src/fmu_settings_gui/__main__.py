@@ -26,8 +26,8 @@ async def serve_spa_catchall(full_path: str) -> FileResponse:
     resolved_path = Path(static_dir / Path(full_path)).resolve()
     if not Path(os.path.commonprefix((static_dir, resolved_path))) == static_dir:
         raise HTTPException(status_code=403, detail="Access denied")
-    if Path(static_dir / full_path).exists():
-        return FileResponse(Path(static_dir / full_path))
+    if resolved_path.exists():
+        return FileResponse(resolved_path)
     return FileResponse(static_dir / "index.html")
 
 
