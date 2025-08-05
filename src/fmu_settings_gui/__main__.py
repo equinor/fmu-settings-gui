@@ -29,7 +29,7 @@ async def serve_spa_catchall(full_path: str) -> FileResponse:
     )
     if bool(re.fullmatch(r"^[\w\s\.\-/]+$", str(resolved_path))) is False:
         raise ValueError(f"Unallowed characters present in {full_path!r}")
-    if not os.path.commonprefix((static_dir, resolved_path)) == str(static_dir):
+    if not resolved_path.startswith(str(static_dir)):
         raise HTTPException(status_code=403, detail="Access denied")
     if os.path.exists(resolved_path):
         return FileResponse(resolved_path)
