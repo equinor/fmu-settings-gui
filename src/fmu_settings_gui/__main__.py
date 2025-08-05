@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import re
 import signal
 import sys
 from pathlib import Path
@@ -26,6 +27,8 @@ async def serve_spa_catchall(full_path: str) -> FileResponse:
     resolved_path = Path(
         os.path.normpath(os.path.realpath(static_dir / Path(full_path)))
     )
+    if bool(re.fullmatch(r"^[\w\s\.\-/]+$", resolved_path)) is False:
+        raise ValueError(f"Unallowed characters present in {full_path!r}")
     if not Path(os.path.commonprefix((static_dir, resolved_path))) == static_dir:
         raise HTTPException(status_code=403, detail="Access denied")
     if resolved_path.exists():
