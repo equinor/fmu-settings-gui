@@ -24,14 +24,12 @@ async def serve_spa_catchall(full_path: str) -> FileResponse:
     """Ensures internal paths to the GUI are served by the SPA."""
     if full_path == "":
         full_path = "index.html"
-    resolved_path = Path(
-        os.path.normpath(os.path.realpath(static_dir / Path(full_path)))
-    )
+    resolved_path = os.path.normpath(os.path.realpath(static_dir / Path(full_path)))
     if bool(re.fullmatch(r"^[\w\s\.\-/]+$", str(resolved_path))) is False:
         raise ValueError(f"Unallowed characters present in {full_path!r}")
     if not Path(os.path.commonprefix((static_dir, resolved_path))) == static_dir:
         raise HTTPException(status_code=403, detail="Access denied")
-    if resolved_path.exists():
+    if os.path.exists(resolved_path):
         return FileResponse(resolved_path)
     return FileResponse(static_dir / "index.html")
 
