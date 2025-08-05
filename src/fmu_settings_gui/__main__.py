@@ -23,7 +23,7 @@ async def serve_spa_catchall(full_path: str) -> FileResponse:
     """Ensures internal paths to the GUI are served by the SPA."""
     if full_path == "":
         full_path = "index.html"
-    resolved_path = Path(static_dir / Path(full_path)).resolve()
+    resolved_path = Path(os.path.normpath(static_dir / Path(full_path)))
     if not Path(os.path.commonprefix((static_dir, resolved_path))) == static_dir:
         raise HTTPException(status_code=403, detail="Access denied")
     if resolved_path.exists():
