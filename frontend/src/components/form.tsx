@@ -3,6 +3,7 @@ import {
   DotProgress,
   TextField as EdsTextField,
   Icon,
+  Search,
   Tooltip,
 } from "@equinor/eds-core-react";
 import { error_filled } from "@equinor/eds-icons";
@@ -21,7 +22,7 @@ import { fieldContext, formContext, useFieldContext } from "../utils/form";
 import { handleValidator, ValidatorProps } from "../utils/validator";
 import {
   EditableTextFieldFormContainer,
-  SearchTextFieldFormContainer,
+  SearchFieldFormContainer,
 } from "./form.style";
 
 Icon.add({ error_filled });
@@ -113,6 +114,32 @@ export function TextField({
   );
 }
 
+export function SearchField({
+  placeholder,
+  toUpperCase,
+}: {
+  placeholder?: string;
+  toUpperCase?: boolean;
+}) {
+  const field = useFieldContext<string>();
+
+  return (
+    <Search
+      id={field.name}
+      value={field.state.value}
+      placeholder={placeholder}
+      onBlur={field.handleBlur}
+      onChange={(e) => {
+        let value = e.target.value;
+        if (toUpperCase) {
+          value = value.toUpperCase();
+        }
+        field.handleChange(value);
+      }}
+    />
+  );
+}
+
 export function SubmitButton({
   label,
   disabled,
@@ -145,71 +172,7 @@ export function SubmitButton({
   );
 }
 
-const { useAppForm: useAppFormSearchTextField } = createFormHook({
-  fieldContext,
-  formContext,
-  fieldComponents: { TextField },
-  formComponents: { SubmitButton },
-});
-
-type SearchTextFieldFormProps = CommonTextFieldProps & SetStateFormProps;
-
-export function SearchTextFieldForm({
-  name,
-  label,
-  value,
-  placeholder,
-  length,
-  minLength,
-  setStateCallback,
-}: SearchTextFieldFormProps) {
-  const validator = handleValidator({ length, minLength });
-
-  const form = useAppFormSearchTextField({
-    defaultValues: {
-      [name]: value,
-    },
-    onSubmit: ({ formApi, value }) => {
-      setStateCallback(value[name]);
-      formApi.reset();
-    },
-  });
-
-  return (
-    <SearchTextFieldFormContainer>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
-        }}
-      >
-        <form.AppField
-          name={name}
-          {...(validator && {
-            validators: {
-              onBlur: validator,
-            },
-          })}
-        >
-          {(field) => (
-            <field.TextField
-              label={label}
-              placeholder={placeholder}
-              toUpperCase={true}
-            />
-          )}
-        </form.AppField>
-
-        <form.AppForm>
-          <form.SubmitButton label="Search" />
-        </form.AppForm>
-      </form>
-    </SearchTextFieldFormContainer>
-  );
-}
-
-const { useAppForm: useAppFormEditableTextField } = createFormHook({
+const { useAppForm: useAppFormEditableTextFieldForm } = createFormHook({
   fieldContext,
   formContext,
   fieldComponents: { TextField },
@@ -242,7 +205,7 @@ export function EditableTextFieldForm({
     setIsReadonly(true);
   };
 
-  const form = useAppFormEditableTextField({
+  const form = useAppFormEditableTextFieldForm({
     defaultValues: {
       [name]: value,
     },
@@ -315,5 +278,51 @@ export function EditableTextFieldForm({
         </form.AppForm>
       </form>
     </EditableTextFieldFormContainer>
+  );
+}
+
+const { useAppForm: useAppFormSearchFieldForm } = createFormHook({
+  fieldContext,
+  formContext,
+  fieldComponents: { SearchField },
+  formComponents: { SubmitButton },
+});
+
+type SearchFieldFormProps = Omit<BasicTextFieldProps, "label"> &
+  SetStateFormProps;
+
+export function SearchFieldForm({
+  name,
+  value,
+  setStateCallback,
+}: SearchFieldFormProps) {
+  const form = useAppFormSearchFieldForm({
+    defaultValues: {
+      [name]: value,
+    },
+    onSubmit: ({ formApi, value }) => {
+      setStateCallback(value[name]);
+      formApi.reset();
+    },
+  });
+
+  return (
+    <SearchFieldFormContainer>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <form.AppField name={name}>
+          {(field) => <field.SearchField toUpperCase={true} />}
+        </form.AppField>
+
+        <form.AppForm>
+          <form.SubmitButton label="Search" />
+        </form.AppForm>
+      </form>
+    </SearchFieldFormContainer>
   );
 }

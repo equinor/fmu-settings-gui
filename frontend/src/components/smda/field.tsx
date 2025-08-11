@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { smdaPostFieldOptions } from "../../client/@tanstack/react-query.gen";
 import { PageHeader } from "../../styles/common";
-import { SearchTextFieldForm } from "../form";
+import { SearchFieldForm } from "../form";
 import { SearchFormContainer } from "./field.style";
 
 export function Field() {
@@ -23,9 +23,8 @@ export function Field() {
       <PageHeader $variant="h3">Field search</PageHeader>
 
       <SearchFormContainer>
-        <SearchTextFieldForm
+        <SearchFieldForm
           name="identifier"
-          label="Field"
           value={searchValue}
           setStateCallback={setStateCallback}
         />

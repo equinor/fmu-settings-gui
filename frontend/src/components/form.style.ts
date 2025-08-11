@@ -1,11 +1,5 @@
 import styled from "styled-components";
 
-export const SearchTextFieldFormContainer = styled.div`
-  form > div {
-    margin-bottom: 1em;
-  }
-`;
-
 export const EditableTextFieldFormContainer = styled.div`
   form > div {
     margin-bottom: 1em;
@@ -13,5 +7,11 @@ export const EditableTextFieldFormContainer = styled.div`
 
   button + button {
     margin-left: 1em;
+  }
+`;
+
+export const SearchFieldFormContainer = styled.div`
+  form > div {
+    margin-bottom: 1em;
   }
 `;
