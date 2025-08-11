@@ -21,6 +21,7 @@ import {
   userGetUserOptions,
 } from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
+import { Field } from "../../components/smda/field";
 import { ssoScopes } from "../../config";
 import { useSmdaHealthCheck } from "../../services/smda";
 import { PageCode, PageHeader, PageText } from "../../styles/common";
@@ -154,7 +155,9 @@ function SmdaNotOk({ text }: { text: string }) {
 function SmdaOk() {
   return (
     <>
-      <PageText>SMDA can be accessed.</PageText>
+      <PageText>Search and display data from SMDA.</PageText>
+
+      <Field />
     </>
   );
 }

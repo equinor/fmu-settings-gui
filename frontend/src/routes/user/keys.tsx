@@ -16,7 +16,7 @@ import {
 } from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
 import {
-  CommonTextFieldFormProps,
+  CommonTextFieldProps,
   EditableTextFieldForm,
   MutationCallbackProps,
   StringObject,
@@ -29,10 +29,7 @@ export const Route = createFileRoute("/user/keys")({
   component: RouteComponent,
 });
 
-type KeysTextFieldFormProps = Omit<
-  CommonTextFieldFormProps,
-  "name" | "value"
-> & {
+type KeysTextFieldFormProps = Omit<CommonTextFieldProps, "name" | "value"> & {
   apiKey: keyof UserApiKeys;
   queryClient: QueryClient;
 };
