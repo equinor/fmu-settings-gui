@@ -3,7 +3,6 @@ import {
   DotProgress,
   TextField as EdsTextField,
   Icon,
-  Search,
   Tooltip,
 } from "@equinor/eds-core-react";
 import { error_filled } from "@equinor/eds-icons";
@@ -23,6 +22,7 @@ import { handleValidator, ValidatorProps } from "../utils/validator";
 import {
   EditableTextFieldFormContainer,
   SearchFieldFormContainer,
+  SearchFieldInput,
 } from "./form.style";
 
 Icon.add({ error_filled });
@@ -124,7 +124,7 @@ export function SearchField({
   const field = useFieldContext<string>();
 
   return (
-    <Search
+    <SearchFieldInput
       id={field.name}
       value={field.state.value}
       placeholder={placeholder}
@@ -307,14 +307,14 @@ export function SearchFieldForm({
   });
 
   return (
-    <SearchFieldFormContainer>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
-        }}
-      >
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        void form.handleSubmit();
+      }}
+    >
+      <SearchFieldFormContainer>
         <form.AppField name={name}>
           {(field) => <field.SearchField toUpperCase={true} />}
         </form.AppField>
@@ -322,7 +322,7 @@ export function SearchFieldForm({
         <form.AppForm>
           <form.SubmitButton label="Search" />
         </form.AppForm>
-      </form>
-    </SearchFieldFormContainer>
+      </SearchFieldFormContainer>
+    </form>
   );
 }

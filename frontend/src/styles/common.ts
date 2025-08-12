@@ -19,6 +19,7 @@ export const PageCode = styled(Typography)`
   border: solid 1px #3d3d3d;
   background: #f7f7f7;
 `;
+
 export const PageSectionSpacer = styled.div`
   height: 1em;
 `;
