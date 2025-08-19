@@ -316,7 +316,7 @@ export function SearchFieldForm({
     >
       <SearchFieldFormContainer>
         <form.AppField name={name}>
-          {(field) => <field.SearchField toUpperCase={true} />}
+          {(field) => <field.SearchField toUpperCase />}
         </form.AppField>
 
         <form.AppForm>

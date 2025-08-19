@@ -1,14 +1,32 @@
-import { Button, Table } from "@equinor/eds-core-react";
+import {
+  ColumnDef,
+  EdsDataGrid,
+  RowSelectionState,
+} from "@equinor/eds-data-grid-react";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { SmdaFieldSearchResult } from "../../client";
+import { SmdaFieldSearchResult, SmdaFieldUuid } from "../../client";
 import { smdaPostFieldOptions } from "../../client/@tanstack/react-query.gen";
 import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
 import { SearchFieldForm } from "../form";
 import { SearchFormContainer, SearchResultsContainer } from "./field.style";
 
 function FieldResults({ data }: { data?: SmdaFieldSearchResult }) {
+  const [selectedRows, setSelectedRows] = useState<RowSelectionState>({});
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Changed data needs to reset row selection state
+  useEffect(() => {
+    setSelectedRows({});
+  }, [data]);
+
+  const columns: ColumnDef<SmdaFieldUuid>[] = [
+    {
+      accessorKey: "identifier",
+      header: "Field",
+    },
+  ];
+
   if (!data) {
     return;
   }
@@ -16,6 +34,10 @@ function FieldResults({ data }: { data?: SmdaFieldSearchResult }) {
   if (data.hits === 0) {
     return <PageText>No fields found.</PageText>;
   }
+
+  const rows = data.results.sort((a, b) =>
+    a.identifier.localeCompare(b.identifier, "no"),
+  );
 
   return (
     <>
@@ -27,29 +49,20 @@ function FieldResults({ data }: { data?: SmdaFieldSearchResult }) {
       <PageSectionSpacer />
 
       <SearchResultsContainer>
-        <Table>
-          <Table.Head sticky>
-            <Table.Row>
-              <Table.Cell>Field</Table.Cell>
-            </Table.Row>
-          </Table.Head>
-          <Table.Body>
-            {data.results
-              .sort((a, b) => a.identifier.localeCompare(b.identifier, "no"))
-              .map((field) => (
-                <Table.Row key={field.uuid}>
-                  <Table.Cell>{field.identifier}</Table.Cell>
-                </Table.Row>
-              ))}
-          </Table.Body>
-          <Table.Foot sticky>
-            <Table.Row>
-              <Table.Cell>
-                <Button>Display for selected</Button>
-              </Table.Cell>
-            </Table.Row>
-          </Table.Foot>
-        </Table>
+        <EdsDataGrid
+          stickyHeader
+          rows={rows}
+          columns={columns}
+          getRowId={(row) => row.uuid}
+          rowClass={(row) => (selectedRows[row.id] ? "selected-row" : "")}
+          enableRowSelection
+          enableMultiRowSelection
+          rowSelectionState={selectedRows}
+          onRowSelectionChange={setSelectedRows}
+          onRowClick={(row) => {
+            row.toggleSelected();
+          }}
+        ></EdsDataGrid>
       </SearchResultsContainer>
     </>
   );
