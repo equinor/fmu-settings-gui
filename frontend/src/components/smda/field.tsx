@@ -74,7 +74,6 @@ export function Field() {
     ...smdaPostFieldOptions({ body: { identifier: searchValue } }),
     enabled: searchValue !== "",
   });
-  console.log("//// search data =", data);
 
   const setStateCallback = (value: string) => {
     setSearchValue(value.trim());
