@@ -3,6 +3,7 @@ import {
   DotProgress,
   TextField as EdsTextField,
   Icon,
+  InputWrapper,
   Tooltip,
 } from "@equinor/eds-core-react";
 import { error_filled } from "@equinor/eds-icons";
@@ -45,6 +46,7 @@ interface BasicTextFieldProps {
   label: string;
   value: string;
   placeholder?: string;
+  helperText?: string;
 }
 
 interface SetStateFormProps {
@@ -63,12 +65,14 @@ export interface CommonTextFieldProps
 export function TextField({
   label,
   placeholder,
+  helperText,
   isReadOnly,
   toUpperCase,
   setSubmitDisabled,
 }: {
   label: string;
   placeholder?: string;
+  helperText?: string;
   isReadOnly?: boolean;
   toUpperCase?: boolean;
   setSubmitDisabled?: Dispatch<SetStateAction<boolean>>;
@@ -88,55 +92,61 @@ export function TextField({
   ]);
 
   return (
-    <EdsTextField
-      id={field.name}
-      name={field.name}
-      label={label}
-      readOnly={isReadOnly}
-      value={field.state.value}
-      placeholder={placeholder}
-      onBlur={field.handleBlur}
-      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-        let value = e.target.value;
-        if (toUpperCase) {
-          value = value.toUpperCase();
-        }
-        field.handleChange(value);
-      }}
-      {...(!field.state.meta.isValid && {
-        variant: "error",
-        helperIcon: <Icon name="error_filled" title="Error" />,
-        helperText: field.state.meta.errors
-          .map((err: z.ZodError) => err.message)
-          .join(", "),
-      })}
-    />
+    <InputWrapper helperProps={{ text: helperText }}>
+      <EdsTextField
+        id={field.name}
+        name={field.name}
+        label={label}
+        readOnly={isReadOnly}
+        value={field.state.value}
+        placeholder={placeholder}
+        onBlur={field.handleBlur}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          let value = e.target.value;
+          if (toUpperCase) {
+            value = value.toUpperCase();
+          }
+          field.handleChange(value);
+        }}
+        {...(!field.state.meta.isValid && {
+          variant: "error",
+          helperIcon: <Icon name="error_filled" title="Error" />,
+          helperText: field.state.meta.errors
+            .map((err: z.ZodError) => err.message)
+            .join(", "),
+        })}
+      />
+    </InputWrapper>
   );
 }
 
 export function SearchField({
   placeholder,
+  helperText,
   toUpperCase,
 }: {
   placeholder?: string;
+  helperText?: string;
   toUpperCase?: boolean;
 }) {
   const field = useFieldContext<string>();
 
   return (
-    <SearchFieldInput
-      id={field.name}
-      value={field.state.value}
-      placeholder={placeholder}
-      onBlur={field.handleBlur}
-      onChange={(e) => {
-        let value = e.target.value;
-        if (toUpperCase) {
-          value = value.toUpperCase();
-        }
-        field.handleChange(value);
-      }}
-    />
+    <InputWrapper helperProps={{ text: helperText }}>
+      <SearchFieldInput
+        id={field.name}
+        value={field.state.value}
+        placeholder={placeholder}
+        onBlur={field.handleBlur}
+        onChange={(e) => {
+          let value = e.target.value;
+          if (toUpperCase) {
+            value = value.toUpperCase();
+          }
+          field.handleChange(value);
+        }}
+      />
+    </InputWrapper>
   );
 }
 
@@ -186,6 +196,7 @@ export function EditableTextFieldForm({
   label,
   value,
   placeholder,
+  helperText,
   length,
   minLength,
   mutationCallback,
@@ -239,6 +250,7 @@ export function EditableTextFieldForm({
             <field.TextField
               label={label}
               placeholder={placeholder}
+              helperText={helperText}
               isReadOnly={isReadonly}
               setSubmitDisabled={setSubmitDisabled}
             />
@@ -294,6 +306,7 @@ type SearchFieldFormProps = Omit<BasicTextFieldProps, "label"> &
 export function SearchFieldForm({
   name,
   value,
+  helperText,
   setStateCallback,
 }: SearchFieldFormProps) {
   const form = useAppFormSearchFieldForm({
@@ -316,7 +329,7 @@ export function SearchFieldForm({
     >
       <SearchFieldFormContainer>
         <form.AppField name={name}>
-          {(field) => <field.SearchField toUpperCase />}
+          {(field) => <field.SearchField helperText={helperText} toUpperCase />}
         </form.AppField>
 
         <form.AppForm>
