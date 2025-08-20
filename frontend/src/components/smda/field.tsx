@@ -87,6 +87,7 @@ export function Field() {
         <SearchFieldForm
           name="identifier"
           value={searchValue}
+          helperText="Tip: Use * as a wildcard in search string"
           setStateCallback={setStateCallback}
         />
       </SearchFormContainer>
