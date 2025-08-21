@@ -26,7 +26,7 @@ import { useSmdaHealthCheck } from "../../services/smda";
 import { PageCode, PageHeader, PageText } from "../../styles/common";
 import { queryAndMutationRetry } from "../../utils/authentication";
 
-export const Route = createFileRoute("/general/smda")({
+export const Route = createFileRoute("/project/masterdata")({
   component: RouteComponent,
 });
 
@@ -170,7 +170,7 @@ function Content() {
 function RouteComponent() {
   return (
     <>
-      <PageHeader>SMDA</PageHeader>
+      <PageHeader>Masterdata</PageHeader>
 
       <Suspense fallback={<Loading />}>
         <Content />
