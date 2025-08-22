@@ -6,10 +6,14 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { SmdaFieldSearchResult, SmdaFieldUuid } from "../../client";
-import { smdaPostFieldOptions } from "../../client/@tanstack/react-query.gen";
-import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
-import { SearchFieldForm } from "../form";
+import { SmdaFieldSearchResult, SmdaFieldUuid } from "../../../client";
+import { smdaPostFieldOptions } from "../../../client/@tanstack/react-query.gen";
+import {
+  PageHeader,
+  PageSectionSpacer,
+  PageText,
+} from "../../../styles/common";
+import { SearchFieldForm } from "../../form";
 import { SearchFormContainer, SearchResultsContainer } from "./field.style";
 
 function FieldResults({ data }: { data?: SmdaFieldSearchResult }) {

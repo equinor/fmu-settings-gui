@@ -21,7 +21,7 @@ import {
   userGetUserOptions,
 } from "../../client/@tanstack/react-query.gen";
 import { Loading } from "../../components/common";
-import { Field } from "../../components/smda/field";
+import { Field } from "../../components/project/masterdata/field";
 import { ssoScopes } from "../../config";
 import { useSmdaHealthCheck } from "../../services/smda";
 import { PageCode, PageHeader, PageText } from "../../styles/common";
