@@ -5,7 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { projectGetProjectOptions } from "../../client/@tanstack/react-query.gen";
 import { PageHeader, PageText } from "../../styles/common";
 
-export const Route = createFileRoute("/directory/")({
+export const Route = createFileRoute("/project/overview")({
   component: RouteComponent,
 });
 
@@ -33,7 +33,7 @@ function RouteComponent() {
 
   return (
     <>
-      <PageHeader>Directory</PageHeader>
+      <PageHeader>Project</PageHeader>
 
       {projectDirNotFound && <ProjectDirSelection />}
 

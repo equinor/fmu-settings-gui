@@ -12,11 +12,9 @@
 
 import { Route as rootRoute } from "./routes/__root";
 import { Route as IndexImport } from "./routes/index";
-import { Route as MappingsIndexImport } from "./routes/mappings/index";
-import { Route as GeneralIndexImport } from "./routes/general/index";
-import { Route as DirectoryIndexImport } from "./routes/directory/index";
 import { Route as UserKeysImport } from "./routes/user/keys";
-import { Route as GeneralSmdaImport } from "./routes/general/smda";
+import { Route as ProjectOverviewImport } from "./routes/project/overview";
+import { Route as ProjectMasterdataImport } from "./routes/project/masterdata";
 
 // Create/Update Routes
 
@@ -26,33 +24,21 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
-const MappingsIndexRoute = MappingsIndexImport.update({
-  id: "/mappings/",
-  path: "/mappings/",
-  getParentRoute: () => rootRoute,
-} as any);
-
-const GeneralIndexRoute = GeneralIndexImport.update({
-  id: "/general/",
-  path: "/general/",
-  getParentRoute: () => rootRoute,
-} as any);
-
-const DirectoryIndexRoute = DirectoryIndexImport.update({
-  id: "/directory/",
-  path: "/directory/",
-  getParentRoute: () => rootRoute,
-} as any);
-
 const UserKeysRoute = UserKeysImport.update({
   id: "/user/keys",
   path: "/user/keys",
   getParentRoute: () => rootRoute,
 } as any);
 
-const GeneralSmdaRoute = GeneralSmdaImport.update({
-  id: "/general/smda",
-  path: "/general/smda",
+const ProjectOverviewRoute = ProjectOverviewImport.update({
+  id: "/project/overview",
+  path: "/project/overview",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const ProjectMasterdataRoute = ProjectMasterdataImport.update({
+  id: "/project/masterdata",
+  path: "/project/masterdata",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -67,11 +53,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexImport;
       parentRoute: typeof rootRoute;
     };
-    "/general/smda": {
-      id: "/general/smda";
-      path: "/general/smda";
-      fullPath: "/general/smda";
-      preLoaderRoute: typeof GeneralSmdaImport;
+    "/project/masterdata": {
+      id: "/project/masterdata";
+      path: "/project/masterdata";
+      fullPath: "/project/masterdata";
+      preLoaderRoute: typeof ProjectMasterdataImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/project/overview": {
+      id: "/project/overview";
+      path: "/project/overview";
+      fullPath: "/project/overview";
+      preLoaderRoute: typeof ProjectOverviewImport;
       parentRoute: typeof rootRoute;
     };
     "/user/keys": {
@@ -81,27 +74,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UserKeysImport;
       parentRoute: typeof rootRoute;
     };
-    "/directory/": {
-      id: "/directory/";
-      path: "/directory";
-      fullPath: "/directory";
-      preLoaderRoute: typeof DirectoryIndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/general/": {
-      id: "/general/";
-      path: "/general";
-      fullPath: "/general";
-      preLoaderRoute: typeof GeneralIndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/mappings/": {
-      id: "/mappings/";
-      path: "/mappings";
-      fullPath: "/mappings";
-      preLoaderRoute: typeof MappingsIndexImport;
-      parentRoute: typeof rootRoute;
-    };
   }
 }
 
@@ -109,76 +81,52 @@ declare module "@tanstack/react-router" {
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
-  "/general/smda": typeof GeneralSmdaRoute;
+  "/project/masterdata": typeof ProjectMasterdataRoute;
+  "/project/overview": typeof ProjectOverviewRoute;
   "/user/keys": typeof UserKeysRoute;
-  "/directory": typeof DirectoryIndexRoute;
-  "/general": typeof GeneralIndexRoute;
-  "/mappings": typeof MappingsIndexRoute;
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
-  "/general/smda": typeof GeneralSmdaRoute;
+  "/project/masterdata": typeof ProjectMasterdataRoute;
+  "/project/overview": typeof ProjectOverviewRoute;
   "/user/keys": typeof UserKeysRoute;
-  "/directory": typeof DirectoryIndexRoute;
-  "/general": typeof GeneralIndexRoute;
-  "/mappings": typeof MappingsIndexRoute;
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
-  "/general/smda": typeof GeneralSmdaRoute;
+  "/project/masterdata": typeof ProjectMasterdataRoute;
+  "/project/overview": typeof ProjectOverviewRoute;
   "/user/keys": typeof UserKeysRoute;
-  "/directory/": typeof DirectoryIndexRoute;
-  "/general/": typeof GeneralIndexRoute;
-  "/mappings/": typeof MappingsIndexRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths:
-    | "/"
-    | "/general/smda"
-    | "/user/keys"
-    | "/directory"
-    | "/general"
-    | "/mappings";
+  fullPaths: "/" | "/project/masterdata" | "/project/overview" | "/user/keys";
   fileRoutesByTo: FileRoutesByTo;
-  to:
-    | "/"
-    | "/general/smda"
-    | "/user/keys"
-    | "/directory"
-    | "/general"
-    | "/mappings";
+  to: "/" | "/project/masterdata" | "/project/overview" | "/user/keys";
   id:
     | "__root__"
     | "/"
-    | "/general/smda"
-    | "/user/keys"
-    | "/directory/"
-    | "/general/"
-    | "/mappings/";
+    | "/project/masterdata"
+    | "/project/overview"
+    | "/user/keys";
   fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
-  GeneralSmdaRoute: typeof GeneralSmdaRoute;
+  ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
+  ProjectOverviewRoute: typeof ProjectOverviewRoute;
   UserKeysRoute: typeof UserKeysRoute;
-  DirectoryIndexRoute: typeof DirectoryIndexRoute;
-  GeneralIndexRoute: typeof GeneralIndexRoute;
-  MappingsIndexRoute: typeof MappingsIndexRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  GeneralSmdaRoute: GeneralSmdaRoute,
+  ProjectMasterdataRoute: ProjectMasterdataRoute,
+  ProjectOverviewRoute: ProjectOverviewRoute,
   UserKeysRoute: UserKeysRoute,
-  DirectoryIndexRoute: DirectoryIndexRoute,
-  GeneralIndexRoute: GeneralIndexRoute,
-  MappingsIndexRoute: MappingsIndexRoute,
 };
 
 export const routeTree = rootRoute
@@ -192,30 +140,22 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/general/smda",
-        "/user/keys",
-        "/directory/",
-        "/general/",
-        "/mappings/"
+        "/project/masterdata",
+        "/project/overview",
+        "/user/keys"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/general/smda": {
-      "filePath": "general/smda.tsx"
+    "/project/masterdata": {
+      "filePath": "project/masterdata.tsx"
+    },
+    "/project/overview": {
+      "filePath": "project/overview.tsx"
     },
     "/user/keys": {
       "filePath": "user/keys.tsx"
-    },
-    "/directory/": {
-      "filePath": "directory/index.tsx"
-    },
-    "/general/": {
-      "filePath": "general/index.tsx"
-    },
-    "/mappings/": {
-      "filePath": "mappings/index.tsx"
     }
   }
 }
