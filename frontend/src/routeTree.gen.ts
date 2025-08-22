@@ -12,8 +12,8 @@
 
 import { Route as rootRoute } from "./routes/__root";
 import { Route as IndexImport } from "./routes/index";
+import { Route as ProjectIndexImport } from "./routes/project/index";
 import { Route as UserKeysImport } from "./routes/user/keys";
-import { Route as ProjectOverviewImport } from "./routes/project/overview";
 import { Route as ProjectMasterdataImport } from "./routes/project/masterdata";
 
 // Create/Update Routes
@@ -24,15 +24,15 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
-const UserKeysRoute = UserKeysImport.update({
-  id: "/user/keys",
-  path: "/user/keys",
+const ProjectIndexRoute = ProjectIndexImport.update({
+  id: "/project/",
+  path: "/project/",
   getParentRoute: () => rootRoute,
 } as any);
 
-const ProjectOverviewRoute = ProjectOverviewImport.update({
-  id: "/project/overview",
-  path: "/project/overview",
+const UserKeysRoute = UserKeysImport.update({
+  id: "/user/keys",
+  path: "/user/keys",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -60,18 +60,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ProjectMasterdataImport;
       parentRoute: typeof rootRoute;
     };
-    "/project/overview": {
-      id: "/project/overview";
-      path: "/project/overview";
-      fullPath: "/project/overview";
-      preLoaderRoute: typeof ProjectOverviewImport;
-      parentRoute: typeof rootRoute;
-    };
     "/user/keys": {
       id: "/user/keys";
       path: "/user/keys";
       fullPath: "/user/keys";
       preLoaderRoute: typeof UserKeysImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/project/": {
+      id: "/project/";
+      path: "/project";
+      fullPath: "/project";
+      preLoaderRoute: typeof ProjectIndexImport;
       parentRoute: typeof rootRoute;
     };
   }
@@ -82,51 +82,46 @@ declare module "@tanstack/react-router" {
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/project/overview": typeof ProjectOverviewRoute;
   "/user/keys": typeof UserKeysRoute;
+  "/project": typeof ProjectIndexRoute;
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/project/overview": typeof ProjectOverviewRoute;
   "/user/keys": typeof UserKeysRoute;
+  "/project": typeof ProjectIndexRoute;
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/project/overview": typeof ProjectOverviewRoute;
   "/user/keys": typeof UserKeysRoute;
+  "/project/": typeof ProjectIndexRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/project/masterdata" | "/project/overview" | "/user/keys";
+  fullPaths: "/" | "/project/masterdata" | "/user/keys" | "/project";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/project/masterdata" | "/project/overview" | "/user/keys";
-  id:
-    | "__root__"
-    | "/"
-    | "/project/masterdata"
-    | "/project/overview"
-    | "/user/keys";
+  to: "/" | "/project/masterdata" | "/user/keys" | "/project";
+  id: "__root__" | "/" | "/project/masterdata" | "/user/keys" | "/project/";
   fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
-  ProjectOverviewRoute: typeof ProjectOverviewRoute;
   UserKeysRoute: typeof UserKeysRoute;
+  ProjectIndexRoute: typeof ProjectIndexRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProjectMasterdataRoute: ProjectMasterdataRoute,
-  ProjectOverviewRoute: ProjectOverviewRoute,
   UserKeysRoute: UserKeysRoute,
+  ProjectIndexRoute: ProjectIndexRoute,
 };
 
 export const routeTree = rootRoute
@@ -141,8 +136,8 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/project/masterdata",
-        "/project/overview",
-        "/user/keys"
+        "/user/keys",
+        "/project/"
       ]
     },
     "/": {
@@ -151,11 +146,11 @@ export const routeTree = rootRoute
     "/project/masterdata": {
       "filePath": "project/masterdata.tsx"
     },
-    "/project/overview": {
-      "filePath": "project/overview.tsx"
-    },
     "/user/keys": {
       "filePath": "user/keys.tsx"
+    },
+    "/project/": {
+      "filePath": "project/index.tsx"
     }
   }
 }

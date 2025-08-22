@@ -5,7 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { projectGetProjectOptions } from "../../client/@tanstack/react-query.gen";
 import { PageHeader, PageText } from "../../styles/common";
 
-export const Route = createFileRoute("/project/overview")({
+export const Route = createFileRoute("/project/")({
   component: RouteComponent,
 });
 

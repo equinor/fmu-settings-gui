@@ -15,11 +15,7 @@ export function Sidebar() {
           />
         </EdsSideBar.Accordion>
         <EdsSideBar.Accordion label="Project" icon={folder}>
-          <EdsSideBar.AccordionItem
-            label="Overview"
-            as={Link}
-            to="/project/overview"
-          />
+          <EdsSideBar.AccordionItem label="Overview" as={Link} to="/project" />
           <EdsSideBar.AccordionItem
             label="Masterdata"
             as={Link}
