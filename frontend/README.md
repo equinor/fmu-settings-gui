@@ -130,6 +130,19 @@ code for the various endpoints as well as the models. The code is placed in the
 tracked and needs to be commited.
 
 
+### Path aliases
+
+The codebase is configured to use path aliases, to more easily arrange imports and to
+avoid excessive levels of relative directories in imports. The code is structured in a
+handful of main subdirectories, like components, routes and utils. There are path aliases
+configured for these subdiretories, which are named prefixed with `#` (ie.
+`#components`). These path aliases are defined in the
+[tsconfig.app.json](tsconfig.app.json) file, and should rarely need to be updated or
+added to. Editors like Visual Studio Code should be able to deal naturally with these
+path aliases. Note that the Vite configuration is set up with a plugin for handling these
+aliases, and that a change in the alias definition list requires a restart of Vite.
+
+
 ### Formatting and linting
 
 There are two tools configured to do formatting and linting of the TypeScript code:
