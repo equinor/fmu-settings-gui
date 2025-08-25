@@ -1,31 +1,33 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
+import {
+  FmuProject,
+  Options,
+  ProjectGetProjectData,
+  projectGetProject,
+} from "../client";
+import { projectGetProjectQueryKey } from "../client/@tanstack/react-query.gen";
 
-import { Options, SmdaGetHealthData, smdaGetHealth } from "../client";
-import { smdaGetHealthQueryKey } from "../client/@tanstack/react-query.gen";
-
-type HealthCheck = {
+type GetProject = {
   status: boolean;
-  text: string;
+  text?: string;
+  data?: FmuProject;
 };
 
-export function useSmdaHealthCheck(options?: Options<SmdaGetHealthData>) {
+export function useProject(options?: Options<ProjectGetProjectData>) {
   return useSuspenseQuery(
     queryOptions({
       queryFn: async ({ queryKey, signal }) => {
-        let status: boolean;
-        let text = "";
         try {
-          const response = await smdaGetHealth({
+          const { data } = await projectGetProject({
             ...options,
             ...queryKey[0],
             signal,
             throwOnError: true,
           });
-          status = true;
-          text = response.data.status ?? "";
+          return { status: true, data } as GetProject;
         } catch (error) {
-          status = false;
+          let text = "";
           if (
             isAxiosError(error) &&
             error.response?.data &&
@@ -34,11 +36,11 @@ export function useSmdaHealthCheck(options?: Options<SmdaGetHealthData>) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             text = String(error.response.data.detail);
           }
+          return { status: false, text } as GetProject;
         }
-        return { status, text } as HealthCheck;
       },
-      queryKey: smdaGetHealthQueryKey(options),
-      retry: false,
+      queryKey: projectGetProjectQueryKey(options),
+      retry: 2,
     }),
   );
 }

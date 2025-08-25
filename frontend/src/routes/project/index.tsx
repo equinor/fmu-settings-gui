@@ -1,43 +1,67 @@
-import { Button } from "@equinor/eds-core-react";
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 
-import { projectGetProjectOptions } from "../../client/@tanstack/react-query.gen";
-import { PageHeader, PageText } from "../../styles/common";
+import { FmuProject } from "../../client";
+import { Loading } from "../../components/common";
+import { useProject } from "../../services/project";
+import { PageCode, PageHeader, PageText } from "../../styles/common";
+import { displayDateTime } from "../../utils/datetime";
+import { ProjectName } from "./overview.style";
 
 export const Route = createFileRoute("/project/")({
   component: RouteComponent,
 });
 
-function ProjectDirSelection() {
+function ProjectInfo({ projectData }: { projectData: FmuProject }) {
   return (
     <PageText>
-      Enter project directory: <input /> <Button>Submit</Button>
+      Project: <ProjectName>{projectData.project_dir_name}</ProjectName>
+      <br />
+      Path: {projectData.path}
+      <br />
+      Created: {displayDateTime(projectData.config.created_at)} by{" "}
+      {projectData.config.created_by}
+      <br />
+      Version: {projectData.config.version}
     </PageText>
   );
 }
 
-function ProjectDirInfo() {
-  const { data } = useQuery(projectGetProjectOptions());
+function ProjectNotFound({ text }: { text: string }) {
+  const hasText = text !== "";
+  const lead = "No project selected" + (hasText ? ":" : ".");
+
   return (
-    <PageText>
-      Current project: <strong>{data?.project_dir_name}</strong>
-      <br />
-      Current path: {data?.path}
-    </PageText>
+    <>
+      <PageText>{lead}</PageText>
+
+      {hasText && <PageCode>{text}</PageCode>}
+    </>
+  );
+}
+
+function Content() {
+  const { data: project } = useProject();
+
+  return (
+    <>
+      {project.status && project.data ? (
+        <ProjectInfo projectData={project.data} />
+      ) : (
+        <ProjectNotFound text={project.text ?? ""} />
+      )}
+    </>
   );
 }
 
 function RouteComponent() {
-  const { projectDirNotFound } = Route.useRouteContext();
-
   return (
     <>
       <PageHeader>Project</PageHeader>
 
-      {projectDirNotFound && <ProjectDirSelection />}
-
-      {!projectDirNotFound && <ProjectDirInfo />}
+      <Suspense fallback={<Loading />}>
+        <Content />
+      </Suspense>
     </>
   );
 }

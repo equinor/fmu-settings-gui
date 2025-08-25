@@ -50,7 +50,6 @@ export interface RouterContext {
   setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>;
   hasResponseInterceptor: boolean;
   accessToken: string;
-  projectDirNotFound: boolean;
   createSessionMutateAsync: UseMutateAsyncFunction<
     Message,
     AxiosError,
@@ -132,7 +131,6 @@ const router = createRouter({
     setApiTokenStatus: undefined!,
     hasResponseInterceptor: false,
     accessToken: undefined!,
-    projectDirNotFound: false,
     createSessionMutateAsync: undefined!,
   },
   defaultPreload: "intent",

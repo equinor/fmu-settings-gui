@@ -23,6 +23,7 @@ import {
 import { Loading } from "../../components/common";
 import { Field } from "../../components/project/masterdata/field";
 import { ssoScopes } from "../../config";
+import { useProject } from "../../services/project";
 import { useSmdaHealthCheck } from "../../services/smda";
 import { PageCode, PageHeader, PageText } from "../../styles/common";
 import { queryAndMutationRetry } from "../../utils/authentication";
@@ -163,7 +164,12 @@ function SmdaOk() {
 }
 
 function Content() {
+  const { data: project } = useProject();
   const { data: healthOk } = useSmdaHealthCheck();
+
+  if (!project.status) {
+    return <PageText>Project not set.</PageText>;
+  }
 
   return (
     <>{healthOk.status ? <SmdaOk /> : <SmdaNotOk text={healthOk.text} />}</>
