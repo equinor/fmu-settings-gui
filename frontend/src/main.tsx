@@ -25,22 +25,22 @@ import {
 import ReactDOM from "react-dom/client";
 import { toast } from "react-toastify";
 
-import { Message, Options, SessionCreateSessionData } from "./client";
+import { Message, Options, SessionCreateSessionData } from "#client";
 import {
   sessionCreateSessionMutation,
   sessionPatchAccessTokenMutation,
   smdaGetHealthQueryKey,
-} from "./client/@tanstack/react-query.gen";
-import { client } from "./client/client.gen";
-import { msalConfig } from "./config";
-import { routeTree } from "./routeTree.gen";
+} from "#client/@tanstack/react-query.gen";
+import { client } from "#client/client.gen";
+import { msalConfig } from "#config";
 import {
   isApiTokenNonEmpty,
   queryAndMutationRetry,
   responseInterceptorFulfilled,
   responseInterceptorRejected,
   TokenStatus,
-} from "./utils/authentication";
+} from "#utils/authentication";
+import { routeTree } from "./routeTree.gen";
 
 export interface RouterContext {
   queryClient: QueryClient;

@@ -15,17 +15,17 @@ import { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { ToastContainer } from "react-toastify";
 
-import { userGetUserOptions } from "../client/@tanstack/react-query.gen";
-import { Header } from "../components/Header";
-import { Sidebar } from "../components/Sidebar";
-import { RouterContext } from "../main";
-import { PageHeader, PageText } from "../styles/common";
-import GlobalStyle from "../styles/global";
+import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
+import { Header } from "#components/Header";
+import { Sidebar } from "#components/Sidebar";
+import { RouterContext } from "#main";
+import { PageHeader, PageText } from "#styles/common";
+import GlobalStyle from "#styles/global";
 import {
   getApiToken,
   isApiTokenNonEmpty,
   queryAndMutationRetry,
-} from "../utils/authentication";
+} from "#utils/authentication";
 import { AppContainer } from "./index.style";
 
 export const Route = createRootRouteWithContext<RouterContext>()({

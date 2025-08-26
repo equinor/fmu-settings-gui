@@ -14,19 +14,19 @@ import { AxiosError } from "axios";
 import { Suspense, useEffect } from "react";
 import { toast } from "react-toastify";
 
-import { Message, Options, SessionPatchAccessTokenData } from "../../client";
+import { Message, Options, SessionPatchAccessTokenData } from "#client";
 import {
   sessionPatchAccessTokenMutation,
   smdaGetHealthQueryKey,
   userGetUserOptions,
-} from "../../client/@tanstack/react-query.gen";
-import { Loading } from "../../components/common";
-import { Field } from "../../components/project/masterdata/field";
-import { ssoScopes } from "../../config";
-import { useProject } from "../../services/project";
-import { useSmdaHealthCheck } from "../../services/smda";
-import { PageCode, PageHeader, PageText } from "../../styles/common";
-import { queryAndMutationRetry } from "../../utils/authentication";
+} from "#client/@tanstack/react-query.gen";
+import { Loading } from "#components/common";
+import { Field } from "#components/project/masterdata/field";
+import { ssoScopes } from "#config";
+import { useProject } from "#services/project";
+import { useSmdaHealthCheck } from "#services/smda";
+import { PageCode, PageHeader, PageText } from "#styles/common";
+import { queryAndMutationRetry } from "#utils/authentication";
 
 export const Route = createFileRoute("/project/masterdata")({
   component: RouteComponent,

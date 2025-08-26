@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PageHeader, PageText } from "../styles/common";
+import { PageHeader, PageText } from "#styles/common";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,

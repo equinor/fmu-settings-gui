@@ -1,12 +1,13 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
+
 import {
   FmuProject,
   Options,
   ProjectGetProjectData,
   projectGetProject,
-} from "../client";
-import { projectGetProjectQueryKey } from "../client/@tanstack/react-query.gen";
+} from "#client";
+import { projectGetProjectQueryKey } from "#client/@tanstack/react-query.gen";
 
 type GetProject = {
   status: boolean;

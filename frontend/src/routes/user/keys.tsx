@@ -7,22 +7,22 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-import { UserApiKeys } from "../../client";
+import { UserApiKeys } from "#client";
 import {
   smdaGetHealthQueryKey,
   userGetUserOptions,
   userGetUserQueryKey,
   userPatchApiKeyMutation,
-} from "../../client/@tanstack/react-query.gen";
-import { Loading } from "../../components/common";
+} from "#client/@tanstack/react-query.gen";
+import { Loading } from "#components/common";
 import {
   CommonTextFieldProps,
   EditableTextFieldForm,
   MutationCallbackProps,
   StringObject,
-} from "../../components/form";
-import { PageHeader, PageSectionSpacer, PageText } from "../../styles/common";
-import { queryAndMutationRetry } from "../../utils/authentication";
+} from "#components/form";
+import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
+import { queryAndMutationRetry } from "#utils/authentication";
 import { KeysFormContainer } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({

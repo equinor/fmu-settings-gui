@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-import { FmuProject } from "../../client";
-import { Loading } from "../../components/common";
-import { useProject } from "../../services/project";
-import { PageCode, PageHeader, PageText } from "../../styles/common";
-import { displayDateTime } from "../../utils/datetime";
+import { FmuProject } from "#client";
+import { Loading } from "#components/common";
+import { useProject } from "#services/project";
+import { PageCode, PageHeader, PageText } from "#styles/common";
+import { displayDateTime } from "#utils/datetime";
 import { ProjectName } from "./index.style";
 
 export const Route = createFileRoute("/project/")({

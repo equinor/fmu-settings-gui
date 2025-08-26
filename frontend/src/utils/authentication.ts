@@ -2,7 +2,7 @@ import { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
 
-import { Message, Options, SessionCreateSessionData } from "../client";
+import { Message, Options, SessionCreateSessionData } from "#client";
 import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
