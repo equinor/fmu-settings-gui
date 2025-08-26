@@ -29,11 +29,7 @@ export function Sidebar() {
           />
         </EdsSideBar.Accordion>
         <EdsSideBar.Accordion label="Project" icon={folder}>
-          <EdsSideBar.AccordionItem
-            label="Overview"
-            as={Link}
-            to="/project/overview"
-          />
+          <EdsSideBar.AccordionItem label="Overview" as={Link} to="/project" />
           {ProjectSubItems.map((item) => (
             <EdsSideBar.AccordionItem
               key={item.to}
