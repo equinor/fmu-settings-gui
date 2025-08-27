@@ -135,7 +135,7 @@ tracked and needs to be commited.
 The codebase is configured to use path aliases, to more easily arrange imports and to
 avoid excessive levels of relative directories in imports. The code is structured in a
 handful of main subdirectories, like components, routes and utils. There are path aliases
-configured for these subdiretories, which are named prefixed with `#` (ie.
+configured for these subdirectories, which are named prefixed with `#` (ie.
 `#components`). These path aliases are defined in the
 [tsconfig.app.json](tsconfig.app.json) file, and should rarely need to be updated or
 added to. Editors like Visual Studio Code should be able to deal naturally with these
