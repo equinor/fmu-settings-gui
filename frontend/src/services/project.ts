@@ -8,6 +8,7 @@ import {
   projectGetProject,
 } from "#client";
 import { projectGetProjectQueryKey } from "#client/@tanstack/react-query.gen";
+import { queryAndMutationRetry } from "#utils/authentication";
 
 type GetProject = {
   status: boolean;
@@ -29,19 +30,22 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
           return { status: true, data } as GetProject;
         } catch (error) {
           let text = "";
-          if (
-            isAxiosError(error) &&
-            error.response?.data &&
-            "detail" in error.response.data
-          ) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            text = String(error.response.data.detail);
+          if (isAxiosError(error)) {
+            // Use normal handling for unauthorized response
+            if (error.status === 401) {
+              return Promise.reject(error);
+            }
+            if (error.response?.data && "detail" in error.response.data) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+              text = String(error.response.data.detail);
+            }
           }
           return { status: false, text } as GetProject;
         }
       },
       queryKey: projectGetProjectQueryKey(options),
-      retry: 2,
+      retry: (failureCount, error) =>
+        queryAndMutationRetry(failureCount, error),
     }),
   );
 }
