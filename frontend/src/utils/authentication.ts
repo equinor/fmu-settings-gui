@@ -1,8 +1,19 @@
-import { UseMutateAsyncFunction } from "@tanstack/react-query";
+import { IPublicClientApplication } from "@azure/msal-browser";
+import {
+  UseMutateAsyncFunction,
+  UseMutateFunction,
+} from "@tanstack/react-query";
 import { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import { Dispatch, SetStateAction } from "react";
+import { toast } from "react-toastify";
 
-import { Message, Options, SessionCreateSessionData } from "#client";
+import {
+  Message,
+  Options,
+  SessionCreateSessionData,
+  SessionPatchAccessTokenData,
+} from "#client";
+import { ssoScopes } from "#config";
 import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
@@ -66,7 +77,7 @@ function isExternalApi(source?: string): boolean {
   return source === "SMDA";
 }
 
-async function createSessionAsync(
+export async function createSessionAsync(
   createSessionMutateAsync: UseMutateAsyncFunction<
     Message,
     AxiosError,
@@ -77,6 +88,26 @@ async function createSessionAsync(
   await createSessionMutateAsync({
     headers: { [APITOKEN_HEADER]: apiToken },
   });
+}
+
+export function handleSsoLogin(msalInstance: IPublicClientApplication) {
+  try {
+    void msalInstance.loginRedirect({ scopes: ssoScopes });
+  } catch (error) {
+    console.error("Error when logging in to SSO: ", error);
+    toast.error(String(error));
+  }
+}
+
+export function handleAddSsoAccessToken(
+  patchAccessTokenMutate: UseMutateFunction<
+    Message,
+    AxiosError,
+    Options<SessionPatchAccessTokenData>
+  >,
+  accessToken: string,
+) {
+  patchAccessTokenMutate({ body: { id: "smda_api", key: accessToken } });
 }
 
 export const responseInterceptorFulfilled =
@@ -100,11 +131,7 @@ export const responseInterceptorRejected =
     setApiToken: Dispatch<SetStateAction<string>>,
     apiTokenStatusValid: boolean,
     setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>,
-    createSessionMutateAsync: UseMutateAsyncFunction<
-      Message,
-      AxiosError,
-      Options<SessionCreateSessionData>
-    >,
+    setRequestSessionCreation: Dispatch<SetStateAction<boolean>>,
   ) =>
   async (error: AxiosError) => {
     if (error.status === 401) {
@@ -119,7 +146,7 @@ export const responseInterceptorRejected =
       } else if (
         !isExternalApi(String(error.response?.headers["x-upstream-source"]))
       ) {
-        await createSessionAsync(createSessionMutateAsync, apiToken);
+        setRequestSessionCreation(true);
       }
     }
     return Promise.reject(error);

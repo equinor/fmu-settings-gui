@@ -1,20 +1,10 @@
-import {
-  InteractionRequiredAuthError,
-  IPublicClientApplication,
-} from "@azure/msal-browser";
+import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { Button, DotProgress } from "@equinor/eds-core-react";
-import {
-  UseMutateFunction,
-  useMutation,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AxiosError } from "axios";
 import { Suspense, useEffect } from "react";
-import { toast } from "react-toastify";
 
-import { Message, Options, SessionPatchAccessTokenData } from "#client";
 import {
   sessionPatchAccessTokenMutation,
   smdaGetHealthQueryKey,
@@ -26,7 +16,11 @@ import { ssoScopes } from "#config";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import { PageCode, PageHeader, PageText } from "#styles/common";
-import { queryAndMutationRetry } from "#utils/authentication";
+import {
+  handleAddSsoAccessToken,
+  handleSsoLogin,
+  queryAndMutationRetry,
+} from "#utils/authentication";
 
 export const Route = createFileRoute("/project/masterdata")({
   component: RouteComponent,
@@ -55,26 +49,6 @@ function SubscriptionKeyPresence() {
       )}
     </PageText>
   );
-}
-
-function handleLogin(msalInstance: IPublicClientApplication) {
-  try {
-    void msalInstance.loginRedirect({ scopes: ssoScopes });
-  } catch (error) {
-    console.error("Error when logging in to SSO: ", error);
-    toast.error(String(error));
-  }
-}
-
-function handleAddAccessToken(
-  accessToken: string,
-  patchAccessTokenMutate: UseMutateFunction<
-    Message,
-    AxiosError,
-    Options<SessionPatchAccessTokenData>
-  >,
-) {
-  patchAccessTokenMutate({ body: { id: "smda_api", key: accessToken } });
 }
 
 function AccessTokenPresence() {
@@ -115,7 +89,7 @@ function AccessTokenPresence() {
             is present. Try adding it to the session:{" "}
             <Button
               onClick={() => {
-                handleAddAccessToken(accessToken, patchAccessTokenMutate);
+                handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
               }}
             >
               {isPending ? <DotProgress /> : "Add to session"}
@@ -127,7 +101,7 @@ function AccessTokenPresence() {
             in:{" "}
             <Button
               onClick={() => {
-                handleLogin(msalInstance);
+                handleSsoLogin(msalInstance);
               }}
             >
               Log in
