@@ -34,6 +34,8 @@ import {
 import { client } from "#client/client.gen";
 import { msalConfig } from "#config";
 import {
+  createSessionAsync,
+  handleAddSsoAccessToken,
   isApiTokenNonEmpty,
   queryAndMutationRetry,
   responseInterceptorFulfilled,
@@ -141,11 +143,14 @@ const router = createRouter({
 
 export function App() {
   const { instance: msalInstance } = useMsal();
-  const [apiToken, setApiToken] = useState<string>("");
+  const [apiToken, setApiToken] = useState("");
   const [apiTokenStatus, setApiTokenStatus] = useState<TokenStatus>({});
-  const [hasResponseInterceptor, setHasResponseInterceptor] =
-    useState<boolean>(false);
-  const [accessToken, setAccessToken] = useState<string>("");
+  const [hasResponseInterceptor, setHasResponseInterceptor] = useState(false);
+  const [accessToken, setAccessToken] = useState("");
+  const [requestSessionCreation, setRequestSessionCreation] = useState(false);
+  const [sessionCreatedAt, setSessionCreatedAt] = useState<
+    number | undefined
+  >();
 
   const { mutateAsync: createSessionMutateAsync } = useMutation({
     ...sessionCreateSessionMutation(),
@@ -176,7 +181,7 @@ export function App() {
           setApiToken,
           apiTokenStatus.valid ?? false,
           setApiTokenStatus,
-          createSessionMutateAsync,
+          setRequestSessionCreation,
         ),
       );
       setHasResponseInterceptor(true);
@@ -184,9 +189,37 @@ export function App() {
     return () => {
       if (id !== undefined) {
         client.instance.interceptors.response.eject(id);
+        setHasResponseInterceptor(false);
       }
     };
   }, [createSessionMutateAsync, apiToken, apiTokenStatus.valid]);
+
+  useEffect(() => {
+    async function callCreateSessionAsync() {
+      await createSessionAsync(createSessionMutateAsync, apiToken);
+    }
+
+    if (requestSessionCreation) {
+      if (
+        sessionCreatedAt === undefined ||
+        Date.now() - sessionCreatedAt > 10_000
+      ) {
+        setSessionCreatedAt(Date.now());
+        void callCreateSessionAsync();
+        if (accessToken !== "") {
+          handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
+        }
+      }
+      setRequestSessionCreation(false);
+    }
+  }, [
+    accessToken,
+    apiToken,
+    createSessionMutateAsync,
+    patchAccessTokenMutate,
+    requestSessionCreation,
+    sessionCreatedAt,
+  ]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Invalidate router context when some of the content changes
   useEffect(() => {
@@ -203,9 +236,10 @@ export function App() {
             msalInstance.setActiveAccount(account);
           } else if (event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
             setAccessToken(payload.accessToken);
-            patchAccessTokenMutate({
-              body: { id: "smda_api", key: payload.accessToken },
-            });
+            handleAddSsoAccessToken(
+              patchAccessTokenMutate,
+              payload.accessToken,
+            );
           }
         }
         return () => {
