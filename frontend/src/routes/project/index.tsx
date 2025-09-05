@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { FmuProject } from "#client";
 import { Loading } from "#components/common";
+import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
 import { PageCode, PageHeader, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
@@ -50,6 +51,7 @@ function Content() {
       ) : (
         <ProjectNotFound text={project.text ?? ""} />
       )}
+      <ProjectSelector />
     </>
   );
 }

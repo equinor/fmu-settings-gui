@@ -16,6 +16,15 @@ export type ApiKeyWritable = {
 };
 
 /**
+ * The ``access`` block contains information related to access control for
+ * this data object.
+ */
+export type Access = {
+    asset: Asset;
+    classification?: Classification | null;
+};
+
+/**
  * A key-value pair for a known and supported access scope.
  */
 export type AccessTokenReadable = {
@@ -31,7 +40,21 @@ export type AccessTokenWritable = {
 };
 
 /**
- * Contains the coordinate system known to SMDA.
+ * The ``access.asset`` block contains information about the owner asset of
+ * these data.
+ */
+export type Asset = {
+    name: string;
+};
+
+/**
+ * The security classification for a given data object.
+ */
+export type Classification = 'asset' | 'internal' | 'restricted';
+
+/**
+ * The ``masterdata.smda.coordinate_system`` block contains the coordinate
+ * system known to SMDA.
  */
 export type CoordinateSystem = {
     identifier: string;
@@ -39,7 +62,8 @@ export type CoordinateSystem = {
 };
 
 /**
- * A single country in the list of countries known to SMDA.
+ * A single country in the ``smda.masterdata.country`` list of countries
+ * known to SMDA.
  */
 export type CountryItem = {
     identifier: string;
@@ -47,7 +71,8 @@ export type CountryItem = {
 };
 
 /**
- * A single discovery in the list of discoveries known to SMDA.
+ * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
+ * known to SMDA.
  */
 export type DiscoveryItem = {
     short_identifier: string;
@@ -71,11 +96,19 @@ export type FmuProject = {
 };
 
 /**
- * A single field in the list of fields known to SMDA.
+ * A single field in the ``masterdata.smda.field`` list of fields
+ * known to SMDA.
  */
 export type FieldItem = {
     identifier: string;
     uuid: string;
+};
+
+/**
+ * A relative path to a global config file, relative to the project root.
+ */
+export type GlobalConfigPath = {
+    relative_path: string;
 };
 
 export type HttpValidationError = {
@@ -84,11 +117,10 @@ export type HttpValidationError = {
 
 /**
  * The ``masterdata`` block contains information related to masterdata.
- *
  * Currently, SMDA holds the masterdata.
  */
 export type Masterdata = {
-    smda?: Smda | null;
+    smda: Smda;
 };
 
 /**
@@ -96,6 +128,21 @@ export type Masterdata = {
  */
 export type Message = {
     message: string;
+};
+
+/**
+ * The ``fmu.model`` block contains information about the model used.
+ *
+ * .. note::
+ * Synonyms for "model" in this context are "template", "setup", etc. The term
+ * "model" is ultra-generic but was chosen before e.g. "template" as the latter
+ * deviates from daily communications and is, if possible, even more generic
+ * than "model".
+ */
+export type Model = {
+    description?: Array<string> | null;
+    name: string;
+    revision: string;
 };
 
 /**
@@ -114,11 +161,13 @@ export type ProjectConfig = {
     version: string;
     created_at: string;
     created_by: string;
-    masterdata: Masterdata;
+    masterdata?: Masterdata | null;
+    model?: Model | null;
+    access?: Access | null;
 };
 
 /**
- * Contains SMDA-related attributes.
+ * The ``masterdata.smda`` block contains SMDA-related attributes.
  */
 export type Smda = {
     coordinate_system: CoordinateSystem;
@@ -165,7 +214,8 @@ export type SmdaMasterdataResult = {
 };
 
 /**
- * Contains the stratigraphic column known to SMDA.
+ * The ``masterdata.smda.stratigraphic_column`` block contains the
+ * stratigraphic column known to SMDA.
  */
 export type StratigraphicColumn = {
     identifier: string;
@@ -188,7 +238,7 @@ export type UserConfig = {
     version: string;
     created_at: string;
     user_api_keys: UserApiKeys;
-    recent_directories: Array<string>;
+    recent_project_directories: Array<string>;
 };
 
 export type ValidationError = {
@@ -325,6 +375,52 @@ export type ProjectPostProjectResponses = {
 
 export type ProjectPostProjectResponse = ProjectPostProjectResponses[keyof ProjectPostProjectResponses];
 
+export type ProjectGetGlobalConfigStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/global_config_status';
+};
+
+export type ProjectGetGlobalConfigStatusErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     *
+     * The global config file was not found at a given location.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * The project .fmu config already contains masterdata.
+     *
+     */
+    409: unknown;
+    /**
+     *
+     * The global config file did not validate against the
+     * GlobalConfiguration Pydantic model.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetGlobalConfigStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ok;
+};
+
+export type ProjectGetGlobalConfigStatusResponse = ProjectGetGlobalConfigStatusResponses[keyof ProjectGetGlobalConfigStatusResponses];
+
 export type ProjectInitProjectData = {
     body: FmuDirPath;
     path?: never;
@@ -375,6 +471,103 @@ export type ProjectInitProjectResponses = {
 };
 
 export type ProjectInitProjectResponse = ProjectInitProjectResponses[keyof ProjectInitProjectResponses];
+
+export type ProjectPostGlobalConfigData = {
+    body?: GlobalConfigPath | null;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/global_config';
+};
+
+export type ProjectPostGlobalConfigErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     *
+     * The global config file was not found at a given location.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * The project .fmu config already contains masterdata.
+     *
+     */
+    409: unknown;
+    /**
+     *
+     * The global config file did not validate against the
+     * GlobalConfiguration Pydantic model.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostGlobalConfigResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostGlobalConfigResponse = ProjectPostGlobalConfigResponses[keyof ProjectPostGlobalConfigResponses];
+
+export type ProjectPatchMasterdataData = {
+    body: Smda;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/masterdata';
+};
+
+export type ProjectPatchMasterdataErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchMasterdataError = ProjectPatchMasterdataErrors[keyof ProjectPatchMasterdataErrors];
+
+export type ProjectPatchMasterdataResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
 
 export type UserGetUserData = {
     body?: never;
