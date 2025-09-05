@@ -1,4 +1,4 @@
-import { Typography } from "@equinor/eds-core-react";
+import { Chip, Typography } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
@@ -23,4 +23,43 @@ export const PageCode = styled(Typography)`
 
 export const PageSectionSpacer = styled.div`
   height: 1em;
+`;
+
+export const InfoBox = styled.div`
+  margin-bottom: ${tokens.spacings.comfortable.medium};
+  padding: ${tokens.spacings.comfortable.small};
+  border: solid 1px ${tokens.colors.ui.background__medium.hex};
+  border-radius: ${tokens.shape.corners.borderRadius};
+  background: ${tokens.colors.ui.background__light.hex};
+  color: ${tokens.colors.text.static_icons__secondary.hex};
+
+  th {
+    padding-right: ${tokens.spacings.comfortable.small};
+    vertical-align: top;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th::after {
+    content: ":";
+  }
+
+  td {
+    vertical-align: top;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${tokens.spacings.comfortable.small};
+  }
+`;
+
+export const InfoChip = styled(Chip)`
+  background-color: ${tokens.colors.ui.background__medium.hex};
+
+  &, svg {
+    color: ${tokens.colors.text.static_icons__default.hex};
+    fill: ${tokens.colors.text.static_icons__default.hex};
+  }
 `;

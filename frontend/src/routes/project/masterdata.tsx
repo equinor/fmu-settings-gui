@@ -11,7 +11,7 @@ import {
   userGetUserOptions,
 } from "#client/@tanstack/react-query.gen";
 import { Loading } from "#components/common";
-import { Field } from "#components/project/masterdata/field";
+import { Overview } from "#components/project/masterdata/Overview";
 import { ssoScopes } from "#config";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
@@ -127,16 +127,6 @@ function SmdaNotOk({ text }: { text: string }) {
   );
 }
 
-function SmdaOk() {
-  return (
-    <>
-      <PageText>Search and display data from SMDA.</PageText>
-
-      <Field />
-    </>
-  );
-}
-
 function Content() {
   const { data: project } = useProject();
   const { data: healthOk } = useSmdaHealthCheck();
@@ -146,7 +136,15 @@ function Content() {
   }
 
   return (
-    <>{healthOk.status ? <SmdaOk /> : <SmdaNotOk text={healthOk.text} />}</>
+    <>
+      {healthOk.status ? (
+        <Overview
+          masterdata={project.data?.config.masterdata.smda ?? undefined}
+        />
+      ) : (
+        <SmdaNotOk text={healthOk.text} />
+      )}
+    </>
   );
 }
 

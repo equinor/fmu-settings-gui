@@ -10,7 +10,8 @@ import { SmdaFieldSearchResult, SmdaFieldUuid } from "#client";
 import { smdaPostFieldOptions } from "#client/@tanstack/react-query.gen";
 import { SearchFieldForm } from "#components/form";
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
-import { SearchFormContainer, SearchResultsContainer } from "./field.style";
+import { stringCompare } from "#utils/string";
+import { SearchFormContainer, SearchResultsContainer } from "./Field.style";
 
 function FieldResults({ data }: { data?: SmdaFieldSearchResult }) {
   const [selectedRows, setSelectedRows] = useState<RowSelectionState>({});
@@ -36,7 +37,7 @@ function FieldResults({ data }: { data?: SmdaFieldSearchResult }) {
   }
 
   const rows = data.results.sort((a, b) =>
-    a.identifier.localeCompare(b.identifier, "no"),
+    stringCompare(a.identifier, b.identifier),
   );
 
   return (
