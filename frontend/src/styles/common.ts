@@ -59,7 +59,7 @@ export const InfoChip = styled(Chip)`
   background-color: ${tokens.colors.ui.background__medium.hex};
 
   &, svg {
-    color: ${tokens.colors.text.static_icons__default.hex};;
-    fill: ${tokens.colors.text.static_icons__default.hex};;
+    color: ${tokens.colors.text.static_icons__default.hex};
+    fill: ${tokens.colors.text.static_icons__default.hex};
   }
 `;
