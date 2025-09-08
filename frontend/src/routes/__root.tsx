@@ -21,11 +21,7 @@ import { Sidebar } from "#components/Sidebar";
 import { RouterContext } from "#main";
 import { PageHeader, PageText } from "#styles/common";
 import GlobalStyle from "#styles/global";
-import {
-  getApiToken,
-  isApiTokenNonEmpty,
-  queryAndMutationRetry,
-} from "#utils/authentication";
+import { getApiToken, isApiTokenNonEmpty } from "#utils/authentication";
 import { AppContainer } from "./index.style";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -47,8 +43,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       await context.queryClient
         .fetchQuery({
           ...userGetUserOptions(),
-          retry: (failureCount, error) =>
-            queryAndMutationRetry(failureCount, error),
           meta: { errorPrefix: "Error getting initial user data" },
         })
         .catch(() => undefined);

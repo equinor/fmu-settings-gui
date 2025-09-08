@@ -16,11 +16,7 @@ import { ssoScopes } from "#config";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import { PageCode, PageHeader, PageText } from "#styles/common";
-import {
-  handleAddSsoAccessToken,
-  handleSsoLogin,
-  queryAndMutationRetry,
-} from "#utils/authentication";
+import { handleAddSsoAccessToken, handleSsoLogin } from "#utils/authentication";
 
 export const Route = createFileRoute("/project/masterdata")({
   component: RouteComponent,
@@ -63,8 +59,6 @@ function AccessTokenPresence() {
         queryKey: smdaGetHealthQueryKey(),
       });
     },
-    retry: (failureCount: number, error: Error) =>
-      queryAndMutationRetry(failureCount, error),
     meta: { errorPrefix: "Error adding access token to session" },
   });
 

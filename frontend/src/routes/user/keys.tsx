@@ -22,7 +22,6 @@ import {
   StringObject,
 } from "#components/form";
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
-import { queryAndMutationRetry } from "#utils/authentication";
 import { KeysFormContainer } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
@@ -53,8 +52,6 @@ function KeysTextFieldForm({
         queryKey: smdaGetHealthQueryKey(),
       });
     },
-    retry: (failureCount: number, error: Error) =>
-      queryAndMutationRetry(failureCount, error),
     meta: { errorPrefix: "Error updating API key" },
   });
 

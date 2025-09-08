@@ -38,7 +38,6 @@ export function useSmdaHealthCheck(options?: Options<SmdaGetHealthData>) {
         return { status, text } as HealthCheck;
       },
       queryKey: smdaGetHealthQueryKey(options),
-      retry: false,
     }),
   );
 }

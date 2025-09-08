@@ -8,7 +8,6 @@ import {
   projectGetProject,
 } from "#client";
 import { projectGetProjectQueryKey } from "#client/@tanstack/react-query.gen";
-import { queryAndMutationRetry } from "#utils/authentication";
 
 type GetProject = {
   status: boolean;
@@ -44,8 +43,6 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
         }
       },
       queryKey: projectGetProjectQueryKey(options),
-      retry: (failureCount, error) =>
-        queryAndMutationRetry(failureCount, error),
     }),
   );
 }

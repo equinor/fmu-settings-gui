@@ -3,7 +3,12 @@ import {
   UseMutateAsyncFunction,
   UseMutateFunction,
 } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse, isAxiosError } from "axios";
+import {
+  AxiosError,
+  AxiosResponse,
+  AxiosResponseHeaders,
+  RawAxiosResponseHeaders,
+} from "axios";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 
@@ -19,6 +24,7 @@ import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
 const FRAGMENTTOKEN_PREFIX = "#token=";
 const STORAGENAME_TOKEN = "apiToken";
 const APITOKEN_HEADER = "x-fmu-settings-api";
+const UPSTREAMSOURCE_HEADER = "x-upstream-source";
 const APIURL_SESSION = "/api/v1/session/";
 
 export type TokenStatus = {
@@ -69,12 +75,14 @@ export function isApiTokenNonEmpty(apiToken: string) {
   return apiToken !== "";
 }
 
-function isApiUrlSession(url?: string): boolean {
+export function isApiUrlSession(url?: string): boolean {
   return url === APIURL_SESSION;
 }
 
-function isExternalApi(source?: string): boolean {
-  return source === "SMDA";
+export function isExternalApi(
+  headers: RawAxiosResponseHeaders | AxiosResponseHeaders | undefined,
+) {
+  return headers && headers[UPSTREAMSOURCE_HEADER] === "SMDA";
 }
 
 export async function createSessionAsync(
@@ -143,24 +151,9 @@ export const responseInterceptorRejected =
         if (apiTokenStatusValid) {
           setApiTokenStatus(() => ({}));
         }
-      } else if (
-        !isExternalApi(String(error.response?.headers["x-upstream-source"]))
-      ) {
+      } else if (!isExternalApi(error.response?.headers)) {
         setRequestSessionCreation(true);
       }
     }
     return Promise.reject(error);
   };
-
-export const queryAndMutationRetry = (failureCount: number, error: Error) => {
-  if (
-    isAxiosError(error) &&
-    isApiUrlSession(error.response?.config.url) &&
-    error.status === 401
-  ) {
-    // Don't retry query or mutation if it resulted in a failed session creation
-    return false;
-  }
-  // Specify at most 2 retries
-  return failureCount < 2;
-};
