@@ -23,7 +23,6 @@ import {
   useState,
 } from "react";
 import ReactDOM from "react-dom/client";
-import { toast } from "react-toastify";
 
 import { Message, Options, SessionCreateSessionData } from "#client";
 import {
@@ -42,6 +41,7 @@ import {
   responseInterceptorRejected,
   TokenStatus,
 } from "#utils/authentication";
+import { defaultErrorHandling } from "#utils/query";
 import { routeTree } from "./routeTree.gen";
 
 export interface RouterContext {
@@ -68,6 +68,7 @@ declare module "@tanstack/react-router" {
 
 interface QueryAndMutationMeta extends Record<string, unknown> {
   errorPrefix?: string;
+  preventDefaultErrorHandling?: Array<number>;
 }
 
 declare module "@tanstack/react-query" {
@@ -82,38 +83,36 @@ const msalInstance = new PublicClientApplication(msalConfig);
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
-      const message =
-        `${
-          query.meta && "errorPrefix" in query.meta
-            ? String(query.meta.errorPrefix)
-            : "Error getting data"
-        }: ` +
-        (isAxiosError(error) &&
-        error.response?.data &&
-        "detail" in error.response.data
-          ? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            String(error.response.data.detail)
-          : error.message);
-      console.error(message);
-      toast.error(message);
+      const {
+        errorPrefix = "Error getting data",
+        preventDefaultErrorHandling = [],
+      } = query.meta ?? {};
+
+      const preventDefault =
+        isAxiosError(error) &&
+        error.response?.status &&
+        preventDefaultErrorHandling.includes(error.response.status);
+
+      if (!preventDefault) {
+        defaultErrorHandling(error, errorPrefix);
+      }
     },
   }),
   mutationCache: new MutationCache({
     onError: (error, _variables, _context, mutation) => {
-      const message =
-        `${
-          mutation.meta && "errorPrefix" in mutation.meta
-            ? String(mutation.meta.errorPrefix)
-            : "Error updating data"
-        }: ` +
-        (isAxiosError(error) &&
-        error.response?.data &&
-        "detail" in error.response.data
-          ? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            String(error.response.data.detail)
-          : error.message);
-      console.error(message);
-      toast.error(message);
+      const {
+        errorPrefix = "Error updating data",
+        preventDefaultErrorHandling = [],
+      } = mutation.meta ?? {};
+
+      const preventDefault =
+        isAxiosError(error) &&
+        error.response?.status &&
+        preventDefaultErrorHandling.includes(error.response.status);
+
+      if (!preventDefault) {
+        defaultErrorHandling(error, errorPrefix);
+      }
     },
   }),
   defaultOptions: {
