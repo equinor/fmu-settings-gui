@@ -82,6 +82,13 @@ export type FieldItemInput = {
     uuid: string;
 };
 
+/**
+ * A relative path to a global config file, relative to the project root.
+ */
+export type GlobalConfigPath = {
+    relative_path: string;
+};
+
 export type HttpValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -476,6 +483,52 @@ export type ProjectInitProjectResponses = {
 };
 
 export type ProjectInitProjectResponse = ProjectInitProjectResponses[keyof ProjectInitProjectResponses];
+
+export type ProjectPostGlobalConfigData = {
+    body?: GlobalConfigPath | null;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/global_config';
+};
+
+export type ProjectPostGlobalConfigErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     *
+     * The global config file was not found at a given location.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * The project .fmu config already contains masterdata.
+     *
+     */
+    409: unknown;
+    /**
+     *
+     * The global config file did not validate against the
+     * GlobalConfiguration Pydantic model.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostGlobalConfigResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostGlobalConfigResponse = ProjectPostGlobalConfigResponses[keyof ProjectPostGlobalConfigResponses];
 
 export type ProjectPatchMasterdataData = {
     body: SmdaInput;

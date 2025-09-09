@@ -160,6 +160,21 @@ export const FieldItem_InputSchema = {
 known to SMDA.`
 } as const;
 
+export const GlobalConfigPathSchema = {
+    properties: {
+        relative_path: {
+            type: 'string',
+            format: 'path',
+            title: 'Relative Path',
+            examples: ['relative_path/to/global_config_file']
+        }
+    },
+    type: 'object',
+    required: ['relative_path'],
+    title: 'GlobalConfigPath',
+    description: 'A relative path to a global config file, relative to the project root.'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
