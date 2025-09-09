@@ -31,25 +31,28 @@ export type AccessTokenWritable = {
 };
 
 /**
- * Contains the coordinate system known to SMDA.
+ * The ``masterdata.smda.coordinate_system`` block contains the coordinate
+ * system known to SMDA.
  */
-export type CoordinateSystem = {
+export type CoordinateSystemInput = {
     identifier: string;
     uuid: string;
 };
 
 /**
- * A single country in the list of countries known to SMDA.
+ * A single country in the ``smda.masterdata.country`` list of countries
+ * known to SMDA.
  */
-export type CountryItem = {
+export type CountryItemInput = {
     identifier: string;
     uuid: string;
 };
 
 /**
- * A single discovery in the list of discoveries known to SMDA.
+ * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
+ * known to SMDA.
  */
-export type DiscoveryItem = {
+export type DiscoveryItemInput = {
     short_identifier: string;
     uuid: string;
 };
@@ -71,9 +74,10 @@ export type FmuProject = {
 };
 
 /**
- * A single field in the list of fields known to SMDA.
+ * A single field in the ``masterdata.smda.field`` list of fields
+ * known to SMDA.
  */
-export type FieldItem = {
+export type FieldItemInput = {
     identifier: string;
     uuid: string;
 };
@@ -88,7 +92,7 @@ export type HttpValidationError = {
  * Currently, SMDA holds the masterdata.
  */
 export type Masterdata = {
-    smda?: Smda | null;
+    smda?: SmdaOutput | null;
 };
 
 /**
@@ -118,14 +122,25 @@ export type ProjectConfig = {
 };
 
 /**
+ * The ``masterdata.smda`` block contains SMDA-related attributes.
+ */
+export type SmdaInput = {
+    coordinate_system: CoordinateSystemInput;
+    country: Array<CountryItemInput>;
+    discovery: Array<DiscoveryItemInput>;
+    field: Array<FieldItemInput>;
+    stratigraphic_column: StratigraphicColumnInput;
+};
+
+/**
  * Contains SMDA-related attributes.
  */
-export type Smda = {
-    coordinate_system: CoordinateSystem;
-    country: Array<CountryItem>;
-    discovery: Array<DiscoveryItem>;
-    field: Array<FieldItem>;
-    stratigraphic_column: StratigraphicColumn;
+export type SmdaOutput = {
+    coordinate_system: FmuSettingsModelsSmdaCoordinateSystem;
+    country: Array<FmuSettingsModelsSmdaCountryItem>;
+    discovery: Array<FmuSettingsModelsSmdaDiscoveryItem>;
+    field: Array<FmuSettingsModelsSmdaFieldItem>;
+    stratigraphic_column: FmuSettingsModelsSmdaStratigraphicColumn;
 };
 
 /**
@@ -156,18 +171,19 @@ export type SmdaFieldUuid = {
  * Contains SMDA-related attributes.
  */
 export type SmdaMasterdataResult = {
-    field: Array<FieldItem>;
-    country: Array<CountryItem>;
-    discovery: Array<DiscoveryItem>;
-    stratigraphic_columns: Array<StratigraphicColumn>;
-    field_coordinate_system: CoordinateSystem;
-    coordinate_systems: Array<CoordinateSystem>;
+    field: Array<FmuDatamodelsFmuResultsFieldsFieldItem>;
+    country: Array<FmuDatamodelsFmuResultsFieldsCountryItem>;
+    discovery: Array<FmuDatamodelsFmuResultsFieldsDiscoveryItem>;
+    stratigraphic_columns: Array<FmuDatamodelsFmuResultsFieldsStratigraphicColumn>;
+    field_coordinate_system: FmuDatamodelsFmuResultsFieldsCoordinateSystem;
+    coordinate_systems: Array<FmuDatamodelsFmuResultsFieldsCoordinateSystem>;
 };
 
 /**
- * Contains the stratigraphic column known to SMDA.
+ * The ``masterdata.smda.stratigraphic_column`` block contains the
+ * stratigraphic column known to SMDA.
  */
-export type StratigraphicColumn = {
+export type StratigraphicColumnInput = {
     identifier: string;
     uuid: string;
 };
@@ -195,6 +211,91 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+};
+
+/**
+ * The ``masterdata.smda.coordinate_system`` block contains the coordinate
+ * system known to SMDA.
+ */
+export type FmuDatamodelsFmuResultsFieldsCoordinateSystem = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * A single country in the ``smda.masterdata.country`` list of countries
+ * known to SMDA.
+ */
+export type FmuDatamodelsFmuResultsFieldsCountryItem = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
+ * known to SMDA.
+ */
+export type FmuDatamodelsFmuResultsFieldsDiscoveryItem = {
+    short_identifier: string;
+    uuid: string;
+};
+
+/**
+ * A single field in the ``masterdata.smda.field`` list of fields
+ * known to SMDA.
+ */
+export type FmuDatamodelsFmuResultsFieldsFieldItem = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * The ``masterdata.smda.stratigraphic_column`` block contains the
+ * stratigraphic column known to SMDA.
+ */
+export type FmuDatamodelsFmuResultsFieldsStratigraphicColumn = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * Contains the coordinate system known to SMDA.
+ */
+export type FmuSettingsModelsSmdaCoordinateSystem = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * A single country in the list of countries known to SMDA.
+ */
+export type FmuSettingsModelsSmdaCountryItem = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * A single discovery in the list of discoveries known to SMDA.
+ */
+export type FmuSettingsModelsSmdaDiscoveryItem = {
+    short_identifier: string;
+    uuid: string;
+};
+
+/**
+ * A single field in the list of fields known to SMDA.
+ */
+export type FmuSettingsModelsSmdaFieldItem = {
+    identifier: string;
+    uuid: string;
+};
+
+/**
+ * Contains the stratigraphic column known to SMDA.
+ */
+export type FmuSettingsModelsSmdaStratigraphicColumn = {
+    identifier: string;
+    uuid: string;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -375,6 +476,57 @@ export type ProjectInitProjectResponses = {
 };
 
 export type ProjectInitProjectResponse = ProjectInitProjectResponses[keyof ProjectInitProjectResponses];
+
+export type ProjectPatchMasterdataData = {
+    body: SmdaInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/masterdata';
+};
+
+export type ProjectPatchMasterdataErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchMasterdataError = ProjectPatchMasterdataErrors[keyof ProjectPatchMasterdataErrors];
+
+export type ProjectPatchMasterdataResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
 
 export type UserGetUserData = {
     body?: never;

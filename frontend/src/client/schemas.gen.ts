@@ -38,7 +38,7 @@ export const AccessTokenSchema = {
     description: 'A key-value pair for a known and supported access scope.'
 } as const;
 
-export const CoordinateSystemSchema = {
+export const CoordinateSystem_InputSchema = {
     properties: {
         identifier: {
             type: 'string',
@@ -55,10 +55,11 @@ export const CoordinateSystemSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'CoordinateSystem',
-    description: 'Contains the coordinate system known to SMDA.'
+    description: `The \`\`masterdata.smda.coordinate_system\`\` block contains the coordinate
+system known to SMDA.`
 } as const;
 
-export const CountryItemSchema = {
+export const CountryItem_InputSchema = {
     properties: {
         identifier: {
             type: 'string',
@@ -75,10 +76,11 @@ export const CountryItemSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'CountryItem',
-    description: 'A single country in the list of countries known to SMDA.'
+    description: `A single country in the \`\`smda.masterdata.country\`\` list of countries
+known to SMDA.`
 } as const;
 
-export const DiscoveryItemSchema = {
+export const DiscoveryItem_InputSchema = {
     properties: {
         short_identifier: {
             type: 'string',
@@ -95,7 +97,8 @@ export const DiscoveryItemSchema = {
     type: 'object',
     required: ['short_identifier', 'uuid'],
     title: 'DiscoveryItem',
-    description: 'A single discovery in the list of discoveries known to SMDA.'
+    description: `A single discovery in the \`\`masterdata.smda.discovery\`\` list of discoveries
+known to SMDA.`
 } as const;
 
 export const FMUDirPathSchema = {
@@ -136,7 +139,7 @@ export const FMUProjectSchema = {
     description: "Information returned when 'opening' an FMU Directory."
 } as const;
 
-export const FieldItemSchema = {
+export const FieldItem_InputSchema = {
     properties: {
         identifier: {
             type: 'string',
@@ -153,7 +156,8 @@ export const FieldItemSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'FieldItem',
-    description: 'A single field in the list of fields known to SMDA.'
+    description: `A single field in the \`\`masterdata.smda.field\`\` list of fields
+known to SMDA.`
 } as const;
 
 export const HTTPValidationErrorSchema = {
@@ -175,7 +179,7 @@ export const MasterdataSchema = {
         smda: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/Smda'
+                    '$ref': '#/components/schemas/Smda-Output'
                 },
                 {
                     type: 'null'
@@ -245,34 +249,70 @@ export const ProjectConfigSchema = {
 Stored as config.json.`
 } as const;
 
-export const SmdaSchema = {
+export const Smda_InputSchema = {
     properties: {
         coordinate_system: {
-            '$ref': '#/components/schemas/CoordinateSystem'
+            '$ref': '#/components/schemas/CoordinateSystem-Input'
         },
         country: {
             items: {
-                '$ref': '#/components/schemas/CountryItem'
+                '$ref': '#/components/schemas/CountryItem-Input'
             },
             type: 'array',
             title: 'Country'
         },
         discovery: {
             items: {
-                '$ref': '#/components/schemas/DiscoveryItem'
+                '$ref': '#/components/schemas/DiscoveryItem-Input'
             },
             type: 'array',
             title: 'Discovery'
         },
         field: {
             items: {
-                '$ref': '#/components/schemas/FieldItem'
+                '$ref': '#/components/schemas/FieldItem-Input'
             },
             type: 'array',
             title: 'Field'
         },
         stratigraphic_column: {
-            '$ref': '#/components/schemas/StratigraphicColumn'
+            '$ref': '#/components/schemas/StratigraphicColumn-Input'
+        }
+    },
+    type: 'object',
+    required: ['coordinate_system', 'country', 'discovery', 'field', 'stratigraphic_column'],
+    title: 'Smda',
+    description: 'The ``masterdata.smda`` block contains SMDA-related attributes.'
+} as const;
+
+export const Smda_OutputSchema = {
+    properties: {
+        coordinate_system: {
+            '$ref': '#/components/schemas/fmu__settings__models__smda__CoordinateSystem'
+        },
+        country: {
+            items: {
+                '$ref': '#/components/schemas/fmu__settings__models__smda__CountryItem'
+            },
+            type: 'array',
+            title: 'Country'
+        },
+        discovery: {
+            items: {
+                '$ref': '#/components/schemas/fmu__settings__models__smda__DiscoveryItem'
+            },
+            type: 'array',
+            title: 'Discovery'
+        },
+        field: {
+            items: {
+                '$ref': '#/components/schemas/fmu__settings__models__smda__FieldItem'
+            },
+            type: 'array',
+            title: 'Field'
+        },
+        stratigraphic_column: {
+            '$ref': '#/components/schemas/fmu__settings__models__smda__StratigraphicColumn'
         }
     },
     type: 'object',
@@ -342,38 +382,38 @@ export const SmdaMasterdataResultSchema = {
     properties: {
         field: {
             items: {
-                '$ref': '#/components/schemas/FieldItem'
+                '$ref': '#/components/schemas/fmu__datamodels__fmu_results__fields__FieldItem'
             },
             type: 'array',
             title: 'Field'
         },
         country: {
             items: {
-                '$ref': '#/components/schemas/CountryItem'
+                '$ref': '#/components/schemas/fmu__datamodels__fmu_results__fields__CountryItem'
             },
             type: 'array',
             title: 'Country'
         },
         discovery: {
             items: {
-                '$ref': '#/components/schemas/DiscoveryItem'
+                '$ref': '#/components/schemas/fmu__datamodels__fmu_results__fields__DiscoveryItem'
             },
             type: 'array',
             title: 'Discovery'
         },
         stratigraphic_columns: {
             items: {
-                '$ref': '#/components/schemas/StratigraphicColumn'
+                '$ref': '#/components/schemas/fmu__datamodels__fmu_results__fields__StratigraphicColumn'
             },
             type: 'array',
             title: 'Stratigraphic Columns'
         },
         field_coordinate_system: {
-            '$ref': '#/components/schemas/CoordinateSystem'
+            '$ref': '#/components/schemas/fmu__datamodels__fmu_results__fields__CoordinateSystem'
         },
         coordinate_systems: {
             items: {
-                '$ref': '#/components/schemas/CoordinateSystem'
+                '$ref': '#/components/schemas/fmu__datamodels__fmu_results__fields__CoordinateSystem'
             },
             type: 'array',
             title: 'Coordinate Systems'
@@ -385,7 +425,7 @@ export const SmdaMasterdataResultSchema = {
     description: 'Contains SMDA-related attributes.'
 } as const;
 
-export const StratigraphicColumnSchema = {
+export const StratigraphicColumn_InputSchema = {
     properties: {
         identifier: {
             type: 'string',
@@ -402,7 +442,8 @@ export const StratigraphicColumnSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'StratigraphicColumn',
-    description: 'Contains the stratigraphic column known to SMDA.'
+    description: `The \`\`masterdata.smda.stratigraphic_column\`\` block contains the
+stratigraphic column known to SMDA.`
 } as const;
 
 export const UserAPIKeysSchema = {
@@ -486,4 +527,209 @@ export const ValidationErrorSchema = {
     type: 'object',
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
+} as const;
+
+export const fmu__datamodels__fmu_results__fields__CoordinateSystemSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['ST_WGS84_UTM37N_P32637']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'CoordinateSystem',
+    description: `The \`\`masterdata.smda.coordinate_system\`\` block contains the coordinate
+system known to SMDA.`
+} as const;
+
+export const fmu__datamodels__fmu_results__fields__CountryItemSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['Norway']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'CountryItem',
+    description: `A single country in the \`\`smda.masterdata.country\`\` list of countries
+known to SMDA.`
+} as const;
+
+export const fmu__datamodels__fmu_results__fields__DiscoveryItemSchema = {
+    properties: {
+        short_identifier: {
+            type: 'string',
+            title: 'Short Identifier',
+            examples: ['SomeDiscovery']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['short_identifier', 'uuid'],
+    title: 'DiscoveryItem',
+    description: `A single discovery in the \`\`masterdata.smda.discovery\`\` list of discoveries
+known to SMDA.`
+} as const;
+
+export const fmu__datamodels__fmu_results__fields__FieldItemSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['OseFax']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'FieldItem',
+    description: `A single field in the \`\`masterdata.smda.field\`\` list of fields
+known to SMDA.`
+} as const;
+
+export const fmu__datamodels__fmu_results__fields__StratigraphicColumnSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['DROGON_2020']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'StratigraphicColumn',
+    description: `The \`\`masterdata.smda.stratigraphic_column\`\` block contains the
+stratigraphic column known to SMDA.`
+} as const;
+
+export const fmu__settings__models__smda__CoordinateSystemSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['ST_WGS84_UTM37N_P32637']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'CoordinateSystem',
+    description: 'Contains the coordinate system known to SMDA.'
+} as const;
+
+export const fmu__settings__models__smda__CountryItemSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['Norway']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'CountryItem',
+    description: 'A single country in the list of countries known to SMDA.'
+} as const;
+
+export const fmu__settings__models__smda__DiscoveryItemSchema = {
+    properties: {
+        short_identifier: {
+            type: 'string',
+            title: 'Short Identifier',
+            examples: ['SomeDiscovery']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['short_identifier', 'uuid'],
+    title: 'DiscoveryItem',
+    description: 'A single discovery in the list of discoveries known to SMDA.'
+} as const;
+
+export const fmu__settings__models__smda__FieldItemSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['OseFax']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'FieldItem',
+    description: 'A single field in the list of fields known to SMDA.'
+} as const;
+
+export const fmu__settings__models__smda__StratigraphicColumnSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            examples: ['DROGON_2020']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid'],
+    title: 'StratigraphicColumn',
+    description: 'Contains the stratigraphic column known to SMDA.'
 } as const;
