@@ -433,6 +433,52 @@ export type ProjectPostProjectResponses = {
 
 export type ProjectPostProjectResponse = ProjectPostProjectResponses[keyof ProjectPostProjectResponses];
 
+export type ProjectGetGlobalConfigStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/global_config_status';
+};
+
+export type ProjectGetGlobalConfigStatusErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     *
+     * The global config file was not found at a given location.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * The project .fmu config already contains masterdata.
+     *
+     */
+    409: unknown;
+    /**
+     *
+     * The global config file did not validate against the
+     * GlobalConfiguration Pydantic model.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetGlobalConfigStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ok;
+};
+
+export type ProjectGetGlobalConfigStatusResponse = ProjectGetGlobalConfigStatusResponses[keyof ProjectGetGlobalConfigStatusResponses];
+
 export type ProjectInitProjectData = {
     body: FmuDirPath;
     path?: never;
