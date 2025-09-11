@@ -132,9 +132,7 @@ function Content() {
   return (
     <>
       {healthOk.status ? (
-        <Overview
-          masterdata={project.data?.config.masterdata.smda ?? undefined}
-        />
+        <Overview masterdata={project.data?.config.masterdata?.smda} />
       ) : (
         <SmdaNotOk text={healthOk.text} />
       )}

@@ -16,6 +16,15 @@ export type ApiKeyWritable = {
 };
 
 /**
+ * The ``access`` block contains information related to access control for
+ * this data object.
+ */
+export type Access = {
+    asset: Asset;
+    classification?: Classification | null;
+};
+
+/**
  * A key-value pair for a known and supported access scope.
  */
 export type AccessTokenReadable = {
@@ -31,10 +40,23 @@ export type AccessTokenWritable = {
 };
 
 /**
+ * The ``access.asset`` block contains information about the owner asset of
+ * these data.
+ */
+export type Asset = {
+    name: string;
+};
+
+/**
+ * The security classification for a given data object.
+ */
+export type Classification = 'asset' | 'internal' | 'restricted';
+
+/**
  * The ``masterdata.smda.coordinate_system`` block contains the coordinate
  * system known to SMDA.
  */
-export type CoordinateSystemInput = {
+export type CoordinateSystem = {
     identifier: string;
     uuid: string;
 };
@@ -43,7 +65,7 @@ export type CoordinateSystemInput = {
  * A single country in the ``smda.masterdata.country`` list of countries
  * known to SMDA.
  */
-export type CountryItemInput = {
+export type CountryItem = {
     identifier: string;
     uuid: string;
 };
@@ -52,7 +74,7 @@ export type CountryItemInput = {
  * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
  * known to SMDA.
  */
-export type DiscoveryItemInput = {
+export type DiscoveryItem = {
     short_identifier: string;
     uuid: string;
 };
@@ -77,7 +99,7 @@ export type FmuProject = {
  * A single field in the ``masterdata.smda.field`` list of fields
  * known to SMDA.
  */
-export type FieldItemInput = {
+export type FieldItem = {
     identifier: string;
     uuid: string;
 };
@@ -95,11 +117,10 @@ export type HttpValidationError = {
 
 /**
  * The ``masterdata`` block contains information related to masterdata.
- *
  * Currently, SMDA holds the masterdata.
  */
 export type Masterdata = {
-    smda?: SmdaOutput | null;
+    smda: Smda;
 };
 
 /**
@@ -107,6 +128,21 @@ export type Masterdata = {
  */
 export type Message = {
     message: string;
+};
+
+/**
+ * The ``fmu.model`` block contains information about the model used.
+ *
+ * .. note::
+ * Synonyms for "model" in this context are "template", "setup", etc. The term
+ * "model" is ultra-generic but was chosen before e.g. "template" as the latter
+ * deviates from daily communications and is, if possible, even more generic
+ * than "model".
+ */
+export type Model = {
+    description?: Array<string> | null;
+    name: string;
+    revision: string;
 };
 
 /**
@@ -125,29 +161,20 @@ export type ProjectConfig = {
     version: string;
     created_at: string;
     created_by: string;
-    masterdata: Masterdata;
+    masterdata?: Masterdata | null;
+    model?: Model | null;
+    access?: Access | null;
 };
 
 /**
  * The ``masterdata.smda`` block contains SMDA-related attributes.
  */
-export type SmdaInput = {
-    coordinate_system: CoordinateSystemInput;
-    country: Array<CountryItemInput>;
-    discovery: Array<DiscoveryItemInput>;
-    field: Array<FieldItemInput>;
-    stratigraphic_column: StratigraphicColumnInput;
-};
-
-/**
- * Contains SMDA-related attributes.
- */
-export type SmdaOutput = {
-    coordinate_system: FmuSettingsModelsSmdaCoordinateSystem;
-    country: Array<FmuSettingsModelsSmdaCountryItem>;
-    discovery: Array<FmuSettingsModelsSmdaDiscoveryItem>;
-    field: Array<FmuSettingsModelsSmdaFieldItem>;
-    stratigraphic_column: FmuSettingsModelsSmdaStratigraphicColumn;
+export type Smda = {
+    coordinate_system: CoordinateSystem;
+    country: Array<CountryItem>;
+    discovery: Array<DiscoveryItem>;
+    field: Array<FieldItem>;
+    stratigraphic_column: StratigraphicColumn;
 };
 
 /**
@@ -178,19 +205,19 @@ export type SmdaFieldUuid = {
  * Contains SMDA-related attributes.
  */
 export type SmdaMasterdataResult = {
-    field: Array<FmuDatamodelsFmuResultsFieldsFieldItem>;
-    country: Array<FmuDatamodelsFmuResultsFieldsCountryItem>;
-    discovery: Array<FmuDatamodelsFmuResultsFieldsDiscoveryItem>;
-    stratigraphic_columns: Array<FmuDatamodelsFmuResultsFieldsStratigraphicColumn>;
-    field_coordinate_system: FmuDatamodelsFmuResultsFieldsCoordinateSystem;
-    coordinate_systems: Array<FmuDatamodelsFmuResultsFieldsCoordinateSystem>;
+    field: Array<FieldItem>;
+    country: Array<CountryItem>;
+    discovery: Array<DiscoveryItem>;
+    stratigraphic_columns: Array<StratigraphicColumn>;
+    field_coordinate_system: CoordinateSystem;
+    coordinate_systems: Array<CoordinateSystem>;
 };
 
 /**
  * The ``masterdata.smda.stratigraphic_column`` block contains the
  * stratigraphic column known to SMDA.
  */
-export type StratigraphicColumnInput = {
+export type StratigraphicColumn = {
     identifier: string;
     uuid: string;
 };
@@ -218,91 +245,6 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
-};
-
-/**
- * The ``masterdata.smda.coordinate_system`` block contains the coordinate
- * system known to SMDA.
- */
-export type FmuDatamodelsFmuResultsFieldsCoordinateSystem = {
-    identifier: string;
-    uuid: string;
-};
-
-/**
- * A single country in the ``smda.masterdata.country`` list of countries
- * known to SMDA.
- */
-export type FmuDatamodelsFmuResultsFieldsCountryItem = {
-    identifier: string;
-    uuid: string;
-};
-
-/**
- * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
- * known to SMDA.
- */
-export type FmuDatamodelsFmuResultsFieldsDiscoveryItem = {
-    short_identifier: string;
-    uuid: string;
-};
-
-/**
- * A single field in the ``masterdata.smda.field`` list of fields
- * known to SMDA.
- */
-export type FmuDatamodelsFmuResultsFieldsFieldItem = {
-    identifier: string;
-    uuid: string;
-};
-
-/**
- * The ``masterdata.smda.stratigraphic_column`` block contains the
- * stratigraphic column known to SMDA.
- */
-export type FmuDatamodelsFmuResultsFieldsStratigraphicColumn = {
-    identifier: string;
-    uuid: string;
-};
-
-/**
- * Contains the coordinate system known to SMDA.
- */
-export type FmuSettingsModelsSmdaCoordinateSystem = {
-    identifier: string;
-    uuid: string;
-};
-
-/**
- * A single country in the list of countries known to SMDA.
- */
-export type FmuSettingsModelsSmdaCountryItem = {
-    identifier: string;
-    uuid: string;
-};
-
-/**
- * A single discovery in the list of discoveries known to SMDA.
- */
-export type FmuSettingsModelsSmdaDiscoveryItem = {
-    short_identifier: string;
-    uuid: string;
-};
-
-/**
- * A single field in the list of fields known to SMDA.
- */
-export type FmuSettingsModelsSmdaFieldItem = {
-    identifier: string;
-    uuid: string;
-};
-
-/**
- * Contains the stratigraphic column known to SMDA.
- */
-export type FmuSettingsModelsSmdaStratigraphicColumn = {
-    identifier: string;
-    uuid: string;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -577,7 +519,7 @@ export type ProjectPostGlobalConfigResponses = {
 export type ProjectPostGlobalConfigResponse = ProjectPostGlobalConfigResponses[keyof ProjectPostGlobalConfigResponses];
 
 export type ProjectPatchMasterdataData = {
-    body: SmdaInput;
+    body: Smda;
     path?: never;
     query?: never;
     url: '/api/v1/project/masterdata';
