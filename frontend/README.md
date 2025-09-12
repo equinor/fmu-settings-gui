@@ -68,39 +68,16 @@ CSS/SCSS/JSON files. Formatting is set up to be done on save.
 
 ## Developing
 
-The application is started by running the following command:
+The frontend application is started by running the following command:
 
 ```shell
 $ pnpm dev
 ```
 
-The web page of the application can then be shown by opening the URL
-[http://localhost:5173/](http://localhost:5173/). Note that an authorization token from
-the API is needed, so initially the web page won't show any content.
-
 The web server is running with Hot Module Replacement, so any changes done to the TypeScript
 and CSS files will be reflected in the running application.
 
-
-### FMU Settings
-
-This frontend application is part of the FMU Settings applications: The CLI application
-is used for starting the API server as well as the GUI (frontend) server, while the API
-application is the one used by the frontend. There is also an `fmu-settings` package
-which contains the business logic and which is used by the API.
-
-The necessary applications can be installed as follows:
-
-```shell
-$ pip install fmu-settings-cli
-```
-
-*Note: Currently the `fmu-settings-cli` package is not published and thus cannot be
-installed via pip. Instead, follow the
-[steps for installing it from the source](https://github.com/equinor/fmu-settings-cli#developing).
-The API can then be started from this installation.*
-
-Then, the API is started with the following command:
+The API also needs to be running, and is started with the following command:
 
 ```shell
 $ fmu-settings api --gui-port 5173 --print-url
