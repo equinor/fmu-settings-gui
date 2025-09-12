@@ -29,25 +29,25 @@ observe the frontend installation output.
 ### Developing
 
 When developing features in the React application, there are corresponding changes in the
-other FMU Settings packages that the frontend application need. It is therefore important
-to make sure that the other packages are used in their newest versions. Installing these
-packages from the public package repository PyPI might not provide the newest versions,
-so installations should be done as editable installs. Python will then import functions
-from the cloned code repos.
+other FMU Settings packages that the frontend application needs. It is therefore
+important to make sure that the other packages are used in their newest versions.
+Installing these packages from the package repository PyPI might not provide the newest
+versions, so installations should be done as editable installs. Python will then import
+functions from the cloned code repos.
 
 A Python virtual environment (venv) should first be created:
 
 ```shell
-$ python -m venv ~/venv/fmu-settings
-$ source ~/venv/fmu-settings/bin/activate
+python -m venv ~/venv/fmu-settings
+source ~/venv/fmu-settings/bin/activate
 ```
 
 Then, an editable install of a package can be done, with the following steps:
 
 ```shell
-$ git clone git@github.com:equinor/fmu-settings-cli.git
-$ cd fmu-settings-cli
-$ pip install -e ".[dev]"
+git clone git@github.com:equinor/fmu-settings-cli.git
+cd fmu-settings-cli
+pip install -e ".[dev]"
 ```
 
 These commands clone the code repo and perform an install of the package, including any
