@@ -147,8 +147,8 @@ This error has been observed when using the `*Options` functions from the Hey AP
 openapi-ts generated code, such as this:
 
 ```typescript
-  queryClient.fetchQuery(projectGetProjectOptions());
+  queryClient.fetchQuery(userGetUserOptions());
 ```
-In this example, `projectGetProjectOptions()` would be marked with the errors
+In this example, `userGetUserOptions()` would be marked with the errors
 `@typescript-eslint/no-unsafe-argument` and `@typescript-eslint/no-unsafe-call`. This is
 a false positive, as running the command `pnpm lint` will indicate.
