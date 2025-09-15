@@ -44,6 +44,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         .fetchQuery({
           ...userGetUserOptions(),
           meta: { errorPrefix: "Error getting initial user data" },
+          retry: 3,
         })
         .catch(() => undefined);
     }
