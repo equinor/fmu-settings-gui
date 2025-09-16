@@ -27,6 +27,7 @@ function SubscriptionKeyPresence() {
 
   const hasSubscriptionKey =
     "smda_subscription" in userData.user_api_keys &&
+    typeof userData.user_api_keys.smda_subscription === "string" &&
     userData.user_api_keys.smda_subscription !== "";
 
   return (
