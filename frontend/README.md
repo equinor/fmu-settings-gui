@@ -13,30 +13,30 @@ Installation of Node.js is best handled by a version manager
 
 ```shell
 # Change to the frontend directory
-$ cd frontend
+cd frontend
 
 # fnm Node.js version manager
-$ curl -fsSL https://fnm.vercel.app/install | bash
-$ eval "$(fnm env --shell bash)"
-$ fnm --version
+curl -fsSL https://fnm.vercel.app/install | bash
+eval "$(fnm env --shell bash)"
+fnm --version
 
 # Node.js JavaScript runtime environment
-$ fnm install --lts
-$ node --version
+fnm install --lts
+node --version
 
 # pnpm package manager
-$ curl -fsSL https://get.pnpm.io/install.sh | sh -
-$ pnpm self-update
-$ pnpm --version
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+pnpm self-update
+pnpm --version
 
 # Vite build tool and web server
-$ pnpm add -D vite
+pnpm add -D vite
 
 # Package dependencies and external tools
-$ pnpm install
-$ mkdir tools
-$ curl -L https://github.com/biomejs/biome/releases/download/%40biomejs%2Fbiome%402.0.0-beta.1/biome-linux-x64-musl -o tools/biome
-$ chmod a+x tools/biome
+pnpm install
+mkdir tools
+curl -L https://github.com/biomejs/biome/releases/download/%40biomejs%2Fbiome%402.0.0-beta.1/biome-linux-x64-musl -o tools/biome
+chmod a+x tools/biome
 ```
 
 Installation of the Biome toolchain is done by downloading the binary. Ideally the
@@ -68,42 +68,19 @@ CSS/SCSS/JSON files. Formatting is set up to be done on save.
 
 ## Developing
 
-The application is started by running the following command:
+The frontend application is started by running the following command:
 
 ```shell
-$ pnpm dev
+pnpm dev
 ```
-
-The web page of the application can then be shown by opening the URL
-[http://localhost:5173/](http://localhost:5173/). Note that an authorization token from
-the API is needed, so initially the web page won't show any content.
 
 The web server is running with Hot Module Replacement, so any changes done to the TypeScript
 and CSS files will be reflected in the running application.
 
-
-### FMU Settings
-
-This frontend application is part of the FMU Settings applications: The CLI application
-is used for starting the API server as well as the GUI (frontend) server, while the API
-application is the one used by the frontend. There is also an `fmu-settings` package
-which contains the business logic and which is used by the API.
-
-The necessary applications can be installed as follows:
+The API also needs to be running, and is started with the following command:
 
 ```shell
-$ pip install fmu-settings-cli
-```
-
-*Note: Currently the `fmu-settings-cli` package is not published and thus cannot be
-installed via pip. Instead, follow the
-[steps for installing it from the source](https://github.com/equinor/fmu-settings-cli#developing).
-The API can then be started from this installation.*
-
-Then, the API is started with the following command:
-
-```shell
-$ fmu-settings api --gui-port 5173 --print-url
+fmu-settings api --gui-port 5173 --print-url
 ```
 
 The specified port number should be the same that the frontend application runs on,
@@ -121,7 +98,7 @@ Whenever there are been updates to the API endpoints and models, a tool can be u
 update the frontend code:
 
 ```shell
-$ pnpm openapi-ts
+pnpm openapi-ts
 ```
 
 This command will get the API's `openapi.json` specification file, and create TypeScript
@@ -156,7 +133,7 @@ formatting and linting will happen during editing and saving of each file. In ad
 this can be done for all files, using the following command:
 
 ```shell
-$ pnpm lint
+pnpm lint
 ```
 
 When a pull request is created, the CI workflow checks for formatting and linting issues,
@@ -170,8 +147,8 @@ This error has been observed when using the `*Options` functions from the Hey AP
 openapi-ts generated code, such as this:
 
 ```typescript
-  queryClient.fetchQuery(projectGetProjectOptions());
+  queryClient.fetchQuery(userGetUserOptions());
 ```
-In this example, `projectGetProjectOptions()` would be marked with the errors
+In this example, `userGetUserOptions()` would be marked with the errors
 `@typescript-eslint/no-unsafe-argument` and `@typescript-eslint/no-unsafe-call`. This is
 a false positive, as running the command `pnpm lint` will indicate.
