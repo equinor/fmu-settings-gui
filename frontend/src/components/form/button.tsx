@@ -1,5 +1,15 @@
 import { Button, DotProgress, Tooltip } from "@equinor/eds-core-react";
 
+export function GeneralButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return <Button onClick={onClick}>{label}</Button>;
+}
+
 export function SubmitButton({
   label,
   disabled,
@@ -29,5 +39,17 @@ export function SubmitButton({
         {isPending ? <DotProgress /> : label}
       </Button>
     </Tooltip>
+  );
+}
+
+export function CancelButton({
+  onClick,
+}: {
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return (
+    <Button type="reset" color="secondary" variant="outlined" onClick={onClick}>
+      Cancel
+    </Button>
   );
 }

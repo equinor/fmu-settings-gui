@@ -1,11 +1,10 @@
-import { Button } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 import { fieldContext, formContext } from "#utils/form";
 import { handleValidator } from "#utils/validator";
-import { SubmitButton } from "./button";
+import { CancelButton, GeneralButton, SubmitButton } from "./button";
 import {
   BasicTextFieldProps,
   CommonTextFieldProps,
@@ -43,7 +42,7 @@ const { useAppForm: useAppFormEditableTextFieldForm } = createFormHook({
   fieldContext,
   formContext,
   fieldComponents: { TextField },
-  formComponents: { SubmitButton },
+  formComponents: { CancelButton, GeneralButton, SubmitButton },
 });
 
 type EditableTextFieldFormProps = CommonTextFieldProps & MutationFormProps;
@@ -116,13 +115,12 @@ export function EditableTextFieldForm({
 
         <form.AppForm>
           {isReadonly ? (
-            <Button
+            <form.GeneralButton
+              label="Edit"
               onClick={() => {
                 setIsReadonly(false);
               }}
-            >
-              Edit
-            </Button>
+            />
           ) : (
             <>
               <form.SubmitButton
@@ -130,18 +128,13 @@ export function EditableTextFieldForm({
                 disabled={submitDisabled}
                 isPending={mutationIsPending}
               />
-              <Button
-                type="reset"
-                color="secondary"
-                variant="outlined"
-                onClick={(e) => {
+              <form.CancelButton
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                   e.preventDefault();
                   form.reset();
                   setIsReadonly(true);
                 }}
-              >
-                Cancel
-              </Button>
+              />
             </>
           )}
         </form.AppForm>
