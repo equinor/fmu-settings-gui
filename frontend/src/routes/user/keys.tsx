@@ -15,12 +15,12 @@ import {
   userPatchApiKeyMutation,
 } from "#client/@tanstack/react-query.gen";
 import { Loading } from "#components/common";
+import { CommonTextFieldProps } from "#components/form/field";
 import {
-  CommonTextFieldProps,
   EditableTextFieldForm,
   MutationCallbackProps,
   StringObject,
-} from "#components/form";
+} from "#components/form/form";
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
 import { KeysFormContainer } from "./keys.style";
 

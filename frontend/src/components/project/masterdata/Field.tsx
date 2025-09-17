@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 
 import { SmdaFieldSearchResult, SmdaFieldUuid } from "#client";
 import { smdaPostFieldOptions } from "#client/@tanstack/react-query.gen";
-import { SearchFieldForm } from "#components/form";
+import { SearchFieldForm } from "#components/form/form";
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
 import { stringCompare } from "#utils/string";
 import { SearchFormContainer, SearchResultsContainer } from "./Field.style";
