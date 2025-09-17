@@ -129,7 +129,7 @@ export function EditableTextFieldForm({
                 isPending={mutationIsPending}
               />
               <form.CancelButton
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                onClick={(e) => {
                   e.preventDefault();
                   form.reset();
                   setIsReadonly(true);
