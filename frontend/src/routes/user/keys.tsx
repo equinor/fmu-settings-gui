@@ -20,7 +20,7 @@ import {
   EditableTextFieldForm,
   MutationCallbackProps,
   StringObject,
-} from "#components/form";
+} from "#components/form/form";
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
 import { KeysFormContainer } from "./keys.style";
 
