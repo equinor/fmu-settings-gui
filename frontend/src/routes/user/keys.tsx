@@ -15,8 +15,8 @@ import {
   userPatchApiKeyMutation,
 } from "#client/@tanstack/react-query.gen";
 import { Loading } from "#components/common";
+import { CommonTextFieldProps } from "#components/form/field";
 import {
-  CommonTextFieldProps,
   EditableTextFieldForm,
   MutationCallbackProps,
   StringObject,
