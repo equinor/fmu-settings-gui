@@ -19,6 +19,29 @@ export const APIKeySchema = {
     description: 'A key-value pair for a known and supported API.'
 } as const;
 
+export const AccessSchema = {
+    properties: {
+        asset: {
+            '$ref': '#/components/schemas/Asset'
+        },
+        classification: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/Classification'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: ['asset'],
+    title: 'Access',
+    description: `The \`\`access\`\` block contains information related to access control for
+this data object.`
+} as const;
+
 export const AccessTokenSchema = {
     properties: {
         id: {
@@ -38,6 +61,28 @@ export const AccessTokenSchema = {
     description: 'A key-value pair for a known and supported access scope.'
 } as const;
 
+export const AssetSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name',
+            examples: ['Drogon']
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'Asset',
+    description: `The \`\`access.asset\`\` block contains information about the owner asset of
+these data.`
+} as const;
+
+export const ClassificationSchema = {
+    type: 'string',
+    enum: ['asset', 'internal', 'restricted'],
+    title: 'Classification',
+    description: 'The security classification for a given data object.'
+} as const;
+
 export const CoordinateSystemSchema = {
     properties: {
         identifier: {
@@ -55,7 +100,8 @@ export const CoordinateSystemSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'CoordinateSystem',
-    description: 'Contains the coordinate system known to SMDA.'
+    description: `The \`\`masterdata.smda.coordinate_system\`\` block contains the coordinate
+system known to SMDA.`
 } as const;
 
 export const CountryItemSchema = {
@@ -75,7 +121,8 @@ export const CountryItemSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'CountryItem',
-    description: 'A single country in the list of countries known to SMDA.'
+    description: `A single country in the \`\`smda.masterdata.country\`\` list of countries
+known to SMDA.`
 } as const;
 
 export const DiscoveryItemSchema = {
@@ -95,7 +142,8 @@ export const DiscoveryItemSchema = {
     type: 'object',
     required: ['short_identifier', 'uuid'],
     title: 'DiscoveryItem',
-    description: 'A single discovery in the list of discoveries known to SMDA.'
+    description: `A single discovery in the \`\`masterdata.smda.discovery\`\` list of discoveries
+known to SMDA.`
 } as const;
 
 export const FMUDirPathSchema = {
@@ -153,7 +201,23 @@ export const FieldItemSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'FieldItem',
-    description: 'A single field in the list of fields known to SMDA.'
+    description: `A single field in the \`\`masterdata.smda.field\`\` list of fields
+known to SMDA.`
+} as const;
+
+export const GlobalConfigPathSchema = {
+    properties: {
+        relative_path: {
+            type: 'string',
+            format: 'path',
+            title: 'Relative Path',
+            examples: ['relative_path/to/global_config_file']
+        }
+    },
+    type: 'object',
+    required: ['relative_path'],
+    title: 'GlobalConfigPath',
+    description: 'A relative path to a global config file, relative to the project root.'
 } as const;
 
 export const HTTPValidationErrorSchema = {
@@ -173,20 +237,13 @@ export const HTTPValidationErrorSchema = {
 export const MasterdataSchema = {
     properties: {
         smda: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/Smda'
-                },
-                {
-                    type: 'null'
-                }
-            ]
+            '$ref': '#/components/schemas/Smda'
         }
     },
     type: 'object',
+    required: ['smda'],
     title: 'Masterdata',
     description: `The \`\`masterdata\`\` block contains information related to masterdata.
-
 Currently, SMDA holds the masterdata.`
 } as const;
 
@@ -201,6 +258,45 @@ export const MessageSchema = {
     required: ['message'],
     title: 'Message',
     description: 'A generic message to return to the GUI.'
+} as const;
+
+export const ModelSchema = {
+    properties: {
+        description: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        name: {
+            type: 'string',
+            title: 'Name',
+            examples: ['Drogon']
+        },
+        revision: {
+            type: 'string',
+            title: 'Revision',
+            examples: ['21.0.0.dev']
+        }
+    },
+    type: 'object',
+    required: ['name', 'revision'],
+    title: 'Model',
+    description: `The \`\`fmu.model\`\` block contains information about the model used.
+
+.. note::
+   Synonyms for "model" in this context are "template", "setup", etc. The term
+   "model" is ultra-generic but was chosen before e.g. "template" as the latter
+   deviates from daily communications and is, if possible, even more generic
+   than "model".`
 } as const;
 
 export const OkSchema = {
@@ -234,11 +330,38 @@ export const ProjectConfigSchema = {
             title: 'Created By'
         },
         masterdata: {
-            '$ref': '#/components/schemas/Masterdata'
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/Masterdata'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        model: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/Model'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        access: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/Access'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
-    required: ['version', 'created_at', 'created_by', 'masterdata'],
+    required: ['version', 'created_at', 'created_by'],
     title: 'ProjectConfig',
     description: `The configuration file in a .fmu directory.
 
@@ -278,7 +401,7 @@ export const SmdaSchema = {
     type: 'object',
     required: ['coordinate_system', 'country', 'discovery', 'field', 'stratigraphic_column'],
     title: 'Smda',
-    description: 'Contains SMDA-related attributes.'
+    description: 'The ``masterdata.smda`` block contains SMDA-related attributes.'
 } as const;
 
 export const SmdaFieldSchema = {
@@ -402,7 +525,8 @@ export const StratigraphicColumnSchema = {
     type: 'object',
     required: ['identifier', 'uuid'],
     title: 'StratigraphicColumn',
-    description: 'Contains the stratigraphic column known to SMDA.'
+    description: `The \`\`masterdata.smda.stratigraphic_column\`\` block contains the
+stratigraphic column known to SMDA.`
 } as const;
 
 export const UserAPIKeysSchema = {
@@ -439,19 +563,18 @@ export const UserConfigSchema = {
         user_api_keys: {
             '$ref': '#/components/schemas/UserAPIKeys'
         },
-        recent_directories: {
+        recent_project_directories: {
             items: {
                 type: 'string',
                 format: 'path'
             },
             type: 'array',
             maxItems: 5,
-            uniqueItems: true,
-            title: 'Recent Directories'
+            title: 'Recent Project Directories'
         }
     },
     type: 'object',
-    required: ['version', 'created_at', 'user_api_keys', 'recent_directories'],
+    required: ['version', 'created_at', 'user_api_keys', 'recent_project_directories'],
     title: 'UserConfig',
     description: `The configuration file in a $HOME/.fmu directory.
 
