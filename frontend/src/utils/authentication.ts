@@ -19,6 +19,7 @@ import {
   SessionPatchAccessTokenData,
 } from "#client";
 import { ssoScopes } from "#config";
+import { HTTP_STATUS_UNAUTHORIZED } from "./api";
 import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
@@ -142,7 +143,7 @@ export const responseInterceptorRejected =
     setRequestSessionCreation: Dispatch<SetStateAction<boolean>>,
   ) =>
   async (error: AxiosError) => {
-    if (error.status === 401) {
+    if (error.status === HTTP_STATUS_UNAUTHORIZED) {
       if (isApiUrlSession(error.response?.config.url)) {
         if (isApiTokenNonEmpty(apiToken)) {
           setApiToken(() => "");

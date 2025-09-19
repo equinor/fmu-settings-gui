@@ -1,6 +1,7 @@
 import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 
+import { HTTP_STATUS_UNAUTHORIZED } from "./api";
 import { isApiUrlSession, isExternalApi } from "./authentication";
 
 export const defaultErrorHandling = (error: Error, errorPrefix: string) => {
@@ -19,7 +20,7 @@ export const defaultErrorHandling = (error: Error, errorPrefix: string) => {
 export const mutationRetry = (failureCount: number, error: Error) => {
   if (
     isAxiosError(error) &&
-    error.status === 401 &&
+    error.status === HTTP_STATUS_UNAUTHORIZED &&
     !(
       isApiUrlSession(error.response?.config.url) ||
       isExternalApi(error.response?.headers)
