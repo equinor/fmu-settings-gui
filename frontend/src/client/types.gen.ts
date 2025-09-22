@@ -238,7 +238,7 @@ export type UserConfig = {
     version: string;
     created_at: string;
     user_api_keys: UserApiKeys;
-    recent_directories: Array<string>;
+    recent_project_directories: Array<string>;
 };
 
 export type ValidationError = {

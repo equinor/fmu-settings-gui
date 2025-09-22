@@ -563,19 +563,18 @@ export const UserConfigSchema = {
         user_api_keys: {
             '$ref': '#/components/schemas/UserAPIKeys'
         },
-        recent_directories: {
+        recent_project_directories: {
             items: {
                 type: 'string',
                 format: 'path'
             },
             type: 'array',
             maxItems: 5,
-            uniqueItems: true,
-            title: 'Recent Directories'
+            title: 'Recent Project Directories'
         }
     },
     type: 'object',
-    required: ['version', 'created_at', 'user_api_keys', 'recent_directories'],
+    required: ['version', 'created_at', 'user_api_keys', 'recent_project_directories'],
     title: 'UserConfig',
     description: `The configuration file in a $HOME/.fmu directory.
 
