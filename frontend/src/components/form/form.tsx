@@ -18,7 +18,7 @@ import {
 
 export type StringObject = { [x: string]: string };
 
-interface FormSubmitCallbackProps {
+export interface FormSubmitCallbackProps {
   message: string;
   formReset: () => void;
 }

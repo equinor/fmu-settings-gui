@@ -2,6 +2,7 @@ import {
   TextField as EdsTextField,
   Icon,
   InputWrapper,
+  NativeSelect,
 } from "@equinor/eds-core-react";
 import { error_filled } from "@equinor/eds-icons";
 import { ChangeEvent, Dispatch, SetStateAction, useEffect } from "react";
@@ -24,6 +25,11 @@ export interface BasicTextFieldProps {
 export interface CommonTextFieldProps
   extends BasicTextFieldProps,
     ValidatorProps {}
+
+export interface OptionProps {
+  value: string;
+  label: string;
+}
 
 export function TextField({
   label,
@@ -110,5 +116,36 @@ export function SearchField({
         }}
       />
     </InputWrapper>
+  );
+}
+
+export function Select({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: OptionProps[];
+  onChange: (value: string) => void;
+}) {
+  const field = useFieldContext();
+
+  return (
+    <NativeSelect
+      id={field.name}
+      label={label}
+      value={value}
+      onChange={(e) => {
+        onChange(e.target.value);
+      }}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </NativeSelect>
   );
 }

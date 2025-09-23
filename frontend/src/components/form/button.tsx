@@ -48,7 +48,7 @@ export function CancelButton({
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
-    <Button type="reset" color="secondary" variant="outlined" onClick={onClick}>
+    <Button type="reset" variant="outlined" onClick={onClick}>
       Cancel
     </Button>
   );

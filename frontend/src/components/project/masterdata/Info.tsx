@@ -14,26 +14,22 @@ export function Info({ masterdata }: { masterdata: Smda }) {
           <tbody>
             <tr>
               <th>Field</th>
-              <td>
+              <td className="chips">
                 {masterdata.field
                   .sort((a, b) => stringCompare(a.identifier, b.identifier))
                   .map<React.ReactNode>((field) => (
-                    <React.Fragment key={field.uuid}>
-                      {field.identifier}
-                    </React.Fragment>
-                  ))
-                  .reduce((prev, curr) => [prev, ", ", curr])}
+                    <InfoChip key={field.uuid}>{field.identifier}</InfoChip>
+                  ))}
               </td>
             </tr>
             <tr>
               <th>Country</th>
-              <td>
+              <td className="chips">
                 {masterdata.country
                   .sort((a, b) => stringCompare(a.identifier, b.identifier))
                   .map<React.ReactNode>((country) => (
-                    <span key={country.uuid}>{country.identifier}</span>
-                  ))
-                  .reduce((prev, curr) => [prev, ", ", curr])}
+                    <InfoChip key={country.uuid}>{country.identifier}</InfoChip>
+                  ))}
               </td>
             </tr>
             <tr>
