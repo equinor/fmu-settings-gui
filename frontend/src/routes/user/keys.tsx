@@ -1,7 +1,7 @@
 import { Typography } from "@equinor/eds-core-react";
 import {
-  QueryClient,
   useMutation,
+  useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -30,17 +30,16 @@ export const Route = createFileRoute("/user/keys")({
 
 type KeysTextFieldFormProps = Omit<CommonTextFieldProps, "name" | "value"> & {
   apiKey: keyof UserApiKeys;
-  queryClient: QueryClient;
 };
 
 function KeysTextFieldForm({
   apiKey,
   label,
-  queryClient,
   placeholder,
   length,
   minLength,
 }: KeysTextFieldFormProps) {
+  const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(userGetUserOptions());
   const { mutate, isPending } = useMutation({
     ...userPatchApiKeyMutation(),
@@ -90,8 +89,6 @@ function KeysTextFieldForm({
 }
 
 function Content() {
-  const { queryClient } = Route.useRouteContext();
-
   return (
     <>
       <PageText $variant="ingress">
@@ -147,7 +144,6 @@ function Content() {
           label="SMDA subscription primary key"
           placeholder="(not set)"
           length={32}
-          queryClient={queryClient}
         />
       </KeysFormContainer>
     </>
