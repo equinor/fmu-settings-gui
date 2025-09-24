@@ -29,5 +29,6 @@ export const mutationRetry = (failureCount: number, error: Error) => {
     // API authorisation, but don't retry a failed session creation
     return failureCount < 1;
   }
+
   return false;
 };

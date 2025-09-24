@@ -39,6 +39,7 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
               text = String(error.response.data.detail);
             }
           }
+
           return { status: false, text } as GetProject;
         }
       },

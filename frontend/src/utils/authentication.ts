@@ -130,6 +130,7 @@ export const responseInterceptorFulfilled =
         valid: true,
       }));
     }
+
     return response;
   };
 
@@ -155,5 +156,6 @@ export const responseInterceptorRejected =
         setRequestSessionCreation(true);
       }
     }
+
     return Promise.reject(error);
   };
