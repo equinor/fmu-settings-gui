@@ -4,19 +4,24 @@ import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import { CoordinateSystem, Smda, SmdaMasterdataResult } from "#client";
+import {
+  CoordinateSystem,
+  Smda,
+  SmdaMasterdataResult,
+  StratigraphicColumn,
+} from "#client";
 import {
   projectGetProjectQueryKey,
   projectPatchMasterdataMutation,
   smdaPostMasterdataOptions,
 } from "#client/@tanstack/react-query.gen";
 import { CancelButton, SubmitButton } from "#components/form/button";
-import { Select } from "#components/form/field";
+import { helperTextLoadingOptions, Select } from "#components/form/field";
 import {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form";
-import { EditDialog } from "#styles/common";
+import { EditDialog, PageSectionSpacer } from "#styles/common";
 import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
@@ -34,6 +39,8 @@ type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
 
 type SmdaReferenceData = {
   coordinateSystems: Array<CoordinateSystem>;
+  stratigraphicColumns: Array<StratigraphicColumn>;
+  stratigraphicColumnsOptions: Array<StratigraphicColumn>;
 };
 
 const { useAppForm } = createFormHook({
@@ -56,6 +63,8 @@ export function Edit({
   const [smdaReferenceData, setSmdaReferenceData] = useState<SmdaReferenceData>(
     {
       coordinateSystems: [],
+      stratigraphicColumns: [],
+      stratigraphicColumnsOptions: [],
     },
   );
   const queryClient = useQueryClient();
@@ -105,12 +114,36 @@ export function Edit({
   }, [isOpen, masterdata]);
 
   useEffect(() => {
-    if (Object.keys(smdaMasterdata.data).length) {
-      const field = Object.values(smdaMasterdata.data)[0];
+    const fieldCount = Object.keys(smdaMasterdata.data).length;
+    if (fieldCount > 0) {
       setSmdaReferenceData({
-        coordinateSystems: field.coordinate_systems.sort((a, b) =>
+        // The list of coordinate systems is the same for all SMDA fields
+        coordinateSystems: Object.values(
+          smdaMasterdata.data,
+        )[0].coordinate_systems.sort((a, b) =>
           stringCompare(a.identifier, b.identifier),
         ),
+        stratigraphicColumns: Object.values(smdaMasterdata.data)
+          .reduce<Array<StratigraphicColumn>>((acc, masterdata) => {
+            acc.push(...masterdata.stratigraphic_columns);
+            return acc;
+          }, [])
+          .sort((a, b) => stringCompare(a.identifier, b.identifier)),
+        stratigraphicColumnsOptions: Object.entries(smdaMasterdata.data).reduce<
+          Array<StratigraphicColumn>
+        >((acc, fieldData) => {
+          const [field, masterdata] = fieldData;
+          acc.push(
+            ...masterdata.stratigraphic_columns
+              .map((value) => ({
+                ...value,
+                identifier:
+                  value.identifier + (fieldCount > 1 ? ` [${field}]` : ""),
+              }))
+              .sort((a, b) => stringCompare(a.identifier, b.identifier)),
+          );
+          return acc;
+        }, []),
       });
     }
   }, [smdaMasterdata.data]);
@@ -127,10 +160,7 @@ export function Edit({
   }: MutationCallbackProps<Smda>) => {
     masterdataMutation.mutate(
       {
-        body: {
-          ...masterdata,
-          coordinate_system: formValue.coordinate_system,
-        },
+        body: formValue,
       },
       {
         onSuccess: (data) => {
@@ -177,14 +207,16 @@ export function Edit({
               <field.Select
                 label="Coordinate system"
                 helperText={
-                  smdaMasterdata.isPending ? "Loading options..." : undefined
+                  smdaMasterdata.isPending
+                    ? helperTextLoadingOptions
+                    : undefined
                 }
                 value={field.state.value.uuid}
                 options={identifierUuidArrayToOptionsArray([
                   emptyIdentifierUuid() as CoordinateSystem,
                   ...smdaReferenceData.coordinateSystems,
                 ])}
-                onChange={(value: string) => {
+                onChange={(value) => {
                   field.handleChange(
                     findOptionValueInIdentifierUuidArray(
                       smdaReferenceData.coordinateSystems,
@@ -195,6 +227,36 @@ export function Edit({
               ></field.Select>
             )}
           </form.AppField>
+
+          <PageSectionSpacer />
+
+          <form.AppField name="stratigraphic_column">
+            {(field) => (
+              <field.Select
+                label="Stratigraphic column"
+                helperText={
+                  smdaMasterdata.isPending
+                    ? helperTextLoadingOptions
+                    : undefined
+                }
+                value={field.state.value.uuid}
+                options={identifierUuidArrayToOptionsArray([
+                  emptyIdentifierUuid() as StratigraphicColumn,
+                  ...smdaReferenceData.stratigraphicColumnsOptions,
+                ])}
+                onChange={(value) => {
+                  field.handleChange(
+                    findOptionValueInIdentifierUuidArray(
+                      smdaReferenceData.stratigraphicColumns,
+                      value,
+                    ) ?? (emptyIdentifierUuid() as StratigraphicColumn),
+                  );
+                }}
+              />
+            )}
+          </form.AppField>
+
+          <PageSectionSpacer />
         </Dialog.CustomContent>
 
         <Dialog.Actions>

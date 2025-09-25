@@ -14,6 +14,8 @@ import { SearchFieldInput } from "./field.style";
 
 Icon.add({ error_filled });
 
+export const helperTextLoadingOptions = "Loading options...";
+
 export interface BasicTextFieldProps {
   name: string;
   label: string;
