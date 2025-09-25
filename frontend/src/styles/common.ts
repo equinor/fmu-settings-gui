@@ -65,6 +65,7 @@ export const InfoChip = styled(Chip)`
 `;
 
 export const EditDialog = styled(Dialog)`
+  width: 100%;
 
   button + button {
     margin-left: ${tokens.spacings.comfortable.small};

@@ -9,7 +9,7 @@ import { emptyMasterdata } from "#utils/model";
 import { Edit } from "./Edit";
 
 export function Overview({ masterdata }: { masterdata: Smda | undefined }) {
-  const [editDialogOpen, setEditDialogOpen] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   function openEditDialog() {
     setEditDialogOpen(true);

@@ -121,11 +121,13 @@ export function SearchField({
 
 export function Select({
   label,
+  helperText,
   value,
   options,
   onChange,
 }: {
   label: string;
+  helperText?: string;
   value: string;
   options: OptionProps[];
   onChange: (value: string) => void;
@@ -133,19 +135,21 @@ export function Select({
   const field = useFieldContext();
 
   return (
-    <NativeSelect
-      id={field.name}
-      label={label}
-      value={value}
-      onChange={(e) => {
-        onChange(e.target.value);
-      }}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </NativeSelect>
+    <InputWrapper helperProps={{ text: helperText }}>
+      <NativeSelect
+        id={field.name}
+        label={label}
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+        }}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </NativeSelect>
+    </InputWrapper>
   );
 }

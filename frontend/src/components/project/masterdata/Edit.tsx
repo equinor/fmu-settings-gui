@@ -1,12 +1,14 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import { CoordinateSystem, Smda } from "#client";
+import { CoordinateSystem, Smda, SmdaMasterdataResult } from "#client";
 import {
   projectGetProjectQueryKey,
   projectPatchMasterdataMutation,
+  smdaPostMasterdataOptions,
 } from "#client/@tanstack/react-query.gen";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import { Select } from "#components/form/field";
@@ -26,6 +28,13 @@ import {
   identifierUuidArrayToOptionsArray,
 } from "#utils/form";
 import { emptyIdentifierUuid } from "#utils/model";
+import { stringCompare } from "#utils/string";
+
+type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
+
+type SmdaReferenceData = {
+  coordinateSystems: Array<CoordinateSystem>;
+};
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -43,8 +52,15 @@ export function Edit({
   isOpen: boolean;
   closeDialog: () => void;
 }) {
+  const [smdaFields, setSmdaFields] = useState<Array<string>>([]);
+  const [smdaReferenceData, setSmdaReferenceData] = useState<SmdaReferenceData>(
+    {
+      coordinateSystems: [],
+    },
+  );
   const queryClient = useQueryClient();
-  const { mutate, isPending } = useMutation({
+
+  const masterdataMutation = useMutation({
     ...projectPatchMasterdataMutation(),
     onSuccess: () => {
       void queryClient.refetchQueries({
@@ -64,16 +80,40 @@ export function Edit({
     },
   });
 
-  const coordSystems = [
-    { identifier: "One", uuid: "15ce3b84-766f-4c93-9050-b154861f9100" },
-    { identifier: "Two", uuid: "25ce3b84-766f-4c93-9050-b154861f9100" },
-    { identifier: "Three", uuid: "35ce3b84-766f-4c93-9050-b154861f9100" },
-    { identifier: "Four", uuid: "45ce3b84-766f-4c93-9050-b154861f9100" },
-  ] as CoordinateSystem[];
-  const coordSystemsOptions = [
-    emptyIdentifierUuid() as CoordinateSystem,
-    ...coordSystems,
-  ];
+  const smdaMasterdata = useQueries({
+    queries: smdaFields.map((field) =>
+      smdaPostMasterdataOptions({ body: [{ identifier: field }] }),
+    ),
+    combine: (results) => ({
+      data: results.reduce<SmdaMasterdataResultGrouped>((acc, curr, idx) => {
+        if (curr.data !== undefined) {
+          const field =
+            (curr.data.field.length && curr.data.field[0].identifier) ||
+            `index-${String(idx)}`;
+          acc[field] = curr.data;
+        }
+        return acc;
+      }, {}),
+      isPending: results.some((result) => result.isPending),
+    }),
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      setSmdaFields(masterdata.field.map((field) => field.identifier));
+    }
+  }, [isOpen, masterdata]);
+
+  useEffect(() => {
+    if (Object.keys(smdaMasterdata.data).length) {
+      const field = Object.values(smdaMasterdata.data)[0];
+      setSmdaReferenceData({
+        coordinateSystems: field.coordinate_systems.sort((a, b) =>
+          stringCompare(a.identifier, b.identifier),
+        ),
+      });
+    }
+  }, [smdaMasterdata.data]);
 
   function handleClose({ formReset }: { formReset: () => void }) {
     formReset();
@@ -85,12 +125,11 @@ export function Edit({
     formSubmitCallback,
     formReset,
   }: MutationCallbackProps<Smda>) => {
-    mutate(
+    masterdataMutation.mutate(
       {
         body: {
           ...masterdata,
           coordinate_system: formValue.coordinate_system,
-          stratigraphic_column: formValue.coordinate_system,
         },
       },
       {
@@ -137,12 +176,18 @@ export function Edit({
             {(field) => (
               <field.Select
                 label="Coordinate system"
+                helperText={
+                  smdaMasterdata.isPending ? "Loading options..." : undefined
+                }
                 value={field.state.value.uuid}
-                options={identifierUuidArrayToOptionsArray(coordSystemsOptions)}
+                options={identifierUuidArrayToOptionsArray([
+                  emptyIdentifierUuid() as CoordinateSystem,
+                  ...smdaReferenceData.coordinateSystems,
+                ])}
                 onChange={(value: string) => {
                   field.handleChange(
                     findOptionValueInIdentifierUuidArray(
-                      coordSystemsOptions,
+                      smdaReferenceData.coordinateSystems,
                       value,
                     ) ?? (emptyIdentifierUuid() as CoordinateSystem),
                   );
@@ -154,7 +199,10 @@ export function Edit({
 
         <Dialog.Actions>
           <form.AppForm>
-            <form.SubmitButton label="Save" isPending={isPending} />
+            <form.SubmitButton
+              label="Save"
+              isPending={masterdataMutation.isPending}
+            />
 
             <form.CancelButton
               onClick={() => {
