@@ -7,6 +7,7 @@ import reactX from "eslint-plugin-react-x";
 import tseslint from "typescript-eslint";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 import pluginRouter from "@tanstack/eslint-plugin-router";
+import stylistic from "@stylistic/eslint-plugin"
 
 export default tseslint.config(
   { ignores: ["dist", "src/client"] },
@@ -33,10 +34,16 @@ export default tseslint.config(
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
       "react-x": reactX,
+      "stylistic": stylistic,
     },
     rules: {
       ...reactDom.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
+      "stylistic/padding-line-between-statements" : [
+        "error", 
+        { blankLine: "always", prev: "*", next: "function" },  
+        { blankLine: "always", prev: "*", next: "return" }
+      ],
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },

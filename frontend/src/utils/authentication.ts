@@ -63,6 +63,7 @@ export function getApiToken() {
       "",
       window.location.pathname + window.location.search,
     );
+
     return fragmentToken;
   } else if (storageToken !== "") {
     return storageToken;
@@ -130,6 +131,7 @@ export const responseInterceptorFulfilled =
         valid: true,
       }));
     }
+
     return response;
   };
 
@@ -155,5 +157,6 @@ export const responseInterceptorRejected =
         setRequestSessionCreation(true);
       }
     }
+
     return Promise.reject(error);
   };

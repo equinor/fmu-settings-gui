@@ -187,6 +187,7 @@ export function App() {
       );
       setHasResponseInterceptor(true);
     }
+
     return () => {
       if (id !== undefined) {
         client.instance.interceptors.response.eject(id);
@@ -243,6 +244,7 @@ export function App() {
             );
           }
         }
+
         return () => {
           if (id !== null) {
             msalInstance.removeEventCallback(id);
