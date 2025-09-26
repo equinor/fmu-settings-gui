@@ -63,6 +63,7 @@ export function getApiToken() {
       "",
       window.location.pathname + window.location.search,
     );
+
     return fragmentToken;
   } else if (storageToken !== "") {
     return storageToken;

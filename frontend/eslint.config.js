@@ -42,7 +42,7 @@ export default tseslint.config(
       "stylistic/padding-line-between-statements" : [
         "error", 
         { blankLine: "always", prev: "*", next: "function" },  
-        { blankLine: "always", prev: "block", next: "return" }
+        { blankLine: "always", prev: "*", next: "return" }
       ],
       "react-refresh/only-export-components": [
         "warn",

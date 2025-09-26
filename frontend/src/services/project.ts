@@ -26,6 +26,7 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
             signal,
             throwOnError: true,
           });
+
           return { status: true, data } as GetProject;
         } catch (error) {
           let text = "";
