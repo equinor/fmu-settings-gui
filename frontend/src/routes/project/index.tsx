@@ -3,9 +3,16 @@ import { Suspense } from "react";
 
 import { FmuProject } from "#client";
 import { Loading } from "#components/common";
+import { EditableAccessInfo } from "#components/project/overview/Access";
+import { EditableModelInfo } from "#components/project/overview/Model";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
-import { PageCode, PageHeader, PageText } from "#styles/common";
+import {
+  PageCode,
+  PageHeader,
+  PageSectionSpacer,
+  PageText,
+} from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import { ProjectName } from "./index.style";
 
@@ -47,11 +54,24 @@ function Content() {
   return (
     <>
       {project.status && project.data ? (
-        <ProjectInfo projectData={project.data} />
+        <>
+          <ProjectInfo projectData={project.data} />
+          <ProjectSelector />
+
+          <PageSectionSpacer />
+
+          <EditableModelInfo projectData={project.data} />
+
+          <PageSectionSpacer />
+
+          <EditableAccessInfo projectData={project.data} />
+        </>
       ) : (
-        <ProjectNotFound text={project.text ?? ""} />
+        <>
+          <ProjectNotFound text={project.text ?? ""} />
+          <ProjectSelector />
+        </>
       )}
-      <ProjectSelector />
     </>
   );
 }

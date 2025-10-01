@@ -1,4 +1,4 @@
-import { Chip, Typography } from "@equinor/eds-core-react";
+import { Chip, Dialog, Typography } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
@@ -61,5 +61,12 @@ export const InfoChip = styled(Chip)`
   &, svg {
     color: ${tokens.colors.text.static_icons__default.hex};
     fill: ${tokens.colors.text.static_icons__default.hex};
+  }
+`;
+export const ExpansiveDialog = styled(Dialog)`
+  width: 100%;
+  
+  button + button {
+    margin-left: ${tokens.spacings.comfortable.small};
   }
 `;

@@ -9,6 +9,13 @@ export function GeneralButton({
 }) {
   return <Button onClick={onClick}>{label}</Button>;
 }
+export function EditButton({
+  onClick,
+}: {
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return GeneralButton({ label: "Edit", onClick });
+}
 
 export function SubmitButton({
   label,
