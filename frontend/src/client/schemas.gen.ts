@@ -152,6 +152,7 @@ export const FMUDirPathSchema = {
             type: 'string',
             format: 'path',
             title: 'Path',
+            description: 'Absolute path to the directory which maybe contains a .fmu directory.',
             examples: ['/path/to/project.2038.02.02']
         }
     },
@@ -167,15 +168,24 @@ export const FMUProjectSchema = {
             type: 'string',
             format: 'path',
             title: 'Path',
+            description: 'Absolute path to the directory which maybe contains a .fmu directory.',
             examples: ['/path/to/project.2038.02.02']
         },
         project_dir_name: {
             type: 'string',
             title: 'Project Dir Name',
+            description: 'The directory name, not the path, that contains the .fmu directory.',
             examples: ['project.2038.02.02']
         },
         config: {
-            '$ref': '#/components/schemas/ProjectConfig'
+            '$ref': '#/components/schemas/ProjectConfig',
+            description: "The configuration of an FMU project's .fmu directory."
+        },
+        is_read_only: {
+            type: 'boolean',
+            title: 'Is Read Only',
+            description: 'Whether the project is in read-only mode due to lock conflicts.',
+            default: false
         }
     },
     type: 'object',
@@ -211,6 +221,7 @@ export const GlobalConfigPathSchema = {
             type: 'string',
             format: 'path',
             title: 'Relative Path',
+            description: 'Relative path in the project to a global config file.',
             examples: ['relative_path/to/global_config_file']
         }
     },
@@ -232,6 +243,131 @@ export const HTTPValidationErrorSchema = {
     },
     type: 'object',
     title: 'HTTPValidationError'
+} as const;
+
+export const LockInfoSchema = {
+    properties: {
+        pid: {
+            type: 'integer',
+            title: 'Pid'
+        },
+        hostname: {
+            type: 'string',
+            title: 'Hostname'
+        },
+        user: {
+            type: 'string',
+            title: 'User'
+        },
+        acquired_at: {
+            type: 'number',
+            title: 'Acquired At'
+        },
+        expires_at: {
+            type: 'number',
+            title: 'Expires At'
+        },
+        version: {
+            type: 'string',
+            pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
+            title: 'Version',
+            default: '0.3.3.dev1+g0cc9b0624'
+        }
+    },
+    type: 'object',
+    required: ['pid', 'hostname', 'user', 'acquired_at', 'expires_at'],
+    title: 'LockInfo',
+    description: 'Represents a .fmu directory lock file.'
+} as const;
+
+export const LockStatusSchema = {
+    properties: {
+        is_lock_acquired: {
+            type: 'boolean',
+            title: 'Is Lock Acquired',
+            description: 'Whether the current session holds the write lock.'
+        },
+        lock_file_exists: {
+            type: 'boolean',
+            title: 'Lock File Exists',
+            description: 'Whether a lock file exists.'
+        },
+        lock_info: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/LockInfo'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            description: 'Contents of the lock file, if available and readable.'
+        },
+        lock_status_error: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lock Status Error',
+            description: 'Error message if checking lock status failed.'
+        },
+        lock_file_read_error: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lock File Read Error',
+            description: 'Error message if reading the lock file failed.'
+        },
+        last_lock_acquire_error: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Lock Acquire Error',
+            description: 'Error message from the last attempt to acquire the lock.'
+        },
+        last_lock_release_error: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Lock Release Error',
+            description: 'Error message from the last attempt to release the lock.'
+        },
+        last_lock_refresh_error: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Lock Refresh Error',
+            description: 'Error message from the last attempt to refresh the lock.'
+        }
+    },
+    type: 'object',
+    required: ['is_lock_acquired', 'lock_file_exists'],
+    title: 'LockStatus',
+    description: 'Information about the project lock status.'
 } as const;
 
 export const MasterdataSchema = {
@@ -409,6 +545,7 @@ export const SmdaFieldSchema = {
         identifier: {
             type: 'string',
             title: 'Identifier',
+            description: 'A field identifier (name).',
             examples: ['TROLL']
         }
     },
@@ -422,18 +559,21 @@ export const SmdaFieldSearchResultSchema = {
     properties: {
         hits: {
             type: 'integer',
-            title: 'Hits'
+            title: 'Hits',
+            description: 'The number of hits from the field search.'
         },
         pages: {
             type: 'integer',
-            title: 'Pages'
+            title: 'Pages',
+            description: 'The number of pages of hits.'
         },
         results: {
             items: {
                 '$ref': '#/components/schemas/SmdaFieldUUID'
             },
             type: 'array',
-            title: 'Results'
+            title: 'Results',
+            description: 'A list of field identifier results from the search.'
         }
     },
     type: 'object',
@@ -447,12 +587,14 @@ export const SmdaFieldUUIDSchema = {
         identifier: {
             type: 'string',
             title: 'Identifier',
+            description: 'A field identifier (name).',
             examples: ['TROLL']
         },
         uuid: {
             type: 'string',
             format: 'uuid',
-            title: 'Uuid'
+            title: 'Uuid',
+            description: 'The SMDA UUID identifier corresponding to the field identifier.'
         }
     },
     type: 'object',
@@ -468,38 +610,49 @@ export const SmdaMasterdataResultSchema = {
                 '$ref': '#/components/schemas/FieldItem'
             },
             type: 'array',
-            title: 'Field'
+            title: 'Field',
+            description: 'A list referring to fields known to SMDA. First item is primary.'
         },
         country: {
             items: {
                 '$ref': '#/components/schemas/CountryItem'
             },
             type: 'array',
-            title: 'Country'
+            title: 'Country',
+            description: 'A list referring to countries known to SMDA. First item is primary.'
         },
         discovery: {
             items: {
                 '$ref': '#/components/schemas/DiscoveryItem'
             },
             type: 'array',
-            title: 'Discovery'
+            title: 'Discovery',
+            description: 'A list referring to discoveries known to SMDA. First item is primary.'
         },
         stratigraphic_columns: {
             items: {
                 '$ref': '#/components/schemas/StratigraphicColumn'
             },
             type: 'array',
-            title: 'Stratigraphic Columns'
+            title: 'Stratigraphic Columns',
+            description: 'Reference to stratigraphic column known to SMDA.'
         },
         field_coordinate_system: {
-            '$ref': '#/components/schemas/CoordinateSystem'
+            '$ref': '#/components/schemas/CoordinateSystem',
+            description: `The primary field's coordinate system.
+
+This coordinate system may not be the coordinate system users use in their model.`
         },
         coordinate_systems: {
             items: {
                 '$ref': '#/components/schemas/CoordinateSystem'
             },
             type: 'array',
-            title: 'Coordinate Systems'
+            title: 'Coordinate Systems',
+            description: `A list of all coordinate systems known to SMDA.
+
+These are provided when the user needs to select a different coordinate system that
+applies to the model they are working on.`
         }
     },
     type: 'object',

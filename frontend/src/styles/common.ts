@@ -1,4 +1,4 @@
-import { Chip, Typography } from "@equinor/eds-core-react";
+import { Chip, Dialog, List, Typography } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
@@ -22,7 +22,11 @@ export const PageCode = styled(Typography)`
 `;
 
 export const PageSectionSpacer = styled.div`
-  height: 1em;
+  height: ${tokens.spacings.comfortable.x_large}
+`;
+
+export const PageList = styled(List)`
+  margin-bottom: 1em;
 `;
 
 export const InfoBox = styled.div`
@@ -61,5 +65,20 @@ export const InfoChip = styled(Chip)`
   &, svg {
     color: ${tokens.colors.text.static_icons__default.hex};
     fill: ${tokens.colors.text.static_icons__default.hex};
+  }
+`;
+
+export const EditDialog = styled(Dialog).attrs<{ $minWidth?: string }>(
+  (props) => ({ style: { minWidth: props.$minWidth ?? "10em" } }),
+)`
+  width: 100%;
+  
+  #eds-dialog-customcontent {
+    padding: ${tokens.spacings.comfortable.medium};
+    padding-bottom: ${tokens.spacings.comfortable.x_large};
+  }
+
+  button + button {
+    margin-left: ${tokens.spacings.comfortable.small};
   }
 `;
