@@ -1,7 +1,11 @@
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { Button, DotProgress } from "@equinor/eds-core-react";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useEffect } from "react";
 
@@ -49,7 +53,8 @@ function SubscriptionKeyPresence() {
 }
 
 function AccessTokenPresence() {
-  const { queryClient, accessToken } = Route.useRouteContext();
+  const queryClient = useQueryClient();
+  const { accessToken } = Route.useRouteContext();
   const { instance: msalInstance } = useMsal();
   const isAuthenticated = useIsAuthenticated();
 

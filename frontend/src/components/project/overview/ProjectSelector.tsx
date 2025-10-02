@@ -119,6 +119,7 @@ function ProjectSelectorForm({
                 detail === `No .fmu directory found at ${path}`
               ) {
                 setInitConfirmDialogOpen(true);
+
                 return;
               }
 

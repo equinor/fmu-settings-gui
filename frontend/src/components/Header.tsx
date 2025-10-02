@@ -7,6 +7,7 @@ import { FmuLogo, HeaderContainer, ProjectInfoContainer } from "./Header.style";
 
 function ProjectInfo() {
   const { data: project } = useProject();
+
   return (
     <ProjectInfoContainer>
       Project:{" "}

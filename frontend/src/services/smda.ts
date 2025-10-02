@@ -35,6 +35,7 @@ export function useSmdaHealthCheck(options?: Options<SmdaGetHealthData>) {
             text = String(error.response.data.detail);
           }
         }
+
         return { status, text } as HealthCheck;
       },
       queryKey: smdaGetHealthQueryKey(options),
