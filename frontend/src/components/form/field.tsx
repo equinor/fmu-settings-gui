@@ -14,8 +14,6 @@ import { CommonInputWrapper, SearchFieldInput } from "./field.style";
 
 Icon.add({ error_filled });
 
-export const helperTextLoadingOptions = "Loading options...";
-
 export interface BasicTextFieldProps {
   name: string;
   label: string;
@@ -32,6 +30,8 @@ export interface OptionProps {
   value: string;
   label: string;
 }
+
+const helperTextLoadingOptions = "Loading options...";
 
 export function TextField({
   label,
@@ -126,12 +126,14 @@ export function Select({
   helperText,
   value,
   options,
+  loadingOptions,
   onChange,
 }: {
   label: string;
   helperText?: string;
   value: string;
   options: OptionProps[];
+  loadingOptions?: boolean;
   onChange: (value: string) => void;
 }) {
   const field = useFieldContext();
@@ -139,8 +141,8 @@ export function Select({
   return (
     <CommonInputWrapper
       helperProps={
-        field.state.meta.isValid
-          ? { text: helperText }
+        field.state.meta.isValid || loadingOptions
+          ? { text: loadingOptions ? helperTextLoadingOptions : helperText }
           : {
               className: "errorText",
               icon: <Icon name="error_filled" title="Error" />,

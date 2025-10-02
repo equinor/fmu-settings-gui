@@ -20,7 +20,7 @@ import {
   smdaPostMasterdataOptions,
 } from "#client/@tanstack/react-query.gen";
 import { CancelButton, SubmitButton } from "#components/form/button";
-import { helperTextLoadingOptions, Select } from "#components/form/field";
+import { Select } from "#components/form/field";
 import {
   FormSubmitCallbackProps,
   MutationCallbackProps,
@@ -257,16 +257,12 @@ export function Edit({
             {(field) => (
               <field.Select
                 label="Coordinate system"
-                helperText={
-                  smdaMasterdata.isPending
-                    ? helperTextLoadingOptions
-                    : undefined
-                }
                 value={field.state.value.uuid}
                 options={identifierUuidArrayToOptionsArray([
                   emptyIdentifierUuid() as CoordinateSystem,
                   ...(smdaReferenceData?.coordinateSystems ?? []),
                 ])}
+                loadingOptions={smdaMasterdata.isPending}
                 onChange={(value) => {
                   field.handleChange(
                     findOptionValueInIdentifierUuidArray(
@@ -290,16 +286,12 @@ export function Edit({
             {(field) => (
               <field.Select
                 label="Stratigraphic column"
-                helperText={
-                  smdaMasterdata.isPending
-                    ? helperTextLoadingOptions
-                    : undefined
-                }
                 value={field.state.value.uuid}
                 options={identifierUuidArrayToOptionsArray([
                   emptyIdentifierUuid() as StratigraphicColumn,
                   ...(smdaReferenceData?.stratigraphicColumnsOptions ?? []),
                 ])}
+                loadingOptions={smdaMasterdata.isPending}
                 onChange={(value) => {
                   field.handleChange(
                     findOptionValueInIdentifierUuidArray(
