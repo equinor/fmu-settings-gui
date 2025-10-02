@@ -24,3 +24,7 @@ export function handleValidator({ length, minLength }: ValidatorProps) {
 
   return validator;
 }
+
+export function requiredStringValidator() {
+  return z.string().nonempty({ error: "Required" });
+}

@@ -24,17 +24,14 @@ import {
 } from "#client/@tanstack/react-query.gen";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import { TextField } from "#components/form/field";
-import { PageSectionSpacer, PageText } from "#styles/common";
+import { ExpansiveDialog, PageSectionSpacer, PageText } from "#styles/common";
 import {
   fieldContext,
   formContext,
   useFieldContext,
   useFormContext,
 } from "#utils/form";
-import {
-  ExpansiveDialog,
-  ProjectSelectorContentContainer,
-} from "./ProjectSelector.style";
+import { ProjectSelectorContentContainer } from "./ProjectSelector.style";
 
 const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
   fieldComponents: {

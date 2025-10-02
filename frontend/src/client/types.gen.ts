@@ -569,6 +569,108 @@ export type ProjectPatchMasterdataResponses = {
 
 export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
 
+export type ProjectPatchModelData = {
+    body: Model;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/model';
+};
+
+export type ProjectPatchModelErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchModelError = ProjectPatchModelErrors[keyof ProjectPatchModelErrors];
+
+export type ProjectPatchModelResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchModelResponse = ProjectPatchModelResponses[keyof ProjectPatchModelResponses];
+
+export type ProjectPatchAccessData = {
+    body: Access;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/access';
+};
+
+export type ProjectPatchAccessErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchAccessError = ProjectPatchAccessErrors[keyof ProjectPatchAccessErrors];
+
+export type ProjectPatchAccessResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchAccessResponse = ProjectPatchAccessResponses[keyof ProjectPatchAccessResponses];
+
 export type UserGetUserData = {
     body?: never;
     path?: never;

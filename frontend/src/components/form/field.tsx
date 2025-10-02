@@ -73,7 +73,7 @@ export function TextField({
         }}
         {...(!field.state.meta.isValid && {
           variant: "error",
-          helperIcon: <Icon name="error_filled" title="Error" />,
+          helperIcon: <Icon name="error_filled" title="Error" size={16} />,
           helperText: field.state.meta.errors
             .map((err: z.ZodError) => err.message)
             .join(", "),
