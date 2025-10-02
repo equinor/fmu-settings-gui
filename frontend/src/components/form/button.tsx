@@ -14,19 +14,15 @@ export function SubmitButton({
   label,
   disabled,
   isPending,
+  helperTextDisabled = "Form can be submitted when errors have been resolved",
 }: {
   label: string;
   disabled?: boolean;
   isPending?: boolean;
+  helperTextDisabled?: string;
 }) {
   return (
-    <Tooltip
-      title={
-        disabled
-          ? "Value can be submitted when it has been changed and is valid"
-          : ""
-      }
-    >
+    <Tooltip title={disabled ? helperTextDisabled : undefined}>
       <Button
         type="submit"
         aria-disabled={disabled}

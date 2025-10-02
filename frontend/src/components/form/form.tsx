@@ -127,6 +127,7 @@ export function EditableTextFieldForm({
                 label="Save"
                 disabled={submitDisabled}
                 isPending={mutationIsPending}
+                helperTextDisabled="Value can be submitted when it has been changed and is valid"
               />
               <form.CancelButton
                 onClick={(e) => {

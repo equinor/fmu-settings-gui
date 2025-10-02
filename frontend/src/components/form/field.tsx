@@ -10,7 +10,7 @@ import z from "zod/v4";
 
 import { useFieldContext } from "#utils/form";
 import { ValidatorProps } from "#utils/validator";
-import { SearchFieldInput } from "./field.style";
+import { CommonInputWrapper, SearchFieldInput } from "./field.style";
 
 Icon.add({ error_filled });
 
@@ -137,7 +137,19 @@ export function Select({
   const field = useFieldContext();
 
   return (
-    <InputWrapper helperProps={{ text: helperText }}>
+    <CommonInputWrapper
+      helperProps={
+        field.state.meta.isValid
+          ? { text: helperText }
+          : {
+              className: "errorText",
+              icon: <Icon name="error_filled" title="Error" />,
+              text: field.state.meta.errors
+                .map((err: string) => err)
+                .join(", "),
+            }
+      }
+    >
       <NativeSelect
         id={field.name}
         label={label}
@@ -152,6 +164,6 @@ export function Select({
           </option>
         ))}
       </NativeSelect>
-    </InputWrapper>
+    </CommonInputWrapper>
   );
 }

@@ -1,5 +1,9 @@
 import { Dialog } from "@equinor/eds-core-react";
-import { createFormHook } from "@tanstack/react-form";
+import {
+  AnyFieldMetaBase,
+  createFormHook,
+  Updater,
+} from "@tanstack/react-form";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -32,7 +36,7 @@ import {
   formContext,
   identifierUuidArrayToOptionsArray,
 } from "#utils/form";
-import { emptyIdentifierUuid } from "#utils/model";
+import { emptyIdentifierUuid, IdentifierUuidType } from "#utils/model";
 import { stringCompare } from "#utils/string";
 
 type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
@@ -50,6 +54,60 @@ const { useAppForm } = createFormHook({
   formComponents: { CancelButton, SubmitButton },
 });
 
+function createReferenceData(
+  masterdataGrouped: SmdaMasterdataResultGrouped,
+): SmdaReferenceData {
+  const fieldCount = Object.keys(masterdataGrouped).length;
+
+  return {
+    // The list of coordinate systems is the same for all SMDA fields
+    coordinateSystems:
+      fieldCount > 0
+        ? Object.values(masterdataGrouped)[0].coordinate_systems.sort((a, b) =>
+            stringCompare(a.identifier, b.identifier),
+          )
+        : [],
+    stratigraphicColumns: Object.values(masterdataGrouped)
+      .reduce<Array<StratigraphicColumn>>((acc, masterdata) => {
+        acc.push(...masterdata.stratigraphic_columns);
+        return acc;
+      }, [])
+      .sort((a, b) => stringCompare(a.identifier, b.identifier)),
+    stratigraphicColumnsOptions: Object.entries(masterdataGrouped)
+      .reduce<Array<StratigraphicColumn>>((acc, fieldData) => {
+        const [field, masterdata] = fieldData;
+        acc.push(
+          ...masterdata.stratigraphic_columns.map((value) => ({
+            ...value,
+            identifier:
+              value.identifier + (fieldCount > 1 ? ` [${field}]` : ""),
+          })),
+        );
+        return acc;
+      }, [])
+      .sort((a, b) => stringCompare(a.identifier, b.identifier)),
+  };
+}
+
+function setErrorUnknownInitialValue(
+  setFieldMeta: (field: keyof Smda, updater: Updater<AnyFieldMetaBase>) => void,
+  field: keyof Smda,
+  identifierUuidArray: IdentifierUuidType[],
+  initialValue: IdentifierUuidType,
+): void {
+  setFieldMeta(field, (meta) => ({
+    ...meta,
+    errorMap: {
+      onChange: findOptionValueInIdentifierUuidArray(
+        identifierUuidArray,
+        initialValue.uuid,
+      )
+        ? undefined
+        : `Initial value "${initialValue.identifier}" does not exist in selection list`,
+    },
+  }));
+}
+
 export function Edit({
   masterdata,
   isOpen,
@@ -59,14 +117,10 @@ export function Edit({
   isOpen: boolean;
   closeDialog: () => void;
 }) {
-  const [smdaFields, setSmdaFields] = useState<Array<string>>([]);
-  const [smdaReferenceData, setSmdaReferenceData] = useState<SmdaReferenceData>(
-    {
-      coordinateSystems: [],
-      stratigraphicColumns: [],
-      stratigraphicColumnsOptions: [],
-    },
-  );
+  const [smdaFields, setSmdaFields] = useState<Array<string> | undefined>();
+  const [smdaReferenceData, setSmdaReferenceData] = useState<
+    SmdaReferenceData | undefined
+  >();
   const queryClient = useQueryClient();
 
   const masterdataMutation = useMutation({
@@ -90,7 +144,7 @@ export function Edit({
   });
 
   const smdaMasterdata = useQueries({
-    queries: smdaFields.map((field) =>
+    queries: (smdaFields ?? []).map((field) =>
       smdaPostMasterdataOptions({ body: [{ identifier: field }] }),
     ),
     combine: (results) => ({
@@ -104,7 +158,19 @@ export function Edit({
         return acc;
       }, {}),
       isPending: results.some((result) => result.isPending),
+      isSuccess: results.every((result) => result.isSuccess),
     }),
+  });
+
+  const form = useAppForm({
+    defaultValues: masterdata,
+    onSubmit: ({ formApi, value }) => {
+      mutationCallback({
+        formValue: value,
+        formSubmitCallback,
+        formReset: formApi.reset,
+      });
+    },
   });
 
   useEffect(() => {
@@ -114,39 +180,30 @@ export function Edit({
   }, [isOpen, masterdata]);
 
   useEffect(() => {
-    const fieldCount = Object.keys(smdaMasterdata.data).length;
-    if (fieldCount > 0) {
-      setSmdaReferenceData({
-        // The list of coordinate systems is the same for all SMDA fields
-        coordinateSystems: Object.values(
-          smdaMasterdata.data,
-        )[0].coordinate_systems.sort((a, b) =>
-          stringCompare(a.identifier, b.identifier),
-        ),
-        stratigraphicColumns: Object.values(smdaMasterdata.data)
-          .reduce<Array<StratigraphicColumn>>((acc, masterdata) => {
-            acc.push(...masterdata.stratigraphic_columns);
-            return acc;
-          }, [])
-          .sort((a, b) => stringCompare(a.identifier, b.identifier)),
-        stratigraphicColumnsOptions: Object.entries(smdaMasterdata.data).reduce<
-          Array<StratigraphicColumn>
-        >((acc, fieldData) => {
-          const [field, masterdata] = fieldData;
-          acc.push(
-            ...masterdata.stratigraphic_columns
-              .map((value) => ({
-                ...value,
-                identifier:
-                  value.identifier + (fieldCount > 1 ? ` [${field}]` : ""),
-              }))
-              .sort((a, b) => stringCompare(a.identifier, b.identifier)),
-          );
-          return acc;
-        }, []),
-      });
+    if (smdaFields !== undefined && smdaMasterdata.isSuccess) {
+      const refData = createReferenceData(smdaMasterdata.data);
+      setSmdaReferenceData(refData);
+      setErrorUnknownInitialValue(
+        form.setFieldMeta,
+        "coordinate_system",
+        refData.coordinateSystems,
+        masterdata.coordinate_system,
+      );
+      setErrorUnknownInitialValue(
+        form.setFieldMeta,
+        "stratigraphic_column",
+        refData.stratigraphicColumnsOptions,
+        masterdata.stratigraphic_column,
+      );
     }
-  }, [smdaMasterdata.data]);
+  }, [
+    form,
+    masterdata.coordinate_system,
+    masterdata.stratigraphic_column,
+    smdaFields,
+    smdaMasterdata.data,
+    smdaMasterdata.isSuccess,
+  ]);
 
   function handleClose({ formReset }: { formReset: () => void }) {
     formReset();
@@ -179,17 +236,6 @@ export function Edit({
     formReset();
   };
 
-  const form = useAppForm({
-    defaultValues: masterdata,
-    onSubmit: ({ formApi, value }) => {
-      mutationCallback({
-        formValue: value,
-        formSubmitCallback,
-        formReset: formApi.reset,
-      });
-    },
-  });
-
   return (
     <EditDialog open={isOpen}>
       <form
@@ -202,7 +248,12 @@ export function Edit({
         <Dialog.Header>Edit masterdata</Dialog.Header>
 
         <Dialog.CustomContent>
-          <form.AppField name="coordinate_system">
+          <form.AppField
+            name="coordinate_system"
+            validators={{
+              onChange: undefined /* Resets any errors set by setFieldMeta */,
+            }}
+          >
             {(field) => (
               <field.Select
                 label="Coordinate system"
@@ -214,12 +265,12 @@ export function Edit({
                 value={field.state.value.uuid}
                 options={identifierUuidArrayToOptionsArray([
                   emptyIdentifierUuid() as CoordinateSystem,
-                  ...smdaReferenceData.coordinateSystems,
+                  ...(smdaReferenceData?.coordinateSystems ?? []),
                 ])}
                 onChange={(value) => {
                   field.handleChange(
                     findOptionValueInIdentifierUuidArray(
-                      smdaReferenceData.coordinateSystems,
+                      smdaReferenceData?.coordinateSystems ?? [],
                       value,
                     ) ?? (emptyIdentifierUuid() as CoordinateSystem),
                   );
@@ -230,7 +281,12 @@ export function Edit({
 
           <PageSectionSpacer />
 
-          <form.AppField name="stratigraphic_column">
+          <form.AppField
+            name="stratigraphic_column"
+            validators={{
+              onChange: undefined /* Resets any errors set by setFieldMeta */,
+            }}
+          >
             {(field) => (
               <field.Select
                 label="Stratigraphic column"
@@ -242,12 +298,12 @@ export function Edit({
                 value={field.state.value.uuid}
                 options={identifierUuidArrayToOptionsArray([
                   emptyIdentifierUuid() as StratigraphicColumn,
-                  ...smdaReferenceData.stratigraphicColumnsOptions,
+                  ...(smdaReferenceData?.stratigraphicColumnsOptions ?? []),
                 ])}
                 onChange={(value) => {
                   field.handleChange(
                     findOptionValueInIdentifierUuidArray(
-                      smdaReferenceData.stratigraphicColumns,
+                      smdaReferenceData?.stratigraphicColumns ?? [],
                       value,
                     ) ?? (emptyIdentifierUuid() as StratigraphicColumn),
                   );
@@ -261,16 +317,23 @@ export function Edit({
 
         <Dialog.Actions>
           <form.AppForm>
-            <form.SubmitButton
-              label="Save"
-              isPending={masterdataMutation.isPending}
-            />
+            <form.Subscribe selector={(state) => state.canSubmit}>
+              {(canSubmit) => (
+                <>
+                  <form.SubmitButton
+                    label="Save"
+                    disabled={!canSubmit || smdaMasterdata.isPending}
+                    isPending={masterdataMutation.isPending}
+                  />
 
-            <form.CancelButton
-              onClick={() => {
-                handleClose({ formReset: form.reset });
-              }}
-            />
+                  <form.CancelButton
+                    onClick={() => {
+                      handleClose({ formReset: form.reset });
+                    }}
+                  />
+                </>
+              )}
+            </form.Subscribe>
           </form.AppForm>
         </Dialog.Actions>
       </form>
