@@ -1,4 +1,5 @@
-import { Dialog } from "@equinor/eds-core-react";
+import { Dialog, Icon, Label } from "@equinor/eds-core-react";
+import { arrow_back } from "@equinor/eds-icons";
 import {
   AnyFieldMetaBase,
   createFormHook,
@@ -25,7 +26,12 @@ import {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form";
-import { EditDialog, PageSectionSpacer } from "#styles/common";
+import {
+  ChipsContainer,
+  EditDialog,
+  InfoChip,
+  PageHeader,
+} from "#styles/common";
 import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
@@ -38,6 +44,9 @@ import {
 } from "#utils/form";
 import { emptyIdentifierUuid, IdentifierUuidType } from "#utils/model";
 import { stringCompare } from "#utils/string";
+import { DiscoveriesContainer, FieldsContainer } from "./Edit.style";
+
+Icon.add({ arrow_back });
 
 type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
 
@@ -162,6 +171,8 @@ export function Edit({
     }),
   });
 
+  console.log(">>> Edit masterdata =", masterdata);
+
   const form = useAppForm({
     defaultValues: masterdata,
     onSubmit: ({ formApi, value }) => {
@@ -181,7 +192,9 @@ export function Edit({
 
   useEffect(() => {
     if (smdaFields !== undefined && smdaMasterdata.isSuccess) {
+      // console.log("  ::: smdaMasterdata.data =", smdaMasterdata.data);
       const refData = createReferenceData(smdaMasterdata.data);
+      // console.log("  ::: refData =", refData);
       setSmdaReferenceData(refData);
       setErrorUnknownInitialValue(
         form.setFieldMeta,
@@ -228,6 +241,8 @@ export function Edit({
     );
   };
 
+  function DeleteIt() {}
+
   const formSubmitCallback = ({
     message,
     formReset,
@@ -248,63 +263,96 @@ export function Edit({
         <Dialog.Header>Edit masterdata</Dialog.Header>
 
         <Dialog.CustomContent>
-          <form.AppField
-            name="coordinate_system"
-            validators={{
-              onChange: undefined /* Resets any errors set by setFieldMeta */,
-            }}
-          >
-            {(field) => (
-              <field.Select
-                label="Coordinate system"
-                value={field.state.value.uuid}
-                options={identifierUuidArrayToOptionsArray([
-                  emptyIdentifierUuid() as CoordinateSystem,
-                  ...(smdaReferenceData?.coordinateSystems ?? []),
-                ])}
-                loadingOptions={smdaMasterdata.isPending}
-                onChange={(value) => {
-                  field.handleChange(
-                    findOptionValueInIdentifierUuidArray(
-                      smdaReferenceData?.coordinateSystems ?? [],
-                      value,
-                    ) ?? (emptyIdentifierUuid() as CoordinateSystem),
-                  );
-                }}
-              ></field.Select>
-            )}
-          </form.AppField>
+          <FieldsContainer>
+            <PageHeader $variant="h4">Project masterdata</PageHeader>
+            <PageHeader $variant="h4">Additional masterdata</PageHeader>
 
-          <PageSectionSpacer />
+            <form.AppField
+              name="coordinate_system"
+              validators={{
+                onChange: undefined /* Resets any errors set by setFieldMeta */,
+              }}
+            >
+              {(field) => (
+                <field.Select
+                  label="Coordinate system"
+                  value={field.state.value.uuid}
+                  options={identifierUuidArrayToOptionsArray([
+                    emptyIdentifierUuid() as CoordinateSystem,
+                    ...(smdaReferenceData?.coordinateSystems ?? []),
+                  ])}
+                  loadingOptions={smdaMasterdata.isPending}
+                  onChange={(value) => {
+                    field.handleChange(
+                      findOptionValueInIdentifierUuidArray(
+                        smdaReferenceData?.coordinateSystems ?? [],
+                        value,
+                      ) ?? (emptyIdentifierUuid() as CoordinateSystem),
+                    );
+                  }}
+                ></field.Select>
+              )}
+            </form.AppField>
+            <div></div>
 
-          <form.AppField
-            name="stratigraphic_column"
-            validators={{
-              onChange: undefined /* Resets any errors set by setFieldMeta */,
-            }}
-          >
-            {(field) => (
-              <field.Select
-                label="Stratigraphic column"
-                value={field.state.value.uuid}
-                options={identifierUuidArrayToOptionsArray([
-                  emptyIdentifierUuid() as StratigraphicColumn,
-                  ...(smdaReferenceData?.stratigraphicColumnsOptions ?? []),
-                ])}
-                loadingOptions={smdaMasterdata.isPending}
-                onChange={(value) => {
-                  field.handleChange(
-                    findOptionValueInIdentifierUuidArray(
-                      smdaReferenceData?.stratigraphicColumns ?? [],
-                      value,
-                    ) ?? (emptyIdentifierUuid() as StratigraphicColumn),
-                  );
-                }}
-              />
-            )}
-          </form.AppField>
+            <form.AppField
+              name="stratigraphic_column"
+              validators={{
+                onChange: undefined /* Resets any errors set by setFieldMeta */,
+              }}
+            >
+              {(field) => (
+                <field.Select
+                  label="Stratigraphic column"
+                  value={field.state.value.uuid}
+                  options={identifierUuidArrayToOptionsArray([
+                    emptyIdentifierUuid() as StratigraphicColumn,
+                    ...(smdaReferenceData?.stratigraphicColumnsOptions ?? []),
+                  ])}
+                  loadingOptions={smdaMasterdata.isPending}
+                  onChange={(value) => {
+                    field.handleChange(
+                      findOptionValueInIdentifierUuidArray(
+                        smdaReferenceData?.stratigraphicColumns ?? [],
+                        value,
+                      ) ?? (emptyIdentifierUuid() as StratigraphicColumn),
+                    );
+                  }}
+                />
+              )}
+            </form.AppField>
+            <div></div>
 
-          <PageSectionSpacer />
+            <form.AppField name="discovery" mode="array">
+              {(field) => (
+                <div>
+                  <Label label="Discoveries" htmlFor={field.name} />
+                  <DiscoveriesContainer>
+                    <PageHeader $variant="h6">OSEBERG</PageHeader>
+                    <ChipsContainer>
+                      {field.state.value.length === 0
+                        ? "No discoveries selected"
+                        : field.state.value.map<React.ReactNode>(
+                            (discovery) => (
+                              <InfoChip
+                                key={discovery.uuid}
+                                onDelete={DeleteIt}
+                              >
+                                {/* <Icon name="arrow_back" /> */}
+                                {discovery.short_identifier}
+                              </InfoChip>
+                            ),
+                          )}
+                    </ChipsContainer>
+                  </DiscoveriesContainer>
+                </div>
+              )}
+            </form.AppField>
+            <div>
+              <Label label="Discoveries" />
+              <DiscoveriesContainer></DiscoveriesContainer>
+            </div>
+          </FieldsContainer>
         </Dialog.CustomContent>
 
         <Dialog.Actions>

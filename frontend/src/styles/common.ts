@@ -47,12 +47,12 @@ export const InfoBox = styled.div`
   td {
     vertical-align: top;
   }
+`;
 
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: ${tokens.spacings.comfortable.small};
-  }
+export const ChipsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${tokens.spacings.comfortable.small}
 `;
 
 export const InfoChip = styled(Chip)`
@@ -66,6 +66,11 @@ export const InfoChip = styled(Chip)`
 
 export const EditDialog = styled(Dialog)`
   width: 100%;
+
+  #eds-dialog-customcontent {
+    padding: ${tokens.spacings.comfortable.medium};
+    padding-bottom: ${tokens.spacings.comfortable.x_large};
+  }
 
   button + button {
     margin-left: ${tokens.spacings.comfortable.small};
