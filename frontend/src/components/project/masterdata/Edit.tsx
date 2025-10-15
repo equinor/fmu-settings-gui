@@ -1,4 +1,4 @@
-import { Dialog, Icon, Label } from "@equinor/eds-core-react";
+import { Dialog, Icon, Label, Typography } from "@equinor/eds-core-react";
 import { arrow_back } from "@equinor/eds-icons";
 import {
   AnyFieldMetaBase,
@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 
 import {
   CoordinateSystem,
+  DiscoveryItem,
   Smda,
   SmdaMasterdataResult,
   StratigraphicColumn,
@@ -56,6 +57,8 @@ type SmdaReferenceData = {
   stratigraphicColumnsOptions: Array<StratigraphicColumn>;
 };
 
+type DiscoveryListGrouped = Record<string, Array<DiscoveryItem>>;
+
 const { useAppForm } = createFormHook({
   fieldContext,
   formContext,
@@ -98,6 +101,32 @@ function createReferenceData(
   };
 }
 
+function createDiscoveryLists(
+  smdaMasterdataGrouped: SmdaMasterdataResultGrouped,
+  projectMasterdataDiscoveries: Array<DiscoveryItem>,
+): [DiscoveryListGrouped, DiscoveryListGrouped] {
+  let project: DiscoveryListGrouped = {};
+  let available: DiscoveryListGrouped = {};
+
+  Object.entries(smdaMasterdataGrouped).forEach(([field, masterdata]) => {
+    if (!(field in project)) {
+      project[field] = [];
+    }
+    if (!(field in available)) {
+      available[field] = [];
+    }
+    masterdata.discovery.forEach((discovery) => {
+      if (projectMasterdataDiscoveries.find((d) => d.uuid === discovery.uuid)) {
+        project[field].push(discovery);
+      } else {
+        available[field].push(discovery);
+      }
+    });
+  });
+
+  return [project, available];
+}
+
 function setErrorUnknownInitialValue(
   setFieldMeta: (field: keyof Smda, updater: Updater<AnyFieldMetaBase>) => void,
   field: keyof Smda,
@@ -130,6 +159,11 @@ export function Edit({
   const [smdaReferenceData, setSmdaReferenceData] = useState<
     SmdaReferenceData | undefined
   >();
+  const [projectDiscoveries, setProjectDiscoveries] =
+    useState<DiscoveryListGrouped>();
+  const [availableDiscoveries, setAvailableDiscoveries] =
+    useState<DiscoveryListGrouped>();
+
   const queryClient = useQueryClient();
 
   const masterdataMutation = useMutation({
@@ -171,7 +205,7 @@ export function Edit({
     }),
   });
 
-  console.log(">>> Edit masterdata =", masterdata);
+  // console.log(">>> Edit masterdata =", masterdata);
 
   const form = useAppForm({
     defaultValues: masterdata,
@@ -186,7 +220,11 @@ export function Edit({
 
   useEffect(() => {
     if (isOpen) {
-      setSmdaFields(masterdata.field.map((field) => field.identifier));
+      setSmdaFields(
+        masterdata.field
+          .map((field) => field.identifier)
+          .sort((a, b) => stringCompare(a, b)),
+      );
     }
   }, [isOpen, masterdata]);
 
@@ -208,10 +246,17 @@ export function Edit({
         refData.stratigraphicColumnsOptions,
         masterdata.stratigraphic_column,
       );
+      const [projectDiscoveries, availableDiscoveries] = createDiscoveryLists(
+        smdaMasterdata.data,
+        masterdata.discovery,
+      );
+      setProjectDiscoveries(projectDiscoveries);
+      setAvailableDiscoveries(availableDiscoveries);
     }
   }, [
     form,
     masterdata.coordinate_system,
+    masterdata.discovery,
     masterdata.stratigraphic_column,
     smdaFields,
     smdaMasterdata.data,
@@ -251,6 +296,42 @@ export function Edit({
     formReset();
   };
 
+  function Discoveries({
+    fields,
+    discoveries,
+  }: {
+    fields: Array<string>;
+    discoveries?: DiscoveryListGrouped;
+  }) {
+    return (
+      <>
+        {fields.map((field) => (
+          <div key={field}>
+            {fields.length > 1 && (
+              <PageHeader $variant="h6">{field}</PageHeader>
+            )}
+            <ChipsContainer>
+              {discoveries !== undefined &&
+                (field in discoveries && discoveries[field].length > 0 ? (
+                  discoveries[field]
+                    .sort((a, b) =>
+                      stringCompare(a.short_identifier, b.short_identifier),
+                    )
+                    .map<React.ReactNode>((discovery) => (
+                      <InfoChip key={discovery.uuid}>
+                        {discovery.short_identifier}
+                      </InfoChip>
+                    ))
+                ) : (
+                  <Typography>none</Typography>
+                ))}
+            </ChipsContainer>
+          </div>
+        ))}
+      </>
+    );
+  }
+
   return (
     <EditDialog open={isOpen}>
       <form
@@ -265,7 +346,7 @@ export function Edit({
         <Dialog.CustomContent>
           <FieldsContainer>
             <PageHeader $variant="h4">Project masterdata</PageHeader>
-            <PageHeader $variant="h4">Additional masterdata</PageHeader>
+            <PageHeader $variant="h4">Available masterdata</PageHeader>
 
             <form.AppField
               name="coordinate_system"
@@ -328,7 +409,7 @@ export function Edit({
                 <div>
                   <Label label="Discoveries" htmlFor={field.name} />
                   <DiscoveriesContainer>
-                    <PageHeader $variant="h6">OSEBERG</PageHeader>
+                    {/* <PageHeader $variant="h6">OSEBERG</PageHeader>
                     <ChipsContainer>
                       {field.state.value.length === 0
                         ? "No discoveries selected"
@@ -338,19 +419,32 @@ export function Edit({
                                 key={discovery.uuid}
                                 onDelete={DeleteIt}
                               >
-                                {/* <Icon name="arrow_back" /> */}
+                                <Icon name="arrow_back" />
                                 {discovery.short_identifier}
                               </InfoChip>
                             ),
                           )}
-                    </ChipsContainer>
+                    </ChipsContainer> */}
+                    {smdaMasterdata.isSuccess && (
+                      <Discoveries
+                        fields={smdaFields ?? []}
+                        discoveries={projectDiscoveries}
+                      />
+                    )}
                   </DiscoveriesContainer>
                 </div>
               )}
             </form.AppField>
             <div>
               <Label label="Discoveries" />
-              <DiscoveriesContainer></DiscoveriesContainer>
+              <DiscoveriesContainer>
+                {smdaMasterdata.isSuccess && (
+                  <Discoveries
+                    fields={smdaFields ?? []}
+                    discoveries={availableDiscoveries}
+                  />
+                )}
+              </DiscoveriesContainer>
             </div>
           </FieldsContainer>
         </Dialog.CustomContent>
