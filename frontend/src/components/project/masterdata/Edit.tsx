@@ -1,5 +1,5 @@
 import { Dialog, Icon, Label, Typography } from "@equinor/eds-core-react";
-import { arrow_back } from "@equinor/eds-icons";
+import { arrow_back, arrow_forward } from "@equinor/eds-icons";
 import {
   AnyFieldMetaBase,
   createFormHook,
@@ -41,13 +41,16 @@ import {
   fieldContext,
   findOptionValueInIdentifierUuidArray,
   formContext,
+  handleIdentifierUuidListOperation,
   identifierUuidArrayToOptionsArray,
+  ListOperation,
+  useFieldContext,
 } from "#utils/form";
 import { emptyIdentifierUuid, IdentifierUuidType } from "#utils/model";
 import { stringCompare } from "#utils/string";
 import { DiscoveriesContainer, FieldsContainer } from "./Edit.style";
 
-Icon.add({ arrow_back });
+Icon.add({ arrow_back, arrow_forward });
 
 type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
 
@@ -286,8 +289,6 @@ export function Edit({
     );
   };
 
-  function DeleteIt() {}
-
   const formSubmitCallback = ({
     message,
     formReset,
@@ -299,10 +300,14 @@ export function Edit({
   function Discoveries({
     fields,
     discoveries,
+    operation,
   }: {
     fields: Array<string>;
     discoveries?: DiscoveryListGrouped;
+    operation: ListOperation;
   }) {
+    const fieldContext = useFieldContext();
+
     return (
       <>
         {fields.map((field) => (
@@ -318,8 +323,27 @@ export function Edit({
                       stringCompare(a.short_identifier, b.short_identifier),
                     )
                     .map<React.ReactNode>((discovery) => (
-                      <InfoChip key={discovery.uuid}>
+                      <InfoChip
+                        key={discovery.uuid}
+                        onClick={() =>
+                          handleIdentifierUuidListOperation(
+                            fieldContext,
+                            operation,
+                            discovery,
+                          )
+                        }
+                      >
+                        {operation === "addition" ? (
+                          <Icon name="arrow_back" />
+                        ) : (
+                          ""
+                        )}
                         {discovery.short_identifier}
+                        {operation === "removal" ? (
+                          <Icon name="arrow_forward" />
+                        ) : (
+                          ""
+                        )}
                       </InfoChip>
                     ))
                 ) : (
@@ -355,26 +379,28 @@ export function Edit({
               }}
             >
               {(field) => (
-                <field.Select
-                  label="Coordinate system"
-                  value={field.state.value.uuid}
-                  options={identifierUuidArrayToOptionsArray([
-                    emptyIdentifierUuid() as CoordinateSystem,
-                    ...(smdaReferenceData?.coordinateSystems ?? []),
-                  ])}
-                  loadingOptions={smdaMasterdata.isPending}
-                  onChange={(value) => {
-                    field.handleChange(
-                      findOptionValueInIdentifierUuidArray(
-                        smdaReferenceData?.coordinateSystems ?? [],
-                        value,
-                      ) ?? (emptyIdentifierUuid() as CoordinateSystem),
-                    );
-                  }}
-                ></field.Select>
+                <>
+                  <field.Select
+                    label="Coordinate system"
+                    value={field.state.value.uuid}
+                    options={identifierUuidArrayToOptionsArray([
+                      emptyIdentifierUuid() as CoordinateSystem,
+                      ...(smdaReferenceData?.coordinateSystems ?? []),
+                    ])}
+                    loadingOptions={smdaMasterdata.isPending}
+                    onChange={(value) => {
+                      field.handleChange(
+                        findOptionValueInIdentifierUuidArray(
+                          smdaReferenceData?.coordinateSystems ?? [],
+                          value,
+                        ) ?? (emptyIdentifierUuid() as CoordinateSystem),
+                      );
+                    }}
+                  ></field.Select>
+                  <div></div>
+                </>
               )}
             </form.AppField>
-            <div></div>
 
             <form.AppField
               name="stratigraphic_column"
@@ -383,69 +409,70 @@ export function Edit({
               }}
             >
               {(field) => (
-                <field.Select
-                  label="Stratigraphic column"
-                  value={field.state.value.uuid}
-                  options={identifierUuidArrayToOptionsArray([
-                    emptyIdentifierUuid() as StratigraphicColumn,
-                    ...(smdaReferenceData?.stratigraphicColumnsOptions ?? []),
-                  ])}
-                  loadingOptions={smdaMasterdata.isPending}
-                  onChange={(value) => {
-                    field.handleChange(
-                      findOptionValueInIdentifierUuidArray(
-                        smdaReferenceData?.stratigraphicColumns ?? [],
-                        value,
-                      ) ?? (emptyIdentifierUuid() as StratigraphicColumn),
-                    );
-                  }}
-                />
-              )}
-            </form.AppField>
-            <div></div>
-
-            <form.AppField name="discovery" mode="array">
-              {(field) => (
-                <div>
-                  <Label label="Discoveries" htmlFor={field.name} />
-                  <DiscoveriesContainer>
-                    {/* <PageHeader $variant="h6">OSEBERG</PageHeader>
-                    <ChipsContainer>
-                      {field.state.value.length === 0
-                        ? "No discoveries selected"
-                        : field.state.value.map<React.ReactNode>(
-                            (discovery) => (
-                              <InfoChip
-                                key={discovery.uuid}
-                                onDelete={DeleteIt}
-                              >
-                                <Icon name="arrow_back" />
-                                {discovery.short_identifier}
-                              </InfoChip>
-                            ),
-                          )}
-                    </ChipsContainer> */}
-                    {smdaMasterdata.isSuccess && (
-                      <Discoveries
-                        fields={smdaFields ?? []}
-                        discoveries={projectDiscoveries}
-                      />
-                    )}
-                  </DiscoveriesContainer>
-                </div>
-              )}
-            </form.AppField>
-            <div>
-              <Label label="Discoveries" />
-              <DiscoveriesContainer>
-                {smdaMasterdata.isSuccess && (
-                  <Discoveries
-                    fields={smdaFields ?? []}
-                    discoveries={availableDiscoveries}
+                <>
+                  <field.Select
+                    label="Stratigraphic column"
+                    value={field.state.value.uuid}
+                    options={identifierUuidArrayToOptionsArray([
+                      emptyIdentifierUuid() as StratigraphicColumn,
+                      ...(smdaReferenceData?.stratigraphicColumnsOptions ?? []),
+                    ])}
+                    loadingOptions={smdaMasterdata.isPending}
+                    onChange={(value) => {
+                      field.handleChange(
+                        findOptionValueInIdentifierUuidArray(
+                          smdaReferenceData?.stratigraphicColumns ?? [],
+                          value,
+                        ) ?? (emptyIdentifierUuid() as StratigraphicColumn),
+                      );
+                    }}
                   />
-                )}
-              </DiscoveriesContainer>
-            </div>
+                  <div></div>
+                </>
+              )}
+            </form.AppField>
+
+            <form.AppField
+              name="discovery"
+              mode="array"
+              listeners={{
+                onChange: ({ value }) => {
+                  const [projectDiscoveries, availableDiscoveries] =
+                    createDiscoveryLists(smdaMasterdata.data, value);
+                  setProjectDiscoveries(projectDiscoveries);
+                  setAvailableDiscoveries(availableDiscoveries);
+                },
+              }}
+            >
+              {(field) => (
+                <>
+                  <div>
+                    <Label label="Discoveries" htmlFor={field.name} />
+                    <DiscoveriesContainer>
+                      {smdaMasterdata.isSuccess && (
+                        <Discoveries
+                          fields={smdaFields ?? []}
+                          discoveries={projectDiscoveries}
+                          operation="removal"
+                        />
+                      )}
+                    </DiscoveriesContainer>
+                  </div>
+                  <div>
+                    <Label label="Discoveries" />
+                    <DiscoveriesContainer>
+                      {smdaMasterdata.isSuccess && (
+                        <Discoveries
+                          fields={smdaFields ?? []}
+                          discoveries={availableDiscoveries}
+                          operation="addition"
+                        />
+                      )}
+                    </DiscoveriesContainer>
+                  </div>
+                </>
+              )}
+            </form.AppField>
           </FieldsContainer>
         </Dialog.CustomContent>
 

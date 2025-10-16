@@ -7,7 +7,11 @@ import {
   StratigraphicColumn,
 } from "#client";
 
+// "Identifier" in type name refers to "identifier" key name
 export type IdentifierUuidType = CoordinateSystem | StratigraphicColumn;
+
+// "Identifier" in type name refers to both "identifier" and "short_identifier" key names
+export type IdentifierUuidListType = CountryItem | DiscoveryItem;
 
 export function emptyIdentifierUuid(): IdentifierUuidType {
   return {

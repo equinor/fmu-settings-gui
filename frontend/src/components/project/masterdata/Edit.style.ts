@@ -14,7 +14,8 @@ export const FieldsContainer = styled.div`
   }
 
   h6 {
-    margin-bottom: 0;
+    margin-bottom: ${tokens.spacings.comfortable.xx_small};
+    font-weight: normal;
   }
 `;
 
@@ -25,6 +26,6 @@ export const DiscoveriesContainer = styled.div`
   background: ${tokens.colors.ui.background__light.hex};
 
   & > div:not(:last-of-type){
-    margin-bottom: ${tokens.spacings.comfortable.small};
+    margin-bottom: ${tokens.spacings.comfortable.medium};
   }
 `;
