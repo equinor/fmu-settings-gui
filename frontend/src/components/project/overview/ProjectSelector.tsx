@@ -16,6 +16,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
+  projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
   projectInitProjectMutation,
   projectPostProjectMutation,
@@ -76,6 +77,9 @@ function ProjectSelectorForm({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetLockStatusQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),
