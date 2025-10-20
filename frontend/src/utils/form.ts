@@ -22,6 +22,7 @@ export function findOptionValueInIdentifierUuidArray(
   value: string,
 ): IdentifierUuidType | undefined {
   const result = array.filter((element) => String(element.uuid) === value);
+
   return result.length === 1 ? result[0] : undefined;
 }
 

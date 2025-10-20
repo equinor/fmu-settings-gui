@@ -85,6 +85,7 @@ function createReferenceData(
     stratigraphicColumns: Object.values(masterdataGrouped)
       .reduce<Array<StratigraphicColumn>>((acc, masterdata) => {
         acc.push(...masterdata.stratigraphic_columns);
+
         return acc;
       }, [])
       .sort((a, b) => stringCompare(a.identifier, b.identifier)),
@@ -98,6 +99,7 @@ function createReferenceData(
               value.identifier + (fieldCount > 1 ? ` [${field}]` : ""),
           })),
         );
+
         return acc;
       }, [])
       .sort((a, b) => stringCompare(a.identifier, b.identifier)),
@@ -108,8 +110,8 @@ function createDiscoveryLists(
   smdaMasterdataGrouped: SmdaMasterdataResultGrouped,
   projectMasterdataDiscoveries: Array<DiscoveryItem>,
 ): [DiscoveryListGrouped, DiscoveryListGrouped] {
-  let project: DiscoveryListGrouped = {};
-  let available: DiscoveryListGrouped = {};
+  const project: DiscoveryListGrouped = {};
+  const available: DiscoveryListGrouped = {};
 
   Object.entries(smdaMasterdataGrouped).forEach(([field, masterdata]) => {
     if (!(field in project)) {
@@ -147,6 +149,63 @@ function setErrorUnknownInitialValue(
         : `Initial value "${initialValue.identifier}" does not exist in selection list`,
     },
   }));
+}
+
+function Discoveries({
+  fields,
+  discoveries,
+  operation,
+}: {
+  fields: Array<string>;
+  discoveries?: DiscoveryListGrouped;
+  operation: ListOperation;
+}) {
+  const fieldContext = useFieldContext();
+
+  return (
+    <>
+      {fields.map((field) => (
+        <div key={field}>
+          {fields.length > 1 && <PageHeader $variant="h6">{field}</PageHeader>}
+          <ChipsContainer>
+            {discoveries !== undefined &&
+              (field in discoveries && discoveries[field].length > 0 ? (
+                discoveries[field]
+                  .sort((a, b) =>
+                    stringCompare(a.short_identifier, b.short_identifier),
+                  )
+                  .map<React.ReactNode>((discovery) => (
+                    <InfoChip
+                      key={discovery.uuid}
+                      onClick={() => {
+                        handleIdentifierUuidListOperation(
+                          fieldContext,
+                          operation,
+                          discovery,
+                        );
+                      }}
+                    >
+                      {operation === "addition" ? (
+                        <Icon name="arrow_back" />
+                      ) : (
+                        ""
+                      )}
+                      {discovery.short_identifier}
+                      {operation === "removal" ? (
+                        <Icon name="arrow_forward" />
+                      ) : (
+                        ""
+                      )}
+                    </InfoChip>
+                  ))
+              ) : (
+                <Typography>none</Typography>
+              ))}
+          </ChipsContainer>
+        </div>
+      ))}
+    </>
+  );
 }
 
 export function Edit({
@@ -201,6 +260,7 @@ export function Edit({
             `index-${String(idx)}`;
           acc[field] = curr.data;
         }
+
         return acc;
       }, {}),
       isPending: results.some((result) => result.isPending),
@@ -296,65 +356,6 @@ export function Edit({
     toast.info(message);
     formReset();
   };
-
-  function Discoveries({
-    fields,
-    discoveries,
-    operation,
-  }: {
-    fields: Array<string>;
-    discoveries?: DiscoveryListGrouped;
-    operation: ListOperation;
-  }) {
-    const fieldContext = useFieldContext();
-
-    return (
-      <>
-        {fields.map((field) => (
-          <div key={field}>
-            {fields.length > 1 && (
-              <PageHeader $variant="h6">{field}</PageHeader>
-            )}
-            <ChipsContainer>
-              {discoveries !== undefined &&
-                (field in discoveries && discoveries[field].length > 0 ? (
-                  discoveries[field]
-                    .sort((a, b) =>
-                      stringCompare(a.short_identifier, b.short_identifier),
-                    )
-                    .map<React.ReactNode>((discovery) => (
-                      <InfoChip
-                        key={discovery.uuid}
-                        onClick={() =>
-                          handleIdentifierUuidListOperation(
-                            fieldContext,
-                            operation,
-                            discovery,
-                          )
-                        }
-                      >
-                        {operation === "addition" ? (
-                          <Icon name="arrow_back" />
-                        ) : (
-                          ""
-                        )}
-                        {discovery.short_identifier}
-                        {operation === "removal" ? (
-                          <Icon name="arrow_forward" />
-                        ) : (
-                          ""
-                        )}
-                      </InfoChip>
-                    ))
-                ) : (
-                  <Typography>none</Typography>
-                ))}
-            </ChipsContainer>
-          </div>
-        ))}
-      </>
-    );
-  }
 
   return (
     <EditDialog open={isOpen}>

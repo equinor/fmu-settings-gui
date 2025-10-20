@@ -28,6 +28,7 @@ export function httpValidationErrorToString(
         .map((l) => String(l))
         .filter((l, idx) => !(idx === 0 && l === "body"))
         .join(".");
+
       return `${locString}: ${valError.msg}`;
     });
 
