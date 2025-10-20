@@ -22,7 +22,11 @@ export const PageCode = styled(Typography)`
 `;
 
 export const PageSectionSpacer = styled.div`
-  height: 1em;
+  height: ${tokens.spacings.comfortable.x_large}
+`;
+
+export const PageList = styled(List)`
+  margin-bottom: 1em;
 `;
 
 export const InfoBox = styled.div`
@@ -64,9 +68,11 @@ export const InfoChip = styled(Chip)`
   }
 `;
 
-export const EditDialog = styled(Dialog)`
+export const EditDialog = styled(Dialog).attrs<{ $minWidth?: string }>(
+  (props) => ({ style: { minWidth: props.$minWidth ?? "10em" } }),
+)`
   width: 100%;
-
+  
   #eds-dialog-customcontent {
     padding: ${tokens.spacings.comfortable.medium};
     padding-bottom: ${tokens.spacings.comfortable.x_large};

@@ -24,17 +24,13 @@ import {
 } from "#client/@tanstack/react-query.gen";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import { TextField } from "#components/form/field";
-import { PageSectionSpacer, PageText } from "#styles/common";
+import { EditDialog, PageSectionSpacer, PageText } from "#styles/common";
 import {
   fieldContext,
   formContext,
   useFieldContext,
   useFormContext,
 } from "#utils/form";
-import {
-  ExpansiveDialog,
-  ProjectSelectorContentContainer,
-} from "./ProjectSelector.style";
 
 const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
   fieldComponents: {
@@ -151,7 +147,7 @@ function ProjectSelectorForm({
   }, [form.state.values.projectPath]);
 
   return (
-    <ExpansiveDialog open={isDialogOpen} isDismissable={false}>
+    <EditDialog open={isDialogOpen} $minWidth="40em">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -164,68 +160,64 @@ function ProjectSelectorForm({
         </Dialog.Header>
 
         <Dialog.CustomContent>
-          <ProjectSelectorContentContainer>
-            <form.AppField
-              name="recentProjectPath"
-              listeners={{
-                onBlur: () => {
-                  sethelperTextRecentProjects("");
-                },
-                onChange: () => {
-                  setValueSource("recentProjectPath");
-                  void form.handleSubmit();
-                },
-              }}
-            >
-              {(field) => (
-                <field.RecentProjectSelect
-                  recentProjects={userData.recent_project_directories}
-                  helperText={helperTextRecentProjects}
-                />
-              )}
-            </form.AppField>
-
-            <PageSectionSpacer />
-
-            <form.AppField
-              name="projectPath"
-              listeners={{
-                onBlur: () => {
-                  setHelperTextProjectPath("");
-                },
-                onChange: () => {
-                  setValueSource("projectPath");
-                },
-              }}
-            >
-              {(field) => (
-                <InputWrapper
-                  color="error"
-                  helperProps={{
-                    text: helperTextProjectPath,
-                    icon: <Icon data={error_filled} size={18} />,
-                  }}
-                >
-                  <field.TextField
-                    label="Alternatively, enter a path to the project"
-                    setSubmitDisabled={setSubmitDisabled}
-                  />
-                </InputWrapper>
-              )}
-            </form.AppField>
-
-            <PageSectionSpacer />
-
-            <form.AppForm>
-              <form.ConfirmInitProjectDialog
-                isOpen={initConfirmDialogOpen}
-                closeDialog={() => {
-                  setInitConfirmDialogOpen(false);
-                }}
-                valueSource={valueSource}
+          <form.AppField
+            name="recentProjectPath"
+            listeners={{
+              onBlur: () => {
+                sethelperTextRecentProjects("");
+              },
+              onChange: () => {
+                setValueSource("recentProjectPath");
+                void form.handleSubmit();
+              },
+            }}
+          >
+            {(field) => (
+              <field.RecentProjectSelect
+                recentProjects={userData.recent_project_directories}
+                helperText={helperTextRecentProjects}
               />
-            </form.AppForm>
-          </ProjectSelectorContentContainer>
+            )}
+          </form.AppField>
+
+          <PageSectionSpacer />
+
+          <form.AppField
+            name="projectPath"
+            listeners={{
+              onBlur: () => {
+                setHelperTextProjectPath("");
+              },
+              onChange: () => {
+                setValueSource("projectPath");
+              },
+            }}
+          >
+            {(field) => (
+              <InputWrapper
+                color="error"
+                helperProps={{
+                  text: helperTextProjectPath,
+                  icon: <Icon data={error_filled} size={18} />,
+                }}
+              >
+                <field.TextField
+                  label="Alternatively, enter a path to the project"
+                  setSubmitDisabled={setSubmitDisabled}
+                />
+              </InputWrapper>
+            )}
+          </form.AppField>
+
+          <form.AppForm>
+            <form.ConfirmInitProjectDialog
+              isOpen={initConfirmDialogOpen}
+              closeDialog={() => {
+                setInitConfirmDialogOpen(false);
+              }}
+              valueSource={valueSource}
+            />
+          </form.AppForm>
         </Dialog.CustomContent>
 
         <Dialog.Actions>
@@ -243,7 +235,7 @@ function ProjectSelectorForm({
           </form.AppForm>
         </Dialog.Actions>
       </form>
-    </ExpansiveDialog>
+    </EditDialog>
   );
 }
 
@@ -333,7 +325,7 @@ function ConfirmInitProjectDialog({
   };
 
   return (
-    <ExpansiveDialog open={isOpen} isDismissable={false}>
+    <EditDialog open={isOpen}>
       <Dialog.Header>
         <Dialog.Title>Initialize project</Dialog.Title>
       </Dialog.Header>
@@ -355,7 +347,7 @@ function ConfirmInitProjectDialog({
         </Button>
         <CancelButton onClick={closeDialog} />
       </Dialog.Actions>
-    </ExpansiveDialog>
+    </EditDialog>
   );
 }
 

@@ -83,6 +83,9 @@ export type DiscoveryItem = {
  * Path where a .fmu directory may exist.
  */
 export type FmuDirPath = {
+    /**
+     * Absolute path to the directory which maybe contains a .fmu directory.
+     */
     path: string;
 };
 
@@ -90,9 +93,22 @@ export type FmuDirPath = {
  * Information returned when 'opening' an FMU Directory.
  */
 export type FmuProject = {
+    /**
+     * Absolute path to the directory which maybe contains a .fmu directory.
+     */
     path: string;
+    /**
+     * The directory name, not the path, that contains the .fmu directory.
+     */
     project_dir_name: string;
+    /**
+     * The configuration of an FMU project's .fmu directory.
+     */
     config: ProjectConfig;
+    /**
+     * Whether the project is in read-only mode due to lock conflicts.
+     */
+    is_read_only?: boolean;
 };
 
 /**
@@ -108,11 +124,64 @@ export type FieldItem = {
  * A relative path to a global config file, relative to the project root.
  */
 export type GlobalConfigPath = {
+    /**
+     * Relative path in the project to a global config file.
+     */
     relative_path: string;
 };
 
 export type HttpValidationError = {
     detail?: Array<ValidationError>;
+};
+
+/**
+ * Represents a .fmu directory lock file.
+ */
+export type LockInfo = {
+    pid: number;
+    hostname: string;
+    user: string;
+    acquired_at: number;
+    expires_at: number;
+    version?: string;
+};
+
+/**
+ * Information about the project lock status.
+ */
+export type LockStatus = {
+    /**
+     * Whether the current session holds the write lock.
+     */
+    is_lock_acquired: boolean;
+    /**
+     * Whether a lock file exists.
+     */
+    lock_file_exists: boolean;
+    /**
+     * Contents of the lock file, if available and readable.
+     */
+    lock_info?: LockInfo | null;
+    /**
+     * Error message if checking lock status failed.
+     */
+    lock_status_error?: string | null;
+    /**
+     * Error message if reading the lock file failed.
+     */
+    lock_file_read_error?: string | null;
+    /**
+     * Error message from the last attempt to acquire the lock.
+     */
+    last_lock_acquire_error?: string | null;
+    /**
+     * Error message from the last attempt to release the lock.
+     */
+    last_lock_release_error?: string | null;
+    /**
+     * Error message from the last attempt to refresh the lock.
+     */
+    last_lock_refresh_error?: string | null;
 };
 
 /**
@@ -181,6 +250,9 @@ export type Smda = {
  * An identifier for a field to be searched for.
  */
 export type SmdaField = {
+    /**
+     * A field identifier (name).
+     */
     identifier: string;
 };
 
@@ -188,8 +260,17 @@ export type SmdaField = {
  * The search result of a field identifier result.
  */
 export type SmdaFieldSearchResult = {
+    /**
+     * The number of hits from the field search.
+     */
     hits: number;
+    /**
+     * The number of pages of hits.
+     */
     pages: number;
+    /**
+     * A list of field identifier results from the search.
+     */
     results: Array<SmdaFieldUuid>;
 };
 
@@ -197,7 +278,13 @@ export type SmdaFieldSearchResult = {
  * Name-UUID identifier for a field as known by SMDA.
  */
 export type SmdaFieldUuid = {
+    /**
+     * A field identifier (name).
+     */
     identifier: string;
+    /**
+     * The SMDA UUID identifier corresponding to the field identifier.
+     */
     uuid: string;
 };
 
@@ -205,11 +292,34 @@ export type SmdaFieldUuid = {
  * Contains SMDA-related attributes.
  */
 export type SmdaMasterdataResult = {
+    /**
+     * A list referring to fields known to SMDA. First item is primary.
+     */
     field: Array<FieldItem>;
+    /**
+     * A list referring to countries known to SMDA. First item is primary.
+     */
     country: Array<CountryItem>;
+    /**
+     * A list referring to discoveries known to SMDA. First item is primary.
+     */
     discovery: Array<DiscoveryItem>;
+    /**
+     * Reference to stratigraphic column known to SMDA.
+     */
     stratigraphic_columns: Array<StratigraphicColumn>;
+    /**
+     * The primary field's coordinate system.
+     *
+     * This coordinate system may not be the coordinate system users use in their model.
+     */
     field_coordinate_system: CoordinateSystem;
+    /**
+     * A list of all coordinate systems known to SMDA.
+     *
+     * These are provided when the user needs to select a different coordinate system that
+     * applies to the model they are working on.
+     */
     coordinate_systems: Array<CoordinateSystem>;
 };
 
@@ -504,6 +614,13 @@ export type ProjectPostGlobalConfigErrors = {
      */
     422: unknown;
     /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
      * Something unexpected has happened
      */
     500: unknown;
@@ -517,6 +634,50 @@ export type ProjectPostGlobalConfigResponses = {
 };
 
 export type ProjectPostGlobalConfigResponse = ProjectPostGlobalConfigResponses[keyof ProjectPostGlobalConfigResponses];
+
+export type ProjectGetLockStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/lock_status';
+};
+
+export type ProjectGetLockStatusErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetLockStatusError = ProjectGetLockStatusErrors[keyof ProjectGetLockStatusErrors];
+
+export type ProjectGetLockStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: LockStatus;
+};
+
+export type ProjectGetLockStatusResponse = ProjectGetLockStatusResponses[keyof ProjectGetLockStatusResponses];
 
 export type ProjectPatchMasterdataData = {
     body: Smda;
@@ -553,6 +714,13 @@ export type ProjectPatchMasterdataErrors = {
      */
     422: HttpValidationError;
     /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
      * Something unexpected has happened
      */
     500: unknown;
@@ -568,6 +736,122 @@ export type ProjectPatchMasterdataResponses = {
 };
 
 export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
+
+export type ProjectPatchModelData = {
+    body: Model;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/model';
+};
+
+export type ProjectPatchModelErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchModelError = ProjectPatchModelErrors[keyof ProjectPatchModelErrors];
+
+export type ProjectPatchModelResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchModelResponse = ProjectPatchModelResponses[keyof ProjectPatchModelResponses];
+
+export type ProjectPatchAccessData = {
+    body: Access;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/access';
+};
+
+export type ProjectPatchAccessErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchAccessError = ProjectPatchAccessErrors[keyof ProjectPatchAccessErrors];
+
+export type ProjectPatchAccessResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchAccessResponse = ProjectPatchAccessResponses[keyof ProjectPatchAccessResponses];
 
 export type UserGetUserData = {
     body?: never;
