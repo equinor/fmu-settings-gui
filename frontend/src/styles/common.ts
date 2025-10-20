@@ -1,4 +1,4 @@
-import { Chip, Dialog, Typography } from "@equinor/eds-core-react";
+import { Chip, Dialog, List, Typography } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
