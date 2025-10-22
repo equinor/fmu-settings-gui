@@ -10,7 +10,7 @@ type AccordianSubItem = {
 };
 
 export function Sidebar() {
-  const { data: project } = useProject();
+  const project = useProject();
 
   const ProjectSubItems: AccordianSubItem[] = [];
   if (project.status) {

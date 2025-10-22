@@ -13,6 +13,7 @@ export const ProjectInfoContainer = styled.div`
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   background: ${tokens.colors.ui.background__light.hex};
   color: ${tokens.colors.text.static_icons__secondary.hex};
+  border-radius: ${tokens.shape.corners.borderRadius};
 
   span {
     font-weight: bold;

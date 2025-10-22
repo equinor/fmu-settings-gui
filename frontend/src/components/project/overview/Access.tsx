@@ -251,6 +251,8 @@ export function EditableAccessInfo({
 
       <GeneralButton
         label={accessData ? "Edit" : "Add"}
+        disabled={projectData.is_read_only}
+        tooltipText={projectData.is_read_only ? "Project is read-only" : ""}
         onClick={() => {
           setIsDialogOpen(true);
         }}

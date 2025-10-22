@@ -1,18 +1,35 @@
-import { Button, TopBar, Typography } from "@equinor/eds-core-react";
+import { Button, Tooltip, TopBar, Typography } from "@equinor/eds-core-react";
 import { Link } from "@tanstack/react-router";
 
 import fmuLogo from "#assets/fmu_logo.png";
+import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { FmuLogo, HeaderContainer, ProjectInfoContainer } from "./Header.style";
 
 function ProjectInfo() {
-  const { data: project } = useProject();
+  const project = useProject();
+  const lockInfo = project.lockStatus?.lock_info;
 
   return (
     <ProjectInfoContainer>
-      Project:{" "}
       {project.status && project.data ? (
-        <span>{project.data.project_dir_name}</span>
+        <>
+          <Tooltip
+            title={
+              project.data.is_read_only
+                ? "Project is read-only" +
+                  (lockInfo
+                    ? ` and locked by ${lockInfo.user}@${lockInfo.hostname}`
+                    : "")
+                : "Project is editable"
+            }
+          >
+            <span>
+              <LockIcon isReadOnly={project.data.is_read_only ?? true} />
+            </span>
+          </Tooltip>
+          <span> {project.data.project_dir_name}</span>
+        </>
       ) : (
         "(not set)"
       )}

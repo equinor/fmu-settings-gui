@@ -16,6 +16,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
+  projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
   projectInitProjectMutation,
   projectPostProjectMutation,
@@ -78,6 +79,9 @@ function ProjectSelectorForm({
         queryKey: projectGetProjectQueryKey(),
       });
       void queryClient.invalidateQueries({
+        queryKey: projectGetLockStatusQueryKey(),
+      });
+      void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),
       });
     },
@@ -101,8 +105,11 @@ function ProjectSelectorForm({
       mutate(
         { body: { path } },
         {
-          onSuccess: () => {
-            toast.info(`Successfully set project ${path}`);
+          onSuccess: (data) => {
+            toast.info(
+              `Successfully set project ${path}` +
+                (data.is_read_only ? " (read-only)" : ""),
+            );
             closeProjectSelector({ formReset: formApi.reset });
           },
           onError: (error) => {

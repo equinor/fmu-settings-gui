@@ -635,6 +635,39 @@ export type ProjectPostGlobalConfigResponses = {
 
 export type ProjectPostGlobalConfigResponse = ProjectPostGlobalConfigResponses[keyof ProjectPostGlobalConfigResponses];
 
+export type ProjectPostLockAcquireData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/lock_acquire';
+};
+
+export type ProjectPostLockAcquireErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostLockAcquireError = ProjectPostLockAcquireErrors[keyof ProjectPostLockAcquireErrors];
+
+export type ProjectPostLockAcquireResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostLockAcquireResponse = ProjectPostLockAcquireResponses[keyof ProjectPostLockAcquireResponses];
+
 export type ProjectGetLockStatusData = {
     body?: never;
     path?: never;
