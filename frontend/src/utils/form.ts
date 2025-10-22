@@ -26,27 +26,44 @@ export function findOptionValueInIdentifierUuidArray(
   return result.length === 1 ? result[0] : undefined;
 }
 
+/**
+ * Adds or removes an identifier-uuid value to a list. The value can be a
+ * single value or an array of values. Only adds a value if it doesn't already
+ * exist in the list, determined by its uuid sub-value.
+ * @param fieldContext The fieldApi.
+ * @param operation "addition" or "removal".
+ * @param value A single identifier-uuid value or an array of such values.
+ */
 export function handleIdentifierUuidListOperation(
   fieldContext: AnyFieldApi,
   operation: ListOperation,
-  value: IdentifierUuidListType,
+  value: IdentifierUuidListType | Array<IdentifierUuidListType>,
 ) {
-  console.log(
-    "===== handleListOperation operation =",
-    operation,
-    "value =",
-    value,
-  );
+  const valueList = Array.isArray(value) ? value : [value];
+  const fieldValue = fieldContext.state.value as Array<IdentifierUuidListType>;
 
   if (operation === "addition") {
-    fieldContext.pushValue(value);
+    valueList.map((value) => {
+      const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
+      if (idx < 0) {
+        fieldContext.pushValue(value);
+      }
+    });
   } else {
-    const idx = (
-      fieldContext.state.value as Array<IdentifierUuidListType>
-    ).findIndex((v) => v.uuid === value.uuid);
-    console.log("     found value at idx ", idx);
-    if (idx >= 0) {
-      fieldContext.removeValue(idx);
+    const indexes: Array<number> = [];
+    valueList.map((value) => {
+      const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
+      if (idx >= 0) {
+        indexes.push(idx);
+      }
+    });
+    if (indexes.length > 0) {
+      // Remove elements in descending index order to avoid index shifting
+      indexes
+        .sort((a, b) => b - a)
+        .map((idx) => {
+          fieldContext.removeValue(idx);
+        });
     }
   }
 }
