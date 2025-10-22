@@ -80,7 +80,7 @@ and CSS files will be reflected in the running application.
 The API also needs to be running, and is started with the following command:
 
 ```shell
-fmu-settings api --gui-port 5173 --print-url
+fmu settings api --gui-port 5173 --print-url --log-level info
 ```
 
 The specified port number should be the same that the frontend application runs on,
