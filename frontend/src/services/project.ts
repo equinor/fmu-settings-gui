@@ -7,16 +7,21 @@ import {
   ProjectGetProjectData,
   projectGetProject,
 } from "#client";
-import { projectGetProjectQueryKey } from "#client/@tanstack/react-query.gen";
+import {
+  projectGetLockStatusOptions,
+  projectGetProjectQueryKey,
+} from "#client/@tanstack/react-query.gen";
+import { LockStatus } from "#client/types.gen";
 
 type GetProject = {
   status: boolean;
   text?: string;
   data?: FmuProject;
+  lockStatus?: LockStatus;
 };
 
 export function useProject(options?: Options<ProjectGetProjectData>) {
-  return useSuspenseQuery(
+  const { data: project } = useSuspenseQuery(
     queryOptions({
       queryFn: async ({ queryKey, signal }) => {
         try {
@@ -47,4 +52,14 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
       queryKey: projectGetProjectQueryKey(options),
     }),
   );
+
+  const { data: lockStatus } = useSuspenseQuery({
+    ...projectGetLockStatusOptions(),
+    refetchInterval: 60000, // 60000 refetch every 60 seconds
+  });
+
+  return {
+    ...project,
+    lockStatus: lockStatus,
+  } as GetProject;
 }
