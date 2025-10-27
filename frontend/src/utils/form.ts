@@ -1,7 +1,7 @@
 import { AnyFieldApi, createFormHookContexts } from "@tanstack/react-form";
 
 import { OptionProps } from "#components/form/field";
-import { IdentifierUuidListType, IdentifierUuidType } from "./model";
+import { IdentifierUuidType, NameUuidType } from "./model";
 
 export type ListOperation = "addition" | "removal";
 
@@ -27,20 +27,20 @@ export function findOptionValueInIdentifierUuidArray(
 }
 
 /**
- * Adds or removes an identifier-uuid value to a list. The value can be a
- * single value or an array of values. Only adds a value if it doesn't already
- * exist in the list, determined by its uuid sub-value.
+ * Adds or removes a name-uuid value to a list. The value can be a single value
+ * or an array of values. Only adds a value if it doesn't already exist in the
+ * list, determined by its uuid sub-value.
  * @param fieldContext The fieldApi.
  * @param operation "addition" or "removal".
- * @param value A single identifier-uuid value or an array of such values.
+ * @param value A single name-uuid value or an array of such values.
  */
-export function handleIdentifierUuidListOperation(
+export function handleNameUuidListOperation(
   fieldContext: AnyFieldApi,
   operation: ListOperation,
-  value: IdentifierUuidListType | Array<IdentifierUuidListType>,
+  value: NameUuidType | Array<NameUuidType>,
 ) {
   const valueList = Array.isArray(value) ? value : [value];
-  const fieldValue = fieldContext.state.value as Array<IdentifierUuidListType>;
+  const fieldValue = fieldContext.state.value as Array<NameUuidType>;
 
   if (operation === "addition") {
     valueList.map((value) => {

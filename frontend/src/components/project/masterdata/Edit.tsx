@@ -44,7 +44,7 @@ import {
   fieldContext,
   findOptionValueInIdentifierUuidArray,
   formContext,
-  handleIdentifierUuidListOperation,
+  handleNameUuidListOperation,
   identifierUuidArrayToOptionsArray,
   ListOperation,
   useFieldContext,
@@ -212,7 +212,7 @@ function Discoveries({
                       onClick={
                         isSelectedField
                           ? () => {
-                              handleIdentifierUuidListOperation(
+                              handleNameUuidListOperation(
                                 fieldContext,
                                 operation,
                                 discovery,
@@ -500,7 +500,7 @@ export function Edit({
                     },
                     onSubmit: ({ fieldApi }) => {
                       if (orphanDiscoveries.length > 0) {
-                        handleIdentifierUuidListOperation(
+                        handleNameUuidListOperation(
                           fieldApi,
                           "removal",
                           orphanDiscoveries,
