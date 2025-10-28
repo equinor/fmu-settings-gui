@@ -118,8 +118,14 @@ function Content() {
           and sign in
         </li>
         <li>
-          Find the SMDA page by searching for &quot;SMDA&quot; on the Products
-          page, and go to this page
+          Go to the{" "}
+          <a
+            href="https://api.equinor.com/product#product=smda"
+            target="_blank"
+            rel="noreferrer"
+          >
+            SMDA product page
+          </a>
         </li>
         <li>
           Subscribe to the API. The subscription name can be given as

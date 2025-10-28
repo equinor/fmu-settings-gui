@@ -39,9 +39,13 @@ async def serve_spa_catchall(full_path: str) -> FileResponse:
 app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
 
 
-def run_server(host: str = "127.0.0.1", port: int = 8000) -> None:
+def run_server(
+    host: str = "127.0.0.1", port: int = 8000, log_level: str = "critical"
+) -> None:
     """Starts the GUI server."""
-    server_config = uvicorn.Config(app=app, host=host, port=port)
+    log_level = log_level.lower()
+
+    server_config = uvicorn.Config(app=app, host=host, port=port, log_level=log_level)
     server = uvicorn.Server(server_config)
 
     def signal_handler(signum: int, frame: FrameType | None) -> None:

@@ -21,13 +21,6 @@ export function Sidebar() {
     <EdsSideBar open>
       <EdsSideBar.Content>
         <EdsSideBar.Link label="Home" icon={dashboard} as={Link} to="/" />
-        <EdsSideBar.Accordion label="User" icon={account_circle}>
-          <EdsSideBar.AccordionItem
-            label="API keys"
-            as={Link}
-            to="/user/keys"
-          />
-        </EdsSideBar.Accordion>
         <EdsSideBar.Accordion label="Project" icon={folder}>
           <EdsSideBar.AccordionItem label="Overview" as={Link} to="/project" />
           {ProjectSubItems.map((item) => (
@@ -38,6 +31,13 @@ export function Sidebar() {
               to={item.to}
             />
           ))}
+        </EdsSideBar.Accordion>
+        <EdsSideBar.Accordion label="User" icon={account_circle}>
+          <EdsSideBar.AccordionItem
+            label="API keys"
+            as={Link}
+            to="/user/keys"
+          />
         </EdsSideBar.Accordion>
       </EdsSideBar.Content>
     </EdsSideBar>
