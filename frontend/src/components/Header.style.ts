@@ -9,13 +9,17 @@ export const FmuLogo = styled.img`
 `;
 
 export const ProjectInfoContainer = styled.div`
-  padding: 0.5em;
+  height: ${tokens.spacings.comfortable.x_large};
+  padding: 0.4em ${tokens.spacings.comfortable.medium};
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
-  background: ${tokens.colors.ui.background__light.hex};
-  color: ${tokens.colors.text.static_icons__secondary.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
+  background: ${tokens.colors.ui.background__light.hex};
 
-  span {
-    font-weight: bold;
-  }
+  display: flex;
+  align-items: center;
+  gap: ${tokens.spacings.comfortable.large};
+`;
+
+export const ProjectInfoItemContainer = styled.div`
+  text-align: left;
 `;
