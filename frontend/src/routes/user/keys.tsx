@@ -7,7 +7,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-import { UserApiKeys } from "#client";
+import { UserApiKeysOutput } from "#client";
 import {
   smdaGetHealthQueryKey,
   userGetUserOptions,
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/user/keys")({
 });
 
 type KeysTextFieldFormProps = Omit<CommonTextFieldProps, "name" | "value"> & {
-  apiKey: keyof UserApiKeys;
+  apiKey: keyof UserApiKeysOutput;
 };
 
 function KeysTextFieldForm({

@@ -104,7 +104,7 @@ export type FmuProject = {
     /**
      * The configuration of an FMU project's .fmu directory.
      */
-    config: ProjectConfig;
+    config: ProjectConfigOutput;
     /**
      * Whether the project is in read-only mode due to lock conflicts.
      */
@@ -188,7 +188,15 @@ export type LockStatus = {
  * The ``masterdata`` block contains information related to masterdata.
  * Currently, SMDA holds the masterdata.
  */
-export type Masterdata = {
+export type MasterdataInput = {
+    smda: Smda;
+};
+
+/**
+ * The ``masterdata`` block contains information related to masterdata.
+ * Currently, SMDA holds the masterdata.
+ */
+export type MasterdataOutput = {
     smda: Smda;
 };
 
@@ -226,13 +234,51 @@ export type Ok = {
  *
  * Stored as config.json.
  */
-export type ProjectConfig = {
+export type ProjectConfigInput = {
     version: string;
     created_at: string;
     created_by: string;
-    masterdata?: Masterdata | null;
+    masterdata?: MasterdataInput | null;
     model?: Model | null;
     access?: Access | null;
+    cache_max_revisions?: number;
+};
+
+/**
+ * The configuration file in a .fmu directory.
+ *
+ * Stored as config.json.
+ */
+export type ProjectConfigOutput = {
+    version: string;
+    created_at: string;
+    created_by: string;
+    masterdata?: MasterdataOutput | null;
+    model?: Model | null;
+    access?: Access | null;
+    cache_max_revisions?: number;
+};
+
+/**
+ * Serializable representation of the current session.
+ */
+export type SessionResponse = {
+    /**
+     * Session identifier.
+     */
+    id: string;
+    /**
+     * Timestamp when the session was created.
+     */
+    created_at: string;
+    /**
+     * Timestamp when the session will expire.
+     */
+    expires_at: string;
+    /**
+     * Timestamp when the session was last accessed.
+     */
+    last_accessed: string;
 };
 
 /**
@@ -335,7 +381,21 @@ export type StratigraphicColumn = {
 /**
  * Known API keys stored in a user config.
  */
-export type UserApiKeys = {
+export type UserApiKeysInputReadable = {
+    smda_subscription?: string | null;
+};
+
+/**
+ * Known API keys stored in a user config.
+ */
+export type UserApiKeysInputWritable = {
+    smda_subscription?: string | null;
+};
+
+/**
+ * Known API keys stored in a user config.
+ */
+export type UserApiKeysOutput = {
     smda_subscription?: string | null;
 };
 
@@ -347,7 +407,8 @@ export type UserApiKeys = {
 export type UserConfig = {
     version: string;
     created_at: string;
-    user_api_keys: UserApiKeys;
+    cache_max_revisions?: number;
+    user_api_keys: UserApiKeysOutput;
     recent_project_directories: Array<string>;
 };
 
@@ -981,6 +1042,39 @@ export type UserPatchApiKeyResponses = {
 
 export type UserPatchApiKeyResponse = UserPatchApiKeyResponses[keyof UserPatchApiKeyResponses];
 
+export type SessionReadSessionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/session/';
+};
+
+export type SessionReadSessionErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type SessionReadSessionError = SessionReadSessionErrors[keyof SessionReadSessionErrors];
+
+export type SessionReadSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: SessionResponse;
+};
+
+export type SessionReadSessionResponse = SessionReadSessionResponses[keyof SessionReadSessionResponses];
+
 export type SessionCreateSessionData = {
     body?: never;
     path?: never;
@@ -1030,7 +1124,7 @@ export type SessionCreateSessionResponses = {
     /**
      * Successful Response
      */
-    200: Message;
+    200: SessionResponse;
 };
 
 export type SessionCreateSessionResponse = SessionCreateSessionResponses[keyof SessionCreateSessionResponses];
