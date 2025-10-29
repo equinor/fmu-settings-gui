@@ -24,7 +24,7 @@ import {
 } from "react";
 import ReactDOM from "react-dom/client";
 
-import { Message, Options, SessionCreateSessionData } from "#client";
+import { Options, SessionCreateSessionData, SessionResponse } from "#client";
 import {
   sessionCreateSessionMutation,
   sessionPatchAccessTokenMutation,
@@ -53,7 +53,7 @@ export interface RouterContext {
   hasResponseInterceptor: boolean;
   accessToken: string;
   createSessionMutateAsync: UseMutateAsyncFunction<
-    Message,
+    SessionResponse,
     AxiosError,
     Options<SessionCreateSessionData>
   >;
@@ -198,7 +198,11 @@ export function App() {
 
   useEffect(() => {
     async function callCreateSessionAsync() {
-      await createSessionAsync(createSessionMutateAsync, apiToken);
+      const sessionInfo = await createSessionAsync(
+        createSessionMutateAsync,
+        apiToken,
+      );
+      setSessionCreatedAt(new Date(sessionInfo.created_at).getTime());
     }
 
     if (requestSessionCreation) {
@@ -206,7 +210,6 @@ export function App() {
         sessionCreatedAt === undefined ||
         Date.now() - sessionCreatedAt > 10_000
       ) {
-        setSessionCreatedAt(Date.now());
         void callCreateSessionAsync();
         if (accessToken !== "") {
           handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);

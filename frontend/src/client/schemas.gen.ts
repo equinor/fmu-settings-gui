@@ -271,7 +271,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.3.3.dev1+g0cc9b0624'
+            default: '0.7.0'
         }
     },
     type: 'object',
@@ -494,6 +494,12 @@ export const ProjectConfigSchema = {
                     type: 'null'
                 }
             ]
+        },
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            default: 5
         }
     },
     type: 'object',
@@ -502,6 +508,38 @@ export const ProjectConfigSchema = {
     description: `The configuration file in a .fmu directory.
 
 Stored as config.json.`
+} as const;
+
+export const SessionResponseSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            title: 'Id',
+            description: 'Session identifier.'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At',
+            description: 'Timestamp when the session was created.'
+        },
+        expires_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Expires At',
+            description: 'Timestamp when the session will expire.'
+        },
+        last_accessed: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Last Accessed',
+            description: 'Timestamp when the session was last accessed.'
+        }
+    },
+    type: 'object',
+    required: ['id', 'created_at', 'expires_at', 'last_accessed'],
+    title: 'SessionResponse',
+    description: 'Serializable representation of the current session.'
 } as const;
 
 export const SmdaSchema = {
@@ -712,6 +750,12 @@ export const UserConfigSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Created At'
+        },
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            default: 5
         },
         user_api_keys: {
             '$ref': '#/components/schemas/UserAPIKeys'
