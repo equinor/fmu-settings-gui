@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 
 import {
   CoordinateSystem,
+  CountryItem,
   DiscoveryItem,
   FieldItem,
   Smda,
@@ -52,8 +53,8 @@ import {
 import { emptyIdentifierUuid, IdentifierUuidType } from "#utils/model";
 import { stringCompare } from "#utils/string";
 import {
-  DiscoveriesContainer,
   FieldsContainer,
+  ItemsContainer,
   OrphanTypesContainer,
 } from "./Edit.style";
 
@@ -67,7 +68,17 @@ type SmdaReferenceData = {
   stratigraphicColumnsOptions: Array<StratigraphicColumn>;
 };
 
+type ItemType = "country" | "discovery" | "field";
 type DiscoveryListGrouped = Record<string, Array<DiscoveryItem>>;
+type ItemLists = {
+  field: Array<FieldItem>;
+  country: Array<CountryItem>;
+  discovery: DiscoveryListGrouped;
+};
+type OrphanItemLists = {
+  country: Array<CountryItem>;
+  discovery: Array<DiscoveryItem>;
+};
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -113,45 +124,52 @@ function createReferenceData(
   };
 }
 
-function createDiscoveryLists(
+function createItemLists(
   smdaMasterdataGrouped: SmdaMasterdataResultGrouped,
   projectFields: Array<FieldItem>,
   projectDiscoveries: Array<DiscoveryItem>,
-): [DiscoveryListGrouped, DiscoveryListGrouped, Array<DiscoveryItem>] {
-  const project = projectFields.reduce<DiscoveryListGrouped>((acc, curr) => {
-    acc[curr.identifier] = [];
+): [ItemLists, ItemLists, OrphanItemLists] {
+  const project = projectFields.reduce<ItemLists>(
+    (acc, curr) => {
+      acc.discovery[curr.identifier] = [];
 
-    return acc;
-  }, {});
-  const available = Object.keys(
-    smdaMasterdataGrouped,
-  ).reduce<DiscoveryListGrouped>((acc, curr) => {
-    acc[curr] = [];
+      return acc;
+    },
+    { field: [], country: [], discovery: {} },
+  );
+  const available = Object.keys(smdaMasterdataGrouped).reduce<ItemLists>(
+    (acc, curr) => {
+      acc.discovery[curr] = [];
 
-    return acc;
-  }, {});
-  const orphan: Array<DiscoveryItem> = [];
-  const selected: Array<string> = [];
+      return acc;
+    },
+    { field: [], country: [], discovery: {} },
+  );
+  const orphan: OrphanItemLists = { country: [], discovery: [] };
+  const selected = {
+    country: [] as Array<string>,
+    discovery: [] as Array<string>,
+  };
 
   Object.entries(smdaMasterdataGrouped).forEach(([field, masterdata]) => {
-    if (!(field in project)) {
-      available[field].push(...masterdata.discovery);
+    if (!(field in project.discovery)) {
+      available.discovery[field].push(...masterdata.discovery);
 
       return;
     }
     masterdata.discovery.forEach((discovery) => {
       if (projectDiscoveries.find((d) => d.uuid === discovery.uuid)) {
-        project[field].push(discovery);
-        selected.push(discovery.uuid);
+        project.discovery[field].push(discovery);
+        selected.discovery.push(discovery.uuid);
       } else {
-        available[field].push(discovery);
+        available.discovery[field].push(discovery);
       }
     });
   });
 
-  orphan.push(
+  orphan.discovery.push(
     ...projectDiscoveries.filter(
-      (discovery) => !selected.includes(discovery.uuid),
+      (discovery) => !selected.discovery.includes(discovery.uuid),
     ),
   );
 
@@ -177,45 +195,76 @@ function setErrorUnknownInitialValue(
   }));
 }
 
-function Discoveries({
+function Items({
   fields,
   selectedFields,
-  discoveries,
+  itemLists,
+  itemType,
   operation,
 }: {
   fields: Array<string>;
   selectedFields?: Array<string>;
-  discoveries: DiscoveryListGrouped;
+  itemLists: ItemLists;
+  itemType: ItemType;
   operation: ListOperation;
 }) {
   const fieldContext = useFieldContext();
+  const groups = itemType === "discovery" ? fields : ["none"];
+
+  if (Object.keys(itemLists).length === 0) {
+    return;
+  }
 
   return (
     <>
-      {fields.map((field) => {
-        const isSelectedField = selectedFields?.includes(field) ?? true;
+      {groups.map((group) => {
+        const isSelectedField = selectedFields?.includes(group) ?? true;
+        const items: Record<
+          string,
+          Array<CountryItem | DiscoveryItem | FieldItem>
+        > = itemType === "discovery"
+          ? itemLists[itemType]
+          : { none: itemLists[itemType] };
+        console.log(
+          "------- ",
+          "group =",
+          group,
+          "itemLists =",
+          itemLists,
+          "itemType =",
+          itemType,
+          "items =",
+          items,
+        );
 
         return (
-          <div key={field}>
-            {fields.length > 1 && (
-              <PageHeader $variant="h6">{field}</PageHeader>
+          <div key={group}>
+            {groups.length > 1 && (
+              <PageHeader $variant="h6">{group}</PageHeader>
             )}
             <ChipsContainer>
-              {field in discoveries && discoveries[field].length > 0 ? (
-                discoveries[field]
+              {group in items && items[group].length > 0 ? (
+                items[group]
                   .sort((a, b) =>
-                    stringCompare(a.short_identifier, b.short_identifier),
+                    stringCompare(
+                      "short_identifier" in a
+                        ? a.short_identifier
+                        : a.identifier,
+                      "short_identifier" in b
+                        ? b.short_identifier
+                        : b.identifier,
+                    ),
                   )
-                  .map<React.ReactNode>((discovery) => (
+                  .map<React.ReactNode>((item) => (
                     <InfoChip
-                      key={discovery.uuid}
+                      key={item.uuid}
                       onClick={
                         isSelectedField
                           ? () => {
                               handleNameUuidListOperation(
                                 fieldContext,
                                 operation,
-                                discovery,
+                                item,
                               );
                             }
                           : undefined
@@ -226,7 +275,9 @@ function Discoveries({
                       ) : (
                         ""
                       )}
-                      {discovery.short_identifier}
+                      {"short_identifier" in item
+                        ? item.short_identifier
+                        : item.identifier}
                       {operation === "removal" ? (
                         <Icon name="arrow_forward" />
                       ) : (
@@ -258,13 +309,15 @@ export function Edit({
   const [smdaReferenceData, setSmdaReferenceData] = useState<
     SmdaReferenceData | undefined
   >();
-  const [projectDiscoveries, setProjectDiscoveries] =
-    useState<DiscoveryListGrouped>({});
-  const [availableDiscoveries, setAvailableDiscoveries] =
-    useState<DiscoveryListGrouped>({});
-  const [orphanDiscoveries, setOrphanDiscoveries] = useState<
-    Array<DiscoveryItem>
-  >([]);
+  const [projectDiscoveries, setProjectDiscoveries] = useState<ItemLists>(
+    {} as ItemLists,
+  );
+  const [availableDiscoveries, setAvailableDiscoveries] = useState<ItemLists>(
+    {} as ItemLists,
+  );
+  const [orphanDiscoveries, setOrphanDiscoveries] = useState<OrphanItemLists>(
+    {} as OrphanItemLists,
+  );
 
   const queryClient = useQueryClient();
 
@@ -348,11 +401,19 @@ export function Edit({
         projectMasterdata.stratigraphic_column,
       );
       const [projectDiscoveries, availableDiscoveries, orphanDiscoveries] =
-        createDiscoveryLists(
+        createItemLists(
           smdaMasterdata.data,
           projectMasterdata.field,
           projectMasterdata.discovery,
         );
+      console.log(
+        "===> projectDiscoveries =",
+        projectDiscoveries,
+        "availableDiscoveries =",
+        availableDiscoveries,
+        "orphanDiscoveries =",
+        orphanDiscoveries,
+      );
       setProjectDiscoveries(projectDiscoveries);
       setAvailableDiscoveries(availableDiscoveries);
       setOrphanDiscoveries(orphanDiscoveries);
@@ -489,7 +550,7 @@ export function Edit({
                         projectDiscoveries,
                         availableDiscoveries,
                         orphanDiscoveries,
-                      ] = createDiscoveryLists(
+                      ] = createItemLists(
                         smdaMasterdata.data,
                         form.getFieldValue("field"),
                         value,
@@ -499,11 +560,11 @@ export function Edit({
                       setOrphanDiscoveries(orphanDiscoveries);
                     },
                     onSubmit: ({ fieldApi }) => {
-                      if (orphanDiscoveries.length > 0) {
+                      if (orphanDiscoveries.discovery.length > 0) {
                         handleNameUuidListOperation(
                           fieldApi,
                           "removal",
-                          orphanDiscoveries,
+                          orphanDiscoveries.discovery,
                         );
                       }
                     },
@@ -513,50 +574,53 @@ export function Edit({
                     <>
                       <div>
                         <Label label="Discoveries" htmlFor={field.name} />
-                        <DiscoveriesContainer>
+                        <ItemsContainer>
                           {smdaMasterdata.isSuccess && (
-                            <Discoveries
+                            <Items
                               fields={fieldList.map((f) => f.identifier)}
-                              discoveries={projectDiscoveries}
+                              itemLists={projectDiscoveries}
+                              itemType="discovery"
                               operation="removal"
                             />
                           )}
-                        </DiscoveriesContainer>
+                        </ItemsContainer>
 
-                        {orphanDiscoveries.length > 0 && (
-                          <OrphanTypesContainer>
-                            <PageText>
-                              The following discoveries are currently present in
-                              the project masterdata but they belong to fields
-                              which are not present there. They will be removed
-                              when the project masterdata is saved.
-                            </PageText>
-                            <PageList>
-                              {orphanDiscoveries.map<React.ReactNode>(
-                                (discovery) => (
-                                  <List.Item key={discovery.uuid}>
-                                    {discovery.short_identifier}
-                                  </List.Item>
-                                ),
-                              )}
-                            </PageList>
-                          </OrphanTypesContainer>
-                        )}
+                        {"discovery" in orphanDiscoveries &&
+                          orphanDiscoveries.discovery.length > 0 && (
+                            <OrphanTypesContainer>
+                              <PageText>
+                                The following discoveries are currently present
+                                in the project masterdata but they belong to
+                                fields which are not present there. They will be
+                                removed when the project masterdata is saved.
+                              </PageText>
+                              <PageList>
+                                {orphanDiscoveries.discovery.map<React.ReactNode>(
+                                  (discovery) => (
+                                    <List.Item key={discovery.uuid}>
+                                      {discovery.short_identifier}
+                                    </List.Item>
+                                  ),
+                                )}
+                              </PageList>
+                            </OrphanTypesContainer>
+                          )}
                       </div>
                       <div>
                         <Label label="Discoveries" />
-                        <DiscoveriesContainer>
+                        <ItemsContainer>
                           {smdaMasterdata.isSuccess && (
-                            <Discoveries
+                            <Items
                               fields={smdaFields ?? []}
                               selectedFields={fieldList.map(
                                 (f) => f.identifier,
                               )}
-                              discoveries={availableDiscoveries}
+                              itemLists={availableDiscoveries}
+                              itemType="discovery"
                               operation="addition"
                             />
                           )}
-                        </DiscoveriesContainer>
+                        </ItemsContainer>
                       </div>
                     </>
                   )}

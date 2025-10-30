@@ -19,7 +19,7 @@ export const FieldsContainer = styled.div`
   }
 `;
 
-export const DiscoveriesContainer = styled.div`
+export const ItemsContainer = styled.div`
   padding: ${tokens.spacings.comfortable.small};
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
