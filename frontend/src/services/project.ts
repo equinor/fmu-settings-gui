@@ -1,4 +1,8 @@
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 
 import {
@@ -54,9 +58,10 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
     }),
   );
 
-  const { data: lockStatus } = useSuspenseQuery({
+  const { data: lockStatus } = useQuery({
     ...projectGetLockStatusOptions(),
     refetchInterval: projectLockStatusRefetchInterval,
+    enabled: project.status && project.data !== undefined,
   });
 
   return {

@@ -135,7 +135,8 @@ export function LockStatusBanner({
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!lockStatus?.lock_info) {
+    if (lockStatus && !lockStatus.lock_info) {
+      console.log(lockStatus);
       if (isReadOnly) {
         toast.info(
           "Project can be opened for editing from the project overview page.",
@@ -147,7 +148,7 @@ export function LockStatusBanner({
         });
       }
     }
-  }, [lockStatus?.lock_info, isReadOnly, queryClient]);
+  }, [lockStatus, isReadOnly, queryClient]);
 
   return (
     <Banner>
