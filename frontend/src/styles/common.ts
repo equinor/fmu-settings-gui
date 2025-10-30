@@ -68,9 +68,15 @@ export const InfoChip = styled(Chip)`
   }
 `;
 
-export const EditDialog = styled(Dialog).attrs<{ $minWidth?: string }>(
-  (props) => ({ style: { minWidth: props.$minWidth ?? "10em" } }),
-)`
+export const EditDialog = styled(Dialog).attrs<{
+  $minWidth?: string;
+  $maxWidth?: string;
+}>((props) => ({
+  style: {
+    minWidth: props.$minWidth ?? "10em",
+    maxWidth: props.$maxWidth ?? "20em",
+  },
+}))`
   width: 100%;
   
   #eds-dialog-customcontent {

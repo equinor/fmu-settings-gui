@@ -1,3 +1,4 @@
+import { Button } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
@@ -22,4 +23,12 @@ export const ProjectInfoContainer = styled.div`
 
 export const ProjectInfoItemContainer = styled.div`
   text-align: left;
+`;
+
+export const HeaderActionButton = styled(Button).attrs({
+  variant: "ghost",
+})`
+  &:hover {
+    background: inherit;
+  }
 `;
