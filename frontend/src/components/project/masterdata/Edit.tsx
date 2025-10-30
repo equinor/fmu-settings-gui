@@ -152,12 +152,16 @@ function createItemLists(
     discovery: [] as Array<string>,
   };
 
-  Object.entries(smdaMasterdataGrouped).forEach(([field, masterdata]) => {
-    if (!(field in project.discovery)) {
-      available.discovery[field].push(...masterdata.discovery);
-
-      return;
-    }
+  Object.entries(smdaMasterdataGrouped).forEach(([fieldGroup, masterdata]) => {
+    masterdata.field.forEach((field) => {
+      if (projectFields.find((f) => f.uuid === field.uuid)) {
+        if (!project.field.find((f) => f.uuid === field.uuid)) {
+          project.field.push(field);
+        }
+      } else if (!available.field.find((f) => f.uuid === field.uuid)) {
+        available.field.push(field);
+      }
+    });
 
     masterdata.country.forEach((country) => {
       if (projectCountries.find((c) => c.uuid === country.uuid)) {
@@ -170,14 +174,18 @@ function createItemLists(
       }
     });
 
-    masterdata.discovery.forEach((discovery) => {
-      if (projectDiscoveries.find((d) => d.uuid === discovery.uuid)) {
-        project.discovery[field].push(discovery);
-        selected.discovery.push(discovery.uuid);
-      } else {
-        available.discovery[field].push(discovery);
-      }
-    });
+    if (fieldGroup in project.discovery) {
+      masterdata.discovery.forEach((discovery) => {
+        if (projectDiscoveries.find((d) => d.uuid === discovery.uuid)) {
+          project.discovery[fieldGroup].push(discovery);
+          selected.discovery.push(discovery.uuid);
+        } else {
+          available.discovery[fieldGroup].push(discovery);
+        }
+      });
+    } else {
+      available.discovery[fieldGroup].push(...masterdata.discovery);
+    }
   });
 
   // Detection of country orphans are currently not implemented
@@ -493,6 +501,44 @@ export function Edit({
               <FieldsContainer>
                 <PageHeader $variant="h4">Project masterdata</PageHeader>
                 <PageHeader $variant="h4">Available masterdata</PageHeader>
+
+                <form.AppField name="field" mode="array">
+                  {(field) => (
+                    <>
+                      <div>
+                        <Label label="Field" htmlFor={field.name} />
+                        <ItemsContainer>
+                          {smdaMasterdata.isSuccess && (
+                            <Items
+                              fields={field.state.value.map(
+                                (f) => f.identifier,
+                              )}
+                              itemLists={projectItems}
+                              itemType="field"
+                              operation="removal"
+                            />
+                          )}
+                        </ItemsContainer>
+                      </div>
+                      <div>
+                        <Label label="Field" />
+                        <ItemsContainer>
+                          {smdaMasterdata.isSuccess && (
+                            <Items
+                              fields={smdaFields ?? []}
+                              selectedFields={field.state.value.map(
+                                (f) => f.identifier,
+                              )}
+                              itemLists={availableItems}
+                              itemType="field"
+                              operation="addition"
+                            />
+                          )}
+                        </ItemsContainer>
+                      </div>
+                    </>
+                  )}
+                </form.AppField>
 
                 <form.AppField name="country" mode="array">
                   {(field) => (
