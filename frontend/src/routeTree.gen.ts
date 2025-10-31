@@ -13,7 +13,7 @@
 import { Route as rootRoute } from "./routes/__root";
 import { Route as IndexImport } from "./routes/index";
 import { Route as ProjectIndexImport } from "./routes/project/index";
-import { Route as UserKeysImport } from "./routes/user/keys";
+import { Route as UserSettingsKeysImport } from "./routes/user-settings/keys";
 import { Route as ProjectMasterdataImport } from "./routes/project/masterdata";
 
 // Create/Update Routes
@@ -30,9 +30,9 @@ const ProjectIndexRoute = ProjectIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
-const UserKeysRoute = UserKeysImport.update({
-  id: "/user/keys",
-  path: "/user/keys",
+const UserSettingsKeysRoute = UserSettingsKeysImport.update({
+  id: "/user-settings/keys",
+  path: "/user-settings/keys",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -60,11 +60,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ProjectMasterdataImport;
       parentRoute: typeof rootRoute;
     };
-    "/user/keys": {
-      id: "/user/keys";
-      path: "/user/keys";
-      fullPath: "/user/keys";
-      preLoaderRoute: typeof UserKeysImport;
+    "/user-settings/keys": {
+      id: "/user-settings/keys";
+      path: "/user-settings/keys";
+      fullPath: "/user-settings/keys";
+      preLoaderRoute: typeof UserSettingsKeysImport;
       parentRoute: typeof rootRoute;
     };
     "/project/": {
@@ -82,14 +82,14 @@ declare module "@tanstack/react-router" {
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/user/keys": typeof UserKeysRoute;
+  "/user-settings/keys": typeof UserSettingsKeysRoute;
   "/project": typeof ProjectIndexRoute;
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/user/keys": typeof UserKeysRoute;
+  "/user-settings/keys": typeof UserSettingsKeysRoute;
   "/project": typeof ProjectIndexRoute;
 }
 
@@ -97,30 +97,35 @@ export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/user/keys": typeof UserKeysRoute;
+  "/user-settings/keys": typeof UserSettingsKeysRoute;
   "/project/": typeof ProjectIndexRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/project/masterdata" | "/user/keys" | "/project";
+  fullPaths: "/" | "/project/masterdata" | "/user-settings/keys" | "/project";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/project/masterdata" | "/user/keys" | "/project";
-  id: "__root__" | "/" | "/project/masterdata" | "/user/keys" | "/project/";
+  to: "/" | "/project/masterdata" | "/user-settings/keys" | "/project";
+  id:
+    | "__root__"
+    | "/"
+    | "/project/masterdata"
+    | "/user-settings/keys"
+    | "/project/";
   fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
-  UserKeysRoute: typeof UserKeysRoute;
+  UserSettingsKeysRoute: typeof UserSettingsKeysRoute;
   ProjectIndexRoute: typeof ProjectIndexRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProjectMasterdataRoute: ProjectMasterdataRoute,
-  UserKeysRoute: UserKeysRoute,
+  UserSettingsKeysRoute: UserSettingsKeysRoute,
   ProjectIndexRoute: ProjectIndexRoute,
 };
 
@@ -136,7 +141,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/project/masterdata",
-        "/user/keys",
+        "/user-settings/keys",
         "/project/"
       ]
     },
@@ -146,8 +151,8 @@ export const routeTree = rootRoute
     "/project/masterdata": {
       "filePath": "project/masterdata.tsx"
     },
-    "/user/keys": {
-      "filePath": "user/keys.tsx"
+    "/user-settings/keys": {
+      "filePath": "user-settings/keys.tsx"
     },
     "/project/": {
       "filePath": "project/index.tsx"

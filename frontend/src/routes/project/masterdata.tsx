@@ -43,7 +43,7 @@ function SubscriptionKeyPresence() {
       ) : (
         <>
           ⛔ An SMDA <strong>subscription key</strong> is not present, please{" "}
-          <Link to="/user/keys" hash="smda_subscription">
+          <Link to="/user-settings/keys" hash="smda_subscription">
             add this key
           </Link>
         </>
