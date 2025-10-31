@@ -32,11 +32,11 @@ export function Sidebar() {
             />
           ))}
         </EdsSideBar.Accordion>
-        <EdsSideBar.Accordion label="User" icon={account_circle}>
+        <EdsSideBar.Accordion label="User settings" icon={account_circle}>
           <EdsSideBar.AccordionItem
             label="API keys"
             as={Link}
-            to="/user/keys"
+            to="/user-settings/keys"
           />
         </EdsSideBar.Accordion>
       </EdsSideBar.Content>

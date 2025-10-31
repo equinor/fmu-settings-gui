@@ -24,7 +24,7 @@ import {
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
 import { KeysFormContainer } from "./keys.style";
 
-export const Route = createFileRoute("/user/keys")({
+export const Route = createFileRoute("/user-settings/keys")({
   component: RouteComponent,
 });
 
