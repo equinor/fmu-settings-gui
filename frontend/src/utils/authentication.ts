@@ -17,6 +17,7 @@ import {
   Options,
   SessionCreateSessionData,
   SessionPatchAccessTokenData,
+  SessionResponse,
 } from "#client";
 import { ssoScopes } from "#config";
 import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
@@ -88,13 +89,13 @@ export function isExternalApi(
 
 export async function createSessionAsync(
   createSessionMutateAsync: UseMutateAsyncFunction<
-    Message,
+    SessionResponse,
     AxiosError,
     Options<SessionCreateSessionData>
   >,
   apiToken: string,
 ) {
-  await createSessionMutateAsync({
+  return await createSessionMutateAsync({
     headers: { [APITOKEN_HEADER]: apiToken },
   });
 }

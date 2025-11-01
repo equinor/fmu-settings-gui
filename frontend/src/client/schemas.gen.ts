@@ -178,7 +178,7 @@ export const FMUProjectSchema = {
             examples: ['project.2038.02.02']
         },
         config: {
-            '$ref': '#/components/schemas/ProjectConfig',
+            '$ref': '#/components/schemas/ProjectConfig-Output',
             description: "The configuration of an FMU project's .fmu directory."
         },
         is_read_only: {
@@ -271,7 +271,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.3.3.dev1+g0cc9b0624'
+            default: '0.5.5.dev2+ga914b68e2'
         }
     },
     type: 'object',
@@ -370,7 +370,20 @@ export const LockStatusSchema = {
     description: 'Information about the project lock status.'
 } as const;
 
-export const MasterdataSchema = {
+export const Masterdata_InputSchema = {
+    properties: {
+        smda: {
+            '$ref': '#/components/schemas/Smda'
+        }
+    },
+    type: 'object',
+    required: ['smda'],
+    title: 'Masterdata',
+    description: `The \`\`masterdata\`\` block contains information related to masterdata.
+Currently, SMDA holds the masterdata.`
+} as const;
+
+export const Masterdata_OutputSchema = {
     properties: {
         smda: {
             '$ref': '#/components/schemas/Smda'
@@ -449,7 +462,7 @@ export const OkSchema = {
     description: 'Returns "ok" if the route is functioning correctly.'
 } as const;
 
-export const ProjectConfigSchema = {
+export const ProjectConfig_InputSchema = {
     properties: {
         version: {
             type: 'string',
@@ -468,7 +481,7 @@ export const ProjectConfigSchema = {
         masterdata: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/Masterdata'
+                    '$ref': '#/components/schemas/Masterdata-Input'
                 },
                 {
                     type: 'null'
@@ -494,6 +507,12 @@ export const ProjectConfigSchema = {
                     type: 'null'
                 }
             ]
+        },
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            default: 5
         }
     },
     type: 'object',
@@ -502,6 +521,99 @@ export const ProjectConfigSchema = {
     description: `The configuration file in a .fmu directory.
 
 Stored as config.json.`
+} as const;
+
+export const ProjectConfig_OutputSchema = {
+    properties: {
+        version: {
+            type: 'string',
+            pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
+            title: 'Version'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        created_by: {
+            type: 'string',
+            title: 'Created By'
+        },
+        masterdata: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/Masterdata-Output'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        model: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/Model'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        access: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/Access'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            default: 5
+        }
+    },
+    type: 'object',
+    required: ['version', 'created_at', 'created_by'],
+    title: 'ProjectConfig',
+    description: `The configuration file in a .fmu directory.
+
+Stored as config.json.`
+} as const;
+
+export const SessionResponseSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            title: 'Id',
+            description: 'Session identifier.'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At',
+            description: 'Timestamp when the session was created.'
+        },
+        expires_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Expires At',
+            description: 'Timestamp when the session will expire.'
+        },
+        last_accessed: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Last Accessed',
+            description: 'Timestamp when the session was last accessed.'
+        }
+    },
+    type: 'object',
+    required: ['id', 'created_at', 'expires_at', 'last_accessed'],
+    title: 'SessionResponse',
+    description: 'Serializable representation of the current session.'
 } as const;
 
 export const SmdaSchema = {
@@ -682,7 +794,28 @@ export const StratigraphicColumnSchema = {
 stratigraphic column known to SMDA.`
 } as const;
 
-export const UserAPIKeysSchema = {
+export const UserAPIKeys_InputSchema = {
+    properties: {
+        smda_subscription: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'password',
+                    writeOnly: true
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Smda Subscription'
+        }
+    },
+    type: 'object',
+    title: 'UserAPIKeys',
+    description: 'Known API keys stored in a user config.'
+} as const;
+
+export const UserAPIKeys_OutputSchema = {
     properties: {
         smda_subscription: {
             anyOf: [
@@ -713,8 +846,14 @@ export const UserConfigSchema = {
             format: 'date-time',
             title: 'Created At'
         },
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            default: 5
+        },
         user_api_keys: {
-            '$ref': '#/components/schemas/UserAPIKeys'
+            '$ref': '#/components/schemas/UserAPIKeys-Output'
         },
         recent_project_directories: {
             items: {
