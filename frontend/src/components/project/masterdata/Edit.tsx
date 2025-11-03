@@ -239,7 +239,7 @@ function Items({
   operation: ListOperation;
 }) {
   const fieldContext = useFieldContext();
-  const groups = itemType === "discovery" ? fields : ["none"];
+  const groups = itemType === "discovery" ? fields.sort() : ["none"];
 
   if (Object.keys(itemLists).length === 0) {
     return;
