@@ -2,12 +2,18 @@ import { Button, DotProgress, Tooltip } from "@equinor/eds-core-react";
 
 export function GeneralButton({
   label,
+  disabled,
   onClick,
 }: {
   label: string;
+  disabled?: boolean;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
-  return <Button onClick={onClick}>{label}</Button>;
+  return (
+    <Button aria-disabled={disabled} onClick={onClick}>
+      {label}
+    </Button>
+  );
 }
 
 export function SubmitButton({

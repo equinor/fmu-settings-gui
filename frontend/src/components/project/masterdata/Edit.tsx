@@ -1,4 +1,11 @@
-import { Dialog, Icon, Label, List, Typography } from "@equinor/eds-core-react";
+import {
+  Button,
+  Dialog,
+  Icon,
+  Label,
+  List,
+  Typography,
+} from "@equinor/eds-core-react";
 import { arrow_back, arrow_forward } from "@equinor/eds-icons";
 import {
   AnyFieldMetaBase,
@@ -57,6 +64,7 @@ import {
   ItemsContainer,
   OrphanTypesContainer,
 } from "./Edit.style";
+import { Field } from "./Field";
 
 Icon.add({ arrow_back, arrow_forward });
 
@@ -282,7 +290,7 @@ function Items({
                           : undefined
                       }
                     >
-                      {operation === "addition" ? (
+                      {isSelectedField && operation === "addition" ? (
                         <Icon name="arrow_back" />
                       ) : (
                         ""
@@ -317,6 +325,7 @@ export function Edit({
   isOpen: boolean;
   closeDialog: () => void;
 }) {
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [smdaFields, setSmdaFields] = useState<Array<string> | undefined>();
   const [smdaReferenceData, setSmdaReferenceData] = useState<
     SmdaReferenceData | undefined
@@ -458,6 +467,28 @@ export function Edit({
     closeDialog();
   }
 
+  function openSearchDialog() {
+    setSearchDialogOpen(true);
+  }
+
+  function closeSearchDialog() {
+    setSearchDialogOpen(false);
+  }
+
+  function addFields(fields: Array<string>) {
+    setSmdaFields((smdaFields) =>
+      fields
+        .reduce((acc, curr) => {
+          if (!acc.includes(curr)) {
+            acc.push(curr);
+          }
+
+          return acc;
+        }, smdaFields ?? [])
+        .sort((a, b) => stringCompare(a, b)),
+    );
+  }
+
   const mutationCallback = ({
     formValue,
     formSubmitCallback,
@@ -485,30 +516,36 @@ export function Edit({
   };
 
   return (
-    <EditDialog open={isOpen}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
-        }}
-      >
-        <Dialog.Header>Edit masterdata</Dialog.Header>
+    <>
+      <Field
+        isOpen={searchDialogOpen}
+        addFields={addFields}
+        closeDialog={closeSearchDialog}
+      />
 
-        <Dialog.CustomContent>
-          <form.Subscribe selector={(state) => state.values.field}>
-            {(fieldList) => (
-              <FieldsContainer>
-                <PageHeader $variant="h4">Project masterdata</PageHeader>
-                <PageHeader $variant="h4">Available masterdata</PageHeader>
+      <EditDialog open={isOpen}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void form.handleSubmit();
+          }}
+        >
+          <Dialog.Header>Edit masterdata</Dialog.Header>
 
-                <form.AppField name="field" mode="array">
-                  {(field) => (
-                    <>
-                      <div>
-                        <Label label="Field" htmlFor={field.name} />
-                        <ItemsContainer>
-                          {smdaMasterdata.isSuccess && (
+          <Dialog.CustomContent>
+            <form.Subscribe selector={(state) => state.values.field}>
+              {(fieldList) => (
+                <FieldsContainer>
+                  <PageHeader $variant="h4">Project masterdata</PageHeader>
+                  <PageHeader $variant="h4">Available masterdata</PageHeader>
+
+                  <form.AppField name="field" mode="array">
+                    {(field) => (
+                      <>
+                        <div>
+                          <Label label="Field" htmlFor={field.name} />
+                          <ItemsContainer>
                             <Items
                               fields={field.state.value.map(
                                 (f) => f.identifier,
@@ -517,13 +554,11 @@ export function Edit({
                               itemType="field"
                               operation="removal"
                             />
-                          )}
-                        </ItemsContainer>
-                      </div>
-                      <div>
-                        <Label label="Field" />
-                        <ItemsContainer>
-                          {smdaMasterdata.isSuccess && (
+                          </ItemsContainer>
+                        </div>
+                        <div>
+                          <Label label="Field" />
+                          <ItemsContainer>
                             <Items
                               fields={smdaFields ?? []}
                               selectedFields={field.state.value.map(
@@ -533,33 +568,36 @@ export function Edit({
                               itemType="field"
                               operation="addition"
                             />
-                          )}
-                        </ItemsContainer>
-                      </div>
-                    </>
-                  )}
-                </form.AppField>
+                          </ItemsContainer>
+                        </div>
+                      </>
+                    )}
+                  </form.AppField>
 
-                <form.AppField name="country" mode="array">
-                  {(field) => (
-                    <>
-                      <div>
-                        <Label label="Country" htmlFor={field.name} />
-                        <ItemsContainer>
-                          {smdaMasterdata.isSuccess && (
+                  <div></div>
+                  <div>
+                    <Button variant="outlined" onClick={openSearchDialog}>
+                      Search for fields
+                    </Button>
+                  </div>
+
+                  <form.AppField name="country" mode="array">
+                    {(field) => (
+                      <>
+                        <div>
+                          <Label label="Country" htmlFor={field.name} />
+                          <ItemsContainer>
                             <Items
                               fields={fieldList.map((f) => f.identifier)}
                               itemLists={projectItems}
                               itemType="country"
                               operation="removal"
                             />
-                          )}
-                        </ItemsContainer>
-                      </div>
-                      <div>
-                        <Label label="Country" />
-                        <ItemsContainer>
-                          {smdaMasterdata.isSuccess && (
+                          </ItemsContainer>
+                        </div>
+                        <div>
+                          <Label label="Country" />
+                          <ItemsContainer>
                             <Items
                               fields={smdaFields ?? []}
                               selectedFields={fieldList.map(
@@ -569,173 +607,171 @@ export function Edit({
                               itemType="country"
                               operation="addition"
                             />
-                          )}
-                        </ItemsContainer>
-                      </div>
-                    </>
-                  )}
-                </form.AppField>
+                          </ItemsContainer>
+                        </div>
+                      </>
+                    )}
+                  </form.AppField>
 
-                <form.AppField
-                  name="coordinate_system"
-                  validators={{
-                    onChange:
-                      undefined /* Resets any errors set by setFieldMeta */,
-                  }}
-                >
-                  {(field) => (
-                    <>
-                      <field.Select
-                        label="Coordinate system"
-                        value={field.state.value.uuid}
-                        options={identifierUuidArrayToOptionsArray([
-                          emptyIdentifierUuid() as CoordinateSystem,
-                          ...(smdaReferenceData?.coordinateSystems ?? []),
-                        ])}
-                        loadingOptions={smdaMasterdata.isPending}
-                        onChange={(value) => {
-                          field.handleChange(
-                            findOptionValueInIdentifierUuidArray(
-                              smdaReferenceData?.coordinateSystems ?? [],
-                              value,
-                            ) ?? (emptyIdentifierUuid() as CoordinateSystem),
-                          );
-                        }}
-                      ></field.Select>
-                      <div></div>
-                    </>
-                  )}
-                </form.AppField>
-
-                <form.AppField
-                  name="stratigraphic_column"
-                  validators={{
-                    onChange:
-                      undefined /* Resets any errors set by setFieldMeta */,
-                  }}
-                >
-                  {(field) => (
-                    <>
-                      <field.Select
-                        label="Stratigraphic column"
-                        value={field.state.value.uuid}
-                        options={identifierUuidArrayToOptionsArray([
-                          emptyIdentifierUuid() as StratigraphicColumn,
-                          ...(smdaReferenceData?.stratigraphicColumnsOptions ??
-                            []),
-                        ])}
-                        loadingOptions={smdaMasterdata.isPending}
-                        onChange={(value) => {
-                          field.handleChange(
-                            findOptionValueInIdentifierUuidArray(
-                              smdaReferenceData?.stratigraphicColumns ?? [],
-                              value,
-                            ) ?? (emptyIdentifierUuid() as StratigraphicColumn),
-                          );
-                        }}
-                      />
-                      <div></div>
-                    </>
-                  )}
-                </form.AppField>
-
-                <form.AppField
-                  name="discovery"
-                  mode="array"
-                  listeners={{
-                    onSubmit: ({ fieldApi }) => {
-                      if (orphanItems.discovery.length > 0) {
-                        handleNameUuidListOperation(
-                          fieldApi,
-                          "removal",
-                          orphanItems.discovery,
-                        );
-                      }
-                    },
-                  }}
-                >
-                  {(field) => (
-                    <>
-                      <div>
-                        <Label label="Discoveries" htmlFor={field.name} />
-                        <ItemsContainer>
-                          {smdaMasterdata.isSuccess && (
-                            <Items
-                              fields={fieldList.map((f) => f.identifier)}
-                              itemLists={projectItems}
-                              itemType="discovery"
-                              operation="removal"
-                            />
-                          )}
-                        </ItemsContainer>
-
-                        {"discovery" in orphanItems &&
-                          orphanItems.discovery.length > 0 && (
-                            <OrphanTypesContainer>
-                              <PageText>
-                                The following discoveries are currently present
-                                in the project masterdata but they belong to
-                                fields which are not present there. They will be
-                                removed when the project masterdata is saved.
-                              </PageText>
-                              <PageList>
-                                {orphanItems.discovery.map<React.ReactNode>(
-                                  (discovery) => (
-                                    <List.Item key={discovery.uuid}>
-                                      {discovery.short_identifier}
-                                    </List.Item>
-                                  ),
-                                )}
-                              </PageList>
-                            </OrphanTypesContainer>
-                          )}
-                      </div>
-                      <div>
-                        <Label label="Discoveries" />
-                        <ItemsContainer>
-                          {smdaMasterdata.isSuccess && (
-                            <Items
-                              fields={smdaFields ?? []}
-                              selectedFields={fieldList.map(
-                                (f) => f.identifier,
-                              )}
-                              itemLists={availableItems}
-                              itemType="discovery"
-                              operation="addition"
-                            />
-                          )}
-                        </ItemsContainer>
-                      </div>
-                    </>
-                  )}
-                </form.AppField>
-              </FieldsContainer>
-            )}
-          </form.Subscribe>
-        </Dialog.CustomContent>
-
-        <Dialog.Actions>
-          <form.AppForm>
-            <form.Subscribe selector={(state) => state.canSubmit}>
-              {(canSubmit) => (
-                <>
-                  <form.SubmitButton
-                    label="Save"
-                    disabled={!canSubmit || smdaMasterdata.isPending}
-                    isPending={masterdataMutation.isPending}
-                  />
-
-                  <form.CancelButton
-                    onClick={() => {
-                      handleClose({ formReset: form.reset });
+                  <form.AppField
+                    name="coordinate_system"
+                    validators={{
+                      onChange:
+                        undefined /* Resets any errors set by setFieldMeta */,
                     }}
-                  />
-                </>
+                  >
+                    {(field) => (
+                      <>
+                        <field.Select
+                          label="Coordinate system"
+                          value={field.state.value.uuid}
+                          options={identifierUuidArrayToOptionsArray([
+                            emptyIdentifierUuid() as CoordinateSystem,
+                            ...(smdaReferenceData?.coordinateSystems ?? []),
+                          ])}
+                          loadingOptions={smdaMasterdata.isPending}
+                          onChange={(value) => {
+                            field.handleChange(
+                              findOptionValueInIdentifierUuidArray(
+                                smdaReferenceData?.coordinateSystems ?? [],
+                                value,
+                              ) ?? (emptyIdentifierUuid() as CoordinateSystem),
+                            );
+                          }}
+                        ></field.Select>
+                        <div></div>
+                      </>
+                    )}
+                  </form.AppField>
+
+                  <form.AppField
+                    name="stratigraphic_column"
+                    validators={{
+                      onChange:
+                        undefined /* Resets any errors set by setFieldMeta */,
+                    }}
+                  >
+                    {(field) => (
+                      <>
+                        <field.Select
+                          label="Stratigraphic column"
+                          value={field.state.value.uuid}
+                          options={identifierUuidArrayToOptionsArray([
+                            emptyIdentifierUuid() as StratigraphicColumn,
+                            ...(smdaReferenceData?.stratigraphicColumnsOptions ??
+                              []),
+                          ])}
+                          loadingOptions={smdaMasterdata.isPending}
+                          onChange={(value) => {
+                            field.handleChange(
+                              findOptionValueInIdentifierUuidArray(
+                                smdaReferenceData?.stratigraphicColumns ?? [],
+                                value,
+                              ) ??
+                                (emptyIdentifierUuid() as StratigraphicColumn),
+                            );
+                          }}
+                        />
+                        <div></div>
+                      </>
+                    )}
+                  </form.AppField>
+
+                  <form.AppField
+                    name="discovery"
+                    mode="array"
+                    listeners={{
+                      onSubmit: ({ fieldApi }) => {
+                        if (orphanItems.discovery.length > 0) {
+                          handleNameUuidListOperation(
+                            fieldApi,
+                            "removal",
+                            orphanItems.discovery,
+                          );
+                        }
+                      },
+                    }}
+                  >
+                    {(field) => (
+                      <>
+                        <div>
+                          <Label label="Discoveries" htmlFor={field.name} />
+                          <ItemsContainer>
+                            <Items
+                              fields={fieldList.map((f) => f.identifier)}
+                              itemLists={projectItems}
+                              itemType="discovery"
+                              operation="removal"
+                            />
+                          </ItemsContainer>
+
+                          {"discovery" in orphanItems &&
+                            orphanItems.discovery.length > 0 && (
+                              <OrphanTypesContainer>
+                                <PageText>
+                                  The following discoveries are currently
+                                  present in the project masterdata but they
+                                  belong to fields which are not present there.
+                                  They will be removed when the project
+                                  masterdata is saved.
+                                </PageText>
+                                <PageList>
+                                  {orphanItems.discovery.map<React.ReactNode>(
+                                    (discovery) => (
+                                      <List.Item key={discovery.uuid}>
+                                        {discovery.short_identifier}
+                                      </List.Item>
+                                    ),
+                                  )}
+                                </PageList>
+                              </OrphanTypesContainer>
+                            )}
+                        </div>
+                        <div>
+                          <Label label="Discoveries" />
+                          <ItemsContainer>
+                            <Items
+                              fields={smdaFields ?? []}
+                              selectedFields={fieldList.map(
+                                (f) => f.identifier,
+                              )}
+                              itemLists={availableItems}
+                              itemType="discovery"
+                              operation="addition"
+                            />
+                          </ItemsContainer>
+                        </div>
+                      </>
+                    )}
+                  </form.AppField>
+                </FieldsContainer>
               )}
             </form.Subscribe>
-          </form.AppForm>
-        </Dialog.Actions>
-      </form>
-    </EditDialog>
+          </Dialog.CustomContent>
+
+          <Dialog.Actions>
+            <form.AppForm>
+              <form.Subscribe selector={(state) => state.canSubmit}>
+                {(canSubmit) => (
+                  <>
+                    <form.SubmitButton
+                      label="Save"
+                      disabled={!canSubmit || smdaMasterdata.isPending}
+                      isPending={masterdataMutation.isPending}
+                    />
+
+                    <form.CancelButton
+                      onClick={() => {
+                        handleClose({ formReset: form.reset });
+                      }}
+                    />
+                  </>
+                )}
+              </form.Subscribe>
+            </form.AppForm>
+          </Dialog.Actions>
+        </form>
+      </EditDialog>
+    </>
   );
 }
