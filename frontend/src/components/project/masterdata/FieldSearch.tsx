@@ -122,7 +122,7 @@ export function FieldSearch({
   };
 
   return (
-    <EditDialog open={isOpen}>
+    <EditDialog open={isOpen} $maxWidth="200em">
       <Dialog.Header>Field search</Dialog.Header>
 
       <Dialog.CustomContent>

@@ -513,7 +513,7 @@ export function Edit({
         closeDialog={closeSearchDialog}
       />
 
-      <EditDialog open={isOpen}>
+      <EditDialog open={isOpen} $maxWidth="200em">
         <form
           onSubmit={(e) => {
             e.preventDefault();
