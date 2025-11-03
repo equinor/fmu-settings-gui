@@ -13,7 +13,10 @@ import { CancelButton, GeneralButton } from "#components/form/button";
 import { SearchFieldForm } from "#components/form/form";
 import { EditDialog, PageSectionSpacer, PageText } from "#styles/common";
 import { stringCompare } from "#utils/string";
-import { SearchFormContainer, SearchResultsContainer } from "./Field.style";
+import {
+  SearchFormContainer,
+  SearchResultsContainer,
+} from "./FieldSearch.style";
 
 function FieldResults({
   data,
@@ -92,7 +95,7 @@ function FieldResults({
   );
 }
 
-export function Field({
+export function FieldSearch({
   isOpen,
   addFields,
   closeDialog,

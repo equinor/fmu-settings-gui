@@ -64,7 +64,7 @@ import {
   ItemsContainer,
   OrphanTypesContainer,
 } from "./Edit.style";
-import { Field } from "./Field";
+import { FieldSearch } from "./FieldSearch";
 
 Icon.add({ arrow_back, arrow_forward });
 
@@ -517,7 +517,7 @@ export function Edit({
 
   return (
     <>
-      <Field
+      <FieldSearch
         isOpen={searchDialogOpen}
         addFields={addFields}
         closeDialog={closeSearchDialog}
