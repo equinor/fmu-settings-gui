@@ -337,14 +337,6 @@ export function Edit({
   const [orphanItems, setOrphanItems] = useState<OrphanItemLists>(
     {} as OrphanItemLists,
   );
-  console.log(
-    "===> projectItems =",
-    projectItems,
-    "availableItems =",
-    availableItems,
-    "orphanItems =",
-    orphanItems,
-  );
 
   const queryClient = useQueryClient();
 
@@ -424,9 +416,7 @@ export function Edit({
 
   useEffect(() => {
     if (smdaFields !== undefined && smdaMasterdata.isSuccess) {
-      // console.log("  ::: smdaMasterdata.data =", smdaMasterdata.data);
       const refData = createReferenceData(smdaMasterdata.data);
-      // console.log("  ::: refData =", refData);
       setSmdaReferenceData(refData);
       setErrorUnknownInitialValue(
         form.setFieldMeta,
