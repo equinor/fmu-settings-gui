@@ -128,7 +128,7 @@ function SmdaNotOk({ text }: { text: string }) {
 }
 
 function Content() {
-  const { data: project } = useProject();
+  const project = useProject();
   const { data: healthOk } = useSmdaHealthCheck();
 
   if (!project.status) {

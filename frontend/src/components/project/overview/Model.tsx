@@ -195,6 +195,8 @@ export function EditableModelInfo({
 
       <GeneralButton
         label={modelData ? "Edit" : "Add"}
+        disabled={projectData.is_read_only}
+        tooltipText={projectData.is_read_only ? "Project is read-only" : ""}
         onClick={() => {
           setIsDialogOpen(true);
         }}

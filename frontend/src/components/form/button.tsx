@@ -3,16 +3,20 @@ import { Button, DotProgress, Tooltip } from "@equinor/eds-core-react";
 export function GeneralButton({
   label,
   disabled,
+  tooltipText,
   onClick,
 }: {
   label: string;
   disabled?: boolean;
+  tooltipText?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
-    <Button aria-disabled={disabled} onClick={onClick}>
-      {label}
-    </Button>
+    <Tooltip title={tooltipText ?? ""}>
+      <Button onClick={onClick} aria-disabled={disabled}>
+        {label}
+      </Button>
+    </Tooltip>
   );
 }
 

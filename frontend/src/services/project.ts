@@ -1,4 +1,8 @@
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 
 import {
@@ -7,17 +11,23 @@ import {
   ProjectGetProjectData,
   projectGetProject,
 } from "#client";
-import { projectGetProjectQueryKey } from "#client/@tanstack/react-query.gen";
+import {
+  projectGetLockStatusOptions,
+  projectGetProjectQueryKey,
+} from "#client/@tanstack/react-query.gen";
+import { LockStatus } from "#client/types.gen";
+import { projectLockStatusRefetchInterval } from "#config";
 import { HTTP_STATUS_UNAUTHORIZED } from "#utils/api";
 
 type GetProject = {
   status: boolean;
   text?: string;
   data?: FmuProject;
+  lockStatus?: LockStatus;
 };
 
 export function useProject(options?: Options<ProjectGetProjectData>) {
-  return useSuspenseQuery(
+  const { data: project } = useSuspenseQuery(
     queryOptions({
       queryFn: async ({ queryKey, signal }) => {
         try {
@@ -48,4 +58,15 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
       queryKey: projectGetProjectQueryKey(options),
     }),
   );
+
+  const { data: lockStatus } = useQuery({
+    ...projectGetLockStatusOptions(),
+    refetchInterval: projectLockStatusRefetchInterval,
+    enabled: project.status && project.data !== undefined,
+  });
+
+  return {
+    ...project,
+    lockStatus,
+  } as GetProject;
 }

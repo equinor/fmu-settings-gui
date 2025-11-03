@@ -12,3 +12,5 @@ export const msalConfig: Configuration = {
 export const ssoScopes = [
   "691a29c5-8199-4e87-80a2-16bd71e831cd/user_impersonation", // SMDA
 ];
+
+export const projectLockStatusRefetchInterval = 300_000; // 5 minutes
