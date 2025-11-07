@@ -50,7 +50,7 @@ import {
 } from "#utils/api";
 import {
   fieldContext,
-  findOptionValueInIdentifierUuidArray,
+  findOptionValueInNameUuidArray,
   formContext,
   handleNameUuidListOperation,
   identifierUuidArrayToOptionsArray,
@@ -209,14 +209,14 @@ function createItemLists(
 function setErrorUnknownInitialValue(
   setFieldMeta: (field: keyof Smda, updater: Updater<AnyFieldMetaBase>) => void,
   field: keyof Smda,
-  identifierUuidArray: IdentifierUuidType[],
+  array: IdentifierUuidType[],
   initialValue: IdentifierUuidType,
 ): void {
   setFieldMeta(field, (meta) => ({
     ...meta,
     errorMap: {
-      onChange: findOptionValueInIdentifierUuidArray(
-        identifierUuidArray,
+      onChange: findOptionValueInNameUuidArray(
+        [emptyIdentifierUuid(), ...array],
         initialValue.uuid,
       )
         ? undefined
@@ -622,7 +622,7 @@ export function Edit({
                           loadingOptions={smdaMasterdata.isPending}
                           onChange={(value) => {
                             field.handleChange(
-                              findOptionValueInIdentifierUuidArray(
+                              findOptionValueInNameUuidArray(
                                 smdaReferenceData?.coordinateSystems ?? [],
                                 value,
                               ) ?? (emptyIdentifierUuid() as CoordinateSystem),
@@ -654,7 +654,7 @@ export function Edit({
                           loadingOptions={smdaMasterdata.isPending}
                           onChange={(value) => {
                             field.handleChange(
-                              findOptionValueInIdentifierUuidArray(
+                              findOptionValueInNameUuidArray(
                                 smdaReferenceData?.stratigraphicColumns ?? [],
                                 value,
                               ) ??

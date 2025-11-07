@@ -7,9 +7,13 @@ import {
   StratigraphicColumn,
 } from "#client";
 
-export type NameUuidType = CountryItem | DiscoveryItem;
+export type IdentifierUuidType =
+  | CoordinateSystem
+  | CountryItem
+  | FieldItem
+  | StratigraphicColumn;
 
-export type IdentifierUuidType = CoordinateSystem | StratigraphicColumn;
+export type NameUuidType = IdentifierUuidType | DiscoveryItem;
 
 export function emptyIdentifierUuid(): IdentifierUuidType {
   return {

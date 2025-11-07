@@ -17,10 +17,10 @@ export function identifierUuidArrayToOptionsArray(
   }));
 }
 
-export function findOptionValueInIdentifierUuidArray(
-  array: IdentifierUuidType[],
+export function findOptionValueInNameUuidArray<T extends NameUuidType>(
+  array: T[],
   value: string,
-): IdentifierUuidType | undefined {
+): T | undefined {
   const result = array.filter((element) => String(element.uuid) === value);
 
   return result.length === 1 ? result[0] : undefined;
