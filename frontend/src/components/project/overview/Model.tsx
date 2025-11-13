@@ -19,7 +19,6 @@ import { TextField } from "#components/form/field";
 import {
   EditDialog,
   InfoBox,
-  InfoChip,
   PageCode,
   PageHeader,
   PageSectionSpacer,
@@ -158,7 +157,7 @@ function ModelInfo({ modelData }: { modelData: Model }) {
           </tr>
           <tr>
             <th>Revision</th>
-            <td>{<InfoChip>{modelData.revision}</InfoChip>}</td>
+            <td>{modelData.revision}</td>
           </tr>
         </tbody>
       </table>
