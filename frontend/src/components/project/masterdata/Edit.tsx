@@ -239,7 +239,8 @@ function Items({
   operation: ListOperation;
 }) {
   const fieldContext = useFieldContext();
-  const groups = itemType === "discovery" ? fields.sort() : ["none"];
+  const groups =
+    itemType === "discovery" && fields.length > 0 ? fields.sort() : ["none"];
 
   if (Object.keys(itemLists).length === 0) {
     return;
@@ -275,36 +276,39 @@ function Items({
                         : b.identifier,
                     ),
                   )
-                  .map<React.ReactNode>((item) => (
-                    <InfoChip
-                      key={item.uuid}
-                      onClick={
-                        isSelectedField
-                          ? () => {
-                              handleNameUuidListOperation(
-                                fieldContext,
-                                operation,
-                                item,
-                              );
-                            }
-                          : undefined
-                      }
-                    >
-                      {isSelectedField && operation === "addition" ? (
-                        <Icon name="arrow_back" />
-                      ) : (
-                        ""
-                      )}
-                      {"short_identifier" in item
+                  .map<React.ReactNode>((item) => {
+                    const contents = [];
+                    if (isSelectedField && operation === "addition") {
+                      contents.push(<Icon name="arrow_back" />);
+                    }
+                    contents.push(
+                      "short_identifier" in item
                         ? item.short_identifier
-                        : item.identifier}
-                      {operation === "removal" ? (
-                        <Icon name="arrow_forward" />
-                      ) : (
-                        ""
-                      )}
-                    </InfoChip>
-                  ))
+                        : item.identifier,
+                    );
+                    if (operation === "removal") {
+                      contents.push(<Icon name="arrow_forward" />);
+                    }
+
+                    return (
+                      <InfoChip
+                        key={item.uuid}
+                        onClick={
+                          isSelectedField
+                            ? () => {
+                                handleNameUuidListOperation(
+                                  fieldContext,
+                                  operation,
+                                  item,
+                                );
+                              }
+                            : undefined
+                        }
+                      >
+                        {...contents}
+                      </InfoChip>
+                    );
+                  })
               ) : (
                 <Typography>none</Typography>
               )}

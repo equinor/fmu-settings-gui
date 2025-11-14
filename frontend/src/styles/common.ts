@@ -60,6 +60,7 @@ export const ChipsContainer = styled.div`
 `;
 
 export const InfoChip = styled(Chip)`
+  padding-left: ${tokens.spacings.comfortable.small};
   background-color: ${tokens.colors.ui.background__medium.hex};
 
   &, svg {
