@@ -145,7 +145,7 @@ export function Select({
           ? { text: loadingOptions ? helperTextLoadingOptions : helperText }
           : {
               className: "errorText",
-              icon: <Icon name="error_filled" title="Error" />,
+              icon: <Icon name="error_filled" title="Error" size={16} />,
               text: field.state.meta.errors
                 .map((err: string) => err)
                 .join(", "),
