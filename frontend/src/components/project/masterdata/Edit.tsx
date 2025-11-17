@@ -104,9 +104,7 @@ function createReferenceData(
     // The list of coordinate systems is the same for all SMDA fields
     coordinateSystems:
       fieldCount > 0
-        ? Object.values(smdaMasterdataGrouped)[0].coordinate_systems.sort(
-            (a, b) => stringCompare(a.identifier, b.identifier),
-          )
+        ? Object.values(smdaMasterdataGrouped)[0].coordinate_systems
         : [],
     stratigraphicColumns: Object.values(smdaMasterdataGrouped)
       .reduce<Array<StratigraphicColumn>>((acc, masterdata) => {
