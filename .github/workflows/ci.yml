@@ -31,44 +31,51 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      
+      - name: Set up Python
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install with dependencies
         if: ${{ always() }}
         run: |
-          pip install -U pip
-          pip install -e ".[dev]"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            uv sync --all-extras --upgrade
+          else
+            uv sync --all-extras --frozen
+          fi
 
       - name: List all installed packages
-        run: pip freeze
+        run: uv pip freeze
 
       - name: Ruff check
         if: ${{ always() }}
-        run: ruff check
+        run: uv run ruff check
 
       - name: Ruff format
         if: ${{ always() }}
-        run: ruff format --check
+        run: uv run ruff format --check
 
       - name: Check typing with mypy
         if: ${{ always() }}
-        run: mypy src tests
+        run: uv run mypy src tests
 
       - name: Run tests
         if: ${{ always() }}
-        run: pytest -n auto tests --cov=src/ --cov-report term-missing
+        run: uv run pytest -n auto tests --cov=src/ --cov-report term-missing
 
   check-sdist:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout commit locally
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -91,21 +98,24 @@ jobs:
       - name: Install with dependencies
         if: ${{ always() }}
         run: |
-          pip install -U pip build
-          pip install -e ".[dev]"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            uv sync --all-extras --upgrade
+          else
+            uv sync --all-extras --frozen
+          fi
 
       - name: List all installed packages
-        run: pip freeze
+        run: uv pip freeze
 
       - name: Ensure pip builds React app
-        run: python -m build -vv
+        run: uv build -v 
 
   check-frontend:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout commit locally
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
