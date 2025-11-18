@@ -82,6 +82,9 @@ function ModelEditorForm({
     defaultValues: {
       modelName: modelData?.name ?? "",
       modelRevision: modelData?.revision ?? "",
+      modelDescription: modelData?.description
+        ? modelData.description.join("\n") // The description is an array of strings.
+        : "",
     },
 
     onSubmit: ({ value, formApi }) => {
@@ -90,6 +93,9 @@ function ModelEditorForm({
           body: {
             name: value.modelName.trim(),
             revision: value.modelRevision.trim(),
+            description: value.modelDescription
+              ? [value.modelDescription.trim()]
+              : undefined,
           },
         },
         {
@@ -103,7 +109,7 @@ function ModelEditorForm({
   });
 
   return (
-    <EditDialog open={isDialogOpen}>
+    <EditDialog open={isDialogOpen} $minWidth="32em">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -134,6 +140,14 @@ function ModelEditorForm({
             }}
           >
             {(field) => <field.TextField label="Revision" />}
+          </form.AppField>
+
+          <PageSectionSpacer />
+
+          <form.AppField name="modelDescription">
+            {(field) => (
+              <field.TextField label="Description" multiline={true} rows={5} />
+            )}
           </form.AppField>
         </Dialog.Content>
 
@@ -173,6 +187,16 @@ function ModelInfo({ modelData }: { modelData: Model }) {
           <tr>
             <th>Revision</th>
             <td>{modelData.revision}</td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <td>
+              {modelData.description ? (
+                <span className="multilineValue">{modelData.description}</span>
+              ) : (
+                <span className="missingValue">none</span>
+              )}
+            </td>
           </tr>
         </tbody>
       </table>
