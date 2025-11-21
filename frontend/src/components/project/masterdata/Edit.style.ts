@@ -2,7 +2,7 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 export const FieldsContainer = styled.div`
-  width: 800px;
+  width: 900px;
   display: grid;
   grid-template-columns: 2fr 1fr;
   column-gap: ${tokens.spacings.comfortable.xx_large};
