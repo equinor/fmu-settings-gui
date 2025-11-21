@@ -72,8 +72,14 @@ type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
 
 type SmdaReferenceData = {
   coordinateSystems: Array<CoordinateSystem>;
+  coordinateSystemsOptions: Array<CoordinateSystem>;
   stratigraphicColumns: Array<StratigraphicColumn>;
   stratigraphicColumnsOptions: Array<StratigraphicColumn>;
+};
+
+type SmdaMasterdataCoordinateSystemFields = {
+  coordinateSystem: CoordinateSystem;
+  fields: Array<FieldItem>;
 };
 
 type ItemType = "country" | "discovery" | "field";
@@ -100,12 +106,55 @@ function createReferenceData(
 ): SmdaReferenceData {
   const fieldCount = Object.keys(smdaMasterdataGrouped).length;
 
+  const defaultCoordinateSystems = Object.values(smdaMasterdataGrouped).reduce<
+    Record<string, SmdaMasterdataCoordinateSystemFields>
+  >((acc, masterdata) => {
+    const csid = masterdata.field_coordinate_system.uuid;
+    if (!(csid in acc)) {
+      acc[csid] = {
+        coordinateSystem: masterdata.field_coordinate_system,
+        fields: [],
+      };
+    }
+    acc[csid].fields = acc[csid].fields
+      .concat(masterdata.field)
+      .sort((a, b) => stringCompare(a.identifier, b.identifier));
+
+    return acc;
+  }, {});
+  const dcsCount = Object.keys(defaultCoordinateSystems).length;
+
+  const dcsOptions = Object.values(defaultCoordinateSystems)
+    .sort((a, b) =>
+      stringCompare(a.fields[0].identifier, b.fields[0].identifier),
+    )
+    .map<CoordinateSystem>((cs) => {
+      const defaultText =
+        dcsCount > 1
+          ? "default for " +
+            cs.fields.map((field) => field.identifier).join(", ")
+          : "default";
+
+      return {
+        ...cs.coordinateSystem,
+        identifier: `${cs.coordinateSystem.identifier} [${defaultText}]`,
+      };
+    });
+
   return {
     // The list of coordinate systems is the same for all SMDA fields
     coordinateSystems:
       fieldCount > 0
-        ? Object.values(smdaMasterdataGrouped)[0].coordinate_systems.sort(
-            (a, b) => stringCompare(a.identifier, b.identifier),
+        ? Object.values(smdaMasterdataGrouped)[0].coordinate_systems
+        : [],
+    coordinateSystemsOptions:
+      fieldCount > 0
+        ? dcsOptions.concat(
+            Object.values(smdaMasterdataGrouped)[0]
+              .coordinate_systems.filter(
+                (cs) => !dcsOptions.some((dcs) => dcs.uuid === cs.uuid),
+              )
+              .sort((a, b) => stringCompare(a.identifier, b.identifier)),
           )
         : [],
     stratigraphicColumns: Object.values(smdaMasterdataGrouped)
@@ -621,7 +670,8 @@ export function Edit({
                           value={field.state.value.uuid}
                           options={identifierUuidArrayToOptionsArray([
                             emptyIdentifierUuid() as CoordinateSystem,
-                            ...(smdaReferenceData?.coordinateSystems ?? []),
+                            ...(smdaReferenceData?.coordinateSystemsOptions ??
+                              []),
                           ])}
                           loadingOptions={smdaMasterdata.isPending}
                           onChange={(value) => {
