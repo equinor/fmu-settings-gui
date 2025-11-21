@@ -35,6 +35,8 @@ const helperTextLoadingOptions = "Loading options...";
 
 export function TextField({
   label,
+  multiline = false,
+  rows,
   placeholder,
   helperText,
   isReadOnly,
@@ -42,6 +44,8 @@ export function TextField({
   setSubmitDisabled,
 }: {
   label: string;
+  multiline?: boolean;
+  rows?: number;
   placeholder?: string;
   helperText?: string;
   isReadOnly?: boolean;
@@ -68,6 +72,8 @@ export function TextField({
         id={field.name}
         name={field.name}
         label={label}
+        multiline={multiline}
+        rows={rows}
         readOnly={isReadOnly}
         value={field.state.value}
         placeholder={placeholder}

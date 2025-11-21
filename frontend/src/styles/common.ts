@@ -51,6 +51,15 @@ export const InfoBox = styled.div`
   td {
     vertical-align: top;
   }
+
+  .missingValue {
+    color: ${tokens.colors.text.static_icons__tertiary.hex};
+    font-style: italic;
+  }
+
+  .multilineValue {
+    white-space: pre-line;
+  }
 `;
 
 export const ChipsContainer = styled.div`

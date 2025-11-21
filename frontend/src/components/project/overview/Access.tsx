@@ -33,6 +33,10 @@ import {
   PageSectionSpacer,
   PageText,
 } from "#styles/common";
+import {
+  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+  httpValidationErrorToString,
+} from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
 import { requiredStringValidator } from "#utils/validator";
 
@@ -69,6 +73,17 @@ function AccessEditorForm({
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
       });
+    },
+    onError: (error) => {
+      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+        const message = httpValidationErrorToString(error);
+        console.error(message);
+        toast.error(message);
+      }
+    },
+    meta: {
+      errorPrefix: "Error saving access information",
+      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
     },
   });
 
