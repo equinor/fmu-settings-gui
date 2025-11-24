@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import {
   projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
+  projectGetRmsProjectsQueryKey,
   projectPostInitProjectMutation,
   projectPostProjectMutation,
   userGetUserOptions,
@@ -80,6 +81,9 @@ function ProjectSelectorForm({
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetRmsProjectsQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),
