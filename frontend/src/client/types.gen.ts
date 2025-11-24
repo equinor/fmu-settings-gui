@@ -233,6 +233,50 @@ export type ProjectConfig = {
     masterdata?: Masterdata | null;
     model?: Model | null;
     access?: Access | null;
+    cache_max_revisions?: number;
+    rms_project_path?: string | null;
+};
+
+/**
+ * Path to an RMS project within the FMU project.
+ */
+export type RmsProjectPath = {
+    /**
+     * Absolute path to the RMS project within the FMU project.
+     */
+    path: string;
+};
+
+/**
+ * List of RMS project paths within the FMU project.
+ */
+export type RmsProjectPathsResult = {
+    /**
+     * List of absolute paths to RMS projects within the FMU project.
+     */
+    results: Array<RmsProjectPath>;
+};
+
+/**
+ * Serializable representation of the current session.
+ */
+export type SessionResponse = {
+    /**
+     * Session identifier.
+     */
+    id: string;
+    /**
+     * Timestamp when the session was created.
+     */
+    created_at: string;
+    /**
+     * Timestamp when the session will expire.
+     */
+    expires_at: string;
+    /**
+     * Timestamp when the session was last accessed.
+     */
+    last_accessed: string;
 };
 
 /**
@@ -324,12 +368,94 @@ export type SmdaMasterdataResult = {
 };
 
 /**
+ * An identifier for a stratigraphic column.
+ */
+export type SmdaStratColumn = {
+    /**
+     * A stratigraphic column identifier.
+     */
+    strat_column_identifier: string;
+};
+
+/**
+ * Result containing a list of stratigraphic units.
+ */
+export type SmdaStratigraphicUnitsResult = {
+    /**
+     * List of stratigraphic units from SMDA.
+     */
+    stratigraphic_units: Array<StratigraphicUnit>;
+};
+
+/**
  * The ``masterdata.smda.stratigraphic_column`` block contains the
  * stratigraphic column known to SMDA.
  */
 export type StratigraphicColumn = {
     identifier: string;
     uuid: string;
+};
+
+/**
+ * Stratigraphic unit item.
+ */
+export type StratigraphicUnit = {
+    /**
+     * The stratigraphic unit identifier (name).
+     */
+    identifier: string;
+    /**
+     * The SMDA UUID identifier corresponding to the stratigraphic unit.
+     */
+    uuid: string;
+    /**
+     * The type of stratigraphic unit.
+     */
+    strat_unit_type: string;
+    /**
+     * The hierarchical level of the stratigraphic unit (1-6).
+     */
+    strat_unit_level: number;
+    /**
+     * The identifier (name) of the stratigraphic unit top pick (horizon).
+     */
+    top: string;
+    /**
+     * The identifier (name) of the stratigraphic unit base pick (horizon).
+     */
+    base: string;
+    /**
+     * The age (in Ma) at the top of the stratigraphic unit.
+     */
+    top_age: number;
+    /**
+     * The age (in Ma) at the base of the stratigraphic unit.
+     */
+    base_age: number;
+    /**
+     * The parent stratigraphic unit identifier, if applicable.
+     */
+    strat_unit_parent: string | null;
+    /**
+     * The type of stratigraphic column this unit belongs to.
+     */
+    strat_column_type: 'lithostratigraphy' | 'sequence stratigraphy' | 'chronostratigraphy' | 'biostratigraphy';
+    /**
+     * The HTML hex color code for visualization.
+     */
+    color_html?: string | null;
+    /**
+     * The red component of the RGB color.
+     */
+    color_r: number | null;
+    /**
+     * The green component of the RGB color.
+     */
+    color_g: number | null;
+    /**
+     * The blue component of the RGB color.
+     */
+    color_b: number | null;
 };
 
 /**
@@ -347,6 +473,7 @@ export type UserApiKeys = {
 export type UserConfig = {
     version: string;
     created_at: string;
+    cache_max_revisions?: number;
     user_api_keys: UserApiKeys;
     recent_project_directories: Array<string>;
 };
@@ -668,6 +795,39 @@ export type ProjectPostLockAcquireResponses = {
 
 export type ProjectPostLockAcquireResponse = ProjectPostLockAcquireResponses[keyof ProjectPostLockAcquireResponses];
 
+export type ProjectPostLockRefreshData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/lock_refresh';
+};
+
+export type ProjectPostLockRefreshErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostLockRefreshError = ProjectPostLockRefreshErrors[keyof ProjectPostLockRefreshErrors];
+
+export type ProjectPostLockRefreshResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostLockRefreshResponse = ProjectPostLockRefreshResponses[keyof ProjectPostLockRefreshResponses];
+
 export type ProjectGetLockStatusData = {
     body?: never;
     path?: never;
@@ -886,6 +1046,108 @@ export type ProjectPatchAccessResponses = {
 
 export type ProjectPatchAccessResponse = ProjectPatchAccessResponses[keyof ProjectPatchAccessResponses];
 
+export type ProjectGetRmsProjectsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/rms_projects';
+};
+
+export type ProjectGetRmsProjectsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetRmsProjectsError = ProjectGetRmsProjectsErrors[keyof ProjectGetRmsProjectsErrors];
+
+export type ProjectGetRmsProjectsResponses = {
+    /**
+     * Successful Response
+     */
+    200: RmsProjectPathsResult;
+};
+
+export type ProjectGetRmsProjectsResponse = ProjectGetRmsProjectsResponses[keyof ProjectGetRmsProjectsResponses];
+
+export type ProjectPatchRmsProjectPathData = {
+    body: RmsProjectPath;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/rms_project_path';
+};
+
+export type ProjectPatchRmsProjectPathErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * A project .fmu directory already exist at a given location, or may
+     * possibly not be a directory, i.e. it may be a .fmu file.
+     *
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchRmsProjectPathError = ProjectPatchRmsProjectPathErrors[keyof ProjectPatchRmsProjectPathErrors];
+
+export type ProjectPatchRmsProjectPathResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchRmsProjectPathResponse = ProjectPatchRmsProjectPathResponses[keyof ProjectPatchRmsProjectPathResponses];
+
 export type UserGetUserData = {
     body?: never;
     path?: never;
@@ -981,6 +1243,39 @@ export type UserPatchApiKeyResponses = {
 
 export type UserPatchApiKeyResponse = UserPatchApiKeyResponses[keyof UserPatchApiKeyResponses];
 
+export type SessionReadSessionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/session/';
+};
+
+export type SessionReadSessionErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type SessionReadSessionError = SessionReadSessionErrors[keyof SessionReadSessionErrors];
+
+export type SessionReadSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: SessionResponse;
+};
+
+export type SessionReadSessionResponse = SessionReadSessionResponses[keyof SessionReadSessionResponses];
+
 export type SessionCreateSessionData = {
     body?: never;
     path?: never;
@@ -1030,7 +1325,7 @@ export type SessionCreateSessionResponses = {
     /**
      * Successful Response
      */
-    200: Message;
+    200: SessionResponse;
 };
 
 export type SessionCreateSessionResponse = SessionCreateSessionResponses[keyof SessionCreateSessionResponses];
@@ -1178,6 +1473,43 @@ export type SmdaPostMasterdataResponses = {
 };
 
 export type SmdaPostMasterdataResponse = SmdaPostMasterdataResponses[keyof SmdaPostMasterdataResponses];
+
+export type SmdaPostStratUnitsData = {
+    body: SmdaStratColumn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/smda/strat_units';
+};
+
+export type SmdaPostStratUnitsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * Occurs when an API call to SMDA times out.
+     */
+    503: unknown;
+};
+
+export type SmdaPostStratUnitsError = SmdaPostStratUnitsErrors[keyof SmdaPostStratUnitsErrors];
+
+export type SmdaPostStratUnitsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SmdaStratigraphicUnitsResult;
+};
+
+export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
 
 export type HealthV1HealthCheckData = {
     body?: never;

@@ -34,6 +34,8 @@ function ProjectInfo({
         <br />
         Path: {projectData.path}
         <br />
+        RMS project: {projectData.config.rms_project_path?.split("rms/model/").pop() ?? "not set"}
+        <br />
         Created: {displayDateTime(projectData.config.created_at)} by{" "}
         {projectData.config.created_by}
         <br />
