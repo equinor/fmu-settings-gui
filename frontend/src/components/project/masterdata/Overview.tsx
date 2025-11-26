@@ -30,7 +30,7 @@ export function Overview({
         <PageText>No masterdata is currently stored in the project.</PageText>
       )}
 
-      <Button onClick={openEditDialog}>Edit masterdata</Button>
+      <Button onClick={openEditDialog}>Edit</Button>
 
       <Edit
         projectMasterdata={projectMasterdata ?? emptyMasterdata()}
