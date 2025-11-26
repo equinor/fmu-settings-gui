@@ -13,12 +13,15 @@ import {
   PageHeader,
   PageSectionSpacer,
   PageText,
+  ProjectInfoContainer,
 } from "#styles/common";
-import { displayDateTime } from "#utils/datetime";
-import { ProjectName } from "./index.style";
+
 export const Route = createFileRoute("/project/")({
   component: RouteComponent,
 });
+
+import { ProjectInfoBox } from "#components/ProjectInfo";
+import { ProjectStatus } from "#components/ProjectStatus";
 
 function ProjectInfo({
   projectData,
@@ -28,23 +31,17 @@ function ProjectInfo({
   lockStatus?: LockStatus;
 }) {
   return (
-    <>
-      <PageText>
-        Project: <ProjectName>{projectData.project_dir_name}</ProjectName>
-        <br />
-        Path: {projectData.path}
-        <br />
-        Created: {displayDateTime(projectData.config.created_at)} by{" "}
-        {projectData.config.created_by}
-        <br />
-        Version: {projectData.config.version}
-      </PageText>
+    <ProjectInfoContainer>
+      <div>
+        <ProjectInfoBox projectData={projectData} extended={true} />
+        <LockStatusBanner
+          lockStatus={lockStatus}
+          isReadOnly={projectData.is_read_only ?? true}
+        />
+      </div>
 
-      <LockStatusBanner
-        lockStatus={lockStatus}
-        isReadOnly={projectData.is_read_only ?? true}
-      />
-    </>
+      <ProjectStatus projectData={projectData} detailed={true} />
+    </ProjectInfoContainer>
   );
 }
 

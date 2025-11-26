@@ -98,3 +98,9 @@ export const EditDialog = styled(Dialog).attrs<{
     margin-left: ${tokens.spacings.comfortable.small};
   }
 `;
+
+export const ProjectInfoContainer = styled.div`
+  display: grid;
+  grid-template-columns: 4fr 3fr;
+  gap: ${tokens.spacings.comfortable.medium};
+`;
