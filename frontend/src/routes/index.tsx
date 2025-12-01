@@ -1,13 +1,52 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { FmuProject } from "#client";
 import { Resources } from "#components/home/Resources";
-import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
+import { ProjectSelector } from "#components/project/overview/ProjectSelector";
+import { useProject } from "#services/project";
+import {
+  InfoBox,
+  PageHeader,
+  PageSectionSpacer,
+  PageText,
+} from "#styles/common";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
 
+function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
+  return (
+    <InfoBox>
+      <PageHeader $variant="h3" $marginBottom="0">
+        {projectData.project_dir_name}
+      </PageHeader>
+
+      <PageText>
+        <span className="emphasis">{projectData.path}</span>
+        <br />
+        Last modified: <span className="missingValue">unknown</span>
+        {/* TODO: Add last modified date*/}
+      </PageText>
+
+      <PageText $marginBottom="0">
+        {projectData.config.model?.description ? (
+          <span className="multilineValue">
+            {projectData.config.model.description}
+          </span>
+        ) : (
+          <span className="missingValue">
+            No description found for the model
+          </span>
+        )}
+      </PageText>
+    </InfoBox>
+  );
+}
+
 function RouteComponent() {
+  const project = useProject();
+
   return (
     <>
       <PageHeader>FMU Settings</PageHeader>
@@ -15,6 +54,16 @@ function RouteComponent() {
       <PageText $variant="ingress">
         This is an application for managing the settings of FMU projects.
       </PageText>
+
+      {project.data ? (
+        <ProjectInfoBox projectData={project.data} />
+      ) : (
+        <>
+          <PageText>No project selected</PageText>
+
+          <ProjectSelector />
+        </>
+      )}
 
       <PageSectionSpacer />
 

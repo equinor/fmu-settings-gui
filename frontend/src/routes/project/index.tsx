@@ -9,16 +9,39 @@ import { EditableModelInfo } from "#components/project/overview/Model";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
 import {
+  InfoBox,
   PageCode,
   PageHeader,
   PageSectionSpacer,
   PageText,
 } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
-import { ProjectName } from "./index.style";
 export const Route = createFileRoute("/project/")({
   component: RouteComponent,
 });
+
+function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
+  const created_date = displayDateTime(projectData.config.created_at);
+
+  return (
+    <InfoBox>
+      <PageHeader $variant="h3" $marginBottom="0">
+        {projectData.project_dir_name}
+      </PageHeader>
+
+      <PageText $marginBottom="0">
+        <span className="emphasis">{projectData.path}</span>
+        <br />
+        Created: {created_date} by {projectData.config.created_by}
+        <br />
+        Last modified: <span className="missingValue">unknown</span>
+        {/* TODO: Add last modified date*/}
+        <br />
+        Version: {projectData.config.version}
+      </PageText>
+    </InfoBox>
+  );
+}
 
 function ProjectInfo({
   projectData,
@@ -29,16 +52,7 @@ function ProjectInfo({
 }) {
   return (
     <>
-      <PageText>
-        Project: <ProjectName>{projectData.project_dir_name}</ProjectName>
-        <br />
-        Path: {projectData.path}
-        <br />
-        Created: {displayDateTime(projectData.config.created_at)} by{" "}
-        {projectData.config.created_by}
-        <br />
-        Version: {projectData.config.version}
-      </PageText>
+      <ProjectInfoBox projectData={projectData} />
 
       <LockStatusBanner
         lockStatus={lockStatus}
@@ -85,6 +99,7 @@ function Content() {
       ) : (
         <>
           <ProjectNotFound text={project.text ?? ""} />
+
           <ProjectSelector />
         </>
       )}

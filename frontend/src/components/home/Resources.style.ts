@@ -3,14 +3,12 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 export const ResourcesContainer = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: ${tokens.spacings.comfortable.medium};
 `;
 
 export const ResourceCard = styled(Card)`
-  width: 250px; 
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   background: ${tokens.colors.ui.background__light.hex};  
 `;
