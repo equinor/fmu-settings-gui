@@ -18,8 +18,8 @@ export const PageCode = styled(Typography)`
   margin: 0 1em 1em 1em;
   padding: 1em;
   border: solid 1px ${tokens.colors.text.static_icons__default.hex};
-  background: ${tokens.colors.ui.background__light.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
+  background: ${tokens.colors.ui.background__light.hex};
 `;
 
 export const PageSectionSpacer = styled.div`
