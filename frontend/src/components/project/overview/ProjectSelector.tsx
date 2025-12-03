@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 import {
   projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
-  projectInitProjectMutation,
+  projectPostInitProjectMutation,
   projectPostProjectMutation,
   userGetUserOptions,
   userGetUserQueryKey,
@@ -299,7 +299,7 @@ function ConfirmInitProjectDialog({
 }) {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    ...projectInitProjectMutation(),
+    ...projectPostInitProjectMutation(),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),

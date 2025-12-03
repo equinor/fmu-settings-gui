@@ -271,7 +271,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.3.3.dev1+g0cc9b0624'
+            default: '0.10.1.dev1+gf96ce0c1f'
         }
     },
     type: 'object',
@@ -494,6 +494,22 @@ export const ProjectConfigSchema = {
                     type: 'null'
                 }
             ]
+        },
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            default: 5
+        },
+        rms: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/RmsProject'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
@@ -502,6 +518,192 @@ export const ProjectConfigSchema = {
     description: `The configuration file in a .fmu directory.
 
 Stored as config.json.`
+} as const;
+
+export const RmsHorizonSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name',
+            description: 'Name of the horizon.'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'RmsHorizon',
+    description: 'A horizon from an RMS project.'
+} as const;
+
+export const RmsHorizonListSchema = {
+    properties: {
+        horizons: {
+            items: {
+                '$ref': '#/components/schemas/RmsHorizon'
+            },
+            type: 'array',
+            title: 'Horizons',
+            description: 'List of horizons in the project.'
+        }
+    },
+    type: 'object',
+    required: ['horizons'],
+    title: 'RmsHorizonList',
+    description: 'List of horizons from an RMS project.'
+} as const;
+
+export const RmsProjectSchema = {
+    properties: {
+        path: {
+            type: 'string',
+            format: 'path',
+            title: 'Path'
+        },
+        version: {
+            type: 'string',
+            title: 'Version'
+        }
+    },
+    type: 'object',
+    required: ['path', 'version'],
+    title: 'RmsProject',
+    description: 'RMS project configuration.'
+} as const;
+
+export const RmsProjectPathSchema = {
+    properties: {
+        path: {
+            type: 'string',
+            format: 'path',
+            title: 'Path',
+            description: 'Absolute path to the RMS project within the FMU project.',
+            examples: ['/path/to/some.project.rms.14.2.2']
+        }
+    },
+    type: 'object',
+    required: ['path'],
+    title: 'RmsProjectPath',
+    description: 'Path to an RMS project within the FMU project.'
+} as const;
+
+export const RmsProjectPathsResultSchema = {
+    properties: {
+        results: {
+            items: {
+                '$ref': '#/components/schemas/RmsProjectPath'
+            },
+            type: 'array',
+            title: 'Results',
+            description: 'List of absolute paths to RMS projects within the FMU project.'
+        }
+    },
+    type: 'object',
+    required: ['results'],
+    title: 'RmsProjectPathsResult',
+    description: 'List of RMS project paths within the FMU project.'
+} as const;
+
+export const RmsStratigraphicZoneSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name',
+            description: 'Name of the zone.'
+        },
+        top: {
+            type: 'string',
+            title: 'Top',
+            description: 'Name of the horizon at the top of the zone.'
+        },
+        base: {
+            type: 'string',
+            title: 'Base',
+            description: 'Name of the horizon at the base of the zone.'
+        }
+    },
+    type: 'object',
+    required: ['name', 'top', 'base'],
+    title: 'RmsStratigraphicZone',
+    description: 'A stratigraphic zone from an RMS project.'
+} as const;
+
+export const RmsWellSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name',
+            description: 'Name of the well.'
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'RmsWell',
+    description: 'A well from an RMS project.'
+} as const;
+
+export const RmsWellListSchema = {
+    properties: {
+        wells: {
+            items: {
+                '$ref': '#/components/schemas/RmsWell'
+            },
+            type: 'array',
+            title: 'Wells',
+            description: 'List of wells in the project.'
+        }
+    },
+    type: 'object',
+    required: ['wells'],
+    title: 'RmsWellList',
+    description: 'List of wells from an RMS project.'
+} as const;
+
+export const RmsZoneListSchema = {
+    properties: {
+        zones: {
+            items: {
+                '$ref': '#/components/schemas/RmsStratigraphicZone'
+            },
+            type: 'array',
+            title: 'Zones',
+            description: 'List of zones in the project.'
+        }
+    },
+    type: 'object',
+    required: ['zones'],
+    title: 'RmsZoneList',
+    description: 'List of zones from an RMS project.'
+} as const;
+
+export const SessionResponseSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            title: 'Id',
+            description: 'Session identifier.'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At',
+            description: 'Timestamp when the session was created.'
+        },
+        expires_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Expires At',
+            description: 'Timestamp when the session will expire.'
+        },
+        last_accessed: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Last Accessed',
+            description: 'Timestamp when the session was last accessed.'
+        }
+    },
+    type: 'object',
+    required: ['id', 'created_at', 'expires_at', 'last_accessed'],
+    title: 'SessionResponse',
+    description: 'Serializable representation of the current session.'
 } as const;
 
 export const SmdaSchema = {
@@ -661,6 +863,38 @@ applies to the model they are working on.`
     description: 'Contains SMDA-related attributes.'
 } as const;
 
+export const SmdaStratColumnSchema = {
+    properties: {
+        strat_column_identifier: {
+            type: 'string',
+            title: 'Strat Column Identifier',
+            description: 'A stratigraphic column identifier.',
+            examples: ['LITHO_TROLL']
+        }
+    },
+    type: 'object',
+    required: ['strat_column_identifier'],
+    title: 'SmdaStratColumn',
+    description: 'An identifier for a stratigraphic column.'
+} as const;
+
+export const SmdaStratigraphicUnitsResultSchema = {
+    properties: {
+        stratigraphic_units: {
+            items: {
+                '$ref': '#/components/schemas/StratigraphicUnit'
+            },
+            type: 'array',
+            title: 'Stratigraphic Units',
+            description: 'List of stratigraphic units from SMDA.'
+        }
+    },
+    type: 'object',
+    required: ['stratigraphic_units'],
+    title: 'SmdaStratigraphicUnitsResult',
+    description: 'Result containing a list of stratigraphic units.'
+} as const;
+
 export const StratigraphicColumnSchema = {
     properties: {
         identifier: {
@@ -680,6 +914,131 @@ export const StratigraphicColumnSchema = {
     title: 'StratigraphicColumn',
     description: `The \`\`masterdata.smda.stratigraphic_column\`\` block contains the
 stratigraphic column known to SMDA.`
+} as const;
+
+export const StratigraphicUnitSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            description: 'The stratigraphic unit identifier (name).',
+            examples: ['VIKING GP.']
+        },
+        uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Uuid',
+            description: 'The SMDA UUID identifier corresponding to the stratigraphic unit.'
+        },
+        strat_unit_type: {
+            type: 'string',
+            title: 'Strat Unit Type',
+            description: 'The type of stratigraphic unit.',
+            examples: ['formation', 'group']
+        },
+        strat_unit_level: {
+            type: 'integer',
+            maximum: 6,
+            minimum: 1,
+            title: 'Strat Unit Level',
+            description: 'The hierarchical level of the stratigraphic unit (1-6).'
+        },
+        top: {
+            type: 'string',
+            title: 'Top',
+            description: 'The identifier (name) of the stratigraphic unit top pick (horizon).',
+            examples: ['VIKING GP. Top']
+        },
+        base: {
+            type: 'string',
+            title: 'Base',
+            description: 'The identifier (name) of the stratigraphic unit base pick (horizon).',
+            examples: ['VIKING GP. Base']
+        },
+        top_age: {
+            type: 'number',
+            minimum: 0,
+            title: 'Top Age',
+            description: 'The age (in Ma) at the top of the stratigraphic unit.'
+        },
+        base_age: {
+            type: 'number',
+            minimum: 0,
+            title: 'Base Age',
+            description: 'The age (in Ma) at the base of the stratigraphic unit.'
+        },
+        strat_unit_parent: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Strat Unit Parent',
+            description: 'The parent stratigraphic unit identifier, if applicable.'
+        },
+        strat_column_type: {
+            type: 'string',
+            enum: ['lithostratigraphy', 'sequence stratigraphy', 'chronostratigraphy', 'biostratigraphy'],
+            title: 'Strat Column Type',
+            description: 'The type of stratigraphic column this unit belongs to.'
+        },
+        color_html: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '#[0-9a-fA-F]{6}'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Color Html',
+            description: 'The HTML hex color code for visualization.'
+        },
+        color_r: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Color R',
+            description: 'The red component of the RGB color.'
+        },
+        color_g: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Color G',
+            description: 'The green component of the RGB color.'
+        },
+        color_b: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Color B',
+            description: 'The blue component of the RGB color.'
+        }
+    },
+    type: 'object',
+    required: ['identifier', 'uuid', 'strat_unit_type', 'strat_unit_level', 'top', 'base', 'top_age', 'base_age', 'strat_unit_parent', 'strat_column_type', 'color_r', 'color_g', 'color_b'],
+    title: 'StratigraphicUnit',
+    description: 'Stratigraphic unit item.'
 } as const;
 
 export const UserAPIKeysSchema = {
@@ -712,6 +1071,12 @@ export const UserConfigSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Created At'
+        },
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            default: 5
         },
         user_api_keys: {
             '$ref': '#/components/schemas/UserAPIKeys'

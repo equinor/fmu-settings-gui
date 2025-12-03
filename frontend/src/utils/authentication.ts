@@ -15,8 +15,9 @@ import { toast } from "react-toastify";
 import {
   Message,
   Options,
-  SessionCreateSessionData,
   SessionPatchAccessTokenData,
+  SessionPostSessionData,
+  SessionResponse,
 } from "#client";
 import { ssoScopes } from "#config";
 import { HTTP_STATUS_UNAUTHORIZED } from "./api";
@@ -89,9 +90,9 @@ export function isExternalApi(
 
 export async function createSessionAsync(
   createSessionMutateAsync: UseMutateAsyncFunction<
-    Message,
+    SessionResponse,
     AxiosError,
-    Options<SessionCreateSessionData>
+    Options<SessionPostSessionData>
   >,
   apiToken: string,
 ) {
