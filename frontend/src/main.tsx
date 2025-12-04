@@ -24,10 +24,10 @@ import {
 } from "react";
 import ReactDOM from "react-dom/client";
 
-import { Message, Options, SessionCreateSessionData } from "#client";
+import { Options, SessionPostSessionData, SessionResponse } from "#client";
 import {
-  sessionCreateSessionMutation,
   sessionPatchAccessTokenMutation,
+  sessionPostSessionMutation,
   smdaGetHealthQueryKey,
 } from "#client/@tanstack/react-query.gen";
 import { client } from "#client/client.gen";
@@ -53,9 +53,9 @@ export interface RouterContext {
   hasResponseInterceptor: boolean;
   accessToken: string;
   createSessionMutateAsync: UseMutateAsyncFunction<
-    Message,
+    SessionResponse,
     AxiosError,
-    Options<SessionCreateSessionData>
+    Options<SessionPostSessionData>
   >;
 }
 
@@ -156,7 +156,7 @@ export function App() {
   >();
 
   const { mutateAsync: createSessionMutateAsync } = useMutation({
-    ...sessionCreateSessionMutation(),
+    ...sessionPostSessionMutation(),
     meta: { errorPrefix: "Error creating session" },
   });
   const { mutate: patchAccessTokenMutate } = useMutation({

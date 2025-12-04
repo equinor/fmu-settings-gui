@@ -13,6 +13,11 @@ export function Sidebar() {
   const project = useProject();
   const location = useLocation();
 
+  const currentPath = location.pathname;
+
+  const projectExpanded = currentPath.startsWith("/project");
+  const userExpanded = currentPath.startsWith("/user");
+
   const ProjectSubItems: AccordianSubItem[] = [];
   if (project.status) {
     ProjectSubItems.push({ label: "Masterdata", to: "/project/masterdata" });
@@ -26,31 +31,42 @@ export function Sidebar() {
           icon={dashboard}
           as={Link}
           to="/"
-          active={location.pathname === "/"}
+          active={currentPath === "/"}
         />
-        <EdsSideBar.Accordion label="Project" icon={folder}>
+
+        <EdsSideBar.Accordion
+          label="Project"
+          icon={folder}
+          isExpanded={projectExpanded}
+        >
           <EdsSideBar.AccordionItem
             label="Overview"
             as={Link}
             to="/project"
-            active={location.pathname === "/project"}
+            active={currentPath === "/project"}
           />
+
           {ProjectSubItems.map((item) => (
             <EdsSideBar.AccordionItem
               key={item.to}
               label={item.label}
               as={Link}
               to={item.to}
-              active={location.pathname === item.to}
+              active={currentPath === item.to}
             />
           ))}
         </EdsSideBar.Accordion>
-        <EdsSideBar.Accordion label="User" icon={account_circle}>
+
+        <EdsSideBar.Accordion
+          label="User"
+          icon={account_circle}
+          isExpanded={userExpanded}
+        >
           <EdsSideBar.AccordionItem
             label="API keys"
             as={Link}
             to="/user/keys"
-            active={location.pathname === "/user/keys"}
+            active={currentPath === "/user/keys"}
           />
         </EdsSideBar.Accordion>
       </EdsSideBar.Content>

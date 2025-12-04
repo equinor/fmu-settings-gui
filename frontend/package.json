@@ -23,7 +23,7 @@
     "@tanstack/react-query": "^5.76.1",
     "@tanstack/react-query-devtools": "^5.76.1",
     "@tanstack/react-router": "^1.120.3",
-    "axios": "^1.9.0",
+    "axios": "^1.12.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-error-boundary": "^6.0.0",
@@ -50,7 +50,7 @@
     "globals": "^15.15.0",
     "typescript": "~5.7.3",
     "typescript-eslint": "^8.32.1",
-    "vite": "^6.3.5",
+    "vite": "^6.4.1",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }
