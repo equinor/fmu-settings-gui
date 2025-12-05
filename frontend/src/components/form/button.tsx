@@ -13,7 +13,7 @@ export function GeneralButton({
 }) {
   return (
     <Tooltip title={tooltipText ?? ""}>
-      <Button onClick={onClick} aria-disabled={disabled}>
+      <Button onClick={onClick} aria-disabled={disabled} disabled={disabled}>
         {label}
       </Button>
     </Tooltip>

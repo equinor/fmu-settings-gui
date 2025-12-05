@@ -1,7 +1,7 @@
-import { Button } from "@equinor/eds-core-react";
 import { useState } from "react";
 
 import { Smda } from "#client";
+import { GeneralButton } from "#components/form/button";
 import { Info } from "#components/project/masterdata/Info";
 import { PageText } from "#styles/common";
 import { emptyMasterdata } from "#utils/model";
@@ -9,8 +9,10 @@ import { Edit } from "./Edit";
 
 export function Overview({
   projectMasterdata,
+  smdaHealthStatus,
 }: {
   projectMasterdata: Smda | undefined;
+  smdaHealthStatus: boolean;
 }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -30,7 +32,12 @@ export function Overview({
         <PageText>No masterdata is currently stored in the project.</PageText>
       )}
 
-      <Button onClick={openEditDialog}>Edit</Button>
+      <GeneralButton
+        label={projectMasterdata ? "Edit" : "Add"}
+        disabled={!smdaHealthStatus}
+        tooltipText={!smdaHealthStatus ? "Log in to edit masterdata" : ""}
+        onClick={openEditDialog}
+      />
 
       <Edit
         projectMasterdata={projectMasterdata ?? emptyMasterdata()}
