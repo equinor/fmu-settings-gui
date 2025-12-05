@@ -230,21 +230,13 @@ export type ProjectConfig = {
     version: string;
     created_at: string;
     created_by: string;
+    last_modified_at?: string | null;
+    last_modified_by?: string | null;
     masterdata?: Masterdata | null;
     model?: Model | null;
     access?: Access | null;
     cache_max_revisions?: number;
     rms?: RmsProject | null;
-};
-
-/**
- * A horizon from an RMS project.
- */
-export type RmsHorizon = {
-    /**
-     * Name of the horizon.
-     */
-    name: string;
 };
 
 /**
@@ -254,7 +246,7 @@ export type RmsHorizonList = {
     /**
      * List of horizons in the project.
      */
-    horizons: Array<RmsHorizon>;
+    horizons: Array<FmuSettingsApiModelsRmsRmsHorizon>;
 };
 
 /**
@@ -263,6 +255,10 @@ export type RmsHorizonList = {
 export type RmsProject = {
     path: string;
     version: string;
+    coordinate_system?: FmuSettingsModelsProjectConfigRmsCoordinateSystem | null;
+    zones?: Array<FmuSettingsModelsProjectConfigRmsStratigraphicZone> | null;
+    horizons?: Array<FmuSettingsModelsProjectConfigRmsHorizon> | null;
+    wells?: Array<FmuSettingsModelsProjectConfigRmsWell> | null;
 };
 
 /**
@@ -286,41 +282,13 @@ export type RmsProjectPathsResult = {
 };
 
 /**
- * A stratigraphic zone from an RMS project.
- */
-export type RmsStratigraphicZone = {
-    /**
-     * Name of the zone.
-     */
-    name: string;
-    /**
-     * Name of the horizon at the top of the zone.
-     */
-    top: string;
-    /**
-     * Name of the horizon at the base of the zone.
-     */
-    base: string;
-};
-
-/**
- * A well from an RMS project.
- */
-export type RmsWell = {
-    /**
-     * Name of the well.
-     */
-    name: string;
-};
-
-/**
  * List of wells from an RMS project.
  */
 export type RmsWellList = {
     /**
      * List of wells in the project.
      */
-    wells: Array<RmsWell>;
+    wells: Array<FmuSettingsApiModelsRmsRmsWell>;
 };
 
 /**
@@ -330,7 +298,7 @@ export type RmsZoneList = {
     /**
      * List of zones in the project.
      */
-    zones: Array<RmsStratigraphicZone>;
+    zones: Array<FmuSettingsApiModelsRmsRmsStratigraphicZone>;
 };
 
 /**
@@ -549,6 +517,7 @@ export type UserApiKeys = {
 export type UserConfig = {
     version: string;
     created_at: string;
+    last_modified_at?: string | null;
     cache_max_revisions?: number;
     user_api_keys: UserApiKeys;
     recent_project_directories: Array<string>;
@@ -558,6 +527,84 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+};
+
+/**
+ * The project coordinate system of an RMS project.
+ */
+export type FmuSettingsModelsProjectConfigRmsCoordinateSystem = {
+    name: string;
+};
+
+/**
+ * A horizon from an RMS project.
+ */
+export type FmuSettingsModelsProjectConfigRmsHorizon = {
+    name: string;
+};
+
+/**
+ * A stratigraphic zone from an RMS project.
+ */
+export type FmuSettingsModelsProjectConfigRmsStratigraphicZone = {
+    name: string;
+    top_horizon_name: string;
+    base_horizon_name: string;
+};
+
+/**
+ * A well from an RMS project.
+ */
+export type FmuSettingsModelsProjectConfigRmsWell = {
+    name: string;
+};
+
+/**
+ * The project coordinate system of an RMS project.
+ */
+export type FmuSettingsApiModelsRmsRmsCoordinateSystem = {
+    /**
+     * Name of the coordinate system.
+     */
+    name: string;
+};
+
+/**
+ * A horizon from an RMS project.
+ */
+export type FmuSettingsApiModelsRmsRmsHorizon = {
+    /**
+     * Name of the horizon.
+     */
+    name: string;
+};
+
+/**
+ * A stratigraphic zone from an RMS project.
+ */
+export type FmuSettingsApiModelsRmsRmsStratigraphicZone = {
+    /**
+     * Name of the zone.
+     */
+    name: string;
+    /**
+     * Name of the horizon at the top of the zone.
+     */
+    top: string;
+    /**
+     * Name of the horizon at the base of the zone.
+     */
+    base: string;
+};
+
+/**
+ * A well from an RMS project.
+ */
+export type FmuSettingsApiModelsRmsRmsWell = {
+    /**
+     * Name of the well.
+     */
+    name: string;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -1611,6 +1658,39 @@ export type RmsGetWellsResponses = {
 };
 
 export type RmsGetWellsResponse = RmsGetWellsResponses[keyof RmsGetWellsResponses];
+
+export type RmsGetCoordinateSystemData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/rms/coordinate_system';
+};
+
+export type RmsGetCoordinateSystemErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type RmsGetCoordinateSystemError = RmsGetCoordinateSystemErrors[keyof RmsGetCoordinateSystemErrors];
+
+export type RmsGetCoordinateSystemResponses = {
+    /**
+     * Successful Response
+     */
+    200: FmuSettingsApiModelsRmsRmsCoordinateSystem;
+};
+
+export type RmsGetCoordinateSystemResponse = RmsGetCoordinateSystemResponses[keyof RmsGetCoordinateSystemResponses];
 
 export type SmdaGetHealthData = {
     body?: never;

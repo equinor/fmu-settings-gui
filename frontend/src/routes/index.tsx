@@ -10,12 +10,17 @@ import {
   PageSectionSpacer,
   PageText,
 } from "#styles/common";
+import { displayDateTime } from "#utils/datetime";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
 
 function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
+  const last_modified_date = displayDateTime(
+    projectData.config.last_modified_at!,
+  );
+
   return (
     <InfoBox>
       <PageHeader $variant="h3" $marginBottom="0">
@@ -25,8 +30,8 @@ function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
       <PageText>
         <span className="emphasis">{projectData.path}</span>
         <br />
-        Last modified: <span className="missingValue">unknown</span>
-        {/* TODO: Add last modified date*/}
+        Last modified: <span className="emphasis">{last_modified_date}</span> by{" "}
+        {projectData.config.last_modified_by}
       </PageText>
 
       <PageText $marginBottom="0">
