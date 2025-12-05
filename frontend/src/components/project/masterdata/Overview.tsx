@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import { Smda } from "#client";
 import { GeneralButton } from "#components/form/button";
-import { GeneralButton } from "#components/form/button";
 import { Info } from "#components/project/masterdata/Info";
 import { PageText } from "#styles/common";
 import { emptyMasterdata } from "#utils/model";
