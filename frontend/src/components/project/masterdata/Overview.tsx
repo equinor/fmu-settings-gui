@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { Smda } from "#client";
 import { GeneralButton } from "#components/form/button";
+import { GeneralButton } from "#components/form/button";
 import { Info } from "#components/project/masterdata/Info";
 import { PageText } from "#styles/common";
 import { emptyMasterdata } from "#utils/model";
@@ -9,10 +10,10 @@ import { Edit } from "./Edit";
 
 export function Overview({
   projectMasterdata,
-  projectReadOnly,
+  smdaHealthStatus,
 }: {
   projectMasterdata: Smda | undefined;
-  projectReadOnly: boolean;
+  smdaHealthStatus: boolean;
 }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -33,9 +34,9 @@ export function Overview({
       )}
 
       <GeneralButton
-        label="Edit"
-        disabled={projectReadOnly}
-        tooltipText={projectReadOnly ? "Project is read-only" : ""}
+        label={projectMasterdata ? "Edit" : "Add"}
+        disabled={!smdaHealthStatus}
+        tooltipText={!smdaHealthStatus ? "Log in to edit masterdata" : ""}
         onClick={openEditDialog}
       />
 

@@ -19,7 +19,12 @@ import { Overview } from "#components/project/masterdata/Overview";
 import { ssoScopes } from "#config";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
-import { PageCode, PageHeader, PageText } from "#styles/common";
+import {
+  PageCode,
+  PageHeader,
+  PageSectionSpacer,
+  PageText,
+} from "#styles/common";
 import { handleAddSsoAccessToken, handleSsoLogin } from "#utils/authentication";
 
 export const Route = createFileRoute("/project/masterdata")({
@@ -116,7 +121,7 @@ function AccessTokenPresence() {
 function SmdaNotOk({ text }: { text: string }) {
   return (
     <>
-      <PageText>Required data for accessing SMDA is not present:</PageText>
+      <PageText>Required data for editing masterdata is not present:</PageText>
 
       <PageCode>{text}</PageCode>
 
@@ -137,14 +142,14 @@ function Content() {
 
   return (
     <>
-      {healthOk.status ? (
-        <Overview
-          projectMasterdata={project.data?.config.masterdata?.smda ?? undefined}
-          projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
-        />
-      ) : (
-        <SmdaNotOk text={healthOk.text} />
-      )}
+      <Overview
+        projectMasterdata={project.data?.config.masterdata?.smda ?? undefined}
+        smdaHealthStatus={healthOk.status}
+      />
+
+      <PageSectionSpacer />
+
+      {!healthOk.status && <SmdaNotOk text={healthOk.text} />}
     </>
   );
 }
