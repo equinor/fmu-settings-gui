@@ -22,9 +22,6 @@ export const Route = createFileRoute("/project/")({
 
 function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
   const created_date = displayDateTime(projectData.config.created_at);
-  const last_modified_date = displayDateTime(
-    projectData.config.last_modified_at!,
-  );
 
   return (
     <InfoBox>
@@ -37,8 +34,17 @@ function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
         <br />
         Created: {created_date} by {projectData.config.created_by}
         <br />
-        Last modified: <span className="emphasis">{last_modified_date}</span> by{" "}
-        {projectData.config.last_modified_by}
+        Last modified:{" "}
+        {projectData.config.last_modified_at ? (
+          <>
+            {displayDateTime(projectData.config.last_modified_at)} by{" "}
+            {projectData.config.last_modified_by ?? (
+              <span className="missingValue">unknown</span>
+            )}
+          </>
+        ) : (
+          <span className="missingValue">unknown</span>
+        )}
         <br />
         Version: {projectData.config.version}
       </PageText>
