@@ -156,7 +156,10 @@ function handlePrepareEditData(
   setAvailableData: Dispatch<SetStateAction<FormMasterdataBase>>,
   setOrphanData: Dispatch<SetStateAction<FormMasterdataSub>>,
 ) {
-  const optionsData = createOptions(masterdata);
+  const optionsData = createOptions(
+    masterdata,
+    formApi.getFieldValue("field") as Array<FieldItem>,
+  );
 
   handleErrorUnknownInitialValue(
     formApi.setFieldMeta,
@@ -189,22 +192,26 @@ function handlePrepareEditData(
 
 function createOptions(
   smdaMasterdataGrouped: SmdaMasterdataResultGrouped,
+  projectFields: Array<FieldItem>,
 ): OptionsData {
-  const fieldCount = Object.keys(smdaMasterdataGrouped).length;
+  const fieldCount = projectFields.length;
 
-  const defaultCoordinateSystems = Object.values(smdaMasterdataGrouped).reduce<
+  const defaultCoordinateSystems = Object.entries(smdaMasterdataGrouped).reduce<
     Record<string, SmdaMasterdataCoordinateSystemFields>
-  >((acc, masterdata) => {
-    const csId = masterdata.field_coordinate_system.uuid;
-    if (!(csId in acc)) {
-      acc[csId] = {
-        coordinateSystem: masterdata.field_coordinate_system,
-        fields: [],
-      };
+  >((acc, fieldData) => {
+    const [field, masterdata] = fieldData;
+    if (projectFields.find((f) => f.identifier === field)) {
+      const csId = masterdata.field_coordinate_system.uuid;
+      if (!(csId in acc)) {
+        acc[csId] = {
+          coordinateSystem: masterdata.field_coordinate_system,
+          fields: [],
+        };
+      }
+      acc[csId].fields = acc[csId].fields
+        .concat(masterdata.field)
+        .sort((a, b) => stringCompare(a.identifier, b.identifier));
     }
-    acc[csId].fields = acc[csId].fields
-      .concat(masterdata.field)
-      .sort((a, b) => stringCompare(a.identifier, b.identifier));
 
     return acc;
   }, {});
@@ -231,35 +238,40 @@ function createOptions(
     // The list of coordinate systems is the same for all SMDA fields
     coordinateSystems:
       fieldCount > 0
-        ? Object.values(smdaMasterdataGrouped)[0].coordinate_systems
+        ? smdaMasterdataGrouped[projectFields[0].identifier].coordinate_systems
         : [],
     coordinateSystemsOptions:
       fieldCount > 0
         ? dcsOptions.concat(
-            Object.values(smdaMasterdataGrouped)[0]
-              .coordinate_systems.filter(
-                (cs) => !dcsOptions.some((dcs) => dcs.uuid === cs.uuid),
-              )
+            smdaMasterdataGrouped[
+              projectFields[0].identifier
+            ].coordinate_systems
+              .filter((cs) => !dcsOptions.some((dcs) => dcs.uuid === cs.uuid))
               .sort((a, b) => stringCompare(a.identifier, b.identifier)),
           )
         : [],
-    stratigraphicColumns: Object.values(smdaMasterdataGrouped)
-      .reduce<Array<StratigraphicColumn>>((acc, masterdata) => {
+    stratigraphicColumns: Object.entries(smdaMasterdataGrouped).reduce<
+      Array<StratigraphicColumn>
+    >((acc, fieldData) => {
+      const [field, masterdata] = fieldData;
+      if (projectFields.find((f) => f.identifier === field)) {
         acc.push(...masterdata.stratigraphic_columns);
+      }
 
-        return acc;
-      }, [])
-      .sort((a, b) => stringCompare(a.identifier, b.identifier)),
+      return acc;
+    }, []),
     stratigraphicColumnsOptions: Object.entries(smdaMasterdataGrouped)
       .reduce<Array<StratigraphicColumn>>((acc, fieldData) => {
         const [field, masterdata] = fieldData;
-        acc.push(
-          ...masterdata.stratigraphic_columns.map((value) => ({
-            ...value,
-            identifier:
-              value.identifier + (fieldCount > 1 ? ` [${field}]` : ""),
-          })),
-        );
+        if (projectFields.find((f) => f.identifier === field)) {
+          acc.push(
+            ...masterdata.stratigraphic_columns.map((value) => ({
+              ...value,
+              identifier:
+                value.identifier + (fieldCount > 1 ? ` [${field}]` : ""),
+            })),
+          );
+        }
 
         return acc;
       }, [])
