@@ -467,7 +467,7 @@ export function Edit({
   closeDialog: () => void;
 }) {
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-  const [smdaFields, setSmdaFields] = useState<Array<string> | undefined>();
+  const [smdaFields, setSmdaFields] = useState<Array<string>>([]);
   const [projectData, setProjectData] = useState<FormMasterdataProject>(
     emptyFormMasterdataProject(),
   );
@@ -501,7 +501,7 @@ export function Edit({
   });
 
   const smdaMasterdata = useQueries({
-    queries: (smdaFields ?? []).map((field) =>
+    queries: smdaFields.map((field) =>
       smdaPostMasterdataOptions({ body: [{ identifier: field }] }),
     ),
     combine: (results) => ({
@@ -553,7 +553,7 @@ export function Edit({
   }, [isOpen, projectMasterdata]);
 
   useEffect(() => {
-    if (smdaFields !== undefined && smdaMasterdata.isSuccess) {
+    if (smdaMasterdata.isSuccess && Object.keys(smdaMasterdata.data).length) {
       handlePrepareEditData(
         smdaMasterdata.data,
         form,
@@ -562,13 +562,7 @@ export function Edit({
         setOrphanData,
       );
     }
-  }, [
-    form,
-    form.setFieldMeta,
-    smdaFields,
-    smdaMasterdata.data,
-    smdaMasterdata.isSuccess,
-  ]);
+  }, [form, form.setFieldMeta, smdaMasterdata.data, smdaMasterdata.isSuccess]);
 
   function handleClose({ formReset }: { formReset: () => void }) {
     formReset();
@@ -592,7 +586,7 @@ export function Edit({
           }
 
           return acc;
-        }, smdaFields ?? [])
+        }, smdaFields)
         .sort((a, b) => stringCompare(a, b)),
     );
   }
@@ -669,7 +663,7 @@ export function Edit({
                           <Label label="Field" />
                           <ItemsContainer>
                             <Items
-                              fields={smdaFields ?? []}
+                              fields={smdaFields}
                               projectFields={field.state.value.map(
                                 (f) => f.identifier,
                               )}
@@ -710,7 +704,7 @@ export function Edit({
                           <Label label="Country" />
                           <ItemsContainer>
                             <Items
-                              fields={smdaFields ?? []}
+                              fields={smdaFields}
                               projectFields={fieldList.map((f) => f.identifier)}
                               itemListGrouped={{
                                 [DUMMYGROUP_NAME]: availableData.country,
@@ -840,7 +834,7 @@ export function Edit({
                           <Label label="Discoveries" />
                           <ItemsContainer>
                             <Items
-                              fields={smdaFields ?? []}
+                              fields={smdaFields}
                               projectFields={fieldList.map((f) => f.identifier)}
                               itemListGrouped={availableData.discovery}
                               operation="addition"
