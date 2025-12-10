@@ -240,13 +240,17 @@ export type ProjectConfig = {
 };
 
 /**
- * List of horizons from an RMS project.
+ * The project coordinate system of an RMS project.
  */
-export type RmsHorizonList = {
-    /**
-     * List of horizons in the project.
-     */
-    horizons: Array<FmuSettingsApiModelsRmsRmsHorizon>;
+export type RmsCoordinateSystem = {
+    name: string;
+};
+
+/**
+ * A horizon from an RMS project.
+ */
+export type RmsHorizon = {
+    name: string;
 };
 
 /**
@@ -255,10 +259,10 @@ export type RmsHorizonList = {
 export type RmsProject = {
     path: string;
     version: string;
-    coordinate_system?: FmuSettingsModelsProjectConfigRmsCoordinateSystem | null;
-    zones?: Array<FmuSettingsModelsProjectConfigRmsStratigraphicZone> | null;
-    horizons?: Array<FmuSettingsModelsProjectConfigRmsHorizon> | null;
-    wells?: Array<FmuSettingsModelsProjectConfigRmsWell> | null;
+    coordinate_system?: RmsCoordinateSystem | null;
+    zones?: Array<RmsStratigraphicZone> | null;
+    horizons?: Array<RmsHorizon> | null;
+    wells?: Array<RmsWell> | null;
 };
 
 /**
@@ -282,23 +286,19 @@ export type RmsProjectPathsResult = {
 };
 
 /**
- * List of wells from an RMS project.
+ * A stratigraphic zone from an RMS project.
  */
-export type RmsWellList = {
-    /**
-     * List of wells in the project.
-     */
-    wells: Array<FmuSettingsApiModelsRmsRmsWell>;
+export type RmsStratigraphicZone = {
+    name: string;
+    top_horizon_name: string;
+    base_horizon_name: string;
 };
 
 /**
- * List of zones from an RMS project.
+ * A well from an RMS project.
  */
-export type RmsZoneList = {
-    /**
-     * List of zones in the project.
-     */
-    zones: Array<FmuSettingsApiModelsRmsRmsStratigraphicZone>;
+export type RmsWell = {
+    name: string;
 };
 
 /**
@@ -527,84 +527,6 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
-};
-
-/**
- * The project coordinate system of an RMS project.
- */
-export type FmuSettingsModelsProjectConfigRmsCoordinateSystem = {
-    name: string;
-};
-
-/**
- * A horizon from an RMS project.
- */
-export type FmuSettingsModelsProjectConfigRmsHorizon = {
-    name: string;
-};
-
-/**
- * A stratigraphic zone from an RMS project.
- */
-export type FmuSettingsModelsProjectConfigRmsStratigraphicZone = {
-    name: string;
-    top_horizon_name: string;
-    base_horizon_name: string;
-};
-
-/**
- * A well from an RMS project.
- */
-export type FmuSettingsModelsProjectConfigRmsWell = {
-    name: string;
-};
-
-/**
- * The project coordinate system of an RMS project.
- */
-export type FmuSettingsApiModelsRmsRmsCoordinateSystem = {
-    /**
-     * Name of the coordinate system.
-     */
-    name: string;
-};
-
-/**
- * A horizon from an RMS project.
- */
-export type FmuSettingsApiModelsRmsRmsHorizon = {
-    /**
-     * Name of the horizon.
-     */
-    name: string;
-};
-
-/**
- * A stratigraphic zone from an RMS project.
- */
-export type FmuSettingsApiModelsRmsRmsStratigraphicZone = {
-    /**
-     * Name of the zone.
-     */
-    name: string;
-    /**
-     * Name of the horizon at the top of the zone.
-     */
-    top: string;
-    /**
-     * Name of the horizon at the base of the zone.
-     */
-    base: string;
-};
-
-/**
- * A well from an RMS project.
- */
-export type FmuSettingsApiModelsRmsRmsWell = {
-    /**
-     * Name of the well.
-     */
-    name: string;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -1019,13 +941,6 @@ export type ProjectPatchMasterdataErrors = {
      */
     404: unknown;
     /**
-     *
-     * A project .fmu directory already exist at a given location, or may
-     * possibly not be a directory, i.e. it may be a .fmu file.
-     *
-     */
-    409: unknown;
-    /**
      * Validation Error
      */
     422: HttpValidationError;
@@ -1077,13 +992,6 @@ export type ProjectPatchModelErrors = {
      */
     404: unknown;
     /**
-     *
-     * A project .fmu directory already exist at a given location, or may
-     * possibly not be a directory, i.e. it may be a .fmu file.
-     *
-     */
-    409: unknown;
-    /**
      * Validation Error
      */
     422: HttpValidationError;
@@ -1134,13 +1042,6 @@ export type ProjectPatchAccessErrors = {
      *
      */
     404: unknown;
-    /**
-     *
-     * A project .fmu directory already exist at a given location, or may
-     * possibly not be a directory, i.e. it may be a .fmu file.
-     *
-     */
-    409: unknown;
     /**
      * Validation Error
      */
@@ -1237,13 +1138,6 @@ export type ProjectPatchRmsErrors = {
      */
     404: unknown;
     /**
-     *
-     * A project .fmu directory already exist at a given location, or may
-     * possibly not be a directory, i.e. it may be a .fmu file.
-     *
-     */
-    409: unknown;
-    /**
      * Validation Error
      */
     422: HttpValidationError;
@@ -1270,6 +1164,210 @@ export type ProjectPatchRmsResponses = {
 };
 
 export type ProjectPatchRmsResponse = ProjectPatchRmsResponses[keyof ProjectPatchRmsResponses];
+
+export type ProjectPatchRmsCoordinateSystemData = {
+    body: RmsCoordinateSystem;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/rms/coordinate_system';
+};
+
+export type ProjectPatchRmsCoordinateSystemErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * RMS project path must be set before updating RMS fields.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchRmsCoordinateSystemResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchRmsCoordinateSystemResponse = ProjectPatchRmsCoordinateSystemResponses[keyof ProjectPatchRmsCoordinateSystemResponses];
+
+export type ProjectPatchRmsZonesData = {
+    body: Array<RmsStratigraphicZone>;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/rms/zones';
+};
+
+export type ProjectPatchRmsZonesErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * RMS project path must be set before updating RMS fields.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchRmsZonesResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchRmsZonesResponse = ProjectPatchRmsZonesResponses[keyof ProjectPatchRmsZonesResponses];
+
+export type ProjectPatchRmsHorizonsData = {
+    body: Array<RmsHorizon>;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/rms/horizons';
+};
+
+export type ProjectPatchRmsHorizonsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * RMS project path must be set before updating RMS fields.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchRmsHorizonsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchRmsHorizonsResponse = ProjectPatchRmsHorizonsResponses[keyof ProjectPatchRmsHorizonsResponses];
+
+export type ProjectPatchRmsWellsData = {
+    body: Array<RmsWell>;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/rms/wells';
+};
+
+export type ProjectPatchRmsWellsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * RMS project path must be set before updating RMS fields.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchRmsWellsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchRmsWellsResponse = ProjectPatchRmsWellsResponses[keyof ProjectPatchRmsWellsResponses];
 
 export type UserGetUserData = {
     body?: never;
@@ -1588,7 +1686,7 @@ export type RmsGetZonesResponses = {
     /**
      * Successful Response
      */
-    200: RmsZoneList;
+    200: Array<RmsStratigraphicZone>;
 };
 
 export type RmsGetZonesResponse = RmsGetZonesResponses[keyof RmsGetZonesResponses];
@@ -1621,7 +1719,7 @@ export type RmsGetHorizonsResponses = {
     /**
      * Successful Response
      */
-    200: RmsHorizonList;
+    200: Array<RmsHorizon>;
 };
 
 export type RmsGetHorizonsResponse = RmsGetHorizonsResponses[keyof RmsGetHorizonsResponses];
@@ -1654,7 +1752,7 @@ export type RmsGetWellsResponses = {
     /**
      * Successful Response
      */
-    200: RmsWellList;
+    200: Array<RmsWell>;
 };
 
 export type RmsGetWellsResponse = RmsGetWellsResponses[keyof RmsGetWellsResponses];
@@ -1687,7 +1785,7 @@ export type RmsGetCoordinateSystemResponses = {
     /**
      * Successful Response
      */
-    200: FmuSettingsApiModelsRmsRmsCoordinateSystem;
+    200: RmsCoordinateSystem;
 };
 
 export type RmsGetCoordinateSystemResponse = RmsGetCoordinateSystemResponses[keyof RmsGetCoordinateSystemResponses];
