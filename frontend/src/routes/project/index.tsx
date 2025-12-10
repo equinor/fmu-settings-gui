@@ -34,8 +34,17 @@ function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
         <br />
         Created: {created_date} by {projectData.config.created_by}
         <br />
-        Last modified: <span className="missingValue">unknown</span>
-        {/* TODO: Add last modified date*/}
+        Last modified:{" "}
+        {projectData.config.last_modified_at ? (
+          <>
+            {displayDateTime(projectData.config.last_modified_at)} by{" "}
+            {projectData.config.last_modified_by ?? (
+              <span className="missingValue">unknown</span>
+            )}
+          </>
+        ) : (
+          <span className="missingValue">unknown</span>
+        )}
         <br />
         Version: {projectData.config.version}
       </PageText>

@@ -31,3 +31,7 @@ export function emptyMasterdata(): Smda {
     stratigraphic_column: emptyIdentifierUuid() as StratigraphicColumn,
   };
 }
+
+export function getRmsProjectName(projectPath: string) {
+  return projectPath.split("rms/model/").pop() ?? "";
+}
