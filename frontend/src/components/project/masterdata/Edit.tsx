@@ -785,7 +785,10 @@ export function Edit({
                     mode="array"
                     listeners={{
                       onSubmit: ({ fieldApi }) => {
-                        if (orphanData.discovery[DUMMYGROUP_NAME].length > 0) {
+                        if (
+                          DUMMYGROUP_NAME in orphanData.discovery &&
+                          orphanData.discovery[DUMMYGROUP_NAME].length > 0
+                        ) {
                           handleNameUuidListOperation(
                             fieldApi,
                             "removal",
