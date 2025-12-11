@@ -140,6 +140,7 @@ function Content() {
       {healthOk.status ? (
         <Overview
           projectMasterdata={project.data?.config.masterdata?.smda ?? undefined}
+          projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
         />
       ) : (
         <SmdaNotOk text={healthOk.text} />

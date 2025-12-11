@@ -459,10 +459,12 @@ function Items({
 
 export function Edit({
   projectMasterdata,
+  projectReadOnly,
   isOpen,
   closeDialog,
 }: {
   projectMasterdata: Smda;
+  projectReadOnly: boolean;
   isOpen: boolean;
   closeDialog: () => void;
 }) {
@@ -534,11 +536,13 @@ export function Edit({
       },
     },
     onSubmit: ({ formApi, value }) => {
-      mutationCallback({
-        formValue: value,
-        formSubmitCallback,
-        formReset: formApi.reset,
-      });
+      if (!projectReadOnly) {
+        mutationCallback({
+          formValue: value,
+          formSubmitCallback,
+          formReset: formApi.reset,
+        });
+      }
     },
   });
 
@@ -859,8 +863,15 @@ export function Edit({
                   <>
                     <form.SubmitButton
                       label="Save"
-                      disabled={!canSubmit || smdaMasterdata.isPending}
+                      disabled={
+                        !canSubmit ||
+                        smdaMasterdata.isPending ||
+                        projectReadOnly
+                      }
                       isPending={masterdataMutation.isPending}
+                      helperTextDisabled={
+                        projectReadOnly ? "Project is read-only" : undefined
+                      }
                     />
 
                     <form.CancelButton

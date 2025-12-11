@@ -13,7 +13,16 @@ export function GeneralButton({
 }) {
   return (
     <Tooltip title={tooltipText ?? ""}>
-      <Button onClick={onClick} aria-disabled={disabled}>
+      <Button
+        aria-disabled={disabled}
+        onClick={
+          disabled
+            ? (e) => {
+                e.preventDefault();
+              }
+            : onClick
+        }
+      >
         {label}
       </Button>
     </Tooltip>
