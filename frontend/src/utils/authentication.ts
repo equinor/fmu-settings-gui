@@ -21,10 +21,14 @@ import {
 } from "#client";
 import { ssoScopes } from "#config";
 import { HTTP_STATUS_UNAUTHORIZED } from "./api";
-import { getStorageItem, removeStorageItem, setStorageItem } from "./storage";
+import {
+  getStorageItem,
+  removeStorageItem,
+  STORAGENAME_API_TOKEN,
+  setStorageItem,
+} from "./storage";
 
 const FRAGMENTTOKEN_PREFIX = "#token=";
-const STORAGENAME_TOKEN = "apiToken";
 const APITOKEN_HEADER = "x-fmu-settings-api";
 const UPSTREAMSOURCE_HEADER = "x-upstream-source";
 const APIURL_SESSION = "/api/v1/session/";
@@ -44,15 +48,15 @@ function getTokenFromFragment() {
 }
 
 function getTokenFromStorage() {
-  return getStorageItem(sessionStorage, STORAGENAME_TOKEN) ?? "";
+  return getStorageItem(sessionStorage, STORAGENAME_API_TOKEN) ?? "";
 }
 
 function setTokenInStorage(token: string) {
-  setStorageItem(sessionStorage, STORAGENAME_TOKEN, token);
+  setStorageItem(sessionStorage, STORAGENAME_API_TOKEN, token);
 }
 
 export function removeTokenFromStorage() {
-  removeStorageItem(sessionStorage, STORAGENAME_TOKEN);
+  removeStorageItem(sessionStorage, STORAGENAME_API_TOKEN);
 }
 
 export function getApiToken() {

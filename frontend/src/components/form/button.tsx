@@ -1,12 +1,21 @@
-import { Button, DotProgress, Tooltip } from "@equinor/eds-core-react";
+import {
+  Button,
+  type ButtonProps,
+  DotProgress,
+  Tooltip,
+} from "@equinor/eds-core-react";
 
 export function GeneralButton({
   label,
+  variant,
   disabled,
+  isPending,
   tooltipText,
   onClick,
 }: {
   label: string;
+  variant?: ButtonProps["variant"];
+  isPending?: boolean;
   disabled?: boolean;
   tooltipText?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -14,6 +23,7 @@ export function GeneralButton({
   return (
     <Tooltip title={tooltipText ?? ""}>
       <Button
+        variant={variant}
         aria-disabled={disabled}
         onClick={
           disabled
@@ -23,7 +33,15 @@ export function GeneralButton({
             : onClick
         }
       >
-        {label}
+        {isPending && (
+          <DotProgress
+            color={variant === "outlined" ? "primary" : undefined}
+            style={{ position: "absolute" }}
+          />
+        )}
+        <span style={{ visibility: isPending ? "hidden" : undefined }}>
+          {label}
+        </span>
       </Button>
     </Tooltip>
   );

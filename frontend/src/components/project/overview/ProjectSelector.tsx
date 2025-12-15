@@ -33,6 +33,10 @@ import {
   useFieldContext,
   useFormContext,
 } from "#utils/form";
+import {
+  removeStorageItem,
+  STORAGENAME_RMS_PROJECT_OPEN,
+} from "#utils/storage";
 
 const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
   fieldComponents: {
@@ -88,6 +92,7 @@ function ProjectSelectorForm({
       void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),
       });
+      removeStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN);
     },
     meta: {
       preventDefaultErrorHandling: codes,

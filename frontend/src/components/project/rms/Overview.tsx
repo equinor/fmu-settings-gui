@@ -1,14 +1,16 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import { FmuProject, RmsProject } from "#client";
+import { RmsProject } from "#client";
 import {
   projectGetProjectQueryKey,
   projectGetRmsProjectsOptions,
   projectPatchRmsMutation,
+  rmsDeleteRmsProjectMutation,
+  rmsPostRmsProjectMutation,
 } from "#client/@tanstack/react-query.gen";
 import {
   CancelButton,
@@ -23,6 +25,12 @@ import {
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
 import { getRmsProjectName } from "#utils/model";
+import {
+  getStorageItem,
+  STORAGENAME_RMS_PROJECT_OPEN,
+  setStorageItem,
+} from "#utils/storage";
+import { ActionButtonsContainer } from "./Overview.style";
 
 const { useAppForm: useAppFormRmsEditor } = createFormHook({
   fieldComponents: {
@@ -209,9 +217,125 @@ function RmsInfo({ rmsData }: { rmsData: RmsProject }) {
   );
 }
 
-export function Overview({ projectData }: { projectData: FmuProject }) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const rmsData = projectData.config.rms;
+function RmsProjectActions({
+  rmsData,
+  projectReadOnly: projectIsReadOnly,
+  setIsRmsProjectOpen,
+  isRmsProjectOpen,
+}: {
+  rmsData: RmsProject | null | undefined;
+  projectReadOnly: boolean | undefined;
+  setIsRmsProjectOpen: Dispatch<SetStateAction<boolean>>;
+  isRmsProjectOpen: boolean;
+}) {
+  const [selectProjectDialogOpen, setSelectProjectDialogOpen] = useState(false);
+
+  const projectOpenMutation = useMutation({
+    ...rmsPostRmsProjectMutation(),
+    onSuccess: () => {
+      setIsRmsProjectOpen(true);
+    },
+    onError: () => {
+      setIsRmsProjectOpen(false);
+    },
+    meta: {
+      errorPrefix: "Error opening the RMS project",
+    },
+  });
+
+  const projectCloseMutation = useMutation({
+    ...rmsDeleteRmsProjectMutation(),
+    onSuccess: () => {
+      setIsRmsProjectOpen(false);
+    },
+    meta: {
+      errorPrefix: "Error closing the RMS project",
+    },
+  });
+
+  return (
+    <>
+      {rmsData?.path &&
+        (projectOpenMutation.isPending ? (
+          <PageText>
+            ⏳ Opening the RMS project. This might take a while...
+          </PageText>
+        ) : isRmsProjectOpen ? (
+          <PageText>✅ The RMS project is open and data is accessible</PageText>
+        ) : (
+          <PageText>
+            ⛔ The RMS project needs to be opened to access data
+          </PageText>
+        ))}
+
+      <ActionButtonsContainer>
+        <GeneralButton
+          label="Select project"
+          disabled={!!projectIsReadOnly || isRmsProjectOpen}
+          tooltipText={
+            projectIsReadOnly
+              ? "Project is read-only"
+              : isRmsProjectOpen
+                ? "Close the RMS project to select a new one"
+                : ""
+          }
+          onClick={() => {
+            setSelectProjectDialogOpen(true);
+          }}
+        />
+
+        {rmsData?.path && (
+          <>
+            <GeneralButton
+              label={isRmsProjectOpen ? "Reload project" : "Open project"}
+              isPending={projectOpenMutation.isPending}
+              variant={isRmsProjectOpen ? "outlined" : "contained"}
+              onClick={() => {
+                projectOpenMutation.mutate({});
+              }}
+            />
+
+            {isRmsProjectOpen && !projectOpenMutation.isPending && (
+              <GeneralButton
+                label="Close project"
+                variant="outlined"
+                isPending={projectCloseMutation.isPending}
+                onClick={() => {
+                  projectCloseMutation.mutate({});
+                }}
+              />
+            )}
+          </>
+        )}
+      </ActionButtonsContainer>
+
+      <RmsEditorForm
+        rmsData={rmsData}
+        isDialogOpen={selectProjectDialogOpen}
+        setIsDialogOpen={setSelectProjectDialogOpen}
+      />
+    </>
+  );
+}
+
+export function Overview({
+  rmsData,
+  projectReadOnly,
+}: {
+  rmsData: RmsProject | null | undefined;
+  projectReadOnly: boolean;
+}) {
+  const [isRmsProjectOpen, setIsRmsProjectOpen] = useState(
+    getStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN, "boolean"),
+  );
+
+  useEffect(() => {
+    setStorageItem(
+      sessionStorage,
+      STORAGENAME_RMS_PROJECT_OPEN,
+      isRmsProjectOpen,
+    );
+  }, [isRmsProjectOpen]);
 
   return (
     <>
@@ -226,19 +350,11 @@ export function Overview({ projectData }: { projectData: FmuProject }) {
         <PageCode>No RMS project information found in the project.</PageCode>
       )}
 
-      <GeneralButton
-        label={"Select project"}
-        disabled={projectData.is_read_only}
-        tooltipText={projectData.is_read_only ? "Project is read-only" : ""}
-        onClick={() => {
-          setIsDialogOpen(true);
-        }}
-      />
-
-      <RmsEditorForm
+      <RmsProjectActions
         rmsData={rmsData}
-        isDialogOpen={isDialogOpen}
-        setIsDialogOpen={setIsDialogOpen}
+        projectReadOnly={projectReadOnly}
+        setIsRmsProjectOpen={setIsRmsProjectOpen}
+        isRmsProjectOpen={isRmsProjectOpen}
       />
     </>
   );
