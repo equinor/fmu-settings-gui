@@ -71,7 +71,9 @@ function RouteComponent() {
         <>
           <PageText>No project selected</PageText>
 
-          <ProjectSelector />
+          <ProjectSelector
+            projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+          />
         </>
       )}
 

@@ -45,10 +45,12 @@ const { useAppForm: useAppFormModelEditor } = createFormHook({
 
 function ModelEditorForm({
   modelData,
+  projectReadOnly,
   isDialogOpen,
   setIsDialogOpen,
 }: {
   modelData: Model | null | undefined;
+  projectReadOnly: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
 }) {
@@ -158,8 +160,11 @@ function ModelEditorForm({
             {([isDefaultValue, canSubmit]) => (
               <form.SubmitButton
                 label="Save"
-                disabled={isDefaultValue || !canSubmit}
+                disabled={isDefaultValue || !canSubmit || projectReadOnly}
                 isPending={isPending}
+                helperTextDisabled={
+                  projectReadOnly ? "Project is read-only" : undefined
+                }
               />
             )}
           </form.Subscribe>
@@ -206,8 +211,10 @@ function ModelInfo({ modelData }: { modelData: Model }) {
 
 export function EditableModelInfo({
   projectData,
+  projectReadOnly,
 }: {
   projectData: FmuProject;
+  projectReadOnly: boolean;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const modelData = projectData.config.model;
@@ -233,8 +240,8 @@ export function EditableModelInfo({
 
       <GeneralButton
         label={modelData ? "Edit" : "Add"}
-        disabled={projectData.is_read_only}
-        tooltipText={projectData.is_read_only ? "Project is read-only" : ""}
+        disabled={projectReadOnly}
+        tooltipText={projectReadOnly ? "Project is read-only" : ""}
         onClick={() => {
           setIsDialogOpen(true);
         }}
@@ -242,6 +249,7 @@ export function EditableModelInfo({
 
       <ModelEditorForm
         modelData={modelData}
+        projectReadOnly={projectReadOnly}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
       />

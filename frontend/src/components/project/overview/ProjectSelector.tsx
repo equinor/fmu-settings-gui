@@ -55,9 +55,11 @@ const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
 type ValueSource = "recentProjectPath" | "projectPath" | "";
 
 function ProjectSelectorForm({
+  projectReadOnly,
   closeDialog,
   isDialogOpen,
 }: {
+  projectReadOnly: boolean;
   closeDialog: () => void;
   isDialogOpen: boolean;
 }) {
@@ -114,11 +116,8 @@ function ProjectSelectorForm({
       mutate(
         { body: { path } },
         {
-          onSuccess: (data) => {
-            toast.info(
-              `Successfully set project ${path}` +
-                (data.is_read_only ? " (read-only)" : ""),
-            );
+          onSuccess: () => {
+            toast.info(`Successfully set project ${path}`);
             closeProjectSelector({ formReset: formApi.reset });
           },
           onError: (error) => {
@@ -240,8 +239,11 @@ function ProjectSelectorForm({
           <form.AppForm>
             <form.SubmitButton
               label="Select"
-              disabled={submitDisabled}
+              disabled={submitDisabled || projectReadOnly}
               isPending={isPending}
+              helperTextDisabled={
+                projectReadOnly ? "Project is read-only" : undefined
+              }
             />
             <form.CancelButton
               onClick={() => {
@@ -367,7 +369,11 @@ function ConfirmInitProjectDialog({
   );
 }
 
-export function ProjectSelector() {
+export function ProjectSelector({
+  projectReadOnly,
+}: {
+  projectReadOnly: boolean;
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleOpen = () => {
@@ -381,6 +387,7 @@ export function ProjectSelector() {
     <>
       <Button onClick={handleOpen}>Select project</Button>
       <ProjectSelectorForm
+        projectReadOnly={projectReadOnly}
         closeDialog={handleClose}
         isDialogOpen={isDialogOpen}
       />

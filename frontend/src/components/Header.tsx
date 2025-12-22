@@ -61,14 +61,15 @@ function ProjectInfoItem({ label, value }: { label: string; value?: string }) {
 
 function ProjectInfo() {
   const project = useProject();
+  const lockStatus = project.lockStatus;
 
   return (
     <ProjectInfoContainer>
       {project.status && project.data ? (
         <>
           <LockStatusIcon
-            isReadOnly={project.data.is_read_only ?? true}
-            lockInfo={project.lockStatus?.lock_info}
+            isReadOnly={!(lockStatus?.is_lock_acquired ?? false)}
+            lockInfo={lockStatus?.lock_info}
           />
           <ProjectInfoItem
             label="Asset"

@@ -55,10 +55,12 @@ const { useAppForm: useAppFormAccessEditor } = createFormHook({
 
 function AccessEditorForm({
   accessData,
+  projectReadOnly,
   isDialogOpen,
   setIsDialogOpen,
 }: {
   accessData: Access | null | undefined;
+  projectReadOnly: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
 }) {
@@ -179,8 +181,11 @@ function AccessEditorForm({
             {([isDefaultValue, canSubmit]) => (
               <form.SubmitButton
                 label="Save"
-                disabled={isDefaultValue || !canSubmit}
+                disabled={isDefaultValue || !canSubmit || projectReadOnly}
                 isPending={isPending}
+                helperTextDisabled={
+                  projectReadOnly ? "Project is read-only" : undefined
+                }
               />
             )}
           </form.Subscribe>
@@ -217,8 +222,10 @@ export function AccessInfo({ accessData }: { accessData: Access }) {
 
 export function EditableAccessInfo({
   projectData,
+  projectReadOnly,
 }: {
   projectData: FmuProject;
+  projectReadOnly: boolean;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const accessData = projectData.config.access;
@@ -266,8 +273,8 @@ export function EditableAccessInfo({
 
       <GeneralButton
         label={accessData ? "Edit" : "Add"}
-        disabled={projectData.is_read_only}
-        tooltipText={projectData.is_read_only ? "Project is read-only" : ""}
+        disabled={projectReadOnly}
+        tooltipText={projectReadOnly ? "Project is read-only" : ""}
         onClick={() => {
           setIsDialogOpen(true);
         }}
@@ -275,6 +282,7 @@ export function EditableAccessInfo({
 
       <AccessEditorForm
         accessData={accessData}
+        projectReadOnly={projectReadOnly}
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
       />
