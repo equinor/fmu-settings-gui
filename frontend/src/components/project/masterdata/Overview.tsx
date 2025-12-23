@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import { Smda } from "#client";
 import { GeneralButton } from "#components/form/button";
-import { GeneralButton } from "#components/form/button";
 import { Info } from "#components/project/masterdata/Info";
 import { PageText } from "#styles/common";
 import { emptyMasterdata } from "#utils/model";
@@ -11,9 +10,13 @@ import { Edit } from "./Edit";
 export function Overview({
   projectMasterdata,
   smdaHealthStatus,
+  projectReadOnly,
+  masterdataEditMode,
 }: {
   projectMasterdata: Smda | undefined;
   smdaHealthStatus: boolean;
+  projectReadOnly: boolean;
+  masterdataEditMode: boolean;
 }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -33,12 +36,14 @@ export function Overview({
         <PageText>No masterdata is currently stored in the project.</PageText>
       )}
 
-      <GeneralButton
-        label={projectMasterdata ? "Edit" : "Add"}
-        disabled={!smdaHealthStatus}
-        tooltipText={!smdaHealthStatus ? "Log in to edit masterdata" : ""}
-        onClick={openEditDialog}
-      />
+      {masterdataEditMode && (
+        <GeneralButton
+          label={projectMasterdata ? "Edit" : "Add"}
+          disabled={!smdaHealthStatus}
+          tooltipText={!smdaHealthStatus ? "Log in to edit masterdata" : ""}
+          onClick={openEditDialog}
+        />
+      )}
 
       <Edit
         projectMasterdata={projectMasterdata ?? emptyMasterdata()}

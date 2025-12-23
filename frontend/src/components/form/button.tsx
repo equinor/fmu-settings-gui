@@ -22,8 +22,26 @@ export function GeneralButton({
 }) {
   return (
     <Tooltip title={tooltipText ?? ""}>
-      <Button onClick={onClick} aria-disabled={disabled} disabled={disabled}>
-        {label}
+      <Button
+        variant={variant}
+        aria-disabled={disabled}
+        onClick={
+          disabled
+            ? (e) => {
+                e.preventDefault();
+              }
+            : onClick
+        }
+      >
+        {isPending && (
+          <DotProgress
+            color={variant === "outlined" ? "primary" : undefined}
+            style={{ position: "absolute" }}
+          />
+        )}
+        <span style={{ visibility: isPending ? "hidden" : undefined }}>
+          {label}
+        </span>
       </Button>
     </Tooltip>
   );
