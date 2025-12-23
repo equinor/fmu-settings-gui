@@ -1,13 +1,13 @@
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { Button, DotProgress } from "@equinor/eds-core-react";
+import { Button, DotProgress, Typography } from "@equinor/eds-core-react";
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import {
   sessionPatchAccessTokenMutation,
@@ -21,6 +21,11 @@ import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import { PageCode, PageHeader, PageText } from "#styles/common";
 import { handleAddSsoAccessToken, handleSsoLogin } from "#utils/authentication";
+import {
+  getStorageItem,
+  STORAGENAME_MASTERDATA_EDIT_MODE,
+  setStorageItem,
+} from "#utils/storage";
 
 export const Route = createFileRoute("/project/masterdata")({
   component: RouteComponent,
@@ -116,7 +121,7 @@ function AccessTokenPresence() {
 function SmdaNotOk({ text }: { text: string }) {
   return (
     <>
-      <PageText>Required data for accessing SMDA is not present:</PageText>
+      <PageText>Required data for editing masterdata is not present:</PageText>
 
       <PageCode>{text}</PageCode>
 
@@ -130,6 +135,21 @@ function SmdaNotOk({ text }: { text: string }) {
 function Content() {
   const project = useProject();
   const { data: healthOk } = useSmdaHealthCheck();
+  const [masterdataEditMode, setMasterdataEditMode] = useState(
+    getStorageItem(sessionStorage, STORAGENAME_MASTERDATA_EDIT_MODE, "boolean"),
+  );
+
+  useEffect(() => {
+    setStorageItem(
+      sessionStorage,
+      STORAGENAME_MASTERDATA_EDIT_MODE,
+      masterdataEditMode,
+    );
+  }, [masterdataEditMode]);
+
+  function toggleMasterdataEditMode() {
+    setMasterdataEditMode((prevMode) => !prevMode);
+  }
 
   if (!project.status) {
     return <PageText>Project not set.</PageText>;
@@ -137,13 +157,22 @@ function Content() {
 
   return (
     <>
-      {healthOk.status ? (
-        <Overview
-          projectMasterdata={project.data?.config.masterdata?.smda ?? undefined}
-          projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
-        />
+      <Overview
+        projectMasterdata={project.data?.config.masterdata?.smda ?? undefined}
+        smdaHealthStatus={healthOk.status}
+        projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+        masterdataEditMode={masterdataEditMode}
+      />
+
+      {masterdataEditMode ? (
+        !healthOk.status && <SmdaNotOk text={healthOk.text} />
       ) : (
-        <SmdaNotOk text={healthOk.text} />
+        <PageText>
+          💡 To manage masterdata,{" "}
+          <Typography onClick={toggleMasterdataEditMode} link>
+            enable editing mode.
+          </Typography>
+        </PageText>
       )}
     </>
   );
