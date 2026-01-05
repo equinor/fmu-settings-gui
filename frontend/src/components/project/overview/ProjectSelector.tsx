@@ -213,7 +213,7 @@ function ProjectSelectorForm({
                 color="error"
                 helperProps={{
                   text: helperTextProjectPath,
-                  icon: <Icon data={error_filled} size={18} />,
+                  icon: <Icon data={error_filled} size={16} />,
                 }}
               >
                 <field.TextField
@@ -272,7 +272,7 @@ function RecentProjectSelect({
       color="error"
       helperProps={{
         text: helperText,
-        icon: <Icon data={error_filled} size={18} />,
+        icon: <Icon data={error_filled} size={16} />,
       }}
     >
       <NativeSelect
