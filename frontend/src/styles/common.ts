@@ -21,7 +21,8 @@ export const PageText = styled(Typography).attrs<{
 `;
 
 export const PageCode = styled(Typography)`
-  margin: 0 1em 1em 1em;
+  margin: ${tokens.spacings.comfortable.small} ;
+  margin-top: 0;
   padding: 1em;
   border: solid 1px ${tokens.colors.text.static_icons__default.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
