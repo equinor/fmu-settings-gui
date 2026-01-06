@@ -1,7 +1,6 @@
 """The main entry point for fmu-settings-gui."""
 
 import asyncio
-import os
 import re
 import signal
 import sys
@@ -24,14 +23,16 @@ async def serve_spa_catchall(full_path: str) -> FileResponse:
     """Ensures internal paths to the GUI are served by the SPA."""
     if full_path == "":
         full_path = "index.html"
-    resolved_path = os.path.normpath(
-        os.path.realpath(os.path.join(str(static_dir), full_path))
-    )
-    if bool(re.fullmatch(r"^[\w\s\.\-/]+$", str(resolved_path))) is False:
+
+    resolved_path = (static_dir / full_path).resolve()
+
+    if not re.fullmatch(r"^[\w\s\.\-/]+$", str(resolved_path)):
         raise ValueError(f"Unallowed characters present in {full_path!r}")
-    if not resolved_path.startswith(str(static_dir)):
+
+    if not resolved_path.is_relative_to(static_dir):
         raise HTTPException(status_code=403, detail="Access denied")
-    if os.path.exists(resolved_path):
+
+    if resolved_path.exists():
         return FileResponse(resolved_path)
     return FileResponse(static_dir / "index.html")
 
