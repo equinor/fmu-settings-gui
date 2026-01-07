@@ -1,6 +1,8 @@
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
+import { InfoBox, WarningBox } from "#styles/common";
+
 export const FieldsContainer = styled.div`
   width: 900px;
   display: grid;
@@ -19,21 +21,15 @@ export const FieldsContainer = styled.div`
   }
 `;
 
-export const ItemsContainer = styled.div`
-  padding: ${tokens.spacings.comfortable.small};
-  border: solid 1px ${tokens.colors.ui.background__medium.hex};
-  border-radius: ${tokens.shape.corners.borderRadius};
-  background: ${tokens.colors.ui.background__light.hex};
+export const ItemsContainer = styled(InfoBox)`
+  margin-bottom: 0;
 
   & > div:not(:last-of-type){
     margin-bottom: ${tokens.spacings.comfortable.medium};
   }
 `;
 
-export const OrphanTypesContainer = styled.div`
+export const OrphanTypesContainer = styled(WarningBox)`
   margin-top: ${tokens.spacings.comfortable.medium};
-  padding: ${tokens.spacings.comfortable.small};
-  border: solid 1px ${tokens.colors.ui.background__medium.hex};
-  border-radius: ${tokens.shape.corners.borderRadius};
-  background: ${tokens.colors.ui.background__warning.hex};
+  margin-bottom: 0;
 `;

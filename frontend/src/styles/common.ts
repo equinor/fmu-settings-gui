@@ -36,14 +36,16 @@ export const PageList = styled(List)`
   margin-bottom: 1em;
 `;
 
-export const InfoBox = styled.div`
+export const GenericBox = styled.div`
   margin-bottom: ${tokens.spacings.comfortable.medium};
   padding: ${tokens.spacings.comfortable.small};
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
   background: ${tokens.colors.ui.background__light.hex};
   color: ${tokens.colors.text.static_icons__secondary.hex};
+`;
 
+export const InfoBox = styled(GenericBox)`
   th {
     padding-right: ${tokens.spacings.comfortable.small};
     vertical-align: top;
@@ -67,6 +69,10 @@ export const InfoBox = styled.div`
   .multilineValue {
     white-space: pre-line;
   }
+`;
+
+export const WarningBox = styled(GenericBox)`
+  background: ${tokens.colors.ui.background__warning.hex};
 `;
 
 export const ChipsContainer = styled.div`
