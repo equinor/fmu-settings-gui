@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import type { FmuProject } from "#client";
-import { Resources } from "#components/home/Resources";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
 import {
@@ -78,8 +77,6 @@ function RouteComponent() {
       )}
 
       <PageSectionSpacer />
-
-      <Resources />
     </>
   );
 }
