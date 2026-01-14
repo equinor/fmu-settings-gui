@@ -10,6 +10,8 @@ import {
   projectGetRmsProjectsOptions,
   projectPatchRmsMutation,
   rmsDeleteRmsProjectMutation,
+  rmsGetHorizonsQueryKey,
+  rmsGetZonesQueryKey,
   rmsPostRmsProjectMutation,
 } from "#client/@tanstack/react-query.gen";
 import {
@@ -228,12 +230,19 @@ function RmsProjectActions({
   setIsRmsProjectOpen: Dispatch<SetStateAction<boolean>>;
   isRmsProjectOpen: boolean;
 }) {
+  const queryClient = useQueryClient();
   const [selectProjectDialogOpen, setSelectProjectDialogOpen] = useState(false);
 
   const projectOpenMutation = useMutation({
     ...rmsPostRmsProjectMutation(),
     onSuccess: () => {
       setIsRmsProjectOpen(true);
+      void queryClient.invalidateQueries({
+        queryKey: rmsGetHorizonsQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: rmsGetZonesQueryKey(),
+      });
     },
     onError: () => {
       setIsRmsProjectOpen(false);
