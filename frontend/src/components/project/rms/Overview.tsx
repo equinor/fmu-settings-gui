@@ -271,7 +271,11 @@ function RmsProjectActions({
       <ActionButtonsContainer>
         <GeneralButton
           label="Select project"
-          disabled={!!projectIsReadOnly || isRmsProjectOpen}
+          disabled={
+            !!projectIsReadOnly ||
+            isRmsProjectOpen ||
+            projectOpenMutation.isPending
+          }
           tooltipText={
             projectIsReadOnly
               ? "Project is read-only"
@@ -289,6 +293,7 @@ function RmsProjectActions({
             <GeneralButton
               label={isRmsProjectOpen ? "Reload project" : "Open project"}
               isPending={projectOpenMutation.isPending}
+              disabled={projectCloseMutation.isPending}
               variant={isRmsProjectOpen ? "outlined" : "contained"}
               onClick={() => {
                 projectOpenMutation.mutate({});

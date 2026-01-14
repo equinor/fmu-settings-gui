@@ -5,6 +5,6 @@ export const ActionButtonsContainer = styled.div`
   margin-bottom: ${tokens.spacings.comfortable.medium};
 
   button + button {
-    margin-left: ${tokens.spacings.comfortable.small};
+    margin-left: ${tokens.spacings.comfortable.small} !important;
   }
 `;
