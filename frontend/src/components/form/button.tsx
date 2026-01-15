@@ -7,6 +7,7 @@ import {
 
 export function GeneralButton({
   label,
+  color,
   variant,
   disabled,
   isPending,
@@ -14,6 +15,7 @@ export function GeneralButton({
   onClick,
 }: {
   label: string;
+  color?: ButtonProps["color"];
   variant?: ButtonProps["variant"];
   isPending?: boolean;
   disabled?: boolean;
@@ -25,6 +27,7 @@ export function GeneralButton({
       <Button
         variant={variant}
         aria-disabled={disabled}
+        color={color}
         onClick={
           disabled
             ? (e) => {
