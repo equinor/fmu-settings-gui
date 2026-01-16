@@ -110,7 +110,7 @@ function FeedbackDialog() {
         isDismissable={true}
         open={isOpen}
         onClose={closeDialog}
-        $maxWidth="32em"
+        style={{ maxWidth: "32em" }}
       >
         <Dialog.Header>Let us know what you think</Dialog.Header>
 
