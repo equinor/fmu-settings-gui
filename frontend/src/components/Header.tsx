@@ -103,7 +103,7 @@ function FeedbackDialog() {
   return (
     <>
       <HeaderActionButton onClick={openDialog}>
-        Feedback <Icon data={comment} size={16} />
+        Feedback <Icon data={comment} size={18} />
       </HeaderActionButton>
 
       <EditDialog
