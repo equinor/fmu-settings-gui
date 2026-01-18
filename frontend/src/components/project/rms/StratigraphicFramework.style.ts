@@ -1,0 +1,108 @@
+import { tokens } from "@equinor/eds-tokens";
+import styled from "styled-components";
+
+import { GenericBox } from "#styles/common";
+
+export const StratigraphicFrameworkContainer = styled(GenericBox)<{
+  $maxHeight?: string;
+  $disablePointerEvents: boolean;
+}>`
+  max-height: ${({ $maxHeight }) => $maxHeight};
+  pointer-events: ${({ $disablePointerEvents }) => ($disablePointerEvents ? "none" : "auto")};
+
+  display: flex;
+  flex-direction: column;
+`;
+
+export const StratigraphicFrameworkHeader = styled.div.attrs<{
+  $numStratColumns: number;
+}>(({ $numStratColumns }) => ({
+  style: {
+    gridTemplateColumns: `minmax(max-content, 2fr) repeat(${$numStratColumns}, 3fr)`,
+  },
+}))`
+  display: grid;
+  border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+  font-weight: ${tokens.typography.table.cell_header.fontWeight};
+  font-size: ${tokens.typography.table.cell_text.fontSize};
+
+  div {
+    padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
+
+    &:nth-child(2) {    
+      display: flex;
+      justify-content: center;
+      grid-column: 2 / -1;
+    }
+  }
+`;
+
+export const StratigraphicFrameworkContent = styled.div.attrs<{
+  $numStratColumns: number;
+  $numRows: number;
+}>((props) => ({
+  style: {
+    gridTemplateRows: `repeat(${props.$numRows}, 14px)`,
+    gridTemplateColumns: `minmax(max-content, 2fr) repeat(${props.$numStratColumns}, 3fr)`,
+  },
+}))`
+  display: grid;
+  overflow: auto;
+  background-color: ${tokens.colors.ui.background__default.hex};
+  padding: ${tokens.spacings.comfortable.medium} ${tokens.spacings.comfortable.small};
+  
+`;
+
+export const ZoneItem = styled.div`
+  padding: ${tokens.spacings.comfortable.xx_small};
+
+  button {
+    width: 100%;
+    height: 100%;
+    display: block;
+
+    background-color: ${tokens.colors.infographic.primary__moss_green_21.rgba}; 
+
+    &.orphan {
+      background-color: ${tokens.colors.interactive.danger__highlight.rgba};
+    } 
+    &:hover:not(.orphan) {
+      background-color: ${tokens.colors.infographic.primary__moss_green_21.rgba};
+    }
+    &.inactive {
+      background-color: ${tokens.colors.interactive.disabled__fill.rgba};
+    }
+  }
+`;
+
+export const HorizonItem = styled.div`
+  grid-column: 1;
+
+  button {
+    height: 100%;  
+    width: 100%;
+    padding: ${tokens.spacings.comfortable.x_small};
+
+    span {
+      justify-content: flex-start;
+    }
+
+    &.orphan {
+      background-color: ${tokens.colors.interactive.danger__highlight.rgba};
+    } 
+    &:disabled:not(.orphan) {
+      color: ${tokens.colors.text.static_icons__default.rgba};
+    }
+    &.inactive {
+      color: ${tokens.colors.interactive.disabled__text.rgba};
+    }
+    &.inactive:hover {
+        color: ${tokens.colors.interactive.focus.rgba};
+      }
+  }
+`;
+
+export const GridLine = styled.div`
+  grid-column: 2 / -1;
+  border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+`;
