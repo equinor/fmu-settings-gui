@@ -10,6 +10,8 @@ import {
   projectGetRmsProjectsOptions,
   projectPatchRmsMutation,
   rmsDeleteRmsProjectMutation,
+  rmsGetHorizonsQueryKey,
+  rmsGetZonesQueryKey,
   rmsPostRmsProjectMutation,
 } from "#client/@tanstack/react-query.gen";
 import {
@@ -228,12 +230,19 @@ function RmsProjectActions({
   setIsRmsProjectOpen: Dispatch<SetStateAction<boolean>>;
   isRmsProjectOpen: boolean;
 }) {
+  const queryClient = useQueryClient();
   const [selectProjectDialogOpen, setSelectProjectDialogOpen] = useState(false);
 
   const projectOpenMutation = useMutation({
     ...rmsPostRmsProjectMutation(),
     onSuccess: () => {
       setIsRmsProjectOpen(true);
+      void queryClient.invalidateQueries({
+        queryKey: rmsGetHorizonsQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: rmsGetZonesQueryKey(),
+      });
     },
     onError: () => {
       setIsRmsProjectOpen(false);
@@ -271,7 +280,11 @@ function RmsProjectActions({
       <ActionButtonsContainer>
         <GeneralButton
           label="Select project"
-          disabled={!!projectIsReadOnly || isRmsProjectOpen}
+          disabled={
+            !!projectIsReadOnly ||
+            isRmsProjectOpen ||
+            projectOpenMutation.isPending
+          }
           tooltipText={
             projectIsReadOnly
               ? "Project is read-only"
@@ -289,6 +302,7 @@ function RmsProjectActions({
             <GeneralButton
               label={isRmsProjectOpen ? "Reload project" : "Open project"}
               isPending={projectOpenMutation.isPending}
+              disabled={projectCloseMutation.isPending}
               variant={isRmsProjectOpen ? "outlined" : "contained"}
               onClick={() => {
                 projectOpenMutation.mutate({});
