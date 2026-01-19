@@ -2,7 +2,7 @@ import { Button, Icon, Popover, Table } from "@equinor/eds-core-react";
 import { lock, lock_open } from "@equinor/eds-icons";
 import { tokens } from "@equinor/eds-tokens";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -35,12 +35,12 @@ function EnableEditingButton({ lockStatus }: { lockStatus?: LockStatus }) {
           {},
           {
             onSuccess: (data) => {
-              data.message === "Project lock acquired."
-                ? toast.info("Project is open for editing")
-                : toast.error(
-                    "An error occured and project remains read-only. " +
-                      (lockStatus?.last_lock_acquire_error ?? ""),
-                  );
+              if (data.message !== "Project lock acquired.") {
+                toast.error(
+                  "An error occured and project remains read-only. " +
+                    (lockStatus?.last_lock_acquire_error ?? ""),
+                );
+              }
             },
           },
         );
@@ -131,14 +131,6 @@ export function LockIcon({ isReadOnly }: { isReadOnly: boolean }) {
 
 export function LockStatusBanner({ lockStatus }: { lockStatus?: LockStatus }) {
   const isReadOnly = !(lockStatus?.is_lock_acquired ?? false);
-
-  useEffect(() => {
-    if (lockStatus && !lockStatus.lock_info && isReadOnly) {
-      toast.info(
-        "Project is now read-only. It can be opened for editing from the project overview page.",
-      );
-    }
-  }, [lockStatus, isReadOnly]);
 
   return (
     <Banner>
