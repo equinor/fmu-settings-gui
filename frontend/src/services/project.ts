@@ -1,18 +1,21 @@
 import {
   queryOptions,
   useQuery,
+  useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
+import { toast } from "react-toastify";
 
 import {
   FmuProject,
   Options,
   ProjectGetProjectData,
+  projectGetLockStatus,
   projectGetProject,
 } from "#client";
 import {
-  projectGetLockStatusOptions,
+  projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
 } from "#client/@tanstack/react-query.gen";
 import { LockStatus } from "#client/types.gen";
@@ -59,8 +62,40 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
     }),
   );
 
+  const queryClient = useQueryClient();
+
   const { data: lockStatus } = useQuery({
-    ...projectGetLockStatusOptions(),
+    ...queryOptions({
+      queryFn: async ({ queryKey, signal }) => {
+        const previousLockStatus = queryClient.getQueryData<LockStatus>(
+          projectGetLockStatusQueryKey(),
+        );
+        const { data } = await projectGetLockStatus({
+          ...options,
+          ...queryKey[0],
+          signal,
+          throwOnError: true,
+        });
+
+        if (previousLockStatus) {
+          const currentIsReadOnly = !data.is_lock_acquired;
+          const previousIsReadOnly = !previousLockStatus.is_lock_acquired;
+
+          if (currentIsReadOnly && !previousIsReadOnly) {
+            toast.info(
+              "Project is now read-only. It can be opened for editing from the project overview page",
+            );
+          }
+
+          if (!currentIsReadOnly && previousIsReadOnly) {
+            toast.info("Project is now open for editing");
+          }
+        }
+
+        return data;
+      },
+      queryKey: projectGetLockStatusQueryKey(options),
+    }),
     refetchInterval: projectLockStatusRefetchInterval,
     enabled: project.status && project.data !== undefined,
   });
