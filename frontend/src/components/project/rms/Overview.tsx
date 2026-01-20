@@ -292,9 +292,15 @@ function RmsProjectActions({
                 ? "Close the RMS project to select a new one"
                 : ""
           }
+          //onClick={() => {
+          //  setSelectProjectDialogOpen(true);
+          //}}
           onClick={() => {
+            void queryClient.invalidateQueries({
+              queryKey: projectGetRmsProjectsOptions().queryKey,
+          });
             setSelectProjectDialogOpen(true);
-          }}
+        }}
         />
 
         {rmsData?.path && (
