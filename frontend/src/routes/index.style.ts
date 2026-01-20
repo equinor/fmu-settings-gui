@@ -1,3 +1,4 @@
+import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 export const AppContainer = styled.div`
@@ -22,6 +23,6 @@ export const AppContainer = styled.div`
     grid-area: content;
     overflow: scroll;
     max-width: 55em;
-    padding: 24px;
+    padding: ${tokens.spacings.comfortable.large};
   }
 `;

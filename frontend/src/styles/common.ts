@@ -21,9 +21,9 @@ export const PageText = styled(Typography).attrs<{
 `;
 
 export const PageCode = styled(Typography)`
-  margin: ${tokens.spacings.comfortable.small} ;
+  margin: ${tokens.spacings.comfortable.medium};
   margin-top: 0;
-  padding: 1em;
+  padding: ${tokens.spacings.comfortable.medium};
   border: solid 1px ${tokens.colors.text.static_icons__default.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
   background: ${tokens.colors.ui.background__light.hex};
@@ -34,7 +34,7 @@ export const PageSectionSpacer = styled.div`
 `;
 
 export const PageList = styled(List)`
-  margin-bottom: 1em;
+  margin-bottom: ${tokens.spacings.comfortable.medium};
 `;
 
 export const GenericBox = styled.div`

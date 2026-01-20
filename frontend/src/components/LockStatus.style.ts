@@ -3,7 +3,7 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 export const LockStatusBanner = styled(Banner)`
-  margin-bottom: 1em;
+  margin-bottom: ${tokens.spacings.comfortable.medium};
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
   box-shadow: none;
