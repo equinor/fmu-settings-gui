@@ -76,6 +76,45 @@ export const AssetSchema = {
 these data.`
 } as const;
 
+export const CacheContentSchema = {
+    properties: {
+        data: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Data',
+            description: 'Parsed JSON object for the cached resource.'
+        }
+    },
+    type: 'object',
+    required: ['data'],
+    title: 'CacheContent',
+    description: 'Content of a cache revision.'
+} as const;
+
+export const CacheListSchema = {
+    properties: {
+        revisions: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Revisions',
+            description: 'Cache revision filenames, sorted oldest to newest.'
+        }
+    },
+    type: 'object',
+    required: ['revisions'],
+    title: 'CacheList',
+    description: 'List of cache revision filenames.'
+} as const;
+
+export const CacheResourceSchema = {
+    type: 'string',
+    enum: ['config.json', 'mappings.json'],
+    title: 'CacheResource',
+    description: 'Resources that can be cached and restored.'
+} as const;
+
 export const ClassificationSchema = {
     type: 'string',
     enum: ['asset', 'internal', 'restricted'],
@@ -180,12 +219,6 @@ export const FMUProjectSchema = {
         config: {
             '$ref': '#/components/schemas/ProjectConfig',
             description: "The configuration of an FMU project's .fmu directory."
-        },
-        is_read_only: {
-            type: 'boolean',
-            title: 'Is Read Only',
-            description: 'Whether the project is in read-only mode due to lock conflicts.',
-            default: false
         }
     },
     type: 'object',
@@ -271,7 +304,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.14.1.dev1+gecd15bdb4'
+            default: '0.14.2.dev3+g4dd7f1961'
         }
     },
     type: 'object',
@@ -556,15 +589,52 @@ export const RmsCoordinateSystemSchema = {
     description: 'The project coordinate system of an RMS project.'
 } as const;
 
+export const RmsCoordinateSystemMatchSchema = {
+    properties: {
+        rms_crs_sys: {
+            '$ref': '#/components/schemas/RmsCoordinateSystem',
+            description: 'The source coordinate system to be matched.'
+        },
+        smda_crs_sys: {
+            '$ref': '#/components/schemas/CoordinateSystem',
+            description: 'The matched target coordinate system.'
+        },
+        score: {
+            type: 'number',
+            maximum: 100,
+            minimum: 0,
+            title: 'Score',
+            description: 'Similarity score for the coordinate systems (0-100).'
+        },
+        confidence: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            title: 'Confidence',
+            description: `Confidence level based on score.
+
+'high' (>80), 'medium' (50-80), 'low' (<50).`
+        }
+    },
+    type: 'object',
+    required: ['rms_crs_sys', 'smda_crs_sys', 'score', 'confidence'],
+    title: 'RmsCoordinateSystemMatch',
+    description: 'A matched coordinate system.'
+} as const;
+
 export const RmsHorizonSchema = {
     properties: {
         name: {
             type: 'string',
             title: 'Name'
+        },
+        type: {
+            type: 'string',
+            enum: ['calculated', 'calculated_unconformity', 'interpreted', 'interpreted_unconformity', 'interpreted_intrusion'],
+            title: 'Type'
         }
     },
     type: 'object',
-    required: ['name'],
+    required: ['name', 'type'],
     title: 'RmsHorizon',
     description: 'A horizon from an RMS project.'
 } as const;
@@ -685,12 +755,73 @@ export const RmsStratigraphicZoneSchema = {
         base_horizon_name: {
             type: 'string',
             title: 'Base Horizon Name'
+        },
+        stratigraphic_column_name: {
+            anyOf: [
+                {
+                    items: {
+                        type: 'string'
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Stratigraphic Column Name'
         }
     },
     type: 'object',
     required: ['name', 'top_horizon_name', 'base_horizon_name'],
     title: 'RmsStratigraphicZone',
     description: 'A stratigraphic zone from an RMS project.'
+} as const;
+
+export const RmsStratigraphyMatchSchema = {
+    properties: {
+        rms_zone: {
+            '$ref': '#/components/schemas/RmsStratigraphicZone',
+            description: 'The RMS stratigraphic zone.'
+        },
+        smda_unit: {
+            '$ref': '#/components/schemas/StratigraphicUnit',
+            description: 'The matched SMDA stratigraphic unit.'
+        },
+        score: {
+            type: 'number',
+            maximum: 100,
+            minimum: 0,
+            title: 'Score',
+            description: 'Similarity score for the zone/unit names (0-100).'
+        },
+        confidence: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            title: 'Confidence',
+            description: `Confidence level based on score.
+
+'high' (>80), 'medium' (50-80), 'low' (<50).`
+        }
+    },
+    type: 'object',
+    required: ['rms_zone', 'smda_unit', 'score', 'confidence'],
+    title: 'RmsStratigraphyMatch',
+    description: 'A matched pair of RMS zone and SMDA stratigraphic unit.'
+} as const;
+
+export const RmsVersionSchema = {
+    properties: {
+        version: {
+            type: 'string',
+            title: 'Version',
+            description: 'A version of RMS.',
+            examples: ['14.2.2', '15.0.1.0']
+        }
+    },
+    type: 'object',
+    required: ['version'],
+    title: 'RmsVersion',
+    description: 'RMS version.'
 } as const;
 
 export const RmsWellSchema = {
