@@ -14,9 +14,9 @@ type GeneralButtonProps = {
 } & Pick<ButtonProps, "variant" | "type">;
 
 export function GeneralButton({
-  label,
+  type,
   variant,
-  type = "button",
+  label,
   disabled,
   isPending,
   tooltipText,
