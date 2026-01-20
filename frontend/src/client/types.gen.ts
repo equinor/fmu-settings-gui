@@ -48,6 +48,33 @@ export type Asset = {
 };
 
 /**
+ * Content of a cache revision.
+ */
+export type CacheContent = {
+    /**
+     * Parsed JSON object for the cached resource.
+     */
+    data: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * List of cache revision filenames.
+ */
+export type CacheList = {
+    /**
+     * Cache revision filenames, sorted oldest to newest.
+     */
+    revisions: Array<string>;
+};
+
+/**
+ * Resources that can be cached and restored.
+ */
+export type CacheResource = 'config.json' | 'mappings.json';
+
+/**
  * The security classification for a given data object.
  */
 export type Classification = 'asset' | 'internal' | 'restricted';
@@ -105,10 +132,6 @@ export type FmuProject = {
      * The configuration of an FMU project's .fmu directory.
      */
     config: ProjectConfig;
-    /**
-     * Whether the project is in read-only mode due to lock conflicts.
-     */
-    is_read_only?: boolean;
 };
 
 /**
@@ -247,10 +270,35 @@ export type RmsCoordinateSystem = {
 };
 
 /**
+ * A matched coordinate system.
+ */
+export type RmsCoordinateSystemMatch = {
+    /**
+     * The source coordinate system to be matched.
+     */
+    rms_crs_sys: RmsCoordinateSystem;
+    /**
+     * The matched target coordinate system.
+     */
+    smda_crs_sys: CoordinateSystem;
+    /**
+     * Similarity score for the coordinate systems (0-100).
+     */
+    score: number;
+    /**
+     * Confidence level based on score.
+     *
+     * 'high' (>80), 'medium' (50-80), 'low' (<50).
+     */
+    confidence: 'high' | 'medium' | 'low';
+};
+
+/**
  * A horizon from an RMS project.
  */
 export type RmsHorizon = {
     name: string;
+    type: 'calculated' | 'calculated_unconformity' | 'interpreted' | 'interpreted_unconformity' | 'interpreted_intrusion';
 };
 
 /**
@@ -292,6 +340,41 @@ export type RmsStratigraphicZone = {
     name: string;
     top_horizon_name: string;
     base_horizon_name: string;
+    stratigraphic_column_name?: Array<string> | null;
+};
+
+/**
+ * A matched pair of RMS zone and SMDA stratigraphic unit.
+ */
+export type RmsStratigraphyMatch = {
+    /**
+     * The RMS stratigraphic zone.
+     */
+    rms_zone: RmsStratigraphicZone;
+    /**
+     * The matched SMDA stratigraphic unit.
+     */
+    smda_unit: StratigraphicUnit;
+    /**
+     * Similarity score for the zone/unit names (0-100).
+     */
+    score: number;
+    /**
+     * Confidence level based on score.
+     *
+     * 'high' (>80), 'medium' (50-80), 'low' (<50).
+     */
+    confidence: 'high' | 'medium' | 'low';
+};
+
+/**
+ * RMS version.
+ */
+export type RmsVersion = {
+    /**
+     * A version of RMS.
+     */
+    version: string;
 };
 
 /**
@@ -1369,6 +1452,145 @@ export type ProjectPatchRmsWellsResponses = {
 
 export type ProjectPatchRmsWellsResponse = ProjectPatchRmsWellsResponses[keyof ProjectPatchRmsWellsResponses];
 
+export type ProjectGetCacheData = {
+    body?: never;
+    path?: never;
+    query: {
+        resource: CacheResource;
+    };
+    url: '/api/v1/project/cache';
+};
+
+export type ProjectGetCacheErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetCacheError = ProjectGetCacheErrors[keyof ProjectGetCacheErrors];
+
+export type ProjectGetCacheResponses = {
+    /**
+     * Successful Response
+     */
+    200: CacheList;
+};
+
+export type ProjectGetCacheResponse = ProjectGetCacheResponses[keyof ProjectGetCacheResponses];
+
+export type ProjectGetCacheRevisionData = {
+    body?: never;
+    path: {
+        revision_id: string;
+    };
+    query: {
+        resource: CacheResource;
+    };
+    url: '/api/v1/project/cache/{revision_id}';
+};
+
+export type ProjectGetCacheRevisionErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Cache revision not found for the specified resource
+     */
+    404: unknown;
+    /**
+     * Cache revision failed validation or not supported for the specified resource
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetCacheRevisionResponses = {
+    /**
+     * Successful Response
+     */
+    200: CacheContent;
+};
+
+export type ProjectGetCacheRevisionResponse = ProjectGetCacheRevisionResponses[keyof ProjectGetCacheRevisionResponses];
+
+export type ProjectPostCacheRestoreData = {
+    body?: never;
+    path: {
+        revision_id: string;
+    };
+    query: {
+        resource: CacheResource;
+    };
+    url: '/api/v1/project/cache/restore/{revision_id}';
+};
+
+export type ProjectPostCacheRestoreErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Cache revision not found for the specified resource
+     */
+    404: unknown;
+    /**
+     * Cache revision failed validation or not supported for the specified resource
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostCacheRestoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostCacheRestoreResponse = ProjectPostCacheRestoreResponses[keyof ProjectPostCacheRestoreResponses];
+
 export type UserGetUserData = {
     body?: never;
     path?: never;
@@ -1626,7 +1848,7 @@ export type RmsDeleteRmsProjectResponses = {
 export type RmsDeleteRmsProjectResponse = RmsDeleteRmsProjectResponses[keyof RmsDeleteRmsProjectResponses];
 
 export type RmsPostRmsProjectData = {
-    body?: never;
+    body?: RmsVersion | null;
     path?: never;
     query?: never;
     url: '/api/v1/rms/';
@@ -1634,20 +1856,26 @@ export type RmsPostRmsProjectData = {
 
 export type RmsPostRmsProjectErrors = {
     /**
+     * RMS project path is not configured in the project config file.
+     */
+    400: unknown;
+    /**
      * No active or valid session was found
      */
     401: unknown;
     /**
-     * Validation Error
+     * RMS project does not exist at the configured path.
      */
-    422: HttpValidationError;
+    404: unknown;
+    /**
+     * Failed to open RMS project {rms_project_path}.
+     */
+    422: unknown;
     /**
      * Something unexpected has happened
      */
     500: unknown;
 };
-
-export type RmsPostRmsProjectError = RmsPostRmsProjectErrors[keyof RmsPostRmsProjectErrors];
 
 export type RmsPostRmsProjectResponses = {
     /**
@@ -1666,6 +1894,13 @@ export type RmsGetZonesData = {
 };
 
 export type RmsGetZonesErrors = {
+    /**
+     *
+     * RMS project path is not configured in the project config file,
+     * or no RMS project is currently open in the session.
+     *
+     */
+    400: unknown;
     /**
      * No active or valid session was found
      */
@@ -1700,6 +1935,13 @@ export type RmsGetHorizonsData = {
 
 export type RmsGetHorizonsErrors = {
     /**
+     *
+     * RMS project path is not configured in the project config file,
+     * or no RMS project is currently open in the session.
+     *
+     */
+    400: unknown;
+    /**
      * No active or valid session was found
      */
     401: unknown;
@@ -1733,6 +1975,13 @@ export type RmsGetWellsData = {
 
 export type RmsGetWellsErrors = {
     /**
+     *
+     * RMS project path is not configured in the project config file,
+     * or no RMS project is currently open in the session.
+     *
+     */
+    400: unknown;
+    /**
      * No active or valid session was found
      */
     401: unknown;
@@ -1765,6 +2014,13 @@ export type RmsGetCoordinateSystemData = {
 };
 
 export type RmsGetCoordinateSystemErrors = {
+    /**
+     *
+     * RMS project path is not configured in the project config file,
+     * or no RMS project is currently open in the session.
+     *
+     */
+    400: unknown;
     /**
      * No active or valid session was found
      */
@@ -1810,6 +2066,10 @@ export type SmdaGetHealthErrors = {
      * Something unexpected has happened
      */
     500: unknown;
+    /**
+     * SMDA API is unreachable or returns an error
+     */
+    503: unknown;
 };
 
 export type SmdaGetHealthError = SmdaGetHealthErrors[keyof SmdaGetHealthErrors];
@@ -1840,9 +2100,13 @@ export type SmdaPostFieldErrors = {
      */
     422: HttpValidationError;
     /**
-     * Something unexpected has happened
+     * SMDA returns a malformed response
      */
     500: unknown;
+    /**
+     * An API call to SMDA times out or fails
+     */
+    503: unknown;
 };
 
 export type SmdaPostFieldError = SmdaPostFieldErrors[keyof SmdaPostFieldErrors];
@@ -1865,24 +2129,38 @@ export type SmdaPostMasterdataData = {
 
 export type SmdaPostMasterdataErrors = {
     /**
+     * Invalid parameters are provided to SMDA API
+     */
+    400: unknown;
+    /**
      * No active or valid session was found
      */
     401: unknown;
     /**
-     * Validation Error
+     * A requested resource is not found in SMDA
      */
-    422: HttpValidationError;
+    404: unknown;
     /**
-     * Something unexpected has happened
+     *
+     * SMDA returns valid data but it doesn't meet expected criteria,
+     * or no results are found for a valid query.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * SMDA returns a malformed response that doesn't match
+     * the expected structure.
+     *
      */
     500: unknown;
     /**
-     * Occurs when an API call to SMDA times out.
+     *
+     * An API call to SMDA times out or the service is unavailable.
+     *
      */
     503: unknown;
 };
-
-export type SmdaPostMasterdataError = SmdaPostMasterdataErrors[keyof SmdaPostMasterdataErrors];
 
 export type SmdaPostMasterdataResponses = {
     /**
@@ -1902,6 +2180,111 @@ export type SmdaPostStratUnitsData = {
 
 export type SmdaPostStratUnitsErrors = {
     /**
+     * Invalid parameters are provided to SMDA API
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * A requested resource is not found in SMDA
+     */
+    404: unknown;
+    /**
+     *
+     * SMDA returns valid data but it doesn't meet expected criteria,
+     * or no results are found for a valid query.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * SMDA returns a malformed response that doesn't match
+     * the expected structure.
+     *
+     */
+    500: unknown;
+    /**
+     *
+     * An API call to SMDA times out or the service is unavailable.
+     *
+     */
+    503: unknown;
+};
+
+export type SmdaPostStratUnitsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SmdaStratigraphicUnitsResult;
+};
+
+export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
+
+export type MatchGetStratigraphyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/match/stratigraphy';
+};
+
+export type MatchGetStratigraphyErrors = {
+    /**
+     *
+     * Required configuration is missing from the project config,
+     * or invalid parameters are provided.
+     *
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     *
+     * SMDA returns valid data but no results are found,
+     * or configuration exists but contains no matchable data.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * SMDA returns a malformed response that doesn't match
+     * the expected structure.
+     *
+     */
+    500: unknown;
+    /**
+     *
+     * An API call to SMDA times out or the service is unavailable.
+     *
+     */
+    503: unknown;
+};
+
+export type MatchGetStratigraphyResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<RmsStratigraphyMatch>;
+};
+
+export type MatchGetStratigraphyResponse = MatchGetStratigraphyResponses[keyof MatchGetStratigraphyResponses];
+
+export type MatchGetCoordinateSystemData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/match/coordinate_system';
+};
+
+export type MatchGetCoordinateSystemErrors = {
+    /**
+     * Required configuration is missing from the project config.
+     */
+    400: unknown;
+    /**
      * No active or valid session was found
      */
     401: unknown;
@@ -1913,22 +2296,18 @@ export type SmdaPostStratUnitsErrors = {
      * Something unexpected has happened
      */
     500: unknown;
-    /**
-     * Occurs when an API call to SMDA times out.
-     */
-    503: unknown;
 };
 
-export type SmdaPostStratUnitsError = SmdaPostStratUnitsErrors[keyof SmdaPostStratUnitsErrors];
+export type MatchGetCoordinateSystemError = MatchGetCoordinateSystemErrors[keyof MatchGetCoordinateSystemErrors];
 
-export type SmdaPostStratUnitsResponses = {
+export type MatchGetCoordinateSystemResponses = {
     /**
      * Successful Response
      */
-    200: SmdaStratigraphicUnitsResult;
+    200: RmsCoordinateSystemMatch;
 };
 
-export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
+export type MatchGetCoordinateSystemResponse = MatchGetCoordinateSystemResponses[keyof MatchGetCoordinateSystemResponses];
 
 export type HealthV1HealthCheckData = {
     body?: never;
