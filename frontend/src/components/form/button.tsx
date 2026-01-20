@@ -5,24 +5,27 @@ import {
   Tooltip,
 } from "@equinor/eds-core-react";
 
-export function GeneralButton({
-  label,
-  variant,
-  disabled,
-  isPending,
-  tooltipText,
-  onClick,
-}: {
+type GeneralButtonProps = {
   label: string;
-  variant?: ButtonProps["variant"];
   isPending?: boolean;
   disabled?: boolean;
   tooltipText?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}) {
+} & Pick<ButtonProps, "variant" | "type">;
+
+export function GeneralButton({
+  type,
+  variant,
+  label,
+  disabled,
+  isPending,
+  tooltipText,
+  onClick,
+}: GeneralButtonProps) {
   return (
     <Tooltip title={tooltipText ?? ""}>
       <Button
+        type={type}
         variant={variant}
         aria-disabled={disabled}
         onClick={
@@ -59,19 +62,13 @@ export function SubmitButton({
   helperTextDisabled?: string;
 }) {
   return (
-    <Tooltip title={disabled ? helperTextDisabled : undefined}>
-      <Button
-        type="submit"
-        aria-disabled={disabled}
-        onClick={(e) => {
-          if (disabled) {
-            e.preventDefault();
-          }
-        }}
-      >
-        {isPending ? <DotProgress /> : label}
-      </Button>
-    </Tooltip>
+    <GeneralButton
+      type="submit"
+      label={label}
+      disabled={disabled}
+      isPending={isPending}
+      tooltipText={disabled ? helperTextDisabled : undefined}
+    />
   );
 }
 
@@ -81,8 +78,11 @@ export function CancelButton({
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
-    <Button type="reset" variant="outlined" onClick={onClick}>
-      Cancel
-    </Button>
+    <GeneralButton
+      type="reset"
+      variant="outlined"
+      label="Cancel"
+      onClick={onClick}
+    />
   );
 }
