@@ -334,6 +334,20 @@ export type RmsProjectPathsResult = {
 };
 
 /**
+ * RMS stratigraphic framework consisting of zones and horizons.
+ */
+export type RmsStratigraphicFramework = {
+    /**
+     * List of RMS stratigraphic zones.
+     */
+    zones: Array<RmsStratigraphicZone>;
+    /**
+     * List of RMS horizons.
+     */
+    horizons: Array<RmsHorizon>;
+};
+
+/**
  * A stratigraphic zone from an RMS project.
  */
 export type RmsStratigraphicZone = {
@@ -1299,14 +1313,14 @@ export type ProjectPatchRmsCoordinateSystemResponses = {
 
 export type ProjectPatchRmsCoordinateSystemResponse = ProjectPatchRmsCoordinateSystemResponses[keyof ProjectPatchRmsCoordinateSystemResponses];
 
-export type ProjectPatchRmsZonesData = {
-    body: Array<RmsStratigraphicZone>;
+export type ProjectPatchRmsStratigraphicFrameworkData = {
+    body: RmsStratigraphicFramework;
     path?: never;
     query?: never;
-    url: '/api/v1/project/rms/zones';
+    url: '/api/v1/project/rms/stratigraphic_framework';
 };
 
-export type ProjectPatchRmsZonesErrors = {
+export type ProjectPatchRmsStratigraphicFrameworkErrors = {
     /**
      * No active or valid session was found
      */
@@ -1324,7 +1338,7 @@ export type ProjectPatchRmsZonesErrors = {
     404: unknown;
     /**
      *
-     * RMS project path must be set before updating RMS fields.
+     * The RMS stratigraphic framework did not validate.
      *
      */
     422: unknown;
@@ -1341,65 +1355,14 @@ export type ProjectPatchRmsZonesErrors = {
     500: unknown;
 };
 
-export type ProjectPatchRmsZonesResponses = {
+export type ProjectPatchRmsStratigraphicFrameworkResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type ProjectPatchRmsZonesResponse = ProjectPatchRmsZonesResponses[keyof ProjectPatchRmsZonesResponses];
-
-export type ProjectPatchRmsHorizonsData = {
-    body: Array<RmsHorizon>;
-    path?: never;
-    query?: never;
-    url: '/api/v1/project/rms/horizons';
-};
-
-export type ProjectPatchRmsHorizonsErrors = {
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     * The OS returned a permissions error while locating or creating .fmu
-     */
-    403: unknown;
-    /**
-     *
-     * The .fmu directory was unable to be found at or above a given path, or
-     * the requested path to create a project .fmu directory at does not exist.
-     *
-     */
-    404: unknown;
-    /**
-     *
-     * RMS project path must be set before updating RMS fields.
-     *
-     */
-    422: unknown;
-    /**
-     *
-     * The project is locked by another process and cannot be modified.
-     * The project can still be read but write operations are blocked.
-     *
-     */
-    423: unknown;
-    /**
-     * Something unexpected has happened
-     */
-    500: unknown;
-};
-
-export type ProjectPatchRmsHorizonsResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type ProjectPatchRmsHorizonsResponse = ProjectPatchRmsHorizonsResponses[keyof ProjectPatchRmsHorizonsResponses];
+export type ProjectPatchRmsStratigraphicFrameworkResponse = ProjectPatchRmsStratigraphicFrameworkResponses[keyof ProjectPatchRmsStratigraphicFrameworkResponses];
 
 export type ProjectPatchRmsWellsData = {
     body: Array<RmsWell>;
