@@ -8,6 +8,7 @@ import { RmsProject } from "#client";
 import {
   projectGetProjectQueryKey,
   projectGetRmsProjectsOptions,
+  projectGetRmsProjectsQueryKey,
   projectPatchRmsMutation,
   rmsDeleteRmsProjectMutation,
   rmsGetHorizonsQueryKey,
@@ -292,15 +293,12 @@ function RmsProjectActions({
                 ? "Close the RMS project to select a new one"
                 : ""
           }
-          //onClick={() => {
-          //  setSelectProjectDialogOpen(true);
-          //}}
           onClick={() => {
             void queryClient.invalidateQueries({
-              queryKey: projectGetRmsProjectsOptions().queryKey,
-          });
+              queryKey: projectGetRmsProjectsQueryKey(),
+            });
             setSelectProjectDialogOpen(true);
-        }}
+          }}
         />
 
         {rmsData?.path && (
