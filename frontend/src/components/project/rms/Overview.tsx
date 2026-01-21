@@ -8,6 +8,7 @@ import { RmsProject } from "#client";
 import {
   projectGetProjectQueryKey,
   projectGetRmsProjectsOptions,
+  projectGetRmsProjectsQueryKey,
   projectPatchRmsMutation,
   rmsDeleteRmsProjectMutation,
   rmsGetHorizonsQueryKey,
@@ -293,6 +294,9 @@ function RmsProjectActions({
                 : ""
           }
           onClick={() => {
+            void queryClient.invalidateQueries({
+              queryKey: projectGetRmsProjectsQueryKey(),
+            });
             setSelectProjectDialogOpen(true);
           }}
         />
