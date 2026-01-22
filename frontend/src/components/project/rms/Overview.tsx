@@ -21,6 +21,7 @@ import {
   SubmitButton,
 } from "#components/form/button";
 import { OptionProps, Select } from "#components/form/field";
+import { rmsMinimumVersion } from "#config";
 import { EditDialog, InfoBox, PageCode, PageText } from "#styles/common";
 import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
@@ -33,6 +34,7 @@ import {
   STORAGENAME_RMS_PROJECT_OPEN,
   setStorageItem,
 } from "#utils/storage";
+import { isVersionLessThan } from "#utils/string";
 import { ActionButtonsContainer } from "./Overview.style";
 
 const { useAppForm: useAppFormRmsEditor } = createFormHook({
@@ -234,6 +236,11 @@ function RmsProjectActions({
   const queryClient = useQueryClient();
   const [selectProjectDialogOpen, setSelectProjectDialogOpen] = useState(false);
 
+  const useRmsVersion =
+    rmsData && isVersionLessThan(rmsData.version, rmsMinimumVersion)
+      ? rmsMinimumVersion
+      : undefined;
+
   const projectOpenMutation = useMutation({
     ...rmsPostRmsProjectMutation(),
     onSuccess: () => {
@@ -245,11 +252,25 @@ function RmsProjectActions({
         queryKey: rmsGetZonesQueryKey(),
       });
     },
-    onError: () => {
+    onError: (error, variables) => {
       setIsRmsProjectOpen(false);
+
+      // If version was specified, retry without to use actual version
+      if (variables.body?.version) {
+        projectOpenMutation.mutate({});
+
+        return;
+      }
+
+      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+        const message = (error.response.data as { detail?: string }).detail;
+        console.error(message);
+        toast.error(message);
+      }
     },
     meta: {
       errorPrefix: "Error opening the RMS project",
+      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
     },
   });
 
@@ -309,7 +330,9 @@ function RmsProjectActions({
               disabled={projectCloseMutation.isPending}
               variant={isRmsProjectOpen ? "outlined" : "contained"}
               onClick={() => {
-                projectOpenMutation.mutate({});
+                projectOpenMutation.mutate({
+                  body: useRmsVersion ? { version: useRmsVersion } : undefined,
+                });
               }}
             />
 
