@@ -32,7 +32,7 @@
     "zod": "^3.25.67"
   },
   "devDependencies": {
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^9.39.2",
     "@stylistic/eslint-plugin": "^5.6.1",
     "@hey-api/openapi-ts": "^0.66.7",
     "@tanstack/eslint-plugin-query": "^5.74.7",
