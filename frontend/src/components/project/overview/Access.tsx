@@ -5,6 +5,7 @@ import {
   List,
   Radio,
   Tooltip,
+  Typography,
 } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -256,13 +257,15 @@ export function EditableAccessInfo({
 
       <PageText>
         Read more about access control in the{" "}
-        <a
-          href="https://doc-sumo-doc-prod.radix.equinor.com/documentation/access_control"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+
+        <Typography
+              link
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://doc-sumo-doc-prod.radix.equinor.com/documentation/access_control"
+            >
           Sumo documentation
-        </a>
+        </Typography>     
       </PageText>
 
       {accessData ? (
