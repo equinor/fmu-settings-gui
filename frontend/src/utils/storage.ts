@@ -1,4 +1,5 @@
 export const STORAGENAME_API_TOKEN = "apiToken";
+export const STORAGENAME_MASTERDATA_EDIT_MODE = "masterdataEditMode";
 export const STORAGENAME_RMS_PROJECT_OPEN = "rmsProjectOpen";
 
 export function getStorageItem(storage: Storage, name: string): string | null;
