@@ -1,7 +1,7 @@
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-import { GenericBox } from "#styles/common";
+import { GenericBox, GenericInnerBox } from "#styles/common";
 
 export const StratigraphicFrameworkContainer = styled(GenericBox)<{
   $maxHeight?: string;
@@ -22,7 +22,6 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
   },
 }))`
   display: grid;
-  border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
   font-weight: ${tokens.typography.table.cell_header.fontWeight};
   font-size: ${tokens.typography.table.cell_text.fontSize};
 
@@ -37,7 +36,7 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
   }
 `;
 
-export const StratigraphicFrameworkContent = styled.div.attrs<{
+export const StratigraphicFrameworkContent = styled(GenericInnerBox).attrs<{
   $numStratColumns: number;
   $numRows: number;
 }>((props) => ({
@@ -48,9 +47,7 @@ export const StratigraphicFrameworkContent = styled.div.attrs<{
 }))`
   display: grid;
   overflow: auto;
-  background-color: ${tokens.colors.ui.background__default.hex};
   padding: ${tokens.spacings.comfortable.medium} ${tokens.spacings.comfortable.small};
-  
 `;
 
 export const ZoneItem = styled.div`

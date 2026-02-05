@@ -52,6 +52,11 @@ export const GenericBox = styled.div`
   color: ${tokens.colors.text.static_icons__secondary.hex};
 `;
 
+export const GenericInnerBox = styled(GenericBox)`
+  margin-bottom: 0;
+  background: ${tokens.colors.ui.background__default.hex};
+`;
+
 export const InfoBox = styled(GenericBox)`
   th {
     padding-right: ${tokens.spacings.comfortable.small};
