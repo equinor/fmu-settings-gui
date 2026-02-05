@@ -2,7 +2,7 @@ import { Dialog, Icon, List } from "@equinor/eds-core-react";
 import { warning_outlined } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { toast } from "react-toastify";
 
 import { RmsHorizon, RmsProject, RmsStratigraphicZone } from "#client";
@@ -18,10 +18,6 @@ import {
   SubmitButton,
 } from "#components/form/button";
 import {
-  namesNotInReference,
-  useStratigraphyHandlers,
-} from "#services/stratigraphy";
-import {
   Banner,
   EditDialog,
   PageCode,
@@ -34,6 +30,7 @@ import {
   ActionButtonsContainer,
   StratigraphyEditorContainer,
 } from "./Stratigraphy.style";
+import { namesNotInReference, useItemHandlers } from "./utils.ts";
 
 type ConfirmAction = "add" | "remove" | "";
 
@@ -50,7 +47,7 @@ function ConfirmActionDialog({
   confirmAction,
 }: {
   onConfirm: () => void;
-  setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction>>;
+  setConfirmAction: Dispatch<SetStateAction<ConfirmAction>>;
   confirmAction: ConfirmAction;
 }) {
   const resetConfirmAction = () => {
@@ -58,18 +55,16 @@ function ConfirmActionDialog({
   };
 
   return (
-    <EditDialog open={!!confirmAction} $minWidth="max-content">
+    <EditDialog open={!!confirmAction} $minWidth="25em">
       <Dialog.Header>Confirm action</Dialog.Header>
 
-      <Dialog.Content>
-        <PageText $marginBottom="0">
-          {confirmAction === "add"
-            ? "This will add all available stratigraphy to the project."
-            : "This will remove all stratigraphy from the project."}
-          <br />
-          Do you wish to continue?
-        </PageText>
-      </Dialog.Content>
+      <Dialog.CustomContent>
+        {confirmAction === "add"
+          ? "This will add all available stratigraphy to the project."
+          : "This will remove all stratigraphy from the project."}
+        <br />
+        Do you wish to continue?
+      </Dialog.CustomContent>
 
       <Dialog.Actions>
         <GeneralButton
@@ -99,7 +94,7 @@ function OrphanBanner({
       </Banner.Icon>
 
       <div>
-        <PageText $marginBottom="0">
+        <PageText>
           There are zones or horizons in the project stratigraphy that are no
           longer available in RMS. They need to be removed before data can be
           saved.
@@ -129,13 +124,12 @@ function StratigraphyEditor({
   const form = useFormContext();
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>("");
 
-  const { handleRemoveItems, handleAddItems, handleAddAll, handleRemoveAll } =
-    useStratigraphyHandlers(
-      projectHorizons,
-      projectZones,
-      availableHorizons,
-      availableZones,
-    );
+  const { removeItems, addItems, addAll, removeAll } = useItemHandlers(
+    projectHorizons,
+    projectZones,
+    availableHorizons,
+    availableZones,
+  );
 
   const unselectedZoneNames = namesNotInReference(availableZones, projectZones);
   const unselectedHorizonNames = namesNotInReference(
@@ -143,16 +137,17 @@ function StratigraphyEditor({
     projectHorizons,
   );
 
-  const handleAddHorizon = (horizon: RmsHorizon) => {
-    handleAddItems("horizons", [horizon.name]);
-  };
-  const handleAddZone = (zone: RmsStratigraphicZone) => {
-    handleAddItems("zones", [zone.name]);
-    handleAddItems("horizons", [zone.top_horizon_name, zone.base_horizon_name]);
+  const addHorizon = (horizon: RmsHorizon) => {
+    addItems("horizons", [horizon.name]);
   };
 
-  const handleRemoveHorizon = (horizon: RmsHorizon) => {
-    handleRemoveItems("horizons", [horizon.name]);
+  const addZone = (zone: RmsStratigraphicZone) => {
+    addItems("zones", [zone.name]);
+    addItems("horizons", [zone.top_horizon_name, zone.base_horizon_name]);
+  };
+
+  const removeHorizon = (horizon: RmsHorizon) => {
+    removeItems("horizons", [horizon.name]);
     const zonesUsingHorizon = projectZones
       .filter(
         (z) =>
@@ -160,10 +155,11 @@ function StratigraphyEditor({
           z.base_horizon_name === horizon.name,
       )
       .map((z) => z.name);
-    handleRemoveItems("zones", zonesUsingHorizon);
+    removeItems("zones", zonesUsingHorizon);
   };
-  const handleRemoveZone = (zone: RmsStratigraphicZone) => {
-    handleRemoveItems("zones", [zone.name]);
+
+  const removeZone = (zone: RmsStratigraphicZone) => {
+    removeItems("zones", [zone.name]);
   };
 
   const orphanZoneNames = namesNotInReference(projectZones, availableZones);
@@ -197,10 +193,10 @@ function StratigraphyEditor({
             orphanHorizonNames={orphanHorizonNames}
             orphanZoneNames={orphanZoneNames}
             onZoneClick={(zone) => {
-              handleRemoveZone(zone);
+              removeZone(zone);
             }}
             onHorizonClick={(horizon) => {
-              handleRemoveHorizon(horizon);
+              removeHorizon(horizon);
             }}
           />
 
@@ -219,7 +215,6 @@ function StratigraphyEditor({
             <GeneralButton
               label="Remove all"
               variant="outlined"
-              color="danger"
               disabled={!projectHorizons.length && !projectZones.length}
               onClick={() => {
                 setConfirmAction("remove");
@@ -238,12 +233,10 @@ function StratigraphyEditor({
             unselectedHorizonNames={unselectedHorizonNames}
             unselectedZoneNames={unselectedZoneNames}
             onZoneClick={(zone, isUnselected) => {
-              isUnselected ? handleAddZone(zone) : handleRemoveZone(zone);
+              isUnselected ? addZone(zone) : removeZone(zone);
             }}
             onHorizonClick={(horizon, isUnselected) => {
-              isUnselected
-                ? handleAddHorizon(horizon)
-                : handleRemoveHorizon(horizon);
+              isUnselected ? addHorizon(horizon) : removeHorizon(horizon);
             }}
           />
 
@@ -256,7 +249,7 @@ function StratigraphyEditor({
         <ConfirmActionDialog
           confirmAction={confirmAction}
           setConfirmAction={setConfirmAction}
-          onConfirm={confirmAction === "add" ? handleAddAll : handleRemoveAll}
+          onConfirm={confirmAction === "add" ? addAll : removeAll}
         />
       </StratigraphyEditorContainer>
     </>
@@ -301,7 +294,6 @@ function Edit({
       zones: projectZones,
       horizons: projectHorizons,
     },
-
     onSubmit: ({ value, formApi }) => {
       rmsStratigraphyMutation.mutate(
         { body: value },
@@ -326,7 +318,7 @@ function Edit({
       >
         <Dialog.Header>Set project stratigraphy</Dialog.Header>
 
-        <Dialog.Content>
+        <Dialog.CustomContent>
           <form.AppForm>
             <form.Subscribe selector={(state) => state.values}>
               {(values) => (
@@ -339,7 +331,7 @@ function Edit({
               )}
             </form.Subscribe>
           </form.AppForm>
-        </Dialog.Content>
+        </Dialog.CustomContent>
 
         <Dialog.Actions>
           <form.Subscribe
@@ -353,7 +345,7 @@ function Edit({
                 helperTextDisabled={
                   projectReadOnly
                     ? "Project is read-only"
-                    : "Form can be submitted when it has been changed and is valid"
+                    : "Form can be submitted when the values have changed"
                 }
               />
             )}
@@ -390,20 +382,20 @@ export function Stratigraphy({
 
       <PageText>
         The following is the model stratigraphy stored in the project, this can
-        be a subset or the full RMS stratigraphy. <br />
-        It is only the stored stratigraphy that will be possible to map to
-        official stratigraphic names.
+        be a subset or the full RMS stratigraphy. It is only the stored
+        stratigraphy that will be possible to map to official stratigraphic
+        names.
       </PageText>
 
-      {!projectHorizons.length ? (
-        <PageCode>
-          No stratigraphy information currently stored in the project.
-        </PageCode>
-      ) : (
+      {projectHorizons.length ? (
         <StratigraphicFramework
           horizons={projectHorizons}
           zones={projectZones}
         />
+      ) : (
+        <PageCode>
+          No stratigraphy information currently stored in the project.
+        </PageCode>
       )}
 
       <GeneralButton

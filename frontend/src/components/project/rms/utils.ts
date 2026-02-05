@@ -43,7 +43,7 @@ export const namesNotInReference = <T extends ItemType>(
     .map((item) => item.name);
 };
 
-export function useStratigraphyHandlers(
+export function useItemHandlers(
   projectHorizons: RmsHorizon[],
   projectZones: RmsStratigraphicZone[],
   availableHorizons: RmsHorizon[],
@@ -51,7 +51,7 @@ export function useStratigraphyHandlers(
 ) {
   const form: AnyFormApi = useFormContext();
 
-  const handleAddItems = (itemType: keyof Stratigraphy, names: string[]) => {
+  const addItems = (itemType: keyof Stratigraphy, names: string[]) => {
     const availableItems =
       itemType === "horizons" ? availableHorizons : availableZones;
     const projectItems =
@@ -75,7 +75,8 @@ export function useStratigraphyHandlers(
       form.setFieldValue(itemType, updatedProjectItems);
     }
   };
-  const handleRemoveItems = (itemType: keyof Stratigraphy, names: string[]) => {
+
+  const removeItems = (itemType: keyof Stratigraphy, names: string[]) => {
     const itemNamesToRemove = new Set(names);
     const projectItems =
       itemType === "horizons" ? projectHorizons : projectZones;
@@ -86,19 +87,20 @@ export function useStratigraphyHandlers(
     form.setFieldValue(itemType, filteredProjectItems);
   };
 
-  const handleRemoveAll = () => {
+  const removeAll = () => {
     form.setFieldValue("horizons", []);
     form.setFieldValue("zones", []);
   };
-  const handleAddAll = () => {
+
+  const addAll = () => {
     form.setFieldValue("horizons", availableHorizons);
     form.setFieldValue("zones", availableZones);
   };
 
   return {
-    handleRemoveItems,
-    handleAddItems,
-    handleAddAll,
-    handleRemoveAll,
+    removeItems,
+    addItems,
+    addAll,
+    removeAll,
   };
 }

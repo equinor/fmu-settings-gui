@@ -2,7 +2,6 @@ import { Button, Tooltip } from "@equinor/eds-core-react";
 import { Fragment } from "react/jsx-runtime";
 
 import { RmsHorizon, RmsStratigraphicZone } from "#client";
-import { findIndexByName } from "#services/stratigraphy";
 import {
   GridLine,
   HorizonItem,
@@ -11,6 +10,7 @@ import {
   StratigraphicFrameworkHeader,
   ZoneItem,
 } from "./StratigraphicFramework.style";
+import { findIndexByName } from "./utils.ts";
 
 type ZonePlacementInfo = {
   horizonIndices: number[];
