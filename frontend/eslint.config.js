@@ -51,6 +51,13 @@ export default tseslint.config(
       ...reactX.configs["recommended-typescript"].rules,
       "@typescript-eslint/no-unused-vars": "error",
       "no-unused-vars": "off",
-    },
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        {
+          "allowNumber": true,
+        }
+      ]
+    },    
+
   },
 );
