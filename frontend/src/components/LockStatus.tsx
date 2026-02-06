@@ -2,7 +2,7 @@ import { Button, Icon, Popover, Table } from "@equinor/eds-core-react";
 import { lock, lock_open } from "@equinor/eds-icons";
 import { tokens } from "@equinor/eds-tokens";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -35,12 +35,12 @@ function EnableEditingButton({ lockStatus }: { lockStatus?: LockStatus }) {
           {},
           {
             onSuccess: (data) => {
-              data.message === "Project lock acquired."
-                ? toast.info("Project is open for editing")
-                : toast.error(
-                    "An error occured and project remains read-only. " +
-                      (lockStatus?.last_lock_acquire_error ?? ""),
-                  );
+              if (data.message !== "Project lock acquired.") {
+                toast.error(
+                  "An error occured and project remains read-only. " +
+                    (lockStatus?.last_lock_acquire_error ?? ""),
+                );
+              }
             },
           },
         );
@@ -106,6 +106,10 @@ function LockInfoTable({ lock_info }: { lock_info: LockInfo }) {
           <Table.Cell>Locked since</Table.Cell>
           <Table.Cell>{displayTimestamp(lock_info.acquired_at)}</Table.Cell>
         </Table.Row>
+        <Table.Row>
+          <Table.Cell>Expires at</Table.Cell>
+          <Table.Cell>{displayTimestamp(lock_info.expires_at)}</Table.Cell>
+        </Table.Row>
       </Table.Body>
     </Table>
   );
@@ -125,30 +129,8 @@ export function LockIcon({ isReadOnly }: { isReadOnly: boolean }) {
   );
 }
 
-export function LockStatusBanner({
-  lockStatus,
-  isReadOnly,
-}: {
-  lockStatus?: LockStatus;
-  isReadOnly: boolean;
-}) {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (lockStatus && !lockStatus.lock_info) {
-      console.log(lockStatus);
-      if (isReadOnly) {
-        toast.info(
-          "Project can be opened for editing from the project overview page.",
-        );
-      } else {
-        toast.error("Lock was removed, project is now read-only.");
-        void queryClient.invalidateQueries({
-          queryKey: projectGetProjectQueryKey(),
-        });
-      }
-    }
-  }, [lockStatus, isReadOnly, queryClient]);
+export function LockStatusBanner({ lockStatus }: { lockStatus?: LockStatus }) {
+  const isReadOnly = !(lockStatus?.is_lock_acquired ?? false);
 
   return (
     <Banner>

@@ -63,10 +63,7 @@ function ProjectInfo({
     <>
       <ProjectInfoBox projectData={projectData} />
 
-      <LockStatusBanner
-        lockStatus={lockStatus}
-        isReadOnly={projectData.is_read_only ?? true}
-      />
+      <LockStatusBanner lockStatus={lockStatus} />
     </>
   );
 }
@@ -86,6 +83,7 @@ function ProjectNotFound({ text }: { text: string }) {
 
 function Content() {
   const project = useProject();
+  const projectReadOnly = !(project.lockStatus?.is_lock_acquired ?? false);
 
   return (
     <>
@@ -95,21 +93,27 @@ function Content() {
             projectData={project.data}
             lockStatus={project.lockStatus}
           />
-          <ProjectSelector />
+          <ProjectSelector projectReadOnly={projectReadOnly} />
 
           <PageSectionSpacer />
 
-          <EditableModelInfo projectData={project.data} />
+          <EditableModelInfo
+            projectData={project.data}
+            projectReadOnly={projectReadOnly}
+          />
 
           <PageSectionSpacer />
 
-          <EditableAccessInfo projectData={project.data} />
+          <EditableAccessInfo
+            projectData={project.data}
+            projectReadOnly={projectReadOnly}
+          />
         </>
       ) : (
         <>
           <ProjectNotFound text={project.text ?? ""} />
 
-          <ProjectSelector />
+          <ProjectSelector projectReadOnly={projectReadOnly} />
         </>
       )}
     </>

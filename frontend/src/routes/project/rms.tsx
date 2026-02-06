@@ -14,7 +14,10 @@ function Content() {
   const project = useProject();
 
   return project.status && project.data ? (
-    <Overview projectData={project.data} />
+    <Overview
+      rmsData={project.data.config.rms}
+      projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+    />
   ) : (
     <PageText>Project not set.</PageText>
   );

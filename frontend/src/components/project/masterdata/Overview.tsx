@@ -9,10 +9,14 @@ import { Edit } from "./Edit";
 
 export function Overview({
   projectMasterdata,
+  smdaHealthStatus,
   projectReadOnly,
+  masterdataEditMode,
 }: {
   projectMasterdata: Smda | undefined;
+  smdaHealthStatus: boolean;
   projectReadOnly: boolean;
+  masterdataEditMode: boolean;
 }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -32,12 +36,14 @@ export function Overview({
         <PageText>No masterdata is currently stored in the project.</PageText>
       )}
 
-      <GeneralButton
-        label="Edit"
-        disabled={projectReadOnly}
-        tooltipText={projectReadOnly ? "Project is read-only" : ""}
-        onClick={openEditDialog}
-      />
+      {masterdataEditMode && smdaHealthStatus && (
+        <GeneralButton
+          label={projectMasterdata ? "Edit" : "Add"}
+          onClick={openEditDialog}
+          disabled={projectReadOnly}
+          tooltipText={projectReadOnly ? "Project is read-only" : ""}
+        />
+      )}
 
       <Edit
         projectMasterdata={projectMasterdata ?? emptyMasterdata()}

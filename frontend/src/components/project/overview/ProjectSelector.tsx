@@ -33,6 +33,10 @@ import {
   useFieldContext,
   useFormContext,
 } from "#utils/form";
+import {
+  removeStorageItem,
+  STORAGENAME_RMS_PROJECT_OPEN,
+} from "#utils/storage";
 
 const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
   fieldComponents: {
@@ -51,9 +55,11 @@ const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
 type ValueSource = "recentProjectPath" | "projectPath" | "";
 
 function ProjectSelectorForm({
+  projectReadOnly,
   closeDialog,
   isDialogOpen,
 }: {
+  projectReadOnly: boolean;
   closeDialog: () => void;
   isDialogOpen: boolean;
 }) {
@@ -88,6 +94,7 @@ function ProjectSelectorForm({
       void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),
       });
+      removeStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN);
     },
     meta: {
       preventDefaultErrorHandling: codes,
@@ -109,11 +116,8 @@ function ProjectSelectorForm({
       mutate(
         { body: { path } },
         {
-          onSuccess: (data) => {
-            toast.info(
-              `Successfully set project ${path}` +
-                (data.is_read_only ? " (read-only)" : ""),
-            );
+          onSuccess: () => {
+            toast.info(`Successfully set project ${path}`);
             closeProjectSelector({ formReset: formApi.reset });
           },
           onError: (error) => {
@@ -209,7 +213,7 @@ function ProjectSelectorForm({
                 color="error"
                 helperProps={{
                   text: helperTextProjectPath,
-                  icon: <Icon data={error_filled} size={18} />,
+                  icon: <Icon data={error_filled} size={16} />,
                 }}
               >
                 <field.TextField
@@ -235,8 +239,11 @@ function ProjectSelectorForm({
           <form.AppForm>
             <form.SubmitButton
               label="Select"
-              disabled={submitDisabled}
+              disabled={submitDisabled || projectReadOnly}
               isPending={isPending}
+              helperTextDisabled={
+                projectReadOnly ? "Project is read-only" : undefined
+              }
             />
             <form.CancelButton
               onClick={() => {
@@ -265,7 +272,7 @@ function RecentProjectSelect({
       color="error"
       helperProps={{
         text: helperText,
-        icon: <Icon data={error_filled} size={18} />,
+        icon: <Icon data={error_filled} size={16} />,
       }}
     >
       <NativeSelect
@@ -362,7 +369,11 @@ function ConfirmInitProjectDialog({
   );
 }
 
-export function ProjectSelector() {
+export function ProjectSelector({
+  projectReadOnly,
+}: {
+  projectReadOnly: boolean;
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleOpen = () => {
@@ -376,6 +387,7 @@ export function ProjectSelector() {
     <>
       <Button onClick={handleOpen}>Select project</Button>
       <ProjectSelectorForm
+        projectReadOnly={projectReadOnly}
         closeDialog={handleClose}
         isDialogOpen={isDialogOpen}
       />
