@@ -29,14 +29,16 @@ export function Resources() {
             </PageText>
           </Card.Content>
           <Card.Actions>
-            <Typography
-              link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://fmu.equinor.com/"
-            >
-              Homepage
-            </Typography>
+            <PageText>
+              <Typography
+                link
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://fmu.equinor.com/"
+              >
+                Homepage
+              </Typography>
+            </PageText>
           </Card.Actions>
         </ResourceCard>
 
@@ -54,23 +56,27 @@ export function Resources() {
             </PageText>
           </Card.Content>
           <Card.Actions>
-            <Typography
-              link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://fmu-sumo.app.radix.equinor.com/"
-            >
-              Homepage
-            </Typography>
+            <PageText>
+              <Typography
+                link
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://fmu-sumo.app.radix.equinor.com/"
+              >
+                Homepage
+              </Typography>
+            </PageText>
 
-            <Typography
-              link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://doc-sumo-doc-prod.radix.equinor.com/"
-            >
-              Documentation
-            </Typography>
+            <PageText>
+              <Typography
+                link
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://doc-sumo-doc-prod.radix.equinor.com/"
+              >
+                Documentation
+              </Typography>
+            </PageText>
           </Card.Actions>
         </ResourceCard>
 
@@ -88,14 +94,16 @@ export function Resources() {
             </PageText>
           </Card.Content>
           <Card.Actions>
-            <Typography
-              link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://fmu-docs.equinor.com/docs/ert/index.html"
-            >
-              Documentation
-            </Typography>
+            <PageText>
+              <Typography
+                link
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://fmu-docs.equinor.com/docs/ert/index.html"
+              >
+                Documentation
+              </Typography>
+            </PageText>
           </Card.Actions>
         </ResourceCard>
 
@@ -113,14 +121,16 @@ export function Resources() {
             </PageText>
           </Card.Content>
           <Card.Actions>
-            <Typography
-              link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://webviz.fmu.equinor.com"
-            >
-              Documentation
-            </Typography>
+            <PageText>
+              <Typography
+                link
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://webviz.fmu.equinor.com"
+              >
+                Documentation
+              </Typography>
+            </PageText>
           </Card.Actions>
         </ResourceCard>
 
@@ -137,14 +147,16 @@ export function Resources() {
             </PageText>
           </Card.Content>
           <Card.Actions>
-            <Typography
-              link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://fmu-dataio.readthedocs.io/en/latest/"
-            >
-              Documentation
-            </Typography>
+            <PageText>
+              <Typography
+                link
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://fmu-dataio.readthedocs.io/en/latest/"
+              >
+                Documentation
+              </Typography>
+            </PageText>
           </Card.Actions>
         </ResourceCard>
       </ResourcesContainer>
