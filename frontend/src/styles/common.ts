@@ -88,6 +88,7 @@ export const InfoChip = styled(Chip)`
 export const EditDialog = styled(Dialog).attrs<{
   $minWidth?: string;
   $maxWidth?: string;
+  $extraPaddingBottom?: boolean;
 }>((props) => ({
   style: {
     minWidth: props.$minWidth ?? "10em",
@@ -98,7 +99,10 @@ export const EditDialog = styled(Dialog).attrs<{
   
   #eds-dialog-customcontent {
     padding: ${tokens.spacings.comfortable.medium};
-    padding-bottom: ${tokens.spacings.comfortable.x_large};
+    padding-bottom: ${(props) =>
+      props.$extraPaddingBottom !== undefined && !props.$extraPaddingBottom
+        ? undefined
+        : tokens.spacings.comfortable.x_large}
   }
 
   button + button {

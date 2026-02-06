@@ -21,6 +21,19 @@ export function getNameFromNameUuidValue(value: NameUuidType) {
     : value.identifier;
 }
 
+export function getNameFromMultipleNameUuidValues(values: Array<NameUuidType>) {
+  let name = "";
+
+  if (values.length) {
+    name = getNameFromNameUuidValue(values[0]);
+    if (values.length > 1) {
+      name += ` (and ${String(values.length - 1)} more)`;
+    }
+  }
+
+  return name;
+}
+
 export function emptyIdentifierUuid(): IdentifierUuidType {
   return {
     identifier: "(none)",

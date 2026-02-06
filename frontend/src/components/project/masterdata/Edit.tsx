@@ -70,6 +70,7 @@ import {
 } from "#utils/form";
 import {
   emptyIdentifierUuid,
+  getNameFromMultipleNameUuidValues,
   getNameFromNameUuidValue,
   IdentifierUuidType,
   NameUuidType,
@@ -85,6 +86,7 @@ import { FieldSearch } from "./FieldSearch";
 Icon.add({ arrow_back, arrow_forward });
 
 const DUMMYGROUP_NAME = "none";
+const AFFECTEDCHECK_LIMIT = 5;
 
 type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
 
@@ -94,16 +96,11 @@ type SmdaMasterdataCoordinateSystemFields = {
 };
 
 type MasterdataItemType = CountryItem | DiscoveryItem | FieldItem;
-type ItemType = "country" | "discovery" | "field";
+type FieldItemType = "country" | "discovery" | "field";
 
-type AffectedItems = {
-  initiator: {
-    itemType: ItemType;
-    item: MasterdataItemType;
-    operation: ListOperation;
-  };
-  requiresConfirmation: boolean;
-  items: Record<ItemType, Array<MasterdataItemType>>;
+type SelectedItems = {
+  operation: ListOperation;
+  items: ItemLists;
 };
 
 type ItemListGrouped<T> = Record<string, Array<T>>;
@@ -140,12 +137,22 @@ function emptyOptionsData(): OptionsData {
   };
 }
 
-function emptyItemLists(): ItemLists {
-  return {
+function emptyItemLists({
+  withDummyGroup = false,
+}: {
+  withDummyGroup?: boolean;
+} = {}): ItemLists {
+  const result = {
     field: [],
     country: [],
     discovery: {},
-  };
+  } as ItemLists;
+
+  if (withDummyGroup) {
+    result.discovery[DUMMYGROUP_NAME] = [];
+  }
+
+  return result;
 }
 
 function emptyFormMasterdataBase(): FormMasterdataBase {
@@ -156,11 +163,21 @@ function emptyFormMasterdataBase(): FormMasterdataBase {
   };
 }
 
-function emptyFormMasterdataSub(): FormMasterdataSub {
-  return {
+function emptyFormMasterdataSub({
+  withDummyGroup = false,
+}: {
+  withDummyGroup?: boolean;
+} = {}): FormMasterdataSub {
+  const result = {
     country: [],
     discovery: {},
-  };
+  } as FormMasterdataSub;
+
+  if (withDummyGroup) {
+    result.discovery[DUMMYGROUP_NAME] = [];
+  }
+
+  return result;
 }
 
 function emptyFormMasterdataProject(): FormMasterdataProject {
@@ -168,6 +185,21 @@ function emptyFormMasterdataProject(): FormMasterdataProject {
     ...emptyFormMasterdataBase(),
     ...emptyOptionsData(),
   };
+}
+
+function itemsCount(itemLists: ItemLists) {
+  let count = 0;
+
+  count += itemLists.field.length;
+  count += itemLists.country.length;
+
+  count += Object.values(itemLists.discovery).reduce((acc, curr) => {
+    acc += curr.length;
+
+    return acc;
+  }, 0);
+
+  return count;
 }
 
 const { useAppForm } = createFormHook({
@@ -184,7 +216,7 @@ function resetEditData(
 ) {
   setProjectData(emptyFormMasterdataProject());
   setAvailableData(emptyFormMasterdataBase());
-  setOrphanData(emptyFormMasterdataSub());
+  setOrphanData(emptyFormMasterdataSub({ withDummyGroup: true }));
 }
 
 function handlePrepareEditData(
@@ -336,8 +368,7 @@ function createItemLists(
     },
     emptyItemLists(),
   );
-  const orphan = emptyItemLists();
-  orphan.discovery[DUMMYGROUP_NAME] = [];
+  const orphan = emptyItemLists({ withDummyGroup: true });
   const selected = {
     country: [] as Array<string>,
     discovery: [] as Array<string>,
@@ -408,55 +439,277 @@ function handleErrorUnknownInitialValue(
   }));
 }
 
-function handleAffectedItems(
+function prepareSelectedItems(
   operation: ListOperation,
-  itemType: ItemType,
+  itemType: FieldItemType,
   item: NameUuidType,
-  setAffectedItems: Dispatch<SetStateAction<AffectedItems | undefined>>,
+  setSelectedItems: Dispatch<SetStateAction<SelectedItems | undefined>>,
 ) {
-  const items = {} as Record<ItemType, Array<MasterdataItemType>>;
-
-  setAffectedItems({
-    initiator: { itemType, item, operation },
-    requiresConfirmation: false,
-    items,
+  setSelectedItems({
+    operation,
+    items: {
+      ...emptyItemLists({ withDummyGroup: true }),
+      [itemType]:
+        itemType === "discovery" ? { [DUMMYGROUP_NAME]: [item] } : [item],
+    },
   });
 }
 
-function ConfirmItemOperationDialog({
+function checkForAffectedItems(
+  operation: ListOperation,
+  checkItems: ItemLists,
+  smdaMasterdataGrouped: SmdaMasterdataResultGrouped,
+  projectFields: Array<FieldItem>,
+  projectCountries: Array<CountryItem>,
+  projectDiscoveries: Array<DiscoveryItem>,
+): ItemLists {
+  const affectedItems = emptyItemLists({ withDummyGroup: true });
+
+  if (operation === "addition") {
+    checkItems.field.forEach((field) => {
+      // Find masterdata for this Field
+      Object.values(smdaMasterdataGrouped).forEach((masterdata) => {
+        if (masterdata.field.find((f) => f.uuid === field.uuid)) {
+          // Find corresponding Country, and mark as affected if not present in project
+          const affected = masterdata.country.filter(
+            (country) =>
+              !projectCountries.find((c) => c.uuid === country.uuid) &&
+              !affectedItems.country.find((c) => c.uuid === country.uuid),
+          );
+          affectedItems.country.push(...affected);
+        }
+      });
+    });
+    checkItems.discovery[DUMMYGROUP_NAME].forEach((discovery) => {
+      // Find masterdata for this Discovery
+      Object.values(smdaMasterdataGrouped).forEach((masterdata) => {
+        if (masterdata.discovery.find((d) => d.uuid === discovery.uuid)) {
+          // Find corresponding Field, and mark as affected if not present in project
+          const affected = masterdata.field.filter(
+            (field) =>
+              !projectFields.find((f) => f.uuid === field.uuid) &&
+              !affectedItems.field.find((f) => f.uuid === field.uuid),
+          );
+          affectedItems.field.push(...affected);
+        }
+      });
+    });
+  } else {
+    // Check items for removal
+    checkItems.field.forEach((field) => {
+      // Find masterdata for this Field
+      Object.values(smdaMasterdataGrouped).forEach((masterdata) => {
+        if (masterdata.field.find((f) => f.uuid === field.uuid)) {
+          // Find corresponding Discoveries, and mark as affected if present in project
+          const affected = masterdata.discovery.filter(
+            (discovery) =>
+              projectDiscoveries.find((d) => d.uuid === discovery.uuid) &&
+              !affectedItems.discovery[DUMMYGROUP_NAME].find(
+                (d) => d.uuid === discovery.uuid,
+              ),
+          );
+          affectedItems.discovery[DUMMYGROUP_NAME].push(...affected);
+        }
+      });
+    });
+    checkItems.country.forEach((country) => {
+      // Find masterdata for this Country
+      Object.values(smdaMasterdataGrouped).forEach((masterdata) => {
+        if (masterdata.country.find((c) => c.uuid === country.uuid)) {
+          // Find corresponding Fields, and mark as affected if present in project
+          const affected = masterdata.field.filter(
+            (field) =>
+              projectFields.find((f) => f.uuid === field.uuid) &&
+              !affectedItems.field.find((f) => f.uuid === field.uuid),
+          );
+          affectedItems.field.push(...affected);
+        }
+      });
+    });
+  }
+
+  return affectedItems;
+}
+
+function handleAffectedItems(
+  selectedItems: SelectedItems,
+  smdaMasterdataGrouped: SmdaMasterdataResultGrouped,
+  projectFields: Array<FieldItem>,
+  projectCountries: Array<CountryItem>,
+  projectDiscoveries: Array<DiscoveryItem>,
+): ItemLists {
+  let checkItems = selectedItems.items;
+  const affectedItems = emptyItemLists({ withDummyGroup: true });
+  const checkedItems = emptyItemLists({ withDummyGroup: true });
+
+  let checkCount = 0;
+  while (itemsCount(checkItems)) {
+    checkCount += 1;
+    const affected = checkForAffectedItems(
+      selectedItems.operation,
+      checkItems,
+      smdaMasterdataGrouped,
+      projectFields,
+      projectCountries,
+      projectDiscoveries,
+    );
+
+    checkedItems.field.push(...checkItems.field);
+    checkedItems.country.push(...checkItems.country);
+    checkedItems.discovery[DUMMYGROUP_NAME].push(
+      ...checkItems.discovery[DUMMYGROUP_NAME],
+    );
+    checkItems = emptyItemLists({ withDummyGroup: true });
+
+    affected.field.forEach((field) => {
+      if (!affectedItems.field.find((f) => f.uuid === field.uuid)) {
+        affectedItems.field.push(field);
+      }
+      if (!checkedItems.field.find((f) => f.uuid === field.uuid)) {
+        checkItems.field.push(field);
+      }
+    });
+    affected.country.forEach((country) => {
+      if (!affectedItems.country.find((c) => c.uuid === country.uuid)) {
+        affectedItems.country.push(country);
+      }
+      if (!checkedItems.country.find((c) => c.uuid === country.uuid)) {
+        checkItems.country.push(country);
+      }
+    });
+    affected.discovery[DUMMYGROUP_NAME].forEach((discovery) => {
+      if (
+        !affectedItems.discovery[DUMMYGROUP_NAME].find(
+          (d) => d.uuid === discovery.uuid,
+        )
+      ) {
+        affectedItems.discovery[DUMMYGROUP_NAME].push(discovery);
+      }
+      if (
+        !checkedItems.discovery[DUMMYGROUP_NAME].find(
+          (d) => d.uuid === discovery.uuid,
+        )
+      ) {
+        checkItems.discovery[DUMMYGROUP_NAME].push(discovery);
+      }
+    });
+
+    if (checkCount > AFFECTEDCHECK_LIMIT) {
+      console.warn(
+        "Check count limit reached when checking for affected items on moving:",
+        checkCount,
+      );
+      break;
+    }
+  }
+
+  return affectedItems;
+}
+
+function ConfirmItemsOperationDialog({
   isOpen,
+  selectedItems,
   affectedItems,
-  handleConfirmItemOperationDecision,
+  handleConfirmItemsOperationDecision,
 }: {
   isOpen: boolean;
-  affectedItems: AffectedItems | undefined;
-  handleConfirmItemOperationDecision: (confirm: boolean) => void;
+  selectedItems: SelectedItems | undefined;
+  affectedItems: ItemLists | undefined;
+  handleConfirmItemsOperationDecision: (confirm: boolean) => void;
 }) {
-  if (affectedItems === undefined) {
+  if (selectedItems === undefined) {
     return;
   }
 
-  const initiator = affectedItems.initiator;
+  const hasAffectedItems =
+    affectedItems !== undefined && itemsCount(affectedItems) > 0;
+
+  let textItemType = "(unknown type)";
+  let textItemName = "(unknown name)";
+  if (selectedItems.items.field.length) {
+    textItemType = "field";
+    textItemName = getNameFromMultipleNameUuidValues(selectedItems.items.field);
+  } else if (selectedItems.items.country.length) {
+    textItemType = "country";
+    textItemName = getNameFromMultipleNameUuidValues(
+      selectedItems.items.country,
+    );
+  } else if (selectedItems.items.discovery[DUMMYGROUP_NAME].length) {
+    textItemType = "discovery";
+    textItemName = getNameFromMultipleNameUuidValues(
+      selectedItems.items.discovery[DUMMYGROUP_NAME],
+    );
+  }
+
+  let textItemsDescription = "selected";
+  if (hasAffectedItems) {
+    textItemsDescription += " and dependant";
+  }
 
   return (
-    <EditDialog open={isOpen} $minWidth="30em">
+    <EditDialog open={isOpen} $minWidth="32em" $extraPaddingBottom={false}>
       <Dialog.Header>
-        <Dialog.Title>Move items</Dialog.Title>
+        <Dialog.Title>
+          {selectedItems.operation === "addition" ? "Add" : "Remove"} items
+        </Dialog.Title>
       </Dialog.Header>
 
-      <Dialog.CustomContent style={{ minHeight: "auto" }}>
+      <Dialog.CustomContent>
         <PageText>
-          The {initiator.itemType}{" "}
-          <strong>{getNameFromNameUuidValue(initiator.item)}</strong> has been
-          selected for{" "}
-          {initiator.operation === "addition" ? "addition to" : "removal from"}{" "}
+          The {textItemType} <span className="emphasis">{textItemName}</span>{" "}
+          has been selected for{" "}
+          {selectedItems.operation === "addition"
+            ? "addition to"
+            : "removal from"}{" "}
           the project.
         </PageText>
 
-        <PageText>
-          The following items will also be{" "}
-          {initiator.operation === "addition" ? "added to" : "removed from"} the
-          project, as they are dependant on this {initiator.itemType}:
+        {hasAffectedItems && (
+          <>
+            <PageText>
+              The following items will also be{" "}
+              {selectedItems.operation === "addition"
+                ? "added to"
+                : "removed from"}{" "}
+              the project, as they are dependant on this {textItemType}:
+            </PageText>
+
+            <PageList>
+              {affectedItems.field.length > 0 && (
+                <List.Item>
+                  Field:{" "}
+                  {affectedItems.field
+                    .map((f) => f.identifier)
+                    .sort((a, b) => stringCompare(a, b))
+                    .join(", ")}
+                </List.Item>
+              )}
+              {affectedItems.country.length > 0 && (
+                <List.Item>
+                  Country:{" "}
+                  {affectedItems.country
+                    .map((c) => c.identifier)
+                    .sort((a, b) => stringCompare(a, b))
+                    .join(", ")}
+                </List.Item>
+              )}
+              {affectedItems.discovery[DUMMYGROUP_NAME].length > 0 && (
+                <List.Item>
+                  Discovery:{" "}
+                  {affectedItems.discovery[DUMMYGROUP_NAME]
+                    .map((d) => d.short_identifier)
+                    .sort((a, b) => stringCompare(a, b))
+                    .join(", ")}
+                </List.Item>
+              )}
+            </PageList>
+          </>
+        )}
+
+        <PageText $marginBottom="0">
+          Do you want to{" "}
+          {selectedItems.operation === "addition" ? "add" : "remove"} the{" "}
+          {textItemsDescription} items?
         </PageText>
       </Dialog.CustomContent>
 
@@ -464,12 +717,12 @@ function ConfirmItemOperationDialog({
         <GeneralButton
           label="OK"
           onClick={() => {
-            handleConfirmItemOperationDecision(true);
+            handleConfirmItemsOperationDecision(true);
           }}
         />
         <CancelButton
           onClick={() => {
-            handleConfirmItemOperationDecision(false);
+            handleConfirmItemsOperationDecision(false);
           }}
         />
       </Dialog.Actions>
@@ -479,82 +732,69 @@ function ConfirmItemOperationDialog({
 
 function Items({
   fields,
-  projectFields,
   itemType,
   itemListGrouped,
   operation,
-  setAffectedItems,
+  setSelectedItems,
 }: {
   fields: Array<string>;
-  projectFields?: Array<string>;
-  itemType: ItemType;
+  itemType: FieldItemType;
   itemListGrouped: ItemListGrouped<MasterdataItemType>;
   operation: ListOperation;
-  setAffectedItems: Dispatch<SetStateAction<AffectedItems | undefined>>;
+  setSelectedItems: Dispatch<SetStateAction<SelectedItems | undefined>>;
 }) {
   const isDummyGroup =
     Object.keys(itemListGrouped).length === 1 &&
     DUMMYGROUP_NAME in itemListGrouped;
   const groups =
-    !isDummyGroup && fields.length > 0 ? fields.sort() : [DUMMYGROUP_NAME];
+    !isDummyGroup && fields.length ? fields.sort() : [DUMMYGROUP_NAME];
 
   return (
     <>
-      {groups.map((group) => {
-        const isRelatedToProjectField =
-          group === DUMMYGROUP_NAME || (projectFields?.includes(group) ?? true);
+      {groups.map((group) => (
+        <div key={group}>
+          {groups.length > 1 && <PageHeader $variant="h6">{group}</PageHeader>}
+          <ChipsContainer>
+            {group in itemListGrouped && itemListGrouped[group].length > 0 ? (
+              itemListGrouped[group]
+                .sort((a, b) =>
+                  stringCompare(
+                    getNameFromNameUuidValue(a),
+                    getNameFromNameUuidValue(b),
+                  ),
+                )
+                .map<React.ReactNode>((item) => {
+                  const contents = [];
+                  if (operation === "addition") {
+                    contents.push(<Icon name="arrow_back" />);
+                  }
+                  contents.push(getNameFromNameUuidValue(item));
+                  if (operation === "removal") {
+                    contents.push(<Icon name="arrow_forward" />);
+                  }
 
-        return (
-          <div key={group}>
-            {groups.length > 1 && (
-              <PageHeader $variant="h6">{group}</PageHeader>
+                  return (
+                    <InfoChip
+                      key={item.uuid}
+                      onClick={() => {
+                        prepareSelectedItems(
+                          operation,
+                          itemType,
+                          item,
+                          setSelectedItems,
+                        );
+                      }}
+                    >
+                      {...contents}
+                    </InfoChip>
+                  );
+                })
+            ) : (
+              <Typography>none</Typography>
             )}
-            <ChipsContainer>
-              {group in itemListGrouped && itemListGrouped[group].length > 0 ? (
-                itemListGrouped[group]
-                  .sort((a, b) =>
-                    stringCompare(
-                      getNameFromNameUuidValue(a),
-                      getNameFromNameUuidValue(b),
-                    ),
-                  )
-                  .map<React.ReactNode>((item) => {
-                    const contents = [];
-                    if (isRelatedToProjectField && operation === "addition") {
-                      contents.push(<Icon name="arrow_back" />);
-                    }
-                    contents.push(getNameFromNameUuidValue(item));
-                    if (operation === "removal") {
-                      contents.push(<Icon name="arrow_forward" />);
-                    }
-
-                    return (
-                      <InfoChip
-                        key={item.uuid}
-                        onClick={
-                          isRelatedToProjectField
-                            ? () => {
-                                handleAffectedItems(
-                                  operation,
-                                  itemType,
-                                  item,
-                                  setAffectedItems,
-                                );
-                              }
-                            : undefined
-                        }
-                      >
-                        {...contents}
-                      </InfoChip>
-                    );
-                  })
-              ) : (
-                <Typography>none</Typography>
-              )}
-            </ChipsContainer>
-          </div>
-        );
-      })}
+          </ChipsContainer>
+        </div>
+      ))}
     </>
   );
 }
@@ -571,7 +811,7 @@ export function Edit({
   closeDialog: () => void;
 }) {
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
-  const [confirmItemOperationDialogOpen, setConfirmItemOperationDialogOpen] =
+  const [confirmItemsOperationDialogOpen, setConfirmItemsOperationDialogOpen] =
     useState(false);
   const [smdaFields, setSmdaFields] = useState<Array<string>>([]);
   const [projectData, setProjectData] = useState<FormMasterdataProject>(
@@ -581,12 +821,13 @@ export function Edit({
     emptyFormMasterdataBase(),
   );
   const [orphanData, setOrphanData] = useState<FormMasterdataSub>(
-    emptyFormMasterdataSub(),
+    emptyFormMasterdataSub({ withDummyGroup: true }),
   );
-  const [affectedItems, setAffectedItems] = useState<
-    AffectedItems | undefined
+  const [isOngoingItemsOperation, setIsOngoingItemsOperation] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<
+    SelectedItems | undefined
   >();
-
+  const [affectedItems, setAffectedItems] = useState<ItemLists | undefined>();
   const queryClient = useQueryClient();
 
   const masterdataMutation = useMutation({
@@ -653,19 +894,77 @@ export function Edit({
     },
   });
 
-  const handleAffectedItemsListOperation = useCallback(() => {
-    if (affectedItems === undefined) {
+  const handleItemsOperation = useCallback(() => {
+    if (selectedItems === undefined || itemsCount(selectedItems.items) === 0) {
       return;
     }
-    const initiator = affectedItems.initiator;
 
-    handleNameUuidListOperationOnForm(
-      form,
-      initiator.operation,
-      initiator.itemType,
-      initiator.item,
+    const fields = selectedItems.items.field.concat(affectedItems?.field ?? []);
+    if (fields.length) {
+      handleNameUuidListOperationOnForm(
+        form,
+        selectedItems.operation,
+        "field",
+        fields,
+      );
+    }
+
+    const countries = selectedItems.items.country.concat(
+      affectedItems?.country ?? [],
     );
-  }, [affectedItems, form]);
+    if (countries.length) {
+      handleNameUuidListOperationOnForm(
+        form,
+        selectedItems.operation,
+        "country",
+        countries,
+      );
+    }
+
+    const discoveries = selectedItems.items.discovery[DUMMYGROUP_NAME].concat(
+      affectedItems?.discovery[DUMMYGROUP_NAME] ?? [],
+    );
+    if (discoveries.length) {
+      handleNameUuidListOperationOnForm(
+        form,
+        selectedItems.operation,
+        "discovery",
+        discoveries,
+      );
+    }
+  }, [selectedItems, affectedItems, form]);
+
+  const finishItemsOperation = useCallback(() => {
+    setSelectedItems(undefined);
+    setAffectedItems(undefined);
+    setIsOngoingItemsOperation(false);
+  }, []);
+
+  const startItemsOperation = useCallback(
+    (selectedItems: SelectedItems) => {
+      setIsOngoingItemsOperation(true);
+
+      const affectedItems = handleAffectedItems(
+        selectedItems,
+        smdaMasterdata.data,
+        form.getFieldValue("field"),
+        form.getFieldValue("country"),
+        form.getFieldValue("discovery"),
+      );
+
+      const requireItemsOperationConfirmation =
+        itemsCount(selectedItems.items) > 1 || itemsCount(affectedItems) > 0;
+
+      if (requireItemsOperationConfirmation) {
+        setAffectedItems(affectedItems);
+        setConfirmItemsOperationDialogOpen(true);
+      } else {
+        handleItemsOperation();
+        finishItemsOperation();
+      }
+    },
+    [smdaMasterdata.data, form, handleItemsOperation, finishItemsOperation],
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -700,15 +999,22 @@ export function Edit({
   ]);
 
   useEffect(() => {
-    if (affectedItems !== undefined) {
-      if (affectedItems.requiresConfirmation) {
-        setConfirmItemOperationDialogOpen(true);
-      } else {
-        handleAffectedItemsListOperation();
-        setAffectedItems(undefined);
-      }
+    if (
+      !isOngoingItemsOperation &&
+      selectedItems !== undefined &&
+      itemsCount(selectedItems.items) > 0 &&
+      smdaMasterdata.isSuccess &&
+      Object.keys(smdaMasterdata.data).length
+    ) {
+      startItemsOperation(selectedItems);
     }
-  }, [affectedItems, handleAffectedItemsListOperation]);
+  }, [
+    isOngoingItemsOperation,
+    selectedItems,
+    smdaMasterdata.data,
+    smdaMasterdata.isSuccess,
+    startItemsOperation,
+  ]);
 
   function handleClose({ formReset }: { formReset: () => void }) {
     formReset();
@@ -738,12 +1044,12 @@ export function Edit({
     );
   }
 
-  function handleConfirmItemOperationDecision(confirm: boolean) {
+  function handleConfirmItemsOperationDecision(confirm: boolean) {
     if (confirm) {
-      handleAffectedItemsListOperation();
+      handleItemsOperation();
     }
-    setAffectedItems(undefined);
-    setConfirmItemOperationDialogOpen(false);
+    setConfirmItemsOperationDialogOpen(false);
+    finishItemsOperation();
   }
 
   const mutationCallback = ({
@@ -781,10 +1087,13 @@ export function Edit({
         closeDialog={closeSearchDialog}
       />
 
-      <ConfirmItemOperationDialog
-        isOpen={confirmItemOperationDialogOpen}
+      <ConfirmItemsOperationDialog
+        isOpen={confirmItemsOperationDialogOpen}
+        selectedItems={selectedItems}
         affectedItems={affectedItems}
-        handleConfirmItemOperationDecision={handleConfirmItemOperationDecision}
+        handleConfirmItemsOperationDecision={
+          handleConfirmItemsOperationDecision
+        }
       />
 
       <EditDialog open={isOpen} $maxWidth="200em">
@@ -819,7 +1128,7 @@ export function Edit({
                                 [DUMMYGROUP_NAME]: projectData.field,
                               }}
                               operation="removal"
-                              setAffectedItems={setAffectedItems}
+                              setSelectedItems={setSelectedItems}
                             />
                           </ItemsContainer>
                         </div>
@@ -828,15 +1137,12 @@ export function Edit({
                           <ItemsContainer>
                             <Items
                               fields={smdaFields}
-                              projectFields={field.state.value.map(
-                                (f) => f.identifier,
-                              )}
                               itemType="field"
                               itemListGrouped={{
                                 [DUMMYGROUP_NAME]: availableData.field,
                               }}
                               operation="addition"
-                              setAffectedItems={setAffectedItems}
+                              setSelectedItems={setSelectedItems}
                             />
                           </ItemsContainer>
                         </div>
@@ -864,7 +1170,7 @@ export function Edit({
                               }}
                               itemType="country"
                               operation="removal"
-                              setAffectedItems={setAffectedItems}
+                              setSelectedItems={setSelectedItems}
                             />
                           </ItemsContainer>
                         </div>
@@ -873,13 +1179,12 @@ export function Edit({
                           <ItemsContainer>
                             <Items
                               fields={smdaFields}
-                              projectFields={fieldList.map((f) => f.identifier)}
                               itemType="country"
                               itemListGrouped={{
                                 [DUMMYGROUP_NAME]: availableData.country,
                               }}
                               operation="addition"
-                              setAffectedItems={setAffectedItems}
+                              setSelectedItems={setSelectedItems}
                             />
                           </ItemsContainer>
                         </div>
@@ -955,10 +1260,7 @@ export function Edit({
                     mode="array"
                     listeners={{
                       onSubmit: ({ fieldApi }) => {
-                        if (
-                          DUMMYGROUP_NAME in orphanData.discovery &&
-                          orphanData.discovery[DUMMYGROUP_NAME].length > 0
-                        ) {
+                        if (orphanData.discovery[DUMMYGROUP_NAME].length) {
                           handleNameUuidListOperation(
                             fieldApi,
                             "removal",
@@ -978,43 +1280,39 @@ export function Edit({
                               itemType="discovery"
                               itemListGrouped={projectData.discovery}
                               operation="removal"
-                              setAffectedItems={setAffectedItems}
+                              setSelectedItems={setSelectedItems}
                             />
                           </ItemsContainer>
 
-                          {DUMMYGROUP_NAME in orphanData.discovery &&
-                            orphanData.discovery[DUMMYGROUP_NAME].length >
-                              0 && (
-                              <OrphanTypesContainer>
-                                <PageText>
-                                  The following discoveries are currently
-                                  present in the project masterdata but they
-                                  belong to fields which are not present there.
-                                  They will be removed when the project
-                                  masterdata is saved.
-                                </PageText>
-                                <PageList>
-                                  {orphanData.discovery[
-                                    DUMMYGROUP_NAME
-                                  ].map<React.ReactNode>((discovery) => (
-                                    <List.Item key={discovery.uuid}>
-                                      {discovery.short_identifier}
-                                    </List.Item>
-                                  ))}
-                                </PageList>
-                              </OrphanTypesContainer>
-                            )}
+                          {orphanData.discovery[DUMMYGROUP_NAME].length > 0 && (
+                            <OrphanTypesContainer>
+                              <PageText>
+                                The following discoveries are currently present
+                                in the project masterdata but they belong to
+                                fields which are not present there. They will be
+                                removed when the project masterdata is saved.
+                              </PageText>
+                              <PageList>
+                                {orphanData.discovery[
+                                  DUMMYGROUP_NAME
+                                ].map<React.ReactNode>((discovery) => (
+                                  <List.Item key={discovery.uuid}>
+                                    {discovery.short_identifier}
+                                  </List.Item>
+                                ))}
+                              </PageList>
+                            </OrphanTypesContainer>
+                          )}
                         </div>
                         <div>
                           <Label label="Discoveries" />
                           <ItemsContainer>
                             <Items
                               fields={smdaFields}
-                              projectFields={fieldList.map((f) => f.identifier)}
                               itemType="discovery"
                               itemListGrouped={availableData.discovery}
                               operation="addition"
-                              setAffectedItems={setAffectedItems}
+                              setSelectedItems={setSelectedItems}
                             />
                           </ItemsContainer>
                         </div>
