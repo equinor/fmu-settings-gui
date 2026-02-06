@@ -1,0 +1,7 @@
+# FMU settings packages
+fmu-settings @ git+https://github.com/equinor/fmu-settings@main
+fmu-settings-api @ git+https://github.com/equinor/fmu-settings-api@main
+fmu-settings-cli @ git+https://github.com/equinor/fmu-settings-cli@main
+
+# Other dependencies
+fmu-datamodels @ git+https://github.com/equinor/fmu-datamodels@main
