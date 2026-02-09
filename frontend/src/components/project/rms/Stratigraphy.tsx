@@ -262,20 +262,28 @@ function Edit({
   projectReadOnly,
   isDialogOpen,
   setIsDialogOpen,
+  isRmsProjectOpen,
 }: {
   projectHorizons: RmsHorizon[];
   projectZones: RmsStratigraphicZone[];
   projectReadOnly: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
+  isRmsProjectOpen: boolean;
 }) {
   const handleClose = ({ formReset }: { formReset: () => void }) => {
     formReset();
     setIsDialogOpen(false);
   };
 
-  const { data: availableHorizons } = useQuery(rmsGetHorizonsOptions());
-  const { data: availableZones } = useQuery(rmsGetZonesOptions());
+  const { data: availableHorizons } = useQuery({
+    ...rmsGetHorizonsOptions(),
+    enabled: isRmsProjectOpen,
+  });
+  const { data: availableZones } = useQuery({
+    ...rmsGetZonesOptions(),
+    enabled: isRmsProjectOpen,
+  });
 
   const queryClient = useQueryClient();
 
@@ -413,15 +421,14 @@ export function Stratigraphy({
         }}
       />
 
-      {isRmsProjectOpen && (
-        <Edit
-          projectHorizons={projectHorizons}
-          projectZones={projectZones}
-          projectReadOnly={projectReadOnly}
-          isDialogOpen={isDialogOpen}
-          setIsDialogOpen={setIsDialogOpen}
-        />
-      )}
+      <Edit
+        projectHorizons={projectHorizons}
+        projectZones={projectZones}
+        projectReadOnly={projectReadOnly}
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        isRmsProjectOpen={isRmsProjectOpen}
+      />
     </>
   );
 }
