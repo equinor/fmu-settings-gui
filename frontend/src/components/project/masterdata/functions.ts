@@ -197,8 +197,7 @@ export function createItemLists(
     emptyItemLists(),
   );
   const orphan = emptyItemLists({ withDummyGroup: true });
-  const selected = {
-    country: [] as Array<string>,
+  const seen = {
     discovery: [] as Array<string>,
   };
 
@@ -217,7 +216,6 @@ export function createItemLists(
       if (projectCountries.find((c) => c.uuid === country.uuid)) {
         if (!project.country.find((c) => c.uuid === country.uuid)) {
           project.country.push(country);
-          selected.country.push(country.uuid);
         }
       } else if (!available.country.find((c) => c.uuid === country.uuid)) {
         available.country.push(country);
@@ -228,7 +226,7 @@ export function createItemLists(
       masterdata.discovery.forEach((discovery) => {
         if (projectDiscoveries.find((d) => d.uuid === discovery.uuid)) {
           project.discovery[fieldGroup].push(discovery);
-          selected.discovery.push(discovery.uuid);
+          seen.discovery.push(discovery.uuid);
         } else {
           available.discovery[fieldGroup].push(discovery);
         }
@@ -238,10 +236,9 @@ export function createItemLists(
     }
   });
 
-  // Detection of country orphans is currently not implemented
   orphan.discovery[DUMMYGROUP_NAME].push(
     ...projectDiscoveries.filter(
-      (discovery) => !selected.discovery.includes(discovery.uuid),
+      (discovery) => !seen.discovery.includes(discovery.uuid),
     ),
   );
 
