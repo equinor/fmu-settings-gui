@@ -1,5 +1,5 @@
 import { Dialog, List } from "@equinor/eds-core-react";
-import { createFormHook } from "@tanstack/react-form";
+import { AnyFormApi, createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useState } from "react";
 import { toast } from "react-toastify";
@@ -115,18 +115,17 @@ function OrphanWarningBox({
 }
 
 function StratigraphyEditor({
-  projectHorizons,
-  projectZones,
   availableHorizons,
   availableZones,
 }: {
-  projectHorizons: RmsHorizon[];
-  projectZones: RmsStratigraphicZone[];
   availableHorizons: RmsHorizon[];
   availableZones: RmsStratigraphicZone[];
 }) {
-  const form = useFormContext();
+  const form: AnyFormApi = useFormContext();
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>("");
+
+  const projectHorizons = form.getFieldValue("horizons") as RmsHorizon[];
+  const projectZones = form.getFieldValue("zones") as RmsStratigraphicZone[];
 
   const { removeItems, addItems, addAll, removeAll } = useItemHandlers(
     projectHorizons,
@@ -357,10 +356,8 @@ function Edit({
         <Dialog.CustomContent>
           <form.AppForm>
             <form.Subscribe selector={(state) => state.values}>
-              {(values) => (
+              {() => (
                 <form.StratigraphyEditor
-                  projectHorizons={values.horizons}
-                  projectZones={values.zones}
                   availableHorizons={availableHorizons ?? []}
                   availableZones={availableZones ?? []}
                 />
