@@ -205,17 +205,6 @@ function StratigraphyEditor({
 
           <ActionButtonsContainer>
             <GeneralButton
-              variant="outlined"
-              label="Add all available"
-              disabled={
-                projectHorizons.length === availableHorizons.length &&
-                projectZones.length === availableZones.length
-              }
-              onClick={() => {
-                setConfirmAction("add");
-              }}
-            />
-            <GeneralButton
               label="Remove all"
               variant="outlined"
               disabled={!projectHorizons.length && !projectZones.length}
@@ -242,6 +231,20 @@ function StratigraphyEditor({
               isUnselected ? addHorizon(horizon) : removeHorizon(horizon);
             }}
           />
+
+          <ActionButtonsContainer>
+            <GeneralButton
+              variant="outlined"
+              label="Add all"
+              disabled={
+                projectHorizons.length === availableHorizons.length &&
+                projectZones.length === availableZones.length
+              }
+              onClick={() => {
+                setConfirmAction("add");
+              }}
+            />
+          </ActionButtonsContainer>
 
           <PageText>
             💡 Click on horizons or zones to add or remove them from the project

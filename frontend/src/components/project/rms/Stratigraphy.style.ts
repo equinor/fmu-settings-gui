@@ -19,10 +19,7 @@ export const StratigraphyEditorContainer = styled.div`
 
 export const ActionButtonsContainer = styled.div`
   margin-bottom: ${tokens.spacings.comfortable.medium};
- 
-  display: flex;
-  justify-content: right;
-  
+
   button + button {
     margin-left: ${tokens.spacings.comfortable.small} !important;
   }
