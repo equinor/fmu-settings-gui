@@ -47,19 +47,26 @@ Then, an editable install of a package can be done, with the following steps:
 ```shell
 git clone git@github.com:equinor/fmu-settings-cli.git
 cd fmu-settings-cli
-pip install -e ".[dev]"
+uv pip install -e ".[dev]"
 ```
 
-These commands clone the code repo and perform an install of the package, including any
-regular and development dependencies. An FMU Settings dependency will initially be
-installed in regular mode, so each of these packages need to be cloned and installed as
-editable in separate steps. The above commands need to be repeated for the rest of the
-packages:
+These commands clone the repository and install the package along with its regular and 
+development dependencies. During developemnt, it is often helpful to work to work with 
+the latest main branches of related `fmu-settings` packages. This can be done with the 
+following command :  
 
+```shell
+uv pip install -r dev_requirements.txt
+```
+
+Note : This does not install the packages in editable mode. 
+
+Packages installed using the dev_requirements.txt. 
 - `fmu-settings-api`
-- `fmu-settings-gui`
+- `fmu-settings-cli`
 - `fmu-settings`
 - `fmu-datamodels`
+- `rms-sys`
 
 Tests for the Python applications are run with the following command:
 
