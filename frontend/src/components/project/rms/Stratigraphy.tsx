@@ -33,6 +33,10 @@ import {
   PageHeader,
   PageText,
 } from "#styles/common";
+import {
+  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+  httpValidationErrorToString,
+} from "#utils/api.ts";
 import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { StratigraphicFramework } from "./StratigraphicFramework";
 import {
@@ -297,6 +301,13 @@ function Edit({
       void queryClient.refetchQueries({
         queryKey: projectGetProjectQueryKey(),
       });
+    },
+    onError: (error) => {
+      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+        const message = httpValidationErrorToString(error);
+        console.error(message);
+        toast.error(message);
+      }
     },
     meta: { errorPrefix: "Error updating project stratigraphy" },
   });
