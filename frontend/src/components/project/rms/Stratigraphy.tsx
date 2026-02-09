@@ -1,7 +1,7 @@
 import { Dialog, List } from "@equinor/eds-core-react";
 import { AnyFormApi, createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -173,9 +173,11 @@ function StratigraphyEditor({
   const hasOrphans =
     orphanHorizonNames.length > 0 || orphanZoneNames.length > 0;
 
-  form.setErrorMap({
-    onChange: hasOrphans ? ["Orphan horizons or zones present"] : undefined,
-  });
+  useEffect(() => {
+    form.setErrorMap({
+      onChange: hasOrphans ? ["Orphan horizons or zones present"] : undefined,
+    });
+  }, [form, hasOrphans]);
 
   return (
     <>
