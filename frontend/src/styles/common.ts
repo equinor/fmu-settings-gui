@@ -115,6 +115,7 @@ export const EditDialog = styled(Dialog).attrs<{
   width: 100%;
   
   #eds-dialog-customcontent {
+    min-height: auto;
     padding: ${tokens.spacings.comfortable.medium};
     padding-bottom: ${tokens.spacings.comfortable.x_large};
   }
