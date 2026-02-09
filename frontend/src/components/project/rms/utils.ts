@@ -1,17 +1,16 @@
 import { AnyFormApi } from "@tanstack/react-form";
 
-import { RmsHorizon, RmsStratigraphicZone } from "#client";
+import {
+  RmsHorizon,
+  RmsStratigraphicFramework,
+  RmsStratigraphicZone,
+} from "#client";
 import { useFormContext } from "#utils/form";
 
 export type ZoneWithColumn = RmsStratigraphicZone & {
   gridColumn: number;
   topHorizonIndex: number;
   baseHorizonIndex: number;
-};
-
-export type Stratigraphy = {
-  horizons: RmsHorizon[];
-  zones: RmsStratigraphicZone[];
 };
 
 export type ItemType = RmsHorizon | RmsStratigraphicZone;
@@ -51,7 +50,10 @@ export function useItemHandlers(
 ) {
   const form: AnyFormApi = useFormContext();
 
-  const addItems = (itemType: keyof Stratigraphy, names: string[]) => {
+  const addItems = (
+    itemType: keyof RmsStratigraphicFramework,
+    names: string[],
+  ) => {
     const availableItems =
       itemType === "horizons" ? availableHorizons : availableZones;
     const projectItems =
@@ -76,7 +78,10 @@ export function useItemHandlers(
     }
   };
 
-  const removeItems = (itemType: keyof Stratigraphy, names: string[]) => {
+  const removeItems = (
+    itemType: keyof RmsStratigraphicFramework,
+    names: string[],
+  ) => {
     const itemNamesToRemove = new Set(names);
     const projectItems =
       itemType === "horizons" ? projectHorizons : projectZones;

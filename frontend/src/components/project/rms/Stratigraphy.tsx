@@ -5,7 +5,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useState } from "react";
 import { toast } from "react-toastify";
 
-import { RmsHorizon, RmsProject, RmsStratigraphicZone } from "#client";
+import {
+  RmsHorizon,
+  RmsProject,
+  RmsStratigraphicFramework,
+  RmsStratigraphicZone,
+} from "#client";
 import {
   projectGetProjectQueryKey,
   projectPatchRmsStratigraphicFrameworkMutation,
@@ -17,6 +22,10 @@ import {
   GeneralButton,
   SubmitButton,
 } from "#components/form/button";
+import {
+  FormSubmitCallbackProps,
+  MutationCallbackProps,
+} from "#components/form/form.tsx";
 import {
   Banner,
   EditDialog,
@@ -261,21 +270,16 @@ function Edit({
   projectZones,
   projectReadOnly,
   isDialogOpen,
-  setIsDialogOpen,
+  closeDialog,
   isRmsProjectOpen,
 }: {
   projectHorizons: RmsHorizon[];
   projectZones: RmsStratigraphicZone[];
   projectReadOnly: boolean;
   isDialogOpen: boolean;
-  setIsDialogOpen: (open: boolean) => void;
+  closeDialog: () => void;
   isRmsProjectOpen: boolean;
 }) {
-  const handleClose = ({ formReset }: { formReset: () => void }) => {
-    formReset();
-    setIsDialogOpen(false);
-  };
-
   const { data: availableHorizons } = useQuery({
     ...rmsGetHorizonsOptions(),
     enabled: isRmsProjectOpen,
@@ -303,17 +307,39 @@ function Edit({
       horizons: projectHorizons,
     },
     onSubmit: ({ value, formApi }) => {
-      rmsStratigraphyMutation.mutate(
-        { body: value },
-        {
-          onSuccess: () => {
-            toast.info("Successfully updated project stratigraphy.");
-            handleClose({ formReset: formApi.reset });
-          },
-        },
-      );
+      if (!projectReadOnly) {
+        mutationCallback({
+          formValue: value,
+          formSubmitCallback,
+          formReset: formApi.reset,
+        });
+      }
     },
   });
+
+  const mutationCallback = ({
+    formValue,
+    formSubmitCallback,
+    formReset,
+  }: MutationCallbackProps<RmsStratigraphicFramework>) => {
+    rmsStratigraphyMutation.mutate(
+      { body: formValue },
+      {
+        onSuccess: (data) => {
+          formSubmitCallback({ message: data.message, formReset });
+          closeDialog();
+        },
+      },
+    );
+  };
+
+  const formSubmitCallback = ({
+    message,
+    formReset,
+  }: FormSubmitCallbackProps) => {
+    toast.info(message);
+    formReset();
+  };
 
   return (
     <EditDialog open={isDialogOpen} $minWidth="60em" $maxWidth="">
@@ -361,7 +387,8 @@ function Edit({
           <form.CancelButton
             onClick={(e) => {
               e.preventDefault();
-              handleClose({ formReset: form.reset });
+              form.reset();
+              closeDialog();
             }}
           />
         </Dialog.Actions>
@@ -383,6 +410,13 @@ export function Stratigraphy({
 
   const projectHorizons = rmsData?.horizons ?? [];
   const projectZones = rmsData?.zones ?? [];
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+  };
+  const openDialog = () => {
+    setIsDialogOpen(true);
+  };
 
   return (
     <>
@@ -416,9 +450,7 @@ export function Stratigraphy({
               ? "RMS project is not open"
               : undefined
         }
-        onClick={() => {
-          setIsDialogOpen(true);
-        }}
+        onClick={openDialog}
       />
 
       <Edit
@@ -426,7 +458,7 @@ export function Stratigraphy({
         projectZones={projectZones}
         projectReadOnly={projectReadOnly}
         isDialogOpen={isDialogOpen}
-        setIsDialogOpen={setIsDialogOpen}
+        closeDialog={closeDialog}
         isRmsProjectOpen={isRmsProjectOpen}
       />
     </>
