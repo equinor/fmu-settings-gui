@@ -50,16 +50,20 @@ cd fmu-settings-cli
 pip install -e ".[dev]"
 ```
 
-These commands clone the code repo and perform an install of the package, including any
-regular and development dependencies. An FMU Settings dependency will initially be
-installed in regular mode, so each of these packages need to be cloned and installed as
-editable in separate steps. The above commands need to be repeated for the rest of the
-packages:
+Since some FMU Settings dependencies are installed in regular mode by default, it is 
+recommended during development to install the main branches of related fmu-settings 
+packages in editable mode. To simplify this process, you can use the provided 
+dev_requirements.txt file, which lists these packages for installation:
 
 - `fmu-settings-api`
-- `fmu-settings-gui`
+- `fmu-settings-cli`
 - `fmu-settings`
 - `fmu-datamodels`
+- `rms-sys`
+
+```shell
+uv pip install -r dev_requirements.txt
+```
 
 Tests for the Python applications are run with the following command:
 

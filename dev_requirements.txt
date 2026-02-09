@@ -5,3 +5,4 @@ fmu-settings-cli @ git+https://github.com/equinor/fmu-settings-cli@main
 
 # Other dependencies
 fmu-datamodels @ git+https://github.com/equinor/fmu-datamodels@main
+rms-sys @ git+https://github.com/equinor/rms-sys@main
