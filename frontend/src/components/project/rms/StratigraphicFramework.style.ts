@@ -74,7 +74,6 @@ export const ZoneItem = styled.div`
 
 export const HorizonItem = styled.div`
   grid-column: 1;
-  margin-right:  ${tokens.spacings.comfortable.medium};
 
   button {
     height: 100%;  
