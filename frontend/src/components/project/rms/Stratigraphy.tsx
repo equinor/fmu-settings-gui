@@ -1,5 +1,4 @@
-import { Dialog, Icon, List } from "@equinor/eds-core-react";
-import { warning_outlined } from "@equinor/eds-icons";
+import { Dialog, List } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -26,13 +25,7 @@ import {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form.tsx";
-import {
-  Banner,
-  EditDialog,
-  PageCode,
-  PageHeader,
-  PageText,
-} from "#styles/common";
+import { EditDialog, PageCode, PageHeader, PageText } from "#styles/common";
 import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
@@ -41,6 +34,7 @@ import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { StratigraphicFramework } from "./StratigraphicFramework";
 import {
   ActionButtonsContainer,
+  OrphanTypesContainer,
   StratigraphyEditorContainer,
 } from "./Stratigraphy.style";
 import { namesNotInReference, useItemHandlers } from "./utils.ts";
@@ -93,7 +87,7 @@ function ConfirmActionDialog({
   );
 }
 
-function OrphanBanner({
+function OrphanWarningBox({
   orphanZoneNames,
   orphanHorizonNames,
 }: {
@@ -101,25 +95,22 @@ function OrphanBanner({
   orphanHorizonNames: string[];
 }) {
   return (
-    <Banner>
-      <Banner.Icon variant="warning">
-        <Icon data={warning_outlined} />
-      </Banner.Icon>
+    <OrphanTypesContainer>
+      <PageText>
+        There are horizons or zones in the project stratigraphy that are no
+        longer available in RMS. They need to be removed before data can be
+        saved.
+      </PageText>
 
-      <div>
-        <PageText>
-          There are zones or horizons in the project stratigraphy that are no
-          longer available in RMS. They need to be removed before data can be
-          saved.
-        </PageText>
-
-        <List>
-          <List.Item>
-            {[...orphanHorizonNames, ...orphanZoneNames].join(", ")}
-          </List.Item>
-        </List>
-      </div>
-    </Banner>
+      <List>
+        {orphanHorizonNames.length > 0 && (
+          <List.Item>{orphanHorizonNames.join(", ")}</List.Item>
+        )}
+        {orphanZoneNames.length > 0 && (
+          <List.Item>{orphanZoneNames.join(", ")}</List.Item>
+        )}
+      </List>
+    </OrphanTypesContainer>
   );
 }
 
@@ -184,18 +175,11 @@ function StratigraphyEditor({
     orphanHorizonNames.length > 0 || orphanZoneNames.length > 0;
 
   form.setErrorMap({
-    onChange: hasOrphans ? ["Orphan zones or horizons present"] : undefined,
+    onChange: hasOrphans ? ["Orphan horizons or zones present"] : undefined,
   });
 
   return (
     <>
-      {hasOrphans && (
-        <OrphanBanner
-          orphanZoneNames={orphanZoneNames}
-          orphanHorizonNames={orphanHorizonNames}
-        />
-      )}
-
       <StratigraphyEditorContainer>
         <div>
           <PageHeader $variant="h4">Project stratigraphy</PageHeader>
@@ -212,6 +196,13 @@ function StratigraphyEditor({
               removeHorizon(horizon);
             }}
           />
+
+          {hasOrphans && (
+            <OrphanWarningBox
+              orphanZoneNames={orphanZoneNames}
+              orphanHorizonNames={orphanHorizonNames}
+            />
+          )}
 
           <ActionButtonsContainer>
             <GeneralButton
