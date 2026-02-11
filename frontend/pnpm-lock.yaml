@@ -28,7 +28,7 @@ importers:
         version: 0.9.2
       '@hey-api/client-axios':
         specifier: ^0.7.1
-        version: 0.7.1(@hey-api/openapi-ts@0.66.7(typescript@5.8.3))(axios@1.13.2)
+        version: 0.7.1(@hey-api/openapi-ts@0.66.7(typescript@5.8.3))(axios@1.13.5)
       '@tanstack/react-form':
         specifier: ^1.23.5
         version: 1.23.5(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -42,8 +42,8 @@ importers:
         specifier: ^1.120.3
         version: 1.120.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       axios:
-        specifier: ^1.13.2
-        version: 1.13.2
+        specifier: ^1.13.5
+        version: 1.13.5
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -1633,8 +1633,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios@1.13.2:
-    resolution: {integrity: sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==}
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   babel-dead-code-elimination@1.0.10:
     resolution: {integrity: sha512-DV5bdJZTzZ0zn0DC24v3jD7Mnidh6xhKa4GfKCbq3sfW8kaWhDdZjP3i81geA8T33tdYqWKw4D3fVv0CwEgKVA==}
@@ -3151,10 +3151,10 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@hey-api/client-axios@0.7.1(@hey-api/openapi-ts@0.66.7(typescript@5.8.3))(axios@1.13.2)':
+  '@hey-api/client-axios@0.7.1(@hey-api/openapi-ts@0.66.7(typescript@5.8.3))(axios@1.13.5)':
     dependencies:
       '@hey-api/openapi-ts': 0.66.7(typescript@5.8.3)
-      axios: 1.13.2
+      axios: 1.13.5
 
   '@hey-api/json-schema-ref-parser@1.0.5':
     dependencies:
@@ -4655,7 +4655,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios@1.13.2:
+  axios@1.13.5:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
