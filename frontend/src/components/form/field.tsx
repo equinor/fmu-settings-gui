@@ -6,7 +6,7 @@ import {
 } from "@equinor/eds-core-react";
 import { error_filled } from "@equinor/eds-icons";
 import { ChangeEvent, Dispatch, SetStateAction, useEffect } from "react";
-import z from "zod/v4";
+import z from "zod";
 
 import { useFieldContext } from "#utils/form";
 import { ValidatorProps } from "#utils/validator";
