@@ -1,5 +1,10 @@
-import { AnyFieldApi, createFormHookContexts } from "@tanstack/react-form";
+import {
+  AnyFieldApi,
+  AnyFormApi,
+  createFormHookContexts,
+} from "@tanstack/react-form";
 
+import { Smda } from "#client";
 import { OptionProps } from "#components/form/field";
 import { IdentifierUuidType, NameUuidType } from "./model";
 
@@ -63,6 +68,54 @@ export function handleNameUuidListOperation(
         .sort((a, b) => b - a)
         .map((idx) => {
           fieldContext.removeValue(idx);
+        });
+    }
+  }
+}
+
+/**
+ * Adds or removes a name-uuid value to a list for the specified field, using
+ * the form context. The value can be a single value or an array of values.
+ * Only adds a value if it doesn't already exist in the list, determined by its
+ * uuid sub-value. Only forms with data of type Smda is supported.
+ * @param formContext The formApi.
+ * @param operation "addition" or "removal".
+ * @param fieldName The field name.
+ * @param value A single name-uuid value or an array of such values.
+ */
+export function handleNameUuidListOperationOnForm(
+  // fieldContext: AnyFieldApi,
+  formContext: AnyFormApi,
+  operation: ListOperation,
+  fieldName: keyof Smda,
+  value: NameUuidType | Array<NameUuidType>,
+) {
+  const valueList = Array.isArray(value) ? value : [value];
+  const fieldValue = formContext.getFieldValue(
+    fieldName,
+  ) as Array<NameUuidType>;
+
+  if (operation === "addition") {
+    valueList.map((value) => {
+      const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
+      if (idx < 0) {
+        formContext.pushFieldValue(fieldName as never, value);
+      }
+    });
+  } else {
+    const indexes: Array<number> = [];
+    valueList.map((value) => {
+      const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
+      if (idx >= 0) {
+        indexes.push(idx);
+      }
+    });
+    if (indexes.length > 0) {
+      // Remove elements in descending index order to avoid index shifting
+      indexes
+        .sort((a, b) => b - a)
+        .map((idx) => {
+          void formContext.removeFieldValue(fieldName as never, idx);
         });
     }
   }

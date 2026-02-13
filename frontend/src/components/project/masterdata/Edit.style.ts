@@ -1,7 +1,7 @@
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-import { InfoBox, WarningBox } from "#styles/common";
+import { GenericBox, WarningBox } from "#styles/common";
 
 export const FieldsContainer = styled.div`
   width: 900px;
@@ -21,10 +21,10 @@ export const FieldsContainer = styled.div`
   }
 `;
 
-export const ItemsContainer = styled(InfoBox)`
+export const ItemsContainer = styled(GenericBox)`
   margin-bottom: 0;
 
-  & > div:not(:last-of-type){
+  & > div:not(:last-of-type) {
     margin-bottom: ${tokens.spacings.comfortable.medium};
   }
 `;
