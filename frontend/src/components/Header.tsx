@@ -170,7 +170,9 @@ export function Header() {
           >
             <FmuLogo src={fmuLogo} />
           </Button>
-          <Typography variant="h1_bold">FMU Settings</Typography>
+          <Typography style={{ marginRight: "16px", whiteSpace: "nowrap" }}>
+            FMU Settings
+          </Typography>
         </TopBar.Header>
         <TopBar.Actions>
           <FeedbackDialog />
