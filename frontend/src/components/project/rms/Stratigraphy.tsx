@@ -66,11 +66,13 @@ function ConfirmActionDialog({
       <Dialog.Header>Confirm action</Dialog.Header>
 
       <Dialog.CustomContent>
-        {confirmAction === "add"
-          ? "This will add all available stratigraphy to the project."
-          : "This will remove all stratigraphy from the project."}
-        <br />
-        Do you wish to continue?
+        <PageText>
+          {confirmAction === "add"
+            ? "This will add all available stratigraphy to the project."
+            : "This will remove all stratigraphy from the project."}
+        </PageText>
+
+        <PageText $marginBottom="0">Do you want to continue? </PageText>
       </Dialog.CustomContent>
 
       <Dialog.Actions>
@@ -304,7 +306,10 @@ function Edit({
         toast.error(message);
       }
     },
-    meta: { errorPrefix: "Error updating project stratigraphy" },
+    meta: {
+      errorPrefix: "Error updating project stratigraphy",
+      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
+    },
   });
 
   const form = useAppForm({

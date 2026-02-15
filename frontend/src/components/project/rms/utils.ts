@@ -35,10 +35,8 @@ export const namesNotInReference = <T extends ItemType>(
   items: T[],
   referenceList: T[],
 ) => {
-  const referenceNames = new Set(referenceList.map((item) => item.name));
-
   return items
-    .filter((item) => !referenceNames.has(item.name))
+    .filter((item) => !referenceList.find((i) => i.name === item.name))
     .map((item) => item.name);
 };
 
