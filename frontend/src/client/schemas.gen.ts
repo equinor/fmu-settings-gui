@@ -742,6 +742,31 @@ export const RmsProjectPathsResultSchema = {
     description: 'List of RMS project paths within the FMU project.'
 } as const;
 
+export const RmsStratigraphicFrameworkSchema = {
+    properties: {
+        zones: {
+            items: {
+                '$ref': '#/components/schemas/RmsStratigraphicZone'
+            },
+            type: 'array',
+            title: 'Zones',
+            description: 'List of RMS stratigraphic zones.'
+        },
+        horizons: {
+            items: {
+                '$ref': '#/components/schemas/RmsHorizon'
+            },
+            type: 'array',
+            title: 'Horizons',
+            description: 'List of RMS horizons.'
+        }
+    },
+    type: 'object',
+    required: ['zones', 'horizons'],
+    title: 'RmsStratigraphicFramework',
+    description: 'RMS stratigraphic framework consisting of zones and horizons.'
+} as const;
+
 export const RmsStratigraphicZoneSchema = {
     properties: {
         name: {

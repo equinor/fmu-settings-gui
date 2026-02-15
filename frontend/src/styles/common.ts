@@ -1,4 +1,10 @@
-import { Chip, Dialog, List, Typography } from "@equinor/eds-core-react";
+import {
+  Chip,
+  Dialog,
+  Banner as EdsBanner,
+  List,
+  Typography,
+} from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
@@ -44,6 +50,11 @@ export const GenericBox = styled.div`
   border-radius: ${tokens.shape.corners.borderRadius};
   background: ${tokens.colors.ui.background__light.hex};
   color: ${tokens.colors.text.static_icons__secondary.hex};
+`;
+
+export const GenericInnerBox = styled(GenericBox)`
+  margin-bottom: 0;
+  background: ${tokens.colors.ui.background__default.hex};
 `;
 
 export const InfoBox = styled(GenericBox)`
@@ -104,11 +115,29 @@ export const EditDialog = styled(Dialog).attrs<{
   width: 100%;
   
   #eds-dialog-customcontent {
+    min-height: auto;
     padding: ${tokens.spacings.comfortable.medium};
     padding-bottom: ${tokens.spacings.comfortable.x_large};
   }
 
   button + button {
     margin-left: ${tokens.spacings.comfortable.small};
+  }
+`;
+
+export const Banner = styled(EdsBanner).attrs<{
+  $marginBottom?: string;
+}>((props) => ({
+  style: {
+    marginBottom: props.$marginBottom ?? tokens.spacings.comfortable.medium,
+  },
+}))`
+  border: solid 1px ${tokens.colors.ui.background__medium.hex};
+  border-radius: ${tokens.shape.corners.borderRadius};
+  box-shadow: none;
+  /* Adjust elements and ensure clean border corners */
+  [class*=Banner__Content],
+  [class*=Banner__NonMarginDivider] {
+    background: none;
   }
 `;
