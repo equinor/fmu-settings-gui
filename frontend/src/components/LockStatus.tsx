@@ -11,8 +11,8 @@ import {
   projectPostLockAcquireMutation,
 } from "#client/@tanstack/react-query.gen";
 import { LockInfo, LockStatus } from "#client/types.gen";
+import { Banner } from "#styles/common";
 import { displayTimestamp } from "#utils/datetime";
-import { LockStatusBanner as Banner } from "./LockStatus.style";
 
 function EnableEditingButton({ lockStatus }: { lockStatus?: LockStatus }) {
   const queryClient = useQueryClient();

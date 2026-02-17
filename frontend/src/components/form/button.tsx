@@ -11,11 +11,12 @@ type GeneralButtonProps = {
   disabled?: boolean;
   tooltipText?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-} & Pick<ButtonProps, "variant" | "type">;
+} & Pick<ButtonProps, "variant" | "color" | "type">;
 
 export function GeneralButton({
   type = "button",
   variant,
+  color,
   label,
   disabled,
   isPending,
@@ -28,6 +29,7 @@ export function GeneralButton({
         type={type}
         variant={variant}
         aria-disabled={disabled}
+        color={color}
         onClick={
           disabled
             ? (e) => {
