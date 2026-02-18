@@ -11,7 +11,7 @@ import {
   PageText,
 } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
-
+import { LockExpireDialog } from "#components/LockExpireDialog";
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
@@ -66,7 +66,10 @@ function RouteComponent() {
       </PageText>
 
       {project.data ? (
-        <ProjectInfoBox projectData={project.data} />
+        <>
+          <ProjectInfoBox projectData={project.data} />
+          <LockExpireDialog />
+        </>
       ) : (
         <>
           <PageText>No project selected</PageText>
