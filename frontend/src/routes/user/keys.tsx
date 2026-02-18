@@ -103,29 +103,40 @@ function Content() {
 
       <PageText>
         An SMDA subscription key is needed for querying the{" "}
-        <a href="https://smda.equinor.com/" target="_blank" rel="noreferrer">
+        <Typography
+          link
+          href="https://smda.equinor.com/"
+          target="_blank"
+          rel="noreferrer"
+        >
           SMDA
-        </a>{" "}
+        </Typography>{" "}
         API. This key can be created as follows:
       </PageText>
 
       <Typography as="ol">
         <li>
           Go to the{" "}
-          <a href="https://api.equinor.com/" target="_blank" rel="noreferrer">
+          <Typography
+            link
+            href="https://api.equinor.com/"
+            target="_blank"
+            rel="noreferrer"
+          >
             Equinor API portal
-          </a>{" "}
+          </Typography>{" "}
           and sign in
         </li>
         <li>
           Go to the{" "}
-          <a
+          <Typography
+            link
             href="https://api.equinor.com/product#product=smda"
             target="_blank"
             rel="noreferrer"
           >
             SMDA product page
-          </a>
+          </Typography>
         </li>
         <li>
           Subscribe to the API. The subscription name can be given as
