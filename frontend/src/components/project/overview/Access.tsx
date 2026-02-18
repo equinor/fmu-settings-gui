@@ -257,15 +257,15 @@ export function EditableAccessInfo({
 
       <PageText>
         Read more about access control in the{" "}
-
         <Typography
-              link
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://doc-sumo-doc-prod.radix.equinor.com/documentation/access_control"
-            >
+          link
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://doc-sumo-doc-prod.radix.equinor.com/documentation/access_control"
+        >
           Sumo documentation
-        </Typography>     
+        </Typography>
+        .
       </PageText>
 
       {accessData ? (
