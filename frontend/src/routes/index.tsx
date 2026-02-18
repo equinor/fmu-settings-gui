@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import type { FmuProject } from "#client";
 import { TaskList } from "#components/home/TaskList";
+import { LockExpireDialog } from "#components/LockExpireDialog";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
 import {
@@ -11,7 +12,6 @@ import {
   PageText,
 } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
-
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
@@ -69,6 +69,7 @@ function RouteComponent() {
         <>
           <ProjectInfoBox projectData={project.data} />
           <TaskList />
+          <LockExpireDialog />
         </>
       ) : (
         <>
