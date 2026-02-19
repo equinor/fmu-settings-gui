@@ -8,6 +8,10 @@ import {
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
+export const PageContainer = styled.div`
+  max-width: 55em;
+`;
+
 export const PageHeader = styled(Typography).attrs<{
   $variant?: string;
   $marginBottom?: string;

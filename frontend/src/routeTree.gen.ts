@@ -16,6 +16,7 @@ import { Route as ProjectIndexImport } from "./routes/project/index";
 import { Route as UserKeysImport } from "./routes/user/keys";
 import { Route as ProjectRmsImport } from "./routes/project/rms";
 import { Route as ProjectMasterdataImport } from "./routes/project/masterdata";
+import { Route as ProjectHistoryImport } from "./routes/project/history";
 
 // Create/Update Routes
 
@@ -49,6 +50,12 @@ const ProjectMasterdataRoute = ProjectMasterdataImport.update({
   getParentRoute: () => rootRoute,
 } as any);
 
+const ProjectHistoryRoute = ProjectHistoryImport.update({
+  id: "/project/history",
+  path: "/project/history",
+  getParentRoute: () => rootRoute,
+} as any);
+
 // Populate the FileRoutesByPath interface
 
 declare module "@tanstack/react-router" {
@@ -58,6 +65,13 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/";
       preLoaderRoute: typeof IndexImport;
+      parentRoute: typeof rootRoute;
+    };
+    "/project/history": {
+      id: "/project/history";
+      path: "/project/history";
+      fullPath: "/project/history";
+      preLoaderRoute: typeof ProjectHistoryImport;
       parentRoute: typeof rootRoute;
     };
     "/project/masterdata": {
@@ -95,6 +109,7 @@ declare module "@tanstack/react-router" {
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRoute;
   "/user/keys": typeof UserKeysRoute;
@@ -103,6 +118,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRoute;
   "/user/keys": typeof UserKeysRoute;
@@ -112,6 +128,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
+  "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRoute;
   "/user/keys": typeof UserKeysRoute;
@@ -122,15 +139,23 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/project/history"
     | "/project/masterdata"
     | "/project/rms"
     | "/user/keys"
     | "/project";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/project/masterdata" | "/project/rms" | "/user/keys" | "/project";
+  to:
+    | "/"
+    | "/project/history"
+    | "/project/masterdata"
+    | "/project/rms"
+    | "/user/keys"
+    | "/project";
   id:
     | "__root__"
     | "/"
+    | "/project/history"
     | "/project/masterdata"
     | "/project/rms"
     | "/user/keys"
@@ -140,6 +165,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  ProjectHistoryRoute: typeof ProjectHistoryRoute;
   ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
   ProjectRmsRoute: typeof ProjectRmsRoute;
   UserKeysRoute: typeof UserKeysRoute;
@@ -148,6 +174,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProjectHistoryRoute: ProjectHistoryRoute,
   ProjectMasterdataRoute: ProjectMasterdataRoute,
   ProjectRmsRoute: ProjectRmsRoute,
   UserKeysRoute: UserKeysRoute,
@@ -165,6 +192,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/project/history",
         "/project/masterdata",
         "/project/rms",
         "/user/keys",
@@ -173,6 +201,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/project/history": {
+      "filePath": "project/history.tsx"
     },
     "/project/masterdata": {
       "filePath": "project/masterdata.tsx"

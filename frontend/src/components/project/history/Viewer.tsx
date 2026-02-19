@@ -1,0 +1,530 @@
+import { Autocomplete, Button, Dialog } from "@equinor/eds-core-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+
+import {
+  projectGetCacheDiffOptions,
+  projectGetCacheDiffQueryKey,
+  projectGetCacheOptions,
+  projectGetCacheQueryKey,
+  projectGetProjectQueryKey,
+  projectPostCacheRestoreMutation,
+} from "#client/@tanstack/react-query.gen";
+import type {
+  CacheResource,
+  ListFieldDiff,
+  ListUpdatedEntry,
+  ScalarFieldDiff,
+} from "#client/types.gen";
+import { EditDialog, GenericInnerBox, PageText } from "#styles/common";
+import { ReadableValue } from "./ReadableValue";
+import type { CacheEntry } from "./types";
+import {
+  formatCacheDateTime,
+  formatFieldPath,
+  formatInlineValue,
+  getListItemKey,
+  getScalarDiffKind,
+  getSnapshotLabel,
+  isListFieldDiff,
+  RESOURCE_LABELS,
+  RESOURCE_OPTIONS,
+} from "./utils";
+import {
+  CacheInfoBox,
+  CardStack,
+  ChangeValueGrid,
+  DiffDialogContent,
+  DiffFieldHeader,
+  DiffGroup,
+  type DiffKind,
+  DiffLegend,
+  ValuePanel,
+  ViewerContainer,
+} from "./Viewer.style";
+
+function ListFieldGroup({
+  kind,
+  title,
+  values,
+}: {
+  kind: DiffKind;
+  title: string;
+  values: Array<Record<string, unknown>>;
+}) {
+  if (values.length === 0) {
+    return null;
+  }
+
+  return (
+    <DiffGroup $kind={kind}>
+      <DiffFieldHeader>
+        <strong>
+          {title} ({String(values.length)})
+        </strong>
+      </DiffFieldHeader>
+
+      <CardStack>
+        {values.map((item, idx) => (
+          <ValuePanel key={`${title}-${String(idx)}-${getListItemKey(item)}`}>
+            <ReadableValue value={item} />
+          </ValuePanel>
+        ))}
+      </CardStack>
+    </DiffGroup>
+  );
+}
+
+function UpdatedFieldGroup({ updated }: { updated: Array<ListUpdatedEntry> }) {
+  if (updated.length === 0) {
+    return null;
+  }
+
+  return (
+    <DiffGroup $kind="updated">
+      <DiffFieldHeader>
+        <strong>Updated ({String(updated.length)})</strong>
+      </DiffFieldHeader>
+
+      <CardStack>
+        {updated.map((item, idx) => (
+          <GenericInnerBox
+            key={`updated-${String(idx)}-${formatInlineValue(item.key)}`}
+          >
+            <ChangeValueGrid>
+              <ValuePanel>
+                <strong>Before restore</strong>
+                <ReadableValue value={item.before} />
+              </ValuePanel>
+              <ValuePanel>
+                <strong>After restore</strong>
+                <ReadableValue value={item.after} />
+              </ValuePanel>
+            </ChangeValueGrid>
+          </GenericInnerBox>
+        ))}
+      </CardStack>
+    </DiffGroup>
+  );
+}
+
+function DiffEntryCard({ diff }: { diff: ScalarFieldDiff | ListFieldDiff }) {
+  if (isListFieldDiff(diff)) {
+    return (
+      <GenericInnerBox>
+        <DiffFieldHeader>
+          <strong>{formatFieldPath(diff.field_path)}</strong>
+        </DiffFieldHeader>
+
+        <CardStack>
+          <ListFieldGroup kind="added" title="Added" values={diff.added} />
+          <ListFieldGroup
+            kind="removed"
+            title="Removed"
+            values={diff.removed}
+          />
+          <UpdatedFieldGroup updated={diff.updated} />
+        </CardStack>
+      </GenericInnerBox>
+    );
+  }
+
+  const kind = getScalarDiffKind(diff);
+
+  return (
+    <GenericInnerBox>
+      <DiffFieldHeader>
+        <strong>{formatFieldPath(diff.field_path)}</strong>
+      </DiffFieldHeader>
+
+      <DiffGroup $kind={kind}>
+        <DiffFieldHeader>
+          <strong>{kind.charAt(0).toUpperCase() + kind.slice(1)} (1)</strong>
+        </DiffFieldHeader>
+
+        <ChangeValueGrid>
+          <ValuePanel>
+            <strong>Before restore</strong>
+            <ReadableValue value={diff.before} />
+          </ValuePanel>
+          <ValuePanel>
+            <strong>After restore</strong>
+            <ReadableValue value={diff.after} />
+          </ValuePanel>
+        </ChangeValueGrid>
+      </DiffGroup>
+    </GenericInnerBox>
+  );
+}
+
+function CacheRow({
+  entry,
+  isSelected,
+  onViewDetails,
+  onRestore,
+  restoreDisabled,
+}: {
+  entry: CacheEntry;
+  isSelected: boolean;
+  onViewDetails: (cache: string) => void;
+  onRestore: (cache: string) => void;
+  restoreDisabled: boolean;
+}) {
+  return (
+    <CacheInfoBox $selected={isSelected} $isAutoBackup={entry.isAutoBackup}>
+      <div>
+        <div>
+          <strong>{entry.label}</strong>
+        </div>
+        <div style={{ marginTop: "0.5em" }}>{entry.dateLabel}</div>
+        <div style={{ marginTop: "0.25em" }}>{entry.timeLabel}</div>
+      </div>
+
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            onViewDetails(entry.cacheId);
+          }}
+        >
+          View details
+        </Button>
+        <Button
+          disabled={restoreDisabled}
+          onClick={() => {
+            onRestore(entry.cacheId);
+          }}
+        >
+          Restore
+        </Button>
+      </div>
+    </CacheInfoBox>
+  );
+}
+
+export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
+  const queryClient = useQueryClient();
+  const [resource, setResource] = useState<CacheResource>("config.json");
+  const [selectedCacheId, setSelectedCacheId] = useState<string | null>(null);
+  const [isDiffDialogOpen, setIsDiffDialogOpen] = useState(false);
+  const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+  const [lastRestoredCacheId, setLastRestoredCacheId] = useState<string | null>(
+    null,
+  );
+
+  const cachesQuery = useQuery({
+    ...projectGetCacheOptions({ query: { resource } }),
+    meta: { errorPrefix: "Error loading cache history" },
+  });
+
+  const allCaches: string[] = useMemo(
+    () => [...(cachesQuery.data?.revisions ?? [])].reverse(),
+    [cachesQuery.data?.revisions],
+  );
+
+  const cacheEntries = useMemo<CacheEntry[]>(
+    () =>
+      allCaches.map((cacheId, index) => {
+        const { dateLabel, timeLabel } = formatCacheDateTime(cacheId);
+        const isAutoBackup = lastRestoredCacheId !== null && index === 0;
+
+        return {
+          cacheId,
+          label: isAutoBackup ? "Pre-restore" : getSnapshotLabel(index),
+          dateLabel,
+          timeLabel,
+          isAutoBackup,
+        };
+      }),
+    [allCaches, lastRestoredCacheId],
+  );
+
+  const selectedCacheEntry = cacheEntries.find(
+    (entry) => entry.cacheId === selectedCacheId,
+  );
+
+  useEffect(() => {
+    if (allCaches.length === 0) {
+      setSelectedCacheId(null);
+
+      return;
+    }
+
+    if (selectedCacheId === null || !allCaches.includes(selectedCacheId)) {
+      setSelectedCacheId(allCaches[0]);
+    }
+  }, [allCaches, selectedCacheId]);
+
+  const diffQuery = useQuery({
+    ...projectGetCacheDiffOptions({
+      path: { revision_id: selectedCacheId ?? "" },
+      query: { resource },
+    }),
+    enabled: isDiffDialogOpen && selectedCacheId !== null,
+    meta: { errorPrefix: "Error loading cache details" },
+  });
+
+  const restoreMutation = useMutation({
+    ...projectPostCacheRestoreMutation(),
+    meta: { errorPrefix: "Error restoring cache" },
+    onSuccess: (_, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetCacheQueryKey({
+          query: { resource: variables.query.resource },
+        }),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetCacheDiffQueryKey({
+          path: { revision_id: variables.path.revision_id },
+          query: { resource: variables.query.resource },
+        }),
+      });
+      toast.info(
+        "Restore successful. An auto-backup of your previous state has been saved at the top of the list.",
+      );
+      setLastRestoredCacheId(variables.path.revision_id);
+      setIsRestoreDialogOpen(false);
+      setSelectedCacheId(null);
+    },
+  });
+
+  function openDiffDialog(cacheId: string) {
+    setSelectedCacheId(cacheId);
+    setIsDiffDialogOpen(true);
+  }
+
+  function openRestoreDialog(cacheId: string) {
+    setSelectedCacheId(cacheId);
+    setIsRestoreDialogOpen(true);
+  }
+
+  function openRestoreDialogFromDiff() {
+    setIsDiffDialogOpen(false);
+    if (selectedCacheId) {
+      openRestoreDialog(selectedCacheId);
+    }
+  }
+
+  function restoreSelectedCache() {
+    if (!selectedCacheId) {
+      return;
+    }
+
+    restoreMutation.mutate({
+      path: { revision_id: selectedCacheId },
+      query: { resource },
+    });
+  }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset pre-restore state when resource changes.
+  useEffect(() => {
+    setLastRestoredCacheId(null);
+  }, [resource]);
+
+  return (
+    <ViewerContainer>
+      <PageText $marginBottom="0">
+        Choose a resource to view its snapshots, listed from newest to oldest.
+      </PageText>
+      <PageText $marginBottom="0">
+        Use "View details" to see what changed between the current version and a
+        snapshot.
+      </PageText>
+      {projectReadOnly && (
+        <PageText $marginBottom="0">
+          Project is read-only. Restore is disabled until the project is opened
+          for editing.
+        </PageText>
+      )}
+
+      <div style={{ maxWidth: "15em" }}>
+        <Autocomplete
+          label="Resource"
+          optionLabel={(option) => option.label}
+          options={RESOURCE_OPTIONS.map((option) => ({
+            value: option,
+            label: RESOURCE_LABELS[option],
+          }))}
+          selectedOptions={[
+            {
+              value: resource,
+              label: RESOURCE_LABELS[resource],
+            },
+          ]}
+          onOptionsChange={(changes) => {
+            if (changes.selectedItems.length > 0) {
+              setResource(changes.selectedItems[0].value);
+            }
+          }}
+          autoWidth
+        />
+      </div>
+
+      {cachesQuery.isPending && <PageText>Loading caches...</PageText>}
+
+      {!cachesQuery.isPending && allCaches.length === 0 && (
+        <PageText>No caches found for {resource}.</PageText>
+      )}
+
+      {cacheEntries.length > 0 && (
+        <CardStack>
+          {cacheEntries.map((entry) => (
+            <CacheRow
+              key={entry.cacheId}
+              entry={entry}
+              isSelected={selectedCacheId === entry.cacheId}
+              onViewDetails={openDiffDialog}
+              onRestore={openRestoreDialog}
+              restoreDisabled={projectReadOnly || restoreMutation.isPending}
+            />
+          ))}
+        </CardStack>
+      )}
+
+      <EditDialog
+        open={isDiffDialogOpen}
+        $maxWidth="56em"
+        $extraPaddingBottom={false}
+      >
+        <Dialog.Header>
+          <Dialog.Title>
+            {RESOURCE_LABELS[resource]} -{" "}
+            {selectedCacheEntry?.dateLabel ?? "Unknown date"} at{" "}
+            {selectedCacheEntry?.timeLabel ?? "Unknown time"}
+          </Dialog.Title>
+        </Dialog.Header>
+
+        <Dialog.CustomContent>
+          <DiffDialogContent>
+            <DiffLegend>
+              <PageText $marginBottom="0.4rem">
+                These changes show what will happen if you restore this
+                snapshot.
+              </PageText>
+              <PageText $marginBottom="0.3rem">
+                <strong>Added:</strong> values that will be added to the current
+                resource.
+              </PageText>
+              <PageText $marginBottom="0.3rem">
+                <strong>Removed:</strong> values that will be removed from the
+                current resource.
+              </PageText>
+              <PageText $marginBottom="0">
+                <strong>Updated:</strong> values that will be replaced in the
+                current resource.
+              </PageText>
+            </DiffLegend>
+
+            {diffQuery.isPending && (
+              <PageText $marginBottom="0">Loading differences...</PageText>
+            )}
+
+            {diffQuery.isError && (
+              <PageText $marginBottom="0">
+                Unable to load differences for this cache.
+              </PageText>
+            )}
+
+            {diffQuery.data?.length === 0 && (
+              <PageText $marginBottom="0">
+                No differences found between current state and this snapshot.
+              </PageText>
+            )}
+
+            <CardStack>
+              {diffQuery.data?.map((diff, index) => (
+                <DiffEntryCard
+                  key={`${diff.field_path}-${String(index)}-${isListFieldDiff(diff) ? "list" : "scalar"}`}
+                  diff={diff}
+                />
+              ))}
+            </CardStack>
+          </DiffDialogContent>
+        </Dialog.CustomContent>
+
+        <Dialog.Actions>
+          <Button
+            disabled={
+              projectReadOnly ||
+              restoreMutation.isPending ||
+              selectedCacheId === null
+            }
+            onClick={openRestoreDialogFromDiff}
+          >
+            Restore
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setIsDiffDialogOpen(false);
+            }}
+          >
+            Close
+          </Button>
+        </Dialog.Actions>
+      </EditDialog>
+
+      <EditDialog
+        open={isRestoreDialogOpen}
+        $maxWidth="36em"
+        $extraPaddingBottom={false}
+      >
+        <Dialog.Header>
+          <Dialog.Title>Restore from snapshot</Dialog.Title>
+        </Dialog.Header>
+
+        <Dialog.Content>
+          <PageText>
+            This will overwrite the current
+            <span className="emphasis"> {RESOURCE_LABELS[resource]}</span> with
+            <span className="emphasis">
+              {" "}
+              {selectedCacheEntry?.label ?? "this snapshot"}
+            </span>
+            .
+          </PageText>
+          <GenericInnerBox>
+            <div>
+              <div>
+                <strong>
+                  {selectedCacheEntry?.label ?? "Selected snapshot"}
+                </strong>
+              </div>
+              <div style={{ marginTop: "0.5em" }}>
+                {selectedCacheEntry?.dateLabel ?? "Unknown date"}
+              </div>
+              <div style={{ marginTop: "0.25em" }}>
+                {selectedCacheEntry?.timeLabel ?? "Unknown time"}
+              </div>
+            </div>
+          </GenericInnerBox>
+        </Dialog.Content>
+
+        <Dialog.Actions>
+          <Button
+            disabled={
+              projectReadOnly ||
+              restoreMutation.isPending ||
+              selectedCacheId === null
+            }
+            onClick={restoreSelectedCache}
+          >
+            {restoreMutation.isPending ? "Restoring..." : "Restore"}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setIsRestoreDialogOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+        </Dialog.Actions>
+      </EditDialog>
+    </ViewerContainer>
+  );
+}
