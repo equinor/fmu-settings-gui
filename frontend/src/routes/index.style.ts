@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export const AppContainer = styled.div`
   display: grid;
-  grid-template-columns: min-content auto;
+  grid-template-columns: auto 1fr;
   grid-template-rows: min-content auto;
   grid-template-areas: 
     "header header"
@@ -22,7 +22,6 @@ export const AppContainer = styled.div`
   .content {
     grid-area: content;
     overflow: scroll;
-    max-width: 55em;
     padding: ${tokens.spacings.comfortable.large};
   }
 `;

@@ -98,6 +98,11 @@ export type CountryItem = {
 };
 
 /**
+ * The system or application data is being mapping to or from.
+ */
+export type DataSystem = 'rms' | 'smda' | 'fmu';
+
+/**
  * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
  * known to SMDA.
  */
@@ -158,6 +163,33 @@ export type HttpValidationError = {
 };
 
 /**
+ * Diff entry for list fields with per-item changes.
+ */
+export type ListFieldDiff = {
+    field_path: string;
+    added: Array<{
+        [key: string]: unknown;
+    }>;
+    removed: Array<{
+        [key: string]: unknown;
+    }>;
+    updated: Array<ListUpdatedEntry>;
+};
+
+/**
+ * Before and after values for an updated list item.
+ */
+export type ListUpdatedEntry = {
+    key: unknown;
+    before: {
+        [key: string]: unknown;
+    };
+    after: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Represents a .fmu directory lock file.
  */
 export type LockInfo = {
@@ -206,6 +238,18 @@ export type LockStatus = {
      */
     last_lock_refresh_error?: string | null;
 };
+
+export type MappingGroup = {
+    [key: string]: unknown;
+};
+
+/**
+ * The discriminator used between mapping types.
+ *
+ * Each of these types should have their own mapping class derived from a base
+ * mapping type, e.g. IdentifierMapping.
+ */
+export type MappingType = 'stratigraphy';
 
 /**
  * The ``masterdata`` block contains information related to masterdata.
@@ -261,6 +305,11 @@ export type ProjectConfig = {
     cache_max_revisions?: number;
     rms?: RmsProject | null;
 };
+
+/**
+ * The kind of relation this mapping represents.
+ */
+export type RelationType = 'primary' | 'alias' | 'equivalent';
 
 /**
  * The project coordinate system of an RMS project.
@@ -396,6 +445,15 @@ export type RmsVersion = {
  */
 export type RmsWell = {
     name: string;
+};
+
+/**
+ * Diff entry for non-list fields.
+ */
+export type ScalarFieldDiff = {
+    field_path: string;
+    before: unknown;
+    after: unknown;
 };
 
 /**
@@ -600,6 +658,23 @@ export type StratigraphicUnit = {
 };
 
 /**
+ * Represents a stratigraphy mapping.
+ *
+ * This is a mapping from stratigraphic identifiers (tops, zones, etc.) to official
+ * identifiers in SMDA.
+ */
+export type StratigraphyIdentifierMapping = {
+    source_system: DataSystem;
+    target_system: DataSystem;
+    mapping_type?: 'stratigraphy';
+    relation_type: RelationType;
+    source_id: string;
+    source_uuid?: string | null;
+    target_id: string;
+    target_uuid?: string | null;
+};
+
+/**
  * Known API keys stored in a user config.
  */
 export type UserApiKeys = {
@@ -624,6 +699,10 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -1220,6 +1299,10 @@ export type ProjectPatchRmsData = {
 
 export type ProjectPatchRmsErrors = {
     /**
+     * The RMS version in the project is not supported
+     */
+    400: unknown;
+    /**
      * No active or valid session was found
      */
     401: unknown;
@@ -1504,6 +1587,49 @@ export type ProjectGetCacheRevisionResponses = {
 
 export type ProjectGetCacheRevisionResponse = ProjectGetCacheRevisionResponses[keyof ProjectGetCacheRevisionResponses];
 
+export type ProjectGetCacheDiffData = {
+    body?: never;
+    path: {
+        revision_id: string;
+    };
+    query: {
+        resource: CacheResource;
+    };
+    url: '/api/v1/project/cache/diff/{revision_id}';
+};
+
+export type ProjectGetCacheDiffErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Cache revision not found for the specified resource
+     */
+    404: unknown;
+    /**
+     * Cache revision failed validation or not supported for the specified resource
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetCacheDiffResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<ScalarFieldDiff | ListFieldDiff>;
+};
+
+export type ProjectGetCacheDiffResponse = ProjectGetCacheDiffResponses[keyof ProjectGetCacheDiffResponses];
+
 export type ProjectPostCacheRestoreData = {
     body?: never;
     path: {
@@ -1553,6 +1679,113 @@ export type ProjectPostCacheRestoreResponses = {
 };
 
 export type ProjectPostCacheRestoreResponse = ProjectPostCacheRestoreResponses[keyof ProjectPostCacheRestoreResponses];
+
+export type ProjectGetMappingsData = {
+    body?: never;
+    path: {
+        mapping_type: MappingType;
+        source_system: DataSystem;
+        target_system: DataSystem;
+    };
+    query?: never;
+    url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}';
+};
+
+export type ProjectGetMappingsErrors = {
+    /**
+     * Invalid mapping data or unsupported mapping type
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Mappings resource file not found
+     */
+    404: unknown;
+    /**
+     *
+     * Mappings resource contains invalid content or corrupted JSON.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetMappingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<MappingGroup>;
+};
+
+export type ProjectGetMappingsResponse = ProjectGetMappingsResponses[keyof ProjectGetMappingsResponses];
+
+export type ProjectPutMappingsData = {
+    body: Array<{
+        mapping_type?: 'stratigraphy';
+    } & StratigraphyIdentifierMapping>;
+    path: {
+        mapping_type: MappingType;
+        source_system: DataSystem;
+        target_system: DataSystem;
+    };
+    query?: never;
+    url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}';
+};
+
+export type ProjectPutMappingsErrors = {
+    /**
+     * Invalid mapping data or unsupported mapping type
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Mappings resource file not found
+     */
+    404: unknown;
+    /**
+     *
+     * Mappings resource contains invalid content or corrupted JSON.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPutMappingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPutMappingsResponse = ProjectPutMappingsResponses[keyof ProjectPutMappingsResponses];
 
 export type UserGetUserData = {
     body?: never;
