@@ -12,7 +12,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -84,6 +84,17 @@ function ProjectSelectorForm({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0] as { _id?: string } | undefined;
+
+          return (
+            key?._id === "projectGetCache" ||
+            key?._id === "projectGetCacheRevision" ||
+            key?._id === "projectGetCacheDiff"
+          );
+        },
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),

@@ -22,6 +22,7 @@ export function Sidebar() {
   if (project.status) {
     ProjectSubItems.push({ label: "RMS", to: "/project/rms" });
     ProjectSubItems.push({ label: "Masterdata", to: "/project/masterdata" });
+    ProjectSubItems.push({ label: "History", to: "/project/history" });
   }
 
   return (

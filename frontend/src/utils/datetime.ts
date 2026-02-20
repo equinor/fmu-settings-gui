@@ -3,7 +3,10 @@ export function displayDateTime(datetime: string): string {
   if (parsedTimestamp) {
     const parsedDateTime = new Date(parsedTimestamp);
 
-    return parsedDateTime.toUTCString();
+    return parsedDateTime.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "medium",
+    });
   } else {
     return "(unknown)";
   }
