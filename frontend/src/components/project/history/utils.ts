@@ -3,6 +3,7 @@ import type {
   ListFieldDiff,
   ScalarFieldDiff,
 } from "#client/types.gen";
+import { displayDateTime } from "#utils/datetime";
 import type { DiffKind } from "./Viewer.style";
 
 export const RESOURCE_OPTIONS: CacheResource[] = [
@@ -46,26 +47,13 @@ function parseCacheDate(cacheId: string): Date | null {
   return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}.${ms}Z`);
 }
 
-export function formatCacheDateTime(cacheId: string): {
-  dateLabel: string;
-  timeLabel: string;
-} {
+export function formatCacheDateTime(cacheId: string): string {
   const parsedDate = parseCacheDate(cacheId);
   if (!parsedDate) {
-    return {
-      dateLabel: "Unknown date",
-      timeLabel: "Unknown time",
-    };
+    return "Unknown date";
   }
 
-  return {
-    dateLabel: parsedDate.toLocaleDateString(undefined, {
-      dateStyle: "medium",
-    }),
-    timeLabel: parsedDate.toLocaleTimeString(undefined, {
-      timeStyle: "medium",
-    }),
-  };
+  return displayDateTime(parsedDate.toISOString());
 }
 
 export function formatFieldPath(path: string): string {

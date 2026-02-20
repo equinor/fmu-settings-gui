@@ -161,14 +161,10 @@ function CacheRow({
   entry,
   isSelected,
   onViewDetails,
-  onRestore,
-  restoreDisabled,
 }: {
   entry: CacheEntry;
   isSelected: boolean;
   onViewDetails: (cache: string) => void;
-  onRestore: (cache: string) => void;
-  restoreDisabled: boolean;
 }) {
   return (
     <CacheInfoBox $selected={isSelected} $isAutoBackup={entry.isAutoBackup}>
@@ -176,28 +172,16 @@ function CacheRow({
         <div>
           <strong>{entry.label}</strong>
         </div>
-        <div style={{ marginTop: "0.5em" }}>{entry.dateLabel}</div>
-        <div style={{ marginTop: "0.25em" }}>{entry.timeLabel}</div>
+        <div style={{ marginTop: "0.5em" }}>{entry.dateTimeLabel}</div>
       </div>
 
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <Button
-          variant="outlined"
-          onClick={() => {
-            onViewDetails(entry.cacheId);
-          }}
-        >
-          View details
-        </Button>
-        <Button
-          disabled={restoreDisabled}
-          onClick={() => {
-            onRestore(entry.cacheId);
-          }}
-        >
-          Restore
-        </Button>
-      </div>
+      <Button
+        onClick={() => {
+          onViewDetails(entry.cacheId);
+        }}
+      >
+        View details
+      </Button>
     </CacheInfoBox>
   );
 }
@@ -227,14 +211,14 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
   const cacheEntries = useMemo<CacheEntry[]>(
     () =>
       allCaches.map((cacheId, index) => {
-        const { dateLabel, timeLabel } = formatCacheDateTime(cacheId);
         const isAutoBackup = lastRestoredCacheId !== null && index === 0;
 
         return {
           cacheId,
-          label: isAutoBackup ? "Pre-restore" : getSnapshotLabel(index),
-          dateLabel,
-          timeLabel,
+          label: isAutoBackup
+            ? `${getSnapshotLabel(index)} (pre-restore)`
+            : getSnapshotLabel(index),
+          dateTimeLabel: formatCacheDateTime(cacheId),
           isAutoBackup,
         };
       }),
@@ -344,7 +328,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
       </PageText>
       <PageText $marginBottom="0">
         Use "View details" to see what changed between the current version and a
-        snapshot.
+        snapshot, and to restore from it.
       </PageText>
       {projectReadOnly && (
         <PageText $marginBottom="0">
@@ -396,8 +380,6 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
               entry={entry}
               isSelected={selectedCacheId === entry.cacheId}
               onViewDetails={openDiffDialog}
-              onRestore={openRestoreDialog}
-              restoreDisabled={projectReadOnly || restoreMutation.isPending}
             />
           ))}
         </CardStack>
@@ -411,31 +393,32 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         <Dialog.Header>
           <Dialog.Title>
             {RESOURCE_LABELS[resource]} -{" "}
-            {selectedCacheEntry?.dateLabel ?? "Unknown date"} at{" "}
-            {selectedCacheEntry?.timeLabel ?? "Unknown time"}
+            {selectedCacheEntry?.dateTimeLabel ?? "Unknown date"}
           </Dialog.Title>
         </Dialog.Header>
 
         <Dialog.CustomContent>
           <DiffDialogContent>
-            <DiffLegend>
-              <PageText $marginBottom="0.4rem">
-                These changes show what will happen if you restore this
-                snapshot.
-              </PageText>
-              <PageText $marginBottom="0.3rem">
-                <strong>Added:</strong> values that will be added to the current
-                resource.
-              </PageText>
-              <PageText $marginBottom="0.3rem">
-                <strong>Removed:</strong> values that will be removed from the
-                current resource.
-              </PageText>
-              <PageText $marginBottom="0">
-                <strong>Updated:</strong> values that will be replaced in the
-                current resource.
-              </PageText>
-            </DiffLegend>
+            {diffQuery.data && diffQuery.data.length > 0 && (
+              <DiffLegend>
+                <PageText $marginBottom="0.4rem">
+                  These changes show what will happen if you restore this
+                  snapshot.
+                </PageText>
+                <PageText $marginBottom="0.3rem">
+                  <strong>Added:</strong> values that will be added to the
+                  current resource.
+                </PageText>
+                <PageText $marginBottom="0.3rem">
+                  <strong>Removed:</strong> values that will be removed from the
+                  current resource.
+                </PageText>
+                <PageText $marginBottom="0">
+                  <strong>Updated:</strong> values that will be replaced in the
+                  current resource.
+                </PageText>
+              </DiffLegend>
+            )}
 
             {diffQuery.isPending && (
               <PageText $marginBottom="0">Loading differences...</PageText>
@@ -469,7 +452,9 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
             disabled={
               projectReadOnly ||
               restoreMutation.isPending ||
-              selectedCacheId === null
+              selectedCacheId === null ||
+              diffQuery.isPending ||
+              diffQuery.data?.length === 0
             }
             onClick={openRestoreDialogFromDiff}
           >
@@ -513,10 +498,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
                 </strong>
               </div>
               <div style={{ marginTop: "0.5em" }}>
-                {selectedCacheEntry?.dateLabel ?? "Unknown date"}
-              </div>
-              <div style={{ marginTop: "0.25em" }}>
-                {selectedCacheEntry?.timeLabel ?? "Unknown time"}
+                {selectedCacheEntry?.dateTimeLabel ?? "Unknown date"}
               </div>
             </div>
           </GenericInnerBox>
