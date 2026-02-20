@@ -40,8 +40,7 @@ import {
   responseInterceptorRejected,
   TokenStatus,
 } from "#utils/authentication";
-import { defaultErrorHandling } from "#utils/query";
-import { mutationRetry } from "#utils/query";
+import { defaultErrorHandling, mutationRetry } from "#utils/query";
 import { routeTree } from "./routeTree.gen";
 
 export interface RouterContext {
@@ -183,6 +182,8 @@ export function App() {
           apiTokenStatus.valid ?? false,
           setApiTokenStatus,
           setRequestSessionCreation,
+          msalInstance,
+          setAccessToken,
         ),
       );
       setHasResponseInterceptor(true);
@@ -194,7 +195,13 @@ export function App() {
         setHasResponseInterceptor(false);
       }
     };
-  }, [createSessionMutateAsync, apiToken, apiTokenStatus.valid]);
+  }, [
+    createSessionMutateAsync,
+    apiToken,
+    apiTokenStatus.valid,
+    msalInstance,
+    setAccessToken,
+  ]);
 
   useEffect(() => {
     async function callCreateSessionAsync() {
