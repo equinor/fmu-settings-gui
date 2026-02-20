@@ -1,4 +1,7 @@
-import { IPublicClientApplication } from "@azure/msal-browser";
+import {
+  InteractionRequiredAuthError,
+  IPublicClientApplication,
+} from "@azure/msal-browser";
 import {
   UseMutateAsyncFunction,
   UseMutateFunction,
@@ -7,6 +10,7 @@ import {
   AxiosError,
   AxiosResponse,
   AxiosResponseHeaders,
+  InternalAxiosRequestConfig,
   RawAxiosResponseHeaders,
 } from "axios";
 import { Dispatch, SetStateAction } from "react";
@@ -18,7 +22,9 @@ import {
   SessionPatchAccessTokenData,
   SessionPostSessionData,
   SessionResponse,
+  sessionPatchAccessToken,
 } from "#client";
+import { client } from "#client/client.gen";
 import { ssoScopes } from "#config";
 import { HTTP_STATUS_UNAUTHORIZED } from "./api";
 import {
@@ -141,6 +147,10 @@ export const responseInterceptorFulfilled =
     return response;
   };
 
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retried?: boolean;
+};
+
 export const responseInterceptorRejected =
   (
     apiToken: string,
@@ -148,6 +158,8 @@ export const responseInterceptorRejected =
     apiTokenStatusValid: boolean,
     setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>,
     setRequestSessionCreation: Dispatch<SetStateAction<boolean>>,
+    msalInstance?: IPublicClientApplication,
+    setAccessToken?: Dispatch<SetStateAction<string>>,
   ) =>
   async (error: AxiosError) => {
     if (error.status === HTTP_STATUS_UNAUTHORIZED) {
@@ -159,7 +171,28 @@ export const responseInterceptorRejected =
         if (apiTokenStatusValid) {
           setApiTokenStatus(() => ({}));
         }
-      } else if (!isExternalApi(error.response?.headers)) {
+      } else if (isExternalApi(error.response?.headers)) {
+        const config = error.config as RetryableRequestConfig | undefined;
+        if (msalInstance && config && !config._retried) {
+          config._retried = true;
+          try {
+            const result = await msalInstance.acquireTokenSilent({
+              scopes: ssoScopes,
+            });
+            setAccessToken?.(result.accessToken);
+            await sessionPatchAccessToken({
+              body: { id: "smda_api", key: result.accessToken },
+              throwOnError: true,
+            });
+
+            return await client.instance(config);
+          } catch (tokenError) {
+            if (tokenError instanceof InteractionRequiredAuthError) {
+              void msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
+            }
+          }
+        }
+      } else {
         setRequestSessionCreation(true);
       }
     }
