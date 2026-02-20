@@ -1,4 +1,9 @@
-import { Autocomplete, Button, Dialog } from "@equinor/eds-core-react";
+import {
+  Autocomplete,
+  Button,
+  Dialog,
+  ListItem,
+} from "@equinor/eds-core-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -16,7 +21,12 @@ import type {
   ListUpdatedEntry,
   ScalarFieldDiff,
 } from "#client/types.gen";
-import { EditDialog, GenericInnerBox, PageText } from "#styles/common";
+import {
+  EditDialog,
+  GenericInnerBox,
+  PageList,
+  PageText,
+} from "#styles/common";
 import { ReadableValue } from "./ReadableValue";
 import type { CacheEntry } from "./types";
 import {
@@ -401,22 +411,24 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
           <DiffDialogContent>
             {diffQuery.data && diffQuery.data.length > 0 && (
               <DiffLegend>
-                <PageText $marginBottom="0.4rem">
+                <PageText>
                   These changes show what will happen if you restore this
                   snapshot.
                 </PageText>
-                <PageText $marginBottom="0.3rem">
-                  <strong>Added:</strong> values that will be added to the
-                  current resource.
-                </PageText>
-                <PageText $marginBottom="0.3rem">
-                  <strong>Removed:</strong> values that will be removed from the
-                  current resource.
-                </PageText>
-                <PageText $marginBottom="0">
-                  <strong>Updated:</strong> values that will be replaced in the
-                  current resource.
-                </PageText>
+                <PageList>
+                  <ListItem>
+                    <strong>Added:</strong> Values that will be added to the
+                    current resource
+                  </ListItem>
+                  <ListItem>
+                    <strong>Removed:</strong> Values that will be removed from
+                    the current resource
+                  </ListItem>
+                  <ListItem>
+                    <strong>Updated:</strong> Values that will be replaced in
+                    the current resource
+                  </ListItem>
+                </PageList>
               </DiffLegend>
             )}
 

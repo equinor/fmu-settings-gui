@@ -48,6 +48,10 @@ export const CacheInfoBox = styled(InfoBox)<{
 export const DiffLegend = styled(GenericBox)`
   background: ${tokens.colors.ui.background__info.hex};
   margin-bottom: 0;
+
+  ul {
+    padding-right: 40px;
+  }
 `;
 
 export const DiffDialogContent = styled.div`
