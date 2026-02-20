@@ -6,31 +6,19 @@ import {projectLockTimeoutWarningThreshold} from "#config";
 
 
 import {
-  // projectGetProjectQueryKey,
+  projectGetProjectQueryKey,
   projectPostLockRefreshMutation, 
   projectGetLockStatusQueryKey
 } from "#client/@tanstack/react-query.gen";
-
 import { EditDialog, PageText } from "#styles/common";
 
-type LockStatus = {
-  lock_info?: {
-    expires_at?: string;
-  }
-}
-
-export function LockExpireDialog(
-  {lockStatus,
-
-}: {lockStatus?: LockStatus;
-
-})
+export function LockExpireDialog({lockStatus}: {lockStatus?: ReturnType<typeof useProject>["lockStatus"]})
  {
-  const queryClient = useQueryClient();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [timeUntilExpire, setTimeUntilExpire] = useState<number>(0);
-  const refreshLockMutation = useProjectPostLockRefreshMutation();  // use generated mutation for lock refresh 
-  // const [isExpired, setIsExpired] = useState(false);
+  const queryClient = useQueryClient();
+  const [isExpired, setIsExpired] = useState(timeUntilExpire <= 0);
 
   const lockInfo = project.lockStatus?.lock_info;
   const lockExpireAt = lockInfo?.expires_at
@@ -113,4 +101,4 @@ export function LockExpireDialog(
       </Dialog.Actions>
     </EditDialog>
   );
-}
+};
