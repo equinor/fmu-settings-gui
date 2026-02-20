@@ -7,15 +7,15 @@ export type DiffKind = "added" | "removed" | "updated";
 
 const diffPalette: Record<DiffKind, { background: string; color: string }> = {
   added: {
-    background: "#e8f5e9",
+    background: tokens.colors.interactive.success__highlight.hex,
     color: tokens.colors.interactive.success__resting.hex,
   },
   removed: {
-    background: "#ffebee",
+    background: tokens.colors.ui.background__danger.hex,
     color: tokens.colors.interactive.danger__resting.hex,
   },
   updated: {
-    background: "#e3f2fd",
+    background: tokens.colors.ui.background__info.hex,
     color: tokens.colors.interactive.primary__resting.hex,
   },
 };

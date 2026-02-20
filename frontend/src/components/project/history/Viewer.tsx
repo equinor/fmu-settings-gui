@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 
 import {
   projectGetCacheDiffOptions,
-  projectGetCacheDiffQueryKey,
   projectGetCacheOptions,
   projectGetCacheQueryKey,
   projectGetProjectQueryKey,
@@ -215,6 +214,8 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
 
   const cachesQuery = useQuery({
     ...projectGetCacheOptions({ query: { resource } }),
+    // Cache revisions can change outside this page (after editing config for example)
+    refetchOnMount: "always",
     meta: { errorPrefix: "Error loading cache history" },
   });
 
@@ -262,6 +263,8 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
       query: { resource },
     }),
     enabled: isDiffDialogOpen && selectedCacheId !== null,
+    staleTime: 0, // Force a fresh fetch whenever a diff is opened.
+    refetchOnMount: "always", // Diffs depend on current state, avoid stale dialog data.
     meta: { errorPrefix: "Error loading cache details" },
   });
 
@@ -277,11 +280,20 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
           query: { resource: variables.query.resource },
         }),
       });
+      // Invalidate all diff queries for this resource after a restore.
+      // Restoring from one snapshot changes the current state, so diffs for
+      // every snapshot of the same resource must be recomputed.
       void queryClient.invalidateQueries({
-        queryKey: projectGetCacheDiffQueryKey({
-          path: { revision_id: variables.path.revision_id },
-          query: { resource: variables.query.resource },
-        }),
+        predicate: (query) => {
+          const key = query.queryKey[0] as
+            | { _id?: string; query?: { resource?: unknown } }
+            | undefined;
+
+          return (
+            key?._id === "projectGetCacheDiff" &&
+            key.query?.resource === variables.query.resource
+          );
+        },
       });
       toast.info(
         "Restore successful. An auto-backup of your previous state has been saved at the top of the list.",
@@ -366,9 +378,15 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
 
       {cachesQuery.isPending && <PageText>Loading caches...</PageText>}
 
-      {!cachesQuery.isPending && allCaches.length === 0 && (
-        <PageText>No caches found for {resource}.</PageText>
+      {cachesQuery.isError && (
+        <PageText>Unable to load cache history.</PageText>
       )}
+
+      {!cachesQuery.isPending &&
+        !cachesQuery.isError &&
+        allCaches.length === 0 && (
+          <PageText>No caches found for {resource}.</PageText>
+        )}
 
       {cacheEntries.length > 0 && (
         <CardStack>
