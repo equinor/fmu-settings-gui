@@ -15,7 +15,10 @@ function Content() {
   const projectReadOnly = !(project.lockStatus?.is_lock_acquired ?? false);
 
   return project.status ? (
-    <Viewer projectReadOnly={projectReadOnly} />
+    <Viewer
+      key={project.data?.path ?? "history-no-project"}
+      projectReadOnly={projectReadOnly}
+    />
   ) : (
     <PageText>Project not set.</PageText>
   );

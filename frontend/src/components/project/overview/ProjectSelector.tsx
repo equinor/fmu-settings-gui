@@ -102,6 +102,17 @@ function ProjectSelectorForm({
         }),
       });
       void queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0] as { _id?: string } | undefined;
+
+          return (
+            key?._id === "projectGetCache" ||
+            key?._id === "projectGetCacheRevision" ||
+            key?._id === "projectGetCacheDiff"
+          );
+        },
+      });
+      void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),
       });
       void queryClient.invalidateQueries({
