@@ -370,16 +370,18 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         />
       </div>
 
-      {cachesQuery.isPending && <PageText>Loading caches...</PageText>}
+      {cachesQuery.isPending && <PageText>Loading snapshots...</PageText>}
 
       {cachesQuery.isError && (
-        <PageText>Unable to load cache history.</PageText>
+        <PageText>Unable to load snapshot history.</PageText>
       )}
 
       {!cachesQuery.isPending &&
         !cachesQuery.isError &&
         allCaches.length === 0 && (
-          <PageText>No caches found for {resource}.</PageText>
+          <PageText>
+            No snapshots found for {RESOURCE_LABELS[resource]}.
+          </PageText>
         )}
 
       {cacheEntries.length > 0 && (
