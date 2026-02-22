@@ -5,8 +5,7 @@ import fmuLogo from "#assets/fmu_logo.png";
 import sumoLogo from "#assets/sumo.png";
 import webvizLogo from "#assets/webviz.png";
 import { PageHeader, PageText } from "#styles/common";
-import { ResourceCard, ResourcesContainer } from "./Resources.style";
-import { Logo } from "./Resources.style";
+import { Logo, ResourceCard, ResourcesContainer } from "./Resources.style";
 
 export function Resources() {
   return (

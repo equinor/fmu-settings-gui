@@ -1,4 +1,4 @@
-import z, { ZodString } from "zod";
+import z, { type ZodString } from "zod";
 
 export interface ValidatorProps {
   length?: number;

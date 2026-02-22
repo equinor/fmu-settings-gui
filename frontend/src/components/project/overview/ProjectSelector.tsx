@@ -12,7 +12,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -156,7 +156,7 @@ function ProjectSelectorForm({
     },
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies:
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset project path helper text whenever projectPath changes
   useEffect(() => {
     setHelperTextProjectPath("");
   }, [form.state.values.projectPath]);

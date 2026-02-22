@@ -1,10 +1,10 @@
 import { Dialog, List } from "@equinor/eds-core-react";
-import { AnyFormApi, createFormHook } from "@tanstack/react-form";
+import { type AnyFormApi, createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import {
+import type {
   RmsHorizon,
   RmsProject,
   RmsStratigraphicFramework,
@@ -21,7 +21,7 @@ import {
   GeneralButton,
   SubmitButton,
 } from "#components/form/button";
-import {
+import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form.tsx";
@@ -182,87 +182,85 @@ function StratigraphyEditor({
   }, [form, hasOrphans]);
 
   return (
-    <>
-      <StratigraphyEditorContainer>
-        <div>
-          <PageHeader $variant="h4">Project stratigraphy</PageHeader>
-          <StratigraphicFramework
-            maxHeight="55vh"
-            horizons={projectHorizons}
-            zones={projectZones}
-            orphanHorizonNames={orphanHorizonNames}
-            orphanZoneNames={orphanZoneNames}
-            onZoneClick={(zone) => {
-              removeZone(zone);
-            }}
-            onHorizonClick={(horizon) => {
-              removeHorizon(horizon);
-            }}
-          />
-
-          {hasOrphans && (
-            <OrphanWarningBox
-              orphanZoneNames={orphanZoneNames}
-              orphanHorizonNames={orphanHorizonNames}
-            />
-          )}
-
-          <ActionButtonsContainer>
-            <GeneralButton
-              label="Remove all"
-              variant="outlined"
-              disabled={!projectHorizons.length && !projectZones.length}
-              onClick={() => {
-                setConfirmAction("remove");
-              }}
-            />
-          </ActionButtonsContainer>
-        </div>
-
-        <div>
-          <PageHeader $variant="h4">Available RMS stratigraphy</PageHeader>
-
-          <StratigraphicFramework
-            maxHeight="55vh"
-            horizons={availableHorizons}
-            zones={availableZones}
-            unselectedHorizonNames={unselectedHorizonNames}
-            unselectedZoneNames={unselectedZoneNames}
-            onZoneClick={(zone, isUnselected) => {
-              isUnselected ? addZone(zone) : removeZone(zone);
-            }}
-            onHorizonClick={(horizon, isUnselected) => {
-              isUnselected ? addHorizon(horizon) : removeHorizon(horizon);
-            }}
-          />
-
-          <ActionButtonsContainer>
-            <GeneralButton
-              variant="outlined"
-              label="Add all"
-              disabled={
-                projectHorizons.length === availableHorizons.length &&
-                projectZones.length === availableZones.length
-              }
-              onClick={() => {
-                setConfirmAction("add");
-              }}
-            />
-          </ActionButtonsContainer>
-
-          <PageText>
-            💡 Click on horizons or zones to add or remove them from the project
-            stratigraphy.
-          </PageText>
-        </div>
-
-        <ConfirmActionDialog
-          confirmAction={confirmAction}
-          setConfirmAction={setConfirmAction}
-          onConfirm={confirmAction === "add" ? addAll : removeAll}
+    <StratigraphyEditorContainer>
+      <div>
+        <PageHeader $variant="h4">Project stratigraphy</PageHeader>
+        <StratigraphicFramework
+          maxHeight="55vh"
+          horizons={projectHorizons}
+          zones={projectZones}
+          orphanHorizonNames={orphanHorizonNames}
+          orphanZoneNames={orphanZoneNames}
+          onZoneClick={(zone) => {
+            removeZone(zone);
+          }}
+          onHorizonClick={(horizon) => {
+            removeHorizon(horizon);
+          }}
         />
-      </StratigraphyEditorContainer>
-    </>
+
+        {hasOrphans && (
+          <OrphanWarningBox
+            orphanZoneNames={orphanZoneNames}
+            orphanHorizonNames={orphanHorizonNames}
+          />
+        )}
+
+        <ActionButtonsContainer>
+          <GeneralButton
+            label="Remove all"
+            variant="outlined"
+            disabled={!projectHorizons.length && !projectZones.length}
+            onClick={() => {
+              setConfirmAction("remove");
+            }}
+          />
+        </ActionButtonsContainer>
+      </div>
+
+      <div>
+        <PageHeader $variant="h4">Available RMS stratigraphy</PageHeader>
+
+        <StratigraphicFramework
+          maxHeight="55vh"
+          horizons={availableHorizons}
+          zones={availableZones}
+          unselectedHorizonNames={unselectedHorizonNames}
+          unselectedZoneNames={unselectedZoneNames}
+          onZoneClick={(zone, isUnselected) => {
+            isUnselected ? addZone(zone) : removeZone(zone);
+          }}
+          onHorizonClick={(horizon, isUnselected) => {
+            isUnselected ? addHorizon(horizon) : removeHorizon(horizon);
+          }}
+        />
+
+        <ActionButtonsContainer>
+          <GeneralButton
+            variant="outlined"
+            label="Add all"
+            disabled={
+              projectHorizons.length === availableHorizons.length &&
+              projectZones.length === availableZones.length
+            }
+            onClick={() => {
+              setConfirmAction("add");
+            }}
+          />
+        </ActionButtonsContainer>
+
+        <PageText>
+          💡 Click on horizons or zones to add or remove them from the project
+          stratigraphy.
+        </PageText>
+      </div>
+
+      <ConfirmActionDialog
+        confirmAction={confirmAction}
+        setConfirmAction={setConfirmAction}
+        onConfirm={confirmAction === "add" ? addAll : removeAll}
+      />
+    </StratigraphyEditorContainer>
   );
 }
 

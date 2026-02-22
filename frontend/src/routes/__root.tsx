@@ -18,7 +18,7 @@ import { ToastContainer } from "react-toastify";
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { Header } from "#components/Header";
 import { Sidebar } from "#components/Sidebar";
-import { RouterContext } from "#main";
+import type { RouterContext } from "#main";
 import { PageHeader, PageText } from "#styles/common";
 import GlobalStyle from "#styles/global";
 import { getApiToken, isApiTokenNonEmpty } from "#utils/authentication";

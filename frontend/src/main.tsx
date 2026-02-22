@@ -1,6 +1,6 @@
 import {
-  AuthenticationResult,
-  EventMessage,
+  type AuthenticationResult,
+  type EventMessage,
   EventType,
   PublicClientApplication,
 } from "@azure/msal-browser";
@@ -10,21 +10,21 @@ import {
   QueryCache,
   QueryClient,
   QueryClientProvider,
-  UseMutateAsyncFunction,
+  type UseMutateAsyncFunction,
   useMutation,
 } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { AxiosError, isAxiosError } from "axios";
+import { type AxiosError, isAxiosError } from "axios";
 import {
-  Dispatch,
-  SetStateAction,
+  type Dispatch,
+  type SetStateAction,
   StrictMode,
   useEffect,
   useState,
 } from "react";
 import ReactDOM from "react-dom/client";
 
-import { Options, SessionPostSessionData, SessionResponse } from "#client";
+import type { Options, SessionPostSessionData, SessionResponse } from "#client";
 import {
   sessionPatchAccessTokenMutation,
   sessionPostSessionMutation,
@@ -38,7 +38,7 @@ import {
   isApiTokenNonEmpty,
   responseInterceptorFulfilled,
   responseInterceptorRejected,
-  TokenStatus,
+  type TokenStatus,
 } from "#utils/authentication";
 import { defaultErrorHandling, mutationRetry } from "#utils/query";
 import { routeTree } from "./routeTree.gen";
@@ -129,13 +129,19 @@ const router = createRouter({
   routeTree,
   context: {
     queryClient,
-    apiToken: undefined!,
-    setApiToken: undefined!,
-    apiTokenStatus: undefined!,
-    setApiTokenStatus: undefined!,
+    apiToken: undefined as unknown as string,
+    setApiToken: undefined as unknown as Dispatch<SetStateAction<string>>,
+    apiTokenStatus: undefined as unknown as TokenStatus,
+    setApiTokenStatus: undefined as unknown as Dispatch<
+      SetStateAction<TokenStatus>
+    >,
     hasResponseInterceptor: false,
-    accessToken: undefined!,
-    createSessionMutateAsync: undefined!,
+    accessToken: undefined as unknown as string,
+    createSessionMutateAsync: undefined as unknown as UseMutateAsyncFunction<
+      SessionResponse,
+      AxiosError,
+      Options<SessionPostSessionData>
+    >,
   },
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
@@ -168,8 +174,9 @@ export function App() {
     meta: { errorPrefix: "Error adding access token to session" },
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Keep dependency list unchanged to preserve existing behavior
   useEffect(() => {
-    let id: number | undefined = undefined;
+    let id: number | undefined;
     if (isApiTokenNonEmpty(apiToken)) {
       id = client.instance.interceptors.response.use(
         responseInterceptorFulfilled(

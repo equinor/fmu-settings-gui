@@ -6,8 +6,8 @@ import { fieldContext, formContext } from "#utils/form";
 import { handleValidator } from "#utils/validator";
 import { CancelButton, GeneralButton, SubmitButton } from "./button";
 import {
-  BasicTextFieldProps,
-  CommonTextFieldProps,
+  type BasicTextFieldProps,
+  type CommonTextFieldProps,
   SearchField,
   TextField,
 } from "./field";

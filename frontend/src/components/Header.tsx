@@ -11,7 +11,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import fmuLogo from "#assets/fmu_logo.png";
-import { LockInfo } from "#client/types.gen";
+import type { LockInfo } from "#client/types.gen";
 import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { EditDialog, PageText } from "#styles/common";

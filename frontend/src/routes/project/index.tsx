@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-import { FmuProject, LockStatus } from "#client/types.gen";
+import type { FmuProject, LockStatus } from "#client/types.gen";
 import { Loading } from "#components/common";
 import { LockStatusBanner } from "#components/LockStatus";
 import { EditableAccessInfo } from "#components/project/overview/Access";
@@ -70,7 +70,7 @@ function ProjectInfo({
 
 function ProjectNotFound({ text }: { text: string }) {
   const hasText = text !== "";
-  const lead = "No project selected" + (hasText ? ":" : ".");
+  const lead = `No project selected${hasText ? ":" : "."}`;
 
   return (
     <>

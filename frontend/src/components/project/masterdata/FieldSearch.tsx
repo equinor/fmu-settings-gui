@@ -1,13 +1,13 @@
 import { Dialog } from "@equinor/eds-core-react";
 import {
-  ColumnDef,
+  type ColumnDef,
   EdsDataGrid,
-  RowSelectionState,
+  type RowSelectionState,
 } from "@equinor/eds-data-grid-react";
 import { useQuery } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 
-import { SmdaFieldSearchResult, SmdaFieldUuid } from "#client";
+import type { SmdaFieldSearchResult, SmdaFieldUuid } from "#client";
 import { smdaPostFieldOptions } from "#client/@tanstack/react-query.gen";
 import { CancelButton, GeneralButton } from "#components/form/button";
 import { SearchFieldForm } from "#components/form/form";

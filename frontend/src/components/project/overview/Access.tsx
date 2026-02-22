@@ -12,13 +12,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-import { FmuProject } from "#client";
+import type { FmuProject } from "#client";
 import {
   projectGetProjectQueryKey,
   projectPatchAccessMutation,
 } from "#client/@tanstack/react-query.gen";
-import { Access } from "#client/types.gen";
-import { Classification } from "#client/types.gen";
+import type { Access, Classification } from "#client/types.gen";
 import {
   CancelButton,
   GeneralButton,

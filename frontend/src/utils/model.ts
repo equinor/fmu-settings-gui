@@ -1,4 +1,4 @@
-import {
+import type {
   CoordinateSystem,
   CountryItem,
   DiscoveryItem,
@@ -44,9 +44,9 @@ export function emptyIdentifierUuid(): IdentifierUuidType {
 export function emptyMasterdata(): Smda {
   return {
     coordinate_system: emptyIdentifierUuid() as CoordinateSystem,
-    country: Array<CountryItem>(),
-    discovery: Array<DiscoveryItem>(),
-    field: Array<FieldItem>(),
+    country: [] as CountryItem[],
+    discovery: [] as DiscoveryItem[],
+    field: [] as FieldItem[],
     stratigraphic_column: emptyIdentifierUuid() as StratigraphicColumn,
   };
 }

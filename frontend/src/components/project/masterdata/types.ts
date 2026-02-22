@@ -1,4 +1,4 @@
-import {
+import type {
   CoordinateSystem,
   CountryItem,
   DiscoveryItem,
@@ -6,7 +6,7 @@ import {
   SmdaMasterdataResult,
   StratigraphicColumn,
 } from "#client";
-import { ListOperation } from "#utils/form";
+import type { ListOperation } from "#utils/form";
 
 export type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
 

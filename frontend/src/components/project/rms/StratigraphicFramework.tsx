@@ -1,7 +1,7 @@
 import { Button, Tooltip } from "@equinor/eds-core-react";
 import { Fragment } from "react/jsx-runtime";
 
-import { RmsHorizon, RmsStratigraphicZone } from "#client";
+import type { RmsHorizon, RmsStratigraphicZone } from "#client";
 import {
   GridLine,
   HorizonItem,
@@ -30,7 +30,7 @@ function getZoneGridPlacement(
     const topHorizonIndex = findIndexByName(horizons, zone.top_horizon_name);
     const baseHorizonIndex = findIndexByName(horizons, zone.base_horizon_name);
 
-    const horizonIndices = new Array<number>();
+    const horizonIndices: number[] = [];
     for (let i = topHorizonIndex; i < baseHorizonIndex; i++) {
       horizonIndices.push(i);
     }
@@ -57,11 +57,16 @@ function getZoneGridPlacement(
           columnOccupancy.set(gridColumn, new Set());
         }
 
-        const occupied = columnOccupancy.get(gridColumn)!;
+        const occupied = columnOccupancy.get(gridColumn);
+        if (!occupied) {
+          throw new Error("Invalid stratigraphy grid state");
+        }
         const hasOverlap = info.horizonIndices.some((idx) => occupied.has(idx));
 
         if (!hasOverlap) {
-          info.horizonIndices.forEach((idx) => occupied.add(idx));
+          info.horizonIndices.forEach((idx) => {
+            occupied.add(idx);
+          });
           info.gridColumn = gridColumn;
           foundColumn = true;
         } else {
@@ -196,7 +201,10 @@ export function StratigraphicFramework({
         })}
 
         {zones.map((zone) => {
-          const grid = zoneGridPlacement.get(zone.name)!;
+          const grid = zoneGridPlacement.get(zone.name);
+          if (!grid) {
+            return null;
+          }
           const isOrphan = orphanZoneNamesSet.has(zone.name);
           const isUnselected = unselectedZoneNamesSet.has(zone.name);
 

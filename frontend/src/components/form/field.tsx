@@ -5,11 +5,16 @@ import {
   NativeSelect,
 } from "@equinor/eds-core-react";
 import { error_filled } from "@equinor/eds-icons";
-import { ChangeEvent, Dispatch, SetStateAction, useEffect } from "react";
-import z from "zod";
+import {
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+  useEffect,
+} from "react";
+import type z from "zod";
 
 import { useFieldContext } from "#utils/form";
-import { ValidatorProps } from "#utils/validator";
+import type { ValidatorProps } from "#utils/validator";
 import { CommonInputWrapper, SearchFieldInput } from "./field.style";
 
 Icon.add({ error_filled });

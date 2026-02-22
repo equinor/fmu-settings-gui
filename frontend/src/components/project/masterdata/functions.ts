@@ -1,7 +1,11 @@
-import { AnyFieldMetaBase, AnyFormApi, Updater } from "@tanstack/react-form";
-import { Dispatch, SetStateAction } from "react";
+import type {
+  AnyFieldMetaBase,
+  AnyFormApi,
+  Updater,
+} from "@tanstack/react-form";
+import type { Dispatch, SetStateAction } from "react";
 
-import {
+import type {
   CoordinateSystem,
   CountryItem,
   DiscoveryItem,
@@ -9,14 +13,17 @@ import {
   Smda,
   StratigraphicColumn,
 } from "#client";
-import { findOptionValueInNameUuidArray, ListOperation } from "#utils/form";
+import {
+  findOptionValueInNameUuidArray,
+  type ListOperation,
+} from "#utils/form";
 import {
   emptyIdentifierUuid,
-  IdentifierUuidType,
-  NameUuidType,
+  type IdentifierUuidType,
+  type NameUuidType,
 } from "#utils/model";
 import { stringCompare } from "#utils/string";
-import {
+import type {
   FieldItemType,
   FormMasterdataBase,
   FormMasterdataProject,

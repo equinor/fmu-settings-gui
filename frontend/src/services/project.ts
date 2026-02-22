@@ -8,9 +8,9 @@ import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 
 import {
-  FmuProject,
-  Options,
-  ProjectGetProjectData,
+  type FmuProject,
+  type Options,
+  type ProjectGetProjectData,
   projectGetLockStatus,
   projectGetProject,
 } from "#client";
@@ -18,7 +18,7 @@ import {
   projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
 } from "#client/@tanstack/react-query.gen";
-import { LockStatus } from "#client/types.gen";
+import type { LockStatus } from "#client/types.gen";
 import { projectLockStatusRefetchInterval } from "#config";
 import { HTTP_STATUS_UNAUTHORIZED } from "#utils/api";
 

@@ -10,15 +10,15 @@ import { arrow_back, arrow_forward } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import {
-  Dispatch,
-  SetStateAction,
+  type Dispatch,
+  type SetStateAction,
   useCallback,
   useEffect,
   useState,
 } from "react";
 import { toast } from "react-toastify";
 
-import { CoordinateSystem, Smda, StratigraphicColumn } from "#client";
+import type { CoordinateSystem, Smda, StratigraphicColumn } from "#client";
 import {
   projectGetProjectQueryKey,
   projectPatchMasterdataMutation,
@@ -30,7 +30,7 @@ import {
   SubmitButton,
 } from "#components/form/button";
 import { Select } from "#components/form/field";
-import {
+import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form";
@@ -53,7 +53,7 @@ import {
   handleNameUuidListOperation,
   handleNameUuidListOperationOnForm,
   identifierUuidArrayToOptionsArray,
-  ListOperation,
+  type ListOperation,
 } from "#utils/form";
 import {
   emptyIdentifierUuid,
@@ -73,7 +73,7 @@ import {
   prepareSelectedItems,
   resetEditData,
 } from "./functions";
-import {
+import type {
   FieldItemType,
   FormMasterdataBase,
   FormMasterdataProject,

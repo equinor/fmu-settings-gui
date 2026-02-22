@@ -4,12 +4,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-import { FmuProject } from "#client";
+import type { FmuProject } from "#client";
 import {
   projectGetProjectQueryKey,
   projectPatchModelMutation,
 } from "#client/@tanstack/react-query.gen";
-import { Model } from "#client/types.gen";
+import type { Model } from "#client/types.gen";
 import {
   CancelButton,
   GeneralButton,

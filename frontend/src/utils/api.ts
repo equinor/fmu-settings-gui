@@ -1,6 +1,6 @@
-import { AxiosError } from "axios";
+import type { AxiosError } from "axios";
 
-import { ValidationError } from "#client";
+import type { ValidationError } from "#client";
 
 export const HTTP_STATUS_UNAUTHORIZED = 401;
 export const HTTP_STATUS_UNPROCESSABLE_CONTENT = 422;

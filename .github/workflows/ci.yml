@@ -33,7 +33,7 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
-      
+
       - name: Set up Python
         run: uv python install ${{ matrix.python-version }}
 
@@ -108,7 +108,7 @@ jobs:
         run: uv pip freeze
 
       - name: Ensure pip builds React app
-        run: uv build -v 
+        run: uv build -v
 
   check-frontend:
     runs-on: ubuntu-latest
@@ -135,7 +135,7 @@ jobs:
       - name: Setup Biome CLI
         uses: biomejs/setup-biome@v2
         with:
-          version: 2.0.0-beta.1
+          version: 2.4.4
 
       - name: Install packages
         run: |

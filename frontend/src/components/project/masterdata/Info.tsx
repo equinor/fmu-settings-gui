@@ -1,6 +1,6 @@
-import React from "react";
+import type React from "react";
 
-import { Smda } from "#client";
+import type { Smda } from "#client";
 import { ChipsContainer, InfoBox, InfoChip, PageText } from "#styles/common";
 import { stringCompare } from "#utils/string";
 

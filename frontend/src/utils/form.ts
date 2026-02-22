@@ -1,12 +1,12 @@
 import {
-  AnyFieldApi,
-  AnyFormApi,
+  type AnyFieldApi,
+  type AnyFormApi,
   createFormHookContexts,
 } from "@tanstack/react-form";
 
-import { Smda } from "#client";
-import { OptionProps } from "#components/form/field";
-import { IdentifierUuidType, NameUuidType } from "./model";
+import type { Smda } from "#client";
+import type { OptionProps } from "#components/form/field";
+import type { IdentifierUuidType, NameUuidType } from "./model";
 
 export type ListOperation = "addition" | "removal";
 
@@ -48,7 +48,7 @@ export function handleNameUuidListOperation(
   const fieldValue = fieldContext.state.value as Array<NameUuidType>;
 
   if (operation === "addition") {
-    valueList.map((value) => {
+    valueList.forEach((value) => {
       const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
       if (idx < 0) {
         fieldContext.pushValue(value);
@@ -56,7 +56,7 @@ export function handleNameUuidListOperation(
     });
   } else {
     const indexes: Array<number> = [];
-    valueList.map((value) => {
+    valueList.forEach((value) => {
       const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
       if (idx >= 0) {
         indexes.push(idx);
@@ -66,7 +66,7 @@ export function handleNameUuidListOperation(
       // Remove elements in descending index order to avoid index shifting
       indexes
         .sort((a, b) => b - a)
-        .map((idx) => {
+        .forEach((idx) => {
           fieldContext.removeValue(idx);
         });
     }
@@ -96,7 +96,7 @@ export function handleNameUuidListOperationOnForm(
   ) as Array<NameUuidType>;
 
   if (operation === "addition") {
-    valueList.map((value) => {
+    valueList.forEach((value) => {
       const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
       if (idx < 0) {
         formContext.pushFieldValue(fieldName as never, value);
@@ -104,7 +104,7 @@ export function handleNameUuidListOperationOnForm(
     });
   } else {
     const indexes: Array<number> = [];
-    valueList.map((value) => {
+    valueList.forEach((value) => {
       const idx = fieldValue.findIndex((v) => v.uuid === value.uuid);
       if (idx >= 0) {
         indexes.push(idx);
@@ -114,7 +114,7 @@ export function handleNameUuidListOperationOnForm(
       // Remove elements in descending index order to avoid index shifting
       indexes
         .sort((a, b) => b - a)
-        .map((idx) => {
+        .forEach((idx) => {
           void formContext.removeFieldValue(fieldName as never, idx);
         });
     }

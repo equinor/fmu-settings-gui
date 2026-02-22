@@ -1,7 +1,7 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 
-import { Options, SmdaGetHealthData, smdaGetHealth } from "#client";
+import { type Options, type SmdaGetHealthData, smdaGetHealth } from "#client";
 import { smdaGetHealthQueryKey } from "#client/@tanstack/react-query.gen";
 
 type HealthCheck = {

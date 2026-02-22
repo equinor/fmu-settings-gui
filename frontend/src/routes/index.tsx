@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { FmuProject } from "#client";
+import type { FmuProject } from "#client";
 import { Resources } from "#components/home/Resources";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";

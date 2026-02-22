@@ -1,6 +1,6 @@
-import { AnyFormApi } from "@tanstack/react-form";
+import type { AnyFormApi } from "@tanstack/react-form";
 
-import {
+import type {
   RmsHorizon,
   RmsStratigraphicFramework,
   RmsStratigraphicZone,

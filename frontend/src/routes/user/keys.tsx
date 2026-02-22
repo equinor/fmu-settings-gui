@@ -7,7 +7,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-import { UserApiKeys } from "#client";
+import type { UserApiKeys } from "#client";
 import {
   smdaGetHealthQueryKey,
   userGetUserOptions,
@@ -15,11 +15,11 @@ import {
   userPatchApiKeyMutation,
 } from "#client/@tanstack/react-query.gen";
 import { Loading } from "#components/common";
-import { CommonTextFieldProps } from "#components/form/field";
+import type { CommonTextFieldProps } from "#components/form/field";
 import {
   EditableTextFieldForm,
-  MutationCallbackProps,
-  StringObject,
+  type MutationCallbackProps,
+  type StringObject,
 } from "#components/form/form";
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
 import { KeysFormContainer } from "./keys.style";

@@ -86,35 +86,32 @@ function AccessTokenPresence() {
   }, [isAuthenticated, msalInstance]);
 
   return (
-    <>
-      <PageText>
-        {isAuthenticated ? (
-          <>
-            ✅ You are logged in with SSO and an <strong>access token</strong>{" "}
-            is present. Try adding it to the session:{" "}
-            <Button
-              onClick={() => {
-                handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
-              }}
-            >
-              {isPending ? <DotProgress /> : "Add to session"}
-            </Button>
-          </>
-        ) : (
-          <>
-            ⛔ An SSO <strong>access token</strong> is not present, please log
-            in:{" "}
-            <Button
-              onClick={() => {
-                handleSsoLogin(msalInstance);
-              }}
-            >
-              Log in
-            </Button>
-          </>
-        )}
-      </PageText>
-    </>
+    <PageText>
+      {isAuthenticated ? (
+        <>
+          ✅ You are logged in with SSO and an <strong>access token</strong> is
+          present. Try adding it to the session:{" "}
+          <Button
+            onClick={() => {
+              handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
+            }}
+          >
+            {isPending ? <DotProgress /> : "Add to session"}
+          </Button>
+        </>
+      ) : (
+        <>
+          ⛔ An SSO <strong>access token</strong> is not present, please log in:{" "}
+          <Button
+            onClick={() => {
+              handleSsoLogin(msalInstance);
+            }}
+          >
+            Log in
+          </Button>
+        </>
+      )}
+    </PageText>
   );
 }
 

@@ -1,10 +1,10 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import { RmsProject } from "#client";
+import type { RmsProject } from "#client";
 import {
   projectGetProjectQueryKey,
   projectGetRmsProjectsOptions,
@@ -20,7 +20,7 @@ import {
   GeneralButton,
   SubmitButton,
 } from "#components/form/button";
-import { OptionProps, Select } from "#components/form/field";
+import { type OptionProps, Select } from "#components/form/field";
 import { rmsMinimumVersion } from "#config";
 import {
   EditDialog,

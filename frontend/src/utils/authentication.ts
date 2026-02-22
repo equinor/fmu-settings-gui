@@ -1,29 +1,29 @@
 import {
   InteractionRequiredAuthError,
-  IPublicClientApplication,
+  type IPublicClientApplication,
 } from "@azure/msal-browser";
-import {
+import type {
   UseMutateAsyncFunction,
   UseMutateFunction,
 } from "@tanstack/react-query";
-import {
+import type {
   AxiosError,
   AxiosResponse,
   AxiosResponseHeaders,
   InternalAxiosRequestConfig,
   RawAxiosResponseHeaders,
 } from "axios";
-import { Dispatch, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 
-import {
+import type {
   Message,
   Options,
   SessionPatchAccessTokenData,
   SessionPostSessionData,
   SessionResponse,
-  sessionPatchAccessToken,
 } from "#client";
+import { sessionPatchAccessToken } from "#client";
 import { client } from "#client/client.gen";
 import { ssoScopes } from "#config";
 import { HTTP_STATUS_UNAUTHORIZED } from "./api";

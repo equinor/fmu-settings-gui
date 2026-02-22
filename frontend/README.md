@@ -35,7 +35,9 @@ pnpm add -D vite
 # Package dependencies and external tools
 pnpm install
 mkdir tools
-curl -L https://github.com/biomejs/biome/releases/download/%40biomejs%2Fbiome%402.0.0-beta.1/biome-linux-x64-musl -o tools/biome
+curl -L https://github.com/biomejs/biome/releases/download/%40biomejs%2Fbiome%402.4.4/biome-linux-x64-musl -o tools/biome
+# macOS Apple Silicon
+# curl -L https://github.com/biomejs/biome/releases/download/%40biomejs%2Fbiome%402.4.4/biome-darwin-arm64 -o tools/biome
 chmod a+x tools/biome
 ```
 
@@ -65,7 +67,6 @@ workspace [settings](../.vscode/settings.json) file that configures Biome as the
 formatter for JavaScript and TypeScript files (includeing JSX/TSX), as well as
 CSS/SCSS/JSON files. Formatting is set up to be done on save.
 
-
 ## Developing
 
 The frontend application is started by running the following command:
@@ -91,7 +92,6 @@ complete URL for the frontend application, including the authorization token. Th
 be opened in the web browser, and as the URL contains the token the API access will be
 authorized and communication will work as expected.
 
-
 ### Updating API endpoints and models
 
 Whenever there are been updates to the API endpoints and models, a tool can be used to
@@ -106,7 +106,6 @@ code for the various endpoints as well as the models. The code is placed in the
 `frontend/src/client` directory, and is part of the repo. Any changes will thus be
 tracked and needs to be commited.
 
-
 ### Path aliases
 
 The codebase is configured to use path aliases, to more easily arrange imports and to
@@ -118,7 +117,6 @@ configured for these subdirectories, which are named prefixed with `#` (ie.
 added to. Editors like Visual Studio Code should be able to deal naturally with these
 path aliases. Note that the Vite configuration is set up with a plugin for handling these
 aliases, and that a change in the alias definition list requires a restart of Vite.
-
 
 ### Formatting and linting
 
@@ -147,8 +145,9 @@ This error has been observed when using the `*Options` functions from the Hey AP
 openapi-ts generated code, such as this:
 
 ```typescript
-  queryClient.fetchQuery(userGetUserOptions());
+queryClient.fetchQuery(userGetUserOptions());
 ```
+
 In this example, `userGetUserOptions()` would be marked with the errors
 `@typescript-eslint/no-unsafe-argument` and `@typescript-eslint/no-unsafe-call`. This is
 a false positive, as running the command `pnpm lint` will indicate.
