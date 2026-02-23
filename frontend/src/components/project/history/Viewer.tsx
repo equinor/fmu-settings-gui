@@ -337,8 +337,8 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         Choose a resource to view its snapshots, listed from newest to oldest.
       </PageText>
       <PageText $marginBottom="0">
-        Use "View details" to see what changed between the current version and a
-        snapshot, and to restore from it.
+        Use <strong>"View details"</strong> to see what changed between the
+        current version and a snapshot, and to <strong>restore</strong> from it.
       </PageText>
       {projectReadOnly && (
         <PageText $marginBottom="0">
