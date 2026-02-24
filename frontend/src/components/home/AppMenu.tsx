@@ -43,6 +43,7 @@ export function AppMenu() {
               variant="ghost"
               href="https://webviz.fmu.equinor.com/"
               target="_blank"
+              rel="noopener noreferrer"
             >
               <img src={webvizLogo} alt="Webviz" />
               <Typography variant="h6">Webviz</Typography>
@@ -52,6 +53,7 @@ export function AppMenu() {
               variant="ghost"
               href="https://fmu.equinor.com/"
               target="_blank"
+              rel="noopener noreferrer"
             >
               <img src={fmuLogo} alt="FMU Hub" />
               <Typography variant="h6">FMU Hub</Typography>
@@ -61,6 +63,7 @@ export function AppMenu() {
               variant="ghost"
               href="https://sumo.fmu.equinor.com/"
               target="_blank"
+              rel="noopener noreferrer"
             >
               <img src={sumoLogo} alt="Sumo" />
               <Typography variant="h6">Sumo</Typography>
