@@ -15,6 +15,6 @@ export const ssoScopes = [
 
 export const projectLockStatusRefetchInterval = 60_000; // 1 minute
 
-export const projectLockTimeoutWarningThreshold = 20_000; // 20 seconds before lock expiration
+export const projectLockTimeoutWarningThreshold = 120_000; // 2 minutes
 
 export const rmsMinimumVersion = "15.0.1.0"; // Minimum version to use when opening RMS projects
