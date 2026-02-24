@@ -21,6 +21,7 @@ import {
   HeaderContainer,
   ProjectInfoContainer,
   ProjectInfoItemContainer,
+  TopBarContainer,
 } from "./Header.style";
 import { AppMenu } from "./home/AppMenu";
 
@@ -163,7 +164,7 @@ export function Header() {
     <HeaderContainer>
       <TopBar>
         <TopBar.Header>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <TopBarContainer>
             <AppMenu />
             <Button
               variant="ghost"
@@ -174,8 +175,7 @@ export function Header() {
               <FmuLogo src={fmuLogo} />
             </Button>
             <Typography>FMU Settings</Typography>
-            <div />
-          </div>
+          </TopBarContainer>
         </TopBar.Header>
         <TopBar.Actions>
           <FeedbackDialog />

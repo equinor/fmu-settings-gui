@@ -9,6 +9,11 @@ export const FmuLogo = styled.img`
   height: auto;
 `;
 
+export const TopBarContainer = styled.div`
+  display: flex;
+  align-items: center;  
+`;
+
 export const ProjectInfoContainer = styled.div`
   height: ${tokens.spacings.comfortable.x_large};
   padding: 0.4em ${tokens.spacings.comfortable.medium};
