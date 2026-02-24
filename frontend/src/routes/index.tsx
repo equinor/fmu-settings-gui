@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import type { FmuProject } from "#client";
-import { TaskList } from "#components/home/TaskList";
-import { LockExpireDialog } from "#components/LockExpireDialog";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
 import {
@@ -66,11 +64,7 @@ function RouteComponent() {
       </PageText>
 
       {project.data ? (
-        <>
-          <ProjectInfoBox projectData={project.data} />
-          <TaskList />
-          <LockExpireDialog />
-        </>
+        <ProjectInfoBox projectData={project.data} />
       ) : (
         <>
           <PageText>No project selected</PageText>

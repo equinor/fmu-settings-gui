@@ -20,6 +20,7 @@ import { useState } from "react";
 
 import fmuLogo from "#assets/fmu-logo.svg";
 import type { LockInfo } from "#client/types.gen";
+import { LockExpireDialog } from "#components/LockExpireDialog";
 import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { useTaskList } from "#services/tasks";
@@ -84,30 +85,36 @@ function ProjectInfo() {
   const lockStatus = project.lockStatus;
 
   return (
-    <ProjectInfoContainer>
-      {project.status && project.data ? (
-        <>
-          <LockStatusIcon
-            isReadOnly={!(lockStatus?.is_lock_acquired ?? false)}
-            lockInfo={lockStatus?.lock_info}
-          />
-          <ProjectInfoItem
-            label="Asset"
-            value={project.data.config.access?.asset.name}
-          />
-          <ProjectInfoItem
-            label="Model"
-            value={project.data.config.model?.name}
-          />
-          <ProjectInfoItem
-            label="Revision"
-            value={project.data.config.model?.revision}
-          />
-        </>
-      ) : (
-        "No project selected"
+    <>
+      {project.lockStatus && (
+        <LockExpireDialog lockStatus={project.lockStatus} />
       )}
-    </ProjectInfoContainer>
+
+      <ProjectInfoContainer>
+        {project.status && project.data ? (
+          <>
+            <LockStatusIcon
+              isReadOnly={!(lockStatus?.is_lock_acquired ?? false)}
+              lockInfo={lockStatus?.lock_info}
+            />
+            <ProjectInfoItem
+              label="Asset"
+              value={project.data.config.access?.asset.name}
+            />
+            <ProjectInfoItem
+              label="Model"
+              value={project.data.config.model?.name}
+            />
+            <ProjectInfoItem
+              label="Revision"
+              value={project.data.config.model?.revision}
+            />
+          </>
+        ) : (
+          "No project selected"
+        )}
+      </ProjectInfoContainer>
+    </>
   );
 }
 

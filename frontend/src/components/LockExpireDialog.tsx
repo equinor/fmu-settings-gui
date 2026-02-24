@@ -6,23 +6,24 @@ import type { LockStatus } from "#client";
 import {
   projectGetLockStatusQueryKey,
   projectPostLockRefreshMutation,
+  projectPostLockReleaseMutation,
 } from "#client/@tanstack/react-query.gen";
 import { projectLockTimeoutWarningThreshold } from "#config";
-import { EditDialog, PageText } from "#styles/common";
-import { displayTimestamp } from "#utils/datetime";
+import { GenericDialog, PageText } from "#styles/common";
 
 export function LockExpireDialog({ lockStatus }: { lockStatus: LockStatus }) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
-  const [timeUntilExpire, setTimeUntilExpire] = useState<number>(200000);
-  const queryClient = useQueryClient();
-  const [isExpired, setIsExpired] = useState(false);
-  // Extract lock information and expiration time
-  const lockExpireAt = lockStatus.lock_info?.expires_at
-    ? new Date(lockStatus.lock_info.expires_at * 1000).getTime()
-    : undefined;
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [timeUntilExpire, setTimeUntilExpire] = useState<number>(
+    Number.POSITIVE_INFINITY,
+  );
 
-  // This is how define a mutation : refresh the lock
-  const { mutate, isPending } = useMutation({
+  const lockInfo = lockStatus.lock_info;
+  const isLockAcquired = lockStatus.is_lock_acquired;
+  const isExpired = !isLockAcquired;
+
+  const queryClient = useQueryClient();
+
+  const lockRefreshMutation = useMutation({
     ...projectPostLockRefreshMutation(),
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -35,20 +36,34 @@ export function LockExpireDialog({ lockStatus }: { lockStatus: LockStatus }) {
     },
   });
 
+  const lockReleaseMutation = useMutation({
+    ...projectPostLockReleaseMutation(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: projectGetLockStatusQueryKey(),
+      });
+      setIsDialogOpen(false);
+    },
+    meta: {
+      errorPrefix: "Error releasing the lock",
+    },
+  });
+
   const onLockRefresh = () => {
-    mutate({});
+    lockRefreshMutation.mutate({});
   };
 
-  // The Timer : TODO Add the icon to see how it looks
+  const onLockRelease = () => {
+    lockReleaseMutation.mutate({});
+  };
+
   useEffect(() => {
-    if (lockExpireAt) {
+    if (isLockAcquired && lockInfo) {
       const updateTimeUntilExpire = () => {
+        const lockExpireAt = new Date(lockInfo.expires_at * 1000).getTime();
+
         const timeLeft = Math.max(0, lockExpireAt - Date.now());
         setTimeUntilExpire(timeLeft);
-
-        timeLeft <= projectLockTimeoutWarningThreshold
-          ? setIsDialogOpen(true)
-          : setIsDialogOpen(false);
       };
 
       updateTimeUntilExpire();
@@ -59,65 +74,67 @@ export function LockExpireDialog({ lockStatus }: { lockStatus: LockStatus }) {
         clearInterval(interval);
       };
     }
-  }, [lockExpireAt]);
-  console.log("LockExpireDialog lockInfo:", lockStatus.lock_info);
-  console.log("LockExpireDialog lockExpireAt:", displayTimestamp(lockExpireAt));
-  console.log("LockExpireDialog rendered. Time until expire:", timeUntilExpire);
+  }, [isLockAcquired, lockInfo]);
 
   useEffect(() => {
+    if (
+      isLockAcquired &&
+      timeUntilExpire <= projectLockTimeoutWarningThreshold
+    ) {
+      setIsDialogOpen(true);
+    }
+
     if (timeUntilExpire === 0) {
       void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),
       });
-      setIsExpired(true);
     }
-  }, [timeUntilExpire, queryClient]);
+  }, [isLockAcquired, timeUntilExpire, queryClient]);
 
   return (
-    <EditDialog open={isDialogOpen} $minWidth="20em">
+    <GenericDialog open={isDialogOpen} $minWidth="20em">
       <Dialog.Header>
         {isExpired ? "Lock expired" : "Lock about to expire"}
       </Dialog.Header>
 
       <Dialog.Content>
         {isExpired ? (
-          <PageText>
+          <PageText $marginBottom="0">
             Your lock has expired. Project is now read-only. It can be opened
             for editing from the project overview page.
           </PageText>
         ) : (
-          <PageText>
-            Your lock will expire and the project will become read-only in .
-            <b>{Math.ceil(timeUntilExpire / 1000)}</b> seconds. <br />
-            Do you want to extend the lock?
-          </PageText>
+          <>
+            <PageText>
+              Your lock will expire and the project will become read-only in{" "}
+              <b>{Math.ceil(timeUntilExpire / 1000)}</b> seconds.
+            </PageText>
+
+            <PageText $marginBottom="0">
+              Do you want to extend the lock?
+            </PageText>
+          </>
         )}
       </Dialog.Content>
 
       <Dialog.Actions>
         {isExpired ? (
-          <>
-            <Button onClick={onLockRefresh}>Extend Lock</Button>
-            <Button
-              onClick={() => {
-                setIsDialogOpen(false);
-              }}
-              variant="contained"
-            >
-              Release Lock
-            </Button>{" "}
-          </>
-        ) : (
           <Button
             onClick={() => {
               setIsDialogOpen(false);
             }}
-            variant="contained"
           >
-            Ok
+            Close
           </Button>
+        ) : (
+          <>
+            <Button onClick={onLockRefresh}>Extend lock</Button>
+            <Button variant="outlined" onClick={onLockRelease}>
+              Release lock
+            </Button>
+          </>
         )}
       </Dialog.Actions>
-    </EditDialog>
+    </GenericDialog>
   );
 }
