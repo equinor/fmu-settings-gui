@@ -25,7 +25,13 @@ import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form.tsx";
-import { EditDialog, PageCode, PageHeader, PageText } from "#styles/common";
+import {
+  EditDialog,
+  GenericDialog,
+  PageCode,
+  PageHeader,
+  PageText,
+} from "#styles/common";
 import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
@@ -62,7 +68,7 @@ function ConfirmActionDialog({
   };
 
   return (
-    <EditDialog open={!!confirmAction} $minWidth="25em">
+    <GenericDialog open={!!confirmAction} $minWidth="25em">
       <Dialog.Header>Confirm action</Dialog.Header>
 
       <Dialog.CustomContent>
@@ -85,7 +91,7 @@ function ConfirmActionDialog({
         />
         <CancelButton onClick={resetConfirmAction} />
       </Dialog.Actions>
-    </EditDialog>
+    </GenericDialog>
   );
 }
 

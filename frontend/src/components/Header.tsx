@@ -14,7 +14,7 @@ import fmuLogo from "#assets/fmu-logo.svg";
 import type { LockInfo } from "#client/types.gen";
 import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
-import { EditDialog, PageText } from "#styles/common";
+import { GenericDialog, PageText } from "#styles/common";
 import {
   FmuLogo,
   HeaderActionButton,
@@ -108,7 +108,7 @@ function FeedbackDialog() {
         Feedback <Icon data={comment} size={18} />
       </HeaderActionButton>
 
-      <EditDialog
+      <GenericDialog
         isDismissable={true}
         open={isOpen}
         onClose={closeDialog}
@@ -154,7 +154,7 @@ function FeedbackDialog() {
         <Dialog.Actions>
           <Button onClick={closeDialog}>Close</Button>
         </Dialog.Actions>
-      </EditDialog>
+      </GenericDialog>
     </>
   );
 }

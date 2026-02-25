@@ -37,6 +37,7 @@ import type {
 import {
   ChipsContainer,
   EditDialog,
+  GenericDialog,
   InfoChip,
   PageHeader,
   PageList,
@@ -142,7 +143,7 @@ function ConfirmItemsOperationDialog({
   }
 
   return (
-    <EditDialog open={isOpen} $minWidth="32em">
+    <GenericDialog open={isOpen} $minWidth="32em">
       <Dialog.Header>
         <Dialog.Title>
           {selectedItems.operation === "addition" ? "Add" : "Remove"} items
@@ -221,7 +222,7 @@ function ConfirmItemsOperationDialog({
           }}
         />
       </Dialog.Actions>
-    </EditDialog>
+    </GenericDialog>
   );
 }
 
