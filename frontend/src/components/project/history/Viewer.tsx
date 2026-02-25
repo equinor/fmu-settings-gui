@@ -352,6 +352,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         <Autocomplete
           label="Resource"
           optionLabel={(option) => option.label}
+          itemToKey={(option) => option?.value ?? null}
           options={RESOURCE_OPTIONS.map((option) => ({
             value: option,
             label: RESOURCE_LABELS[option],
