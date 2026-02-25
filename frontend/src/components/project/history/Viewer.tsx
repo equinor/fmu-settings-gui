@@ -22,7 +22,7 @@ import type {
   ScalarFieldDiff,
 } from "#client/types.gen";
 import {
-  EditDialog,
+  GenericDialog,
   GenericInnerBox,
   PageList,
   PageText,
@@ -397,11 +397,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         </CardStack>
       )}
 
-      <EditDialog
-        open={isDiffDialogOpen}
-        $maxWidth="56em"
-        $extraPaddingBottom={false}
-      >
+      <GenericDialog open={isDiffDialogOpen} $maxWidth="56em">
         <Dialog.Header>
           <Dialog.Title>
             {RESOURCE_LABELS[resource]} -{" "}
@@ -483,13 +479,9 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
             Close
           </Button>
         </Dialog.Actions>
-      </EditDialog>
+      </GenericDialog>
 
-      <EditDialog
-        open={isRestoreDialogOpen}
-        $maxWidth="36em"
-        $extraPaddingBottom={false}
-      >
+      <GenericDialog open={isRestoreDialogOpen} $maxWidth="36em">
         <Dialog.Header>
           <Dialog.Title>Restore from snapshot</Dialog.Title>
         </Dialog.Header>
@@ -538,7 +530,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
             Cancel
           </Button>
         </Dialog.Actions>
-      </EditDialog>
+      </GenericDialog>
     </ViewerContainer>
   );
 }
