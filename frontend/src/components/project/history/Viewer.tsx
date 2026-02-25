@@ -21,6 +21,7 @@ import type {
   ListUpdatedEntry,
   ScalarFieldDiff,
 } from "#client/types.gen";
+import { GeneralButton } from "#components/form/button";
 import {
   GenericDialog,
   GenericInnerBox,
@@ -458,7 +459,9 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         </Dialog.CustomContent>
 
         <Dialog.Actions>
-          <Button
+          <GeneralButton
+            label="Restore"
+            isPending={restoreMutation.isPending}
             disabled={
               projectReadOnly ||
               restoreMutation.isPending ||
@@ -466,10 +469,15 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
               diffQuery.isPending ||
               diffQuery.data?.length === 0
             }
+            tooltipText={
+              projectReadOnly
+                ? "Project is read-only"
+                : diffQuery.data?.length === 0
+                  ? "No differences to restore"
+                  : undefined
+            }
             onClick={openRestoreDialogFromDiff}
-          >
-            Restore
-          </Button>
+          />
           <Button
             variant="outlined"
             onClick={() => {
@@ -511,16 +519,17 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         </Dialog.Content>
 
         <Dialog.Actions>
-          <Button
+          <GeneralButton
+            label="Restore"
+            isPending={restoreMutation.isPending}
             disabled={
               projectReadOnly ||
               restoreMutation.isPending ||
               selectedCacheId === null
             }
+            tooltipText={projectReadOnly ? "Project is read-only" : undefined}
             onClick={restoreSelectedCache}
-          >
-            {restoreMutation.isPending ? "Restoring..." : "Restore"}
-          </Button>
+          />
           <Button
             variant="outlined"
             onClick={() => {
