@@ -142,7 +142,7 @@ function ConfirmItemsOperationDialog({
   }
 
   return (
-    <EditDialog open={isOpen} $minWidth="32em" $extraPaddingBottom={false}>
+    <EditDialog open={isOpen} $minWidth="32em">
       <Dialog.Header>
         <Dialog.Title>
           {selectedItems.operation === "addition" ? "Add" : "Remove"} items

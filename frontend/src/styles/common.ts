@@ -103,29 +103,30 @@ export const InfoChip = styled(Chip)`
   }
 `;
 
-export const EditDialog = styled(Dialog).attrs<{
+export const GenericDialog = styled(Dialog).attrs<{
   $minWidth?: string;
   $maxWidth?: string;
-  $extraPaddingBottom?: boolean;
-}>((props) => ({
+}>(({ $minWidth = "10em", $maxWidth = undefined }) => ({
   style: {
-    minWidth: props.$minWidth ?? "10em",
-    maxWidth: props.$maxWidth ?? "20em",
+    minWidth: $minWidth,
+    maxWidth: $maxWidth,
   },
 }))`
   width: 100%;
-  
+
   #eds-dialog-customcontent {
     min-height: auto;
     padding: ${tokens.spacings.comfortable.medium};
-    padding-bottom: ${(props) =>
-      props.$extraPaddingBottom !== undefined && !props.$extraPaddingBottom
-        ? undefined
-        : tokens.spacings.comfortable.x_large}
   }
 
   button + button {
     margin-left: ${tokens.spacings.comfortable.small};
+  }
+`;
+
+export const EditDialog = styled(GenericDialog)`
+  #eds-dialog-customcontent {
+    padding-bottom: ${tokens.spacings.comfortable.x_large};
   }
 `;
 
