@@ -20,8 +20,8 @@ export function Sidebar() {
 
   const ProjectSubItems: AccordianSubItem[] = [];
   if (project.status) {
-    ProjectSubItems.push({ label: "RMS", to: "/project/rms" });
     ProjectSubItems.push({ label: "Masterdata", to: "/project/masterdata" });
+    ProjectSubItems.push({ label: "RMS", to: "/project/rms" });
   }
 
   return (

@@ -115,6 +115,70 @@ export const CacheResourceSchema = {
     description: 'Resources that can be cached and restored.'
 } as const;
 
+export const CacheRetentionSchema = {
+    properties: {
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            description: 'Maximum number of cache revisions to keep per resource.',
+            default: 5
+        }
+    },
+    type: 'object',
+    title: 'CacheRetention',
+    description: 'Cache retention setting for project resources.'
+} as const;
+
+export const ChangeInfoSchema = {
+    properties: {
+        timestamp: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Timestamp'
+        },
+        change_type: {
+            '$ref': '#/components/schemas/ChangeType'
+        },
+        user: {
+            type: 'string',
+            title: 'User'
+        },
+        path: {
+            type: 'string',
+            format: 'path',
+            title: 'Path'
+        },
+        change: {
+            type: 'string',
+            title: 'Change'
+        },
+        hostname: {
+            type: 'string',
+            title: 'Hostname'
+        },
+        file: {
+            type: 'string',
+            title: 'File'
+        },
+        key: {
+            type: 'string',
+            title: 'Key'
+        }
+    },
+    type: 'object',
+    required: ['change_type', 'user', 'path', 'change', 'hostname', 'file', 'key'],
+    title: 'ChangeInfo',
+    description: 'Represents a change in the changelog file.'
+} as const;
+
+export const ChangeTypeSchema = {
+    type: 'string',
+    enum: ['update', 'remove', 'add', 'reset', 'merge', 'copy'],
+    title: 'ChangeType',
+    description: 'The types of change that can be made on a file.'
+} as const;
+
 export const ClassificationSchema = {
     type: 'string',
     enum: ['asset', 'internal', 'restricted'],
@@ -162,6 +226,13 @@ export const CountryItemSchema = {
     title: 'CountryItem',
     description: `A single country in the \`\`smda.masterdata.country\`\` list of countries
 known to SMDA.`
+} as const;
+
+export const DataSystemSchema = {
+    type: 'string',
+    enum: ['rms', 'smda', 'fmu'],
+    title: 'DataSystem',
+    description: 'The system or application data is being mapping to or from.'
 } as const;
 
 export const DiscoveryItemSchema = {
@@ -278,6 +349,64 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const ListFieldDiffSchema = {
+    properties: {
+        field_path: {
+            type: 'string',
+            title: 'Field Path'
+        },
+        added: {
+            items: {
+                additionalProperties: true,
+                type: 'object'
+            },
+            type: 'array',
+            title: 'Added'
+        },
+        removed: {
+            items: {
+                additionalProperties: true,
+                type: 'object'
+            },
+            type: 'array',
+            title: 'Removed'
+        },
+        updated: {
+            items: {
+                '$ref': '#/components/schemas/ListUpdatedEntry'
+            },
+            type: 'array',
+            title: 'Updated'
+        }
+    },
+    type: 'object',
+    required: ['field_path', 'added', 'removed', 'updated'],
+    title: 'ListFieldDiff',
+    description: 'Diff entry for list fields with per-item changes.'
+} as const;
+
+export const ListUpdatedEntrySchema = {
+    properties: {
+        key: {
+            title: 'Key'
+        },
+        before: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'Before'
+        },
+        after: {
+            additionalProperties: true,
+            type: 'object',
+            title: 'After'
+        }
+    },
+    type: 'object',
+    required: ['key', 'before', 'after'],
+    title: 'ListUpdatedEntry',
+    description: 'Before and after values for an updated list item.'
+} as const;
+
 export const LockInfoSchema = {
     properties: {
         pid: {
@@ -304,7 +433,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.14.2.dev3+g4dd7f1961'
+            default: '0.22.0'
         }
     },
     type: 'object',
@@ -401,6 +530,29 @@ export const LockStatusSchema = {
     required: ['is_lock_acquired', 'lock_file_exists'],
     title: 'LockStatus',
     description: 'Information about the project lock status.'
+} as const;
+
+export const Log_ChangeInfo_Schema = {
+    items: {
+        '$ref': '#/components/schemas/ChangeInfo'
+    },
+    type: 'array',
+    title: 'Log[ChangeInfo]'
+} as const;
+
+export const MappingGroupSchema = {
+    additionalProperties: true,
+    type: 'object'
+} as const;
+
+export const MappingTypeSchema = {
+    type: 'string',
+    enum: ['stratigraphy'],
+    title: 'MappingType',
+    description: `The discriminator used between mapping types.
+
+Each of these types should have their own mapping class derived from a base
+mapping type, e.g. IdentifierMapping.`
 } as const;
 
 export const MasterdataSchema = {
@@ -574,6 +726,13 @@ export const ProjectConfigSchema = {
     description: `The configuration file in a .fmu directory.
 
 Stored as config.json.`
+} as const;
+
+export const RelationTypeSchema = {
+    type: 'string',
+    enum: ['primary', 'alias', 'equivalent'],
+    title: 'RelationType',
+    description: 'The kind of relation this mapping represents.'
 } as const;
 
 export const RmsCoordinateSystemSchema = {
@@ -860,6 +1019,25 @@ export const RmsWellSchema = {
     required: ['name'],
     title: 'RmsWell',
     description: 'A well from an RMS project.'
+} as const;
+
+export const ScalarFieldDiffSchema = {
+    properties: {
+        field_path: {
+            type: 'string',
+            title: 'Field Path'
+        },
+        before: {
+            title: 'Before'
+        },
+        after: {
+            title: 'After'
+        }
+    },
+    type: 'object',
+    required: ['field_path', 'before', 'after'],
+    title: 'ScalarFieldDiff',
+    description: 'Diff entry for non-list fields.'
 } as const;
 
 export const SessionResponseSchema = {
@@ -1229,6 +1407,89 @@ export const StratigraphicUnitSchema = {
     description: 'Stratigraphic unit item.'
 } as const;
 
+export const StratigraphyIdentifierMappingSchema = {
+    properties: {
+        source_system: {
+            '$ref': '#/components/schemas/DataSystem'
+        },
+        target_system: {
+            '$ref': '#/components/schemas/DataSystem'
+        },
+        mapping_type: {
+            type: 'string',
+            const: 'stratigraphy',
+            title: 'Mapping Type',
+            default: 'stratigraphy'
+        },
+        relation_type: {
+            '$ref': '#/components/schemas/RelationType'
+        },
+        source_id: {
+            type: 'string',
+            title: 'Source Id'
+        },
+        source_uuid: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Source Uuid'
+        },
+        target_id: {
+            type: 'string',
+            title: 'Target Id'
+        },
+        target_uuid: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Target Uuid'
+        }
+    },
+    type: 'object',
+    required: ['source_system', 'target_system', 'relation_type', 'source_id', 'target_id'],
+    title: 'StratigraphyIdentifierMapping',
+    description: `Represents a stratigraphy mapping.
+
+This is a mapping from stratigraphic identifiers (tops, zones, etc.) to official
+identifiers in SMDA.`
+} as const;
+
+export const SumoAssetSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name',
+            description: 'Name of the asset in Sumo.'
+        },
+        code: {
+            type: 'string',
+            title: 'Code',
+            description: 'Code of the asset in Sumo.'
+        },
+        roleprefix: {
+            type: 'string',
+            title: 'Roleprefix',
+            description: 'Roleprefix of the asset in Sumo.'
+        }
+    },
+    type: 'object',
+    required: ['name', 'code', 'roleprefix'],
+    title: 'SumoAsset',
+    description: 'A valid asset in Sumo.'
+} as const;
+
 export const UserAPIKeysSchema = {
     properties: {
         smda_subscription: {
@@ -1322,6 +1583,13 @@ export const ValidationErrorSchema = {
         type: {
             type: 'string',
             title: 'Error Type'
+        },
+        input: {
+            title: 'Input'
+        },
+        ctx: {
+            type: 'object',
+            title: 'Context'
         }
     },
     type: 'object',

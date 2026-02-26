@@ -75,6 +75,35 @@ export type CacheList = {
 export type CacheResource = 'config.json' | 'mappings.json';
 
 /**
+ * Cache retention setting for project resources.
+ */
+export type CacheRetention = {
+    /**
+     * Maximum number of cache revisions to keep per resource.
+     */
+    cache_max_revisions?: number;
+};
+
+/**
+ * Represents a change in the changelog file.
+ */
+export type ChangeInfo = {
+    timestamp?: string;
+    change_type: ChangeType;
+    user: string;
+    path: string;
+    change: string;
+    hostname: string;
+    file: string;
+    key: string;
+};
+
+/**
+ * The types of change that can be made on a file.
+ */
+export type ChangeType = 'update' | 'remove' | 'add' | 'reset' | 'merge' | 'copy';
+
+/**
  * The security classification for a given data object.
  */
 export type Classification = 'asset' | 'internal' | 'restricted';
@@ -96,6 +125,11 @@ export type CountryItem = {
     identifier: string;
     uuid: string;
 };
+
+/**
+ * The system or application data is being mapping to or from.
+ */
+export type DataSystem = 'rms' | 'smda' | 'fmu';
 
 /**
  * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
@@ -158,6 +192,33 @@ export type HttpValidationError = {
 };
 
 /**
+ * Diff entry for list fields with per-item changes.
+ */
+export type ListFieldDiff = {
+    field_path: string;
+    added: Array<{
+        [key: string]: unknown;
+    }>;
+    removed: Array<{
+        [key: string]: unknown;
+    }>;
+    updated: Array<ListUpdatedEntry>;
+};
+
+/**
+ * Before and after values for an updated list item.
+ */
+export type ListUpdatedEntry = {
+    key: unknown;
+    before: {
+        [key: string]: unknown;
+    };
+    after: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Represents a .fmu directory lock file.
  */
 export type LockInfo = {
@@ -206,6 +267,20 @@ export type LockStatus = {
      */
     last_lock_refresh_error?: string | null;
 };
+
+export type LogChangeInfo = Array<ChangeInfo>;
+
+export type MappingGroup = {
+    [key: string]: unknown;
+};
+
+/**
+ * The discriminator used between mapping types.
+ *
+ * Each of these types should have their own mapping class derived from a base
+ * mapping type, e.g. IdentifierMapping.
+ */
+export type MappingType = 'stratigraphy';
 
 /**
  * The ``masterdata`` block contains information related to masterdata.
@@ -261,6 +336,11 @@ export type ProjectConfig = {
     cache_max_revisions?: number;
     rms?: RmsProject | null;
 };
+
+/**
+ * The kind of relation this mapping represents.
+ */
+export type RelationType = 'primary' | 'alias' | 'equivalent';
 
 /**
  * The project coordinate system of an RMS project.
@@ -396,6 +476,15 @@ export type RmsVersion = {
  */
 export type RmsWell = {
     name: string;
+};
+
+/**
+ * Diff entry for non-list fields.
+ */
+export type ScalarFieldDiff = {
+    field_path: string;
+    before: unknown;
+    after: unknown;
 };
 
 /**
@@ -600,6 +689,41 @@ export type StratigraphicUnit = {
 };
 
 /**
+ * Represents a stratigraphy mapping.
+ *
+ * This is a mapping from stratigraphic identifiers (tops, zones, etc.) to official
+ * identifiers in SMDA.
+ */
+export type StratigraphyIdentifierMapping = {
+    source_system: DataSystem;
+    target_system: DataSystem;
+    mapping_type?: 'stratigraphy';
+    relation_type: RelationType;
+    source_id: string;
+    source_uuid?: string | null;
+    target_id: string;
+    target_uuid?: string | null;
+};
+
+/**
+ * A valid asset in Sumo.
+ */
+export type SumoAsset = {
+    /**
+     * Name of the asset in Sumo.
+     */
+    name: string;
+    /**
+     * Code of the asset in Sumo.
+     */
+    code: string;
+    /**
+     * Roleprefix of the asset in Sumo.
+     */
+    roleprefix: string;
+};
+
+/**
  * Known API keys stored in a user config.
  */
 export type UserApiKeys = {
@@ -624,6 +748,10 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -753,6 +881,41 @@ export type ProjectPostProjectResponses = {
 };
 
 export type ProjectPostProjectResponse = ProjectPostProjectResponses[keyof ProjectPostProjectResponses];
+
+export type ProjectGetSumoAssetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/sumo_assets';
+};
+
+export type ProjectGetSumoAssetsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Sumo assets file not found
+     */
+    404: unknown;
+    /**
+     * Invalid file content in Sumo assets file
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetSumoAssetsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<SumoAsset>;
+};
+
+export type ProjectGetSumoAssetsResponse = ProjectGetSumoAssetsResponses[keyof ProjectGetSumoAssetsResponses];
 
 export type ProjectGetGlobalConfigStatusData = {
     body?: never;
@@ -936,6 +1099,39 @@ export type ProjectPostLockAcquireResponses = {
 };
 
 export type ProjectPostLockAcquireResponse = ProjectPostLockAcquireResponses[keyof ProjectPostLockAcquireResponses];
+
+export type ProjectPostLockReleaseData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/lock_release';
+};
+
+export type ProjectPostLockReleaseErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostLockReleaseError = ProjectPostLockReleaseErrors[keyof ProjectPostLockReleaseErrors];
+
+export type ProjectPostLockReleaseResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostLockReleaseResponse = ProjectPostLockReleaseResponses[keyof ProjectPostLockReleaseResponses];
 
 export type ProjectPostLockRefreshData = {
     body?: never;
@@ -1167,6 +1363,57 @@ export type ProjectPatchAccessResponses = {
 
 export type ProjectPatchAccessResponse = ProjectPatchAccessResponses[keyof ProjectPatchAccessResponses];
 
+export type ProjectPatchCacheMaxRevisionsData = {
+    body: CacheRetention;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/cache_max_revisions';
+};
+
+export type ProjectPatchCacheMaxRevisionsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchCacheMaxRevisionsError = ProjectPatchCacheMaxRevisionsErrors[keyof ProjectPatchCacheMaxRevisionsErrors];
+
+export type ProjectPatchCacheMaxRevisionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchCacheMaxRevisionsResponse = ProjectPatchCacheMaxRevisionsResponses[keyof ProjectPatchCacheMaxRevisionsResponses];
+
 export type ProjectGetRmsProjectsData = {
     body?: never;
     path?: never;
@@ -1219,6 +1466,10 @@ export type ProjectPatchRmsData = {
 };
 
 export type ProjectPatchRmsErrors = {
+    /**
+     * The RMS version in the project is not supported
+     */
+    400: unknown;
     /**
      * No active or valid session was found
      */
@@ -1504,6 +1755,49 @@ export type ProjectGetCacheRevisionResponses = {
 
 export type ProjectGetCacheRevisionResponse = ProjectGetCacheRevisionResponses[keyof ProjectGetCacheRevisionResponses];
 
+export type ProjectGetCacheDiffData = {
+    body?: never;
+    path: {
+        revision_id: string;
+    };
+    query: {
+        resource: CacheResource;
+    };
+    url: '/api/v1/project/cache/diff/{revision_id}';
+};
+
+export type ProjectGetCacheDiffErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Cache revision not found for the specified resource
+     */
+    404: unknown;
+    /**
+     * Cache revision failed validation or not supported for the specified resource
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetCacheDiffResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<ScalarFieldDiff | ListFieldDiff>;
+};
+
+export type ProjectGetCacheDiffResponse = ProjectGetCacheDiffResponses[keyof ProjectGetCacheDiffResponses];
+
 export type ProjectPostCacheRestoreData = {
     body?: never;
     path: {
@@ -1553,6 +1847,152 @@ export type ProjectPostCacheRestoreResponses = {
 };
 
 export type ProjectPostCacheRestoreResponse = ProjectPostCacheRestoreResponses[keyof ProjectPostCacheRestoreResponses];
+
+export type ProjectGetMappingsData = {
+    body?: never;
+    path: {
+        mapping_type: MappingType;
+        source_system: DataSystem;
+        target_system: DataSystem;
+    };
+    query?: never;
+    url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}';
+};
+
+export type ProjectGetMappingsErrors = {
+    /**
+     * Invalid mapping data or unsupported mapping type
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Mappings resource file not found
+     */
+    404: unknown;
+    /**
+     *
+     * Mappings resource contains invalid content or corrupted JSON.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetMappingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<MappingGroup>;
+};
+
+export type ProjectGetMappingsResponse = ProjectGetMappingsResponses[keyof ProjectGetMappingsResponses];
+
+export type ProjectPutMappingsData = {
+    body: Array<{
+        mapping_type?: 'stratigraphy';
+    } & StratigraphyIdentifierMapping>;
+    path: {
+        mapping_type: MappingType;
+        source_system: DataSystem;
+        target_system: DataSystem;
+    };
+    query?: never;
+    url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}';
+};
+
+export type ProjectPutMappingsErrors = {
+    /**
+     * Invalid mapping data or unsupported mapping type
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Mappings resource file not found
+     */
+    404: unknown;
+    /**
+     *
+     * Mappings resource contains invalid content or corrupted JSON.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPutMappingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPutMappingsResponse = ProjectPutMappingsResponses[keyof ProjectPutMappingsResponses];
+
+export type ProjectGetChangelogData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/changelog';
+};
+
+export type ProjectGetChangelogErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Changelog file not found
+     */
+    404: unknown;
+    /**
+     * Invalid changelog data
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetChangelogResponses = {
+    /**
+     * Successful Response
+     */
+    200: LogChangeInfo;
+};
+
+export type ProjectGetChangelogResponse = ProjectGetChangelogResponses[keyof ProjectGetChangelogResponses];
 
 export type UserGetUserData = {
     body?: never;
@@ -1776,6 +2216,51 @@ export type SessionPatchAccessTokenResponses = {
 };
 
 export type SessionPatchAccessTokenResponse = SessionPatchAccessTokenResponses[keyof SessionPatchAccessTokenResponses];
+
+export type SessionPostRestoreData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/session/restore';
+};
+
+export type SessionPostRestoreErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Permission denied while restoring a .fmu directory
+     */
+    403: unknown;
+    /**
+     * A .fmu path exists but is not a directory
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Project is locked by another process and cannot be restored
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type SessionPostRestoreError = SessionPostRestoreErrors[keyof SessionPostRestoreErrors];
+
+export type SessionPostRestoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type SessionPostRestoreResponse = SessionPostRestoreResponses[keyof SessionPostRestoreResponses];
 
 export type RmsDeleteRmsProjectData = {
     body?: never;
