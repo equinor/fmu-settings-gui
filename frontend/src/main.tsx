@@ -184,13 +184,12 @@ export function App() {
           setApiTokenStatus,
         ),
         responseInterceptorRejected(
+          msalInstance,
           apiToken,
           setApiToken,
           apiTokenStatus.valid ?? false,
           setApiTokenStatus,
           setRequestSessionCreation,
-          msalInstance,
-          setAccessToken,
         ),
       );
       setHasResponseInterceptor(true);
