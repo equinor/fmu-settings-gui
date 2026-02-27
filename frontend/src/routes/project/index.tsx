@@ -93,7 +93,7 @@ function Content() {
             projectData={project.data}
             lockStatus={project.lockStatus}
           />
-          <ProjectSelector projectReadOnly={projectReadOnly} />
+          <ProjectSelector />
 
           <PageSectionSpacer />
 
@@ -113,7 +113,7 @@ function Content() {
         <>
           <ProjectNotFound text={project.text ?? ""} />
 
-          <ProjectSelector projectReadOnly={projectReadOnly} />
+          <ProjectSelector />
         </>
       )}
     </>
