@@ -260,7 +260,7 @@ export function EditableAccessInfo({
           link
           target="_blank"
           rel="noopener noreferrer"
-          href="https://doc-sumo-doc-prod.radix.equinor.com/documentation/access_control"
+          href="https://fmu-docs.equinor.com/docs/sumo/documentation/access_control/"
         >
           Sumo documentation
         </Typography>
