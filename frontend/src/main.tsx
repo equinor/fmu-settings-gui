@@ -2,6 +2,7 @@ import {
   type AuthenticationResult,
   type EventMessage,
   EventType,
+  InteractionRequiredAuthError,
   PublicClientApplication,
 } from "@azure/msal-browser";
 import { MsalProvider, useMsal } from "@azure/msal-react";
@@ -31,7 +32,7 @@ import {
   smdaGetHealthQueryKey,
 } from "#client/@tanstack/react-query.gen";
 import { client } from "#client/client.gen";
-import { msalConfig } from "#config";
+import { msalConfig, ssoScopes } from "#config";
 import {
   createSessionAsync,
   handleAddSsoAccessToken,
@@ -56,6 +57,7 @@ export interface RouterContext {
     AxiosError,
     Options<SessionPostSessionData>
   >;
+  setRequestAcquireSsoAccessToken: Dispatch<SetStateAction<boolean>>;
 }
 
 // Register the router instance for type safety
@@ -142,6 +144,9 @@ const router = createRouter({
       AxiosError,
       Options<SessionPostSessionData>
     >,
+    setRequestAcquireSsoAccessToken: undefined as unknown as Dispatch<
+      SetStateAction<boolean>
+    >,
   },
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
@@ -159,6 +164,8 @@ export function App() {
   const [sessionCreatedAt, setSessionCreatedAt] = useState<
     number | undefined
   >();
+  const [requestAcquireSsoAccessToken, setRequestAcquireSsoAccessToken] =
+    useState(false);
 
   const { mutateAsync: createSessionMutateAsync } = useMutation({
     ...sessionPostSessionMutation(),
@@ -174,7 +181,6 @@ export function App() {
     meta: { errorPrefix: "Error adding access token to session" },
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Keep dependency list unchanged to preserve existing behavior
   useEffect(() => {
     let id: number | undefined;
     if (isApiTokenNonEmpty(apiToken)) {
@@ -184,12 +190,12 @@ export function App() {
           setApiTokenStatus,
         ),
         responseInterceptorRejected(
-          msalInstance,
           apiToken,
           setApiToken,
           apiTokenStatus.valid ?? false,
           setApiTokenStatus,
           setRequestSessionCreation,
+          setRequestAcquireSsoAccessToken,
         ),
       );
       setHasResponseInterceptor(true);
@@ -201,13 +207,7 @@ export function App() {
         setHasResponseInterceptor(false);
       }
     };
-  }, [
-    createSessionMutateAsync,
-    apiToken,
-    apiTokenStatus.valid,
-    msalInstance,
-    setAccessToken,
-  ]);
+  }, [createSessionMutateAsync, apiToken, apiTokenStatus.valid]);
 
   useEffect(() => {
     async function callCreateSessionAsync() {
@@ -236,6 +236,19 @@ export function App() {
     sessionCreatedAt,
   ]);
 
+  useEffect(() => {
+    if (requestAcquireSsoAccessToken) {
+      msalInstance
+        .acquireTokenSilent({ scopes: ssoScopes })
+        .catch((error: unknown) => {
+          if (error instanceof InteractionRequiredAuthError) {
+            return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
+          }
+        });
+      setRequestAcquireSsoAccessToken(false);
+    }
+  }, [msalInstance, requestAcquireSsoAccessToken]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: Invalidate router context when some of the content changes
   useEffect(() => {
     void router.invalidate();
@@ -249,6 +262,15 @@ export function App() {
           if (event.eventType === EventType.LOGIN_SUCCESS) {
             const account = payload.account;
             msalInstance.setActiveAccount(account);
+            msalInstance
+              .acquireTokenSilent({ scopes: ssoScopes })
+              .catch((error: unknown) => {
+                if (error instanceof InteractionRequiredAuthError) {
+                  return msalInstance.acquireTokenRedirect({
+                    scopes: ssoScopes,
+                  });
+                }
+              });
           } else if (event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
             setAccessToken(payload.accessToken);
             handleAddSsoAccessToken(
@@ -279,6 +301,7 @@ export function App() {
         hasResponseInterceptor,
         accessToken,
         createSessionMutateAsync,
+        setRequestAcquireSsoAccessToken,
       }}
     />
   );

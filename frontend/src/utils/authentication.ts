@@ -1,7 +1,4 @@
-import {
-  InteractionRequiredAuthError,
-  type IPublicClientApplication,
-} from "@azure/msal-browser";
+import { type IPublicClientApplication } from "@azure/msal-browser";
 import type {
   UseMutateAsyncFunction,
   UseMutateFunction,
@@ -151,12 +148,12 @@ export const responseInterceptorFulfilled =
 
 export const responseInterceptorRejected =
   (
-    msalInstance: IPublicClientApplication,
     apiToken: string,
     setApiToken: Dispatch<SetStateAction<string>>,
     apiTokenStatusValid: boolean,
     setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>,
     setRequestSessionCreation: Dispatch<SetStateAction<boolean>>,
+    setRequestAcquireSsoAccessToken: Dispatch<SetStateAction<boolean>>,
   ) =>
   async (error: AxiosError) => {
     if (error.status === HTTP_STATUS_UNAUTHORIZED) {
@@ -170,13 +167,7 @@ export const responseInterceptorRejected =
         }
       } else if (isExternalApi(error.response?.headers)) {
         if (!isApiUrlSmdaHealthcheck(error.response?.config.url)) {
-          try {
-            await msalInstance.acquireTokenSilent({ scopes: ssoScopes });
-          } catch (tokenError) {
-            if (tokenError instanceof InteractionRequiredAuthError) {
-              void msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
-            }
-          }
+          setRequestAcquireSsoAccessToken(true);
         }
       } else {
         setRequestSessionCreation(true);

@@ -1,4 +1,3 @@
-import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { Button, DotProgress, Typography } from "@equinor/eds-core-react";
 import {
@@ -16,7 +15,6 @@ import {
 } from "#client/@tanstack/react-query.gen";
 import { Loading } from "#components/common";
 import { Overview } from "#components/project/masterdata/Overview";
-import { ssoScopes } from "#config";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import { PageCode, PageHeader, PageText, WarningBox } from "#styles/common";
@@ -72,18 +70,6 @@ function AccessTokenPresence() {
     },
     meta: { errorPrefix: "Error adding access token to session" },
   });
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      msalInstance
-        .acquireTokenSilent({ scopes: ssoScopes })
-        .catch((error: unknown) => {
-          if (error instanceof InteractionRequiredAuthError) {
-            return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
-          }
-        });
-    }
-  }, [isAuthenticated, msalInstance]);
 
   return (
     <PageText>
