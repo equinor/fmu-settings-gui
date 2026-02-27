@@ -1,24 +1,16 @@
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { Button, DotProgress, Typography } from "@equinor/eds-core-react";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { Button, Typography } from "@equinor/eds-core-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useEffect, useState } from "react";
 
-import {
-  sessionPatchAccessTokenMutation,
-  smdaGetHealthQueryKey,
-  userGetUserOptions,
-} from "#client/@tanstack/react-query.gen";
+import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { Loading } from "#components/common";
 import { Overview } from "#components/project/masterdata/Overview";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import { PageCode, PageHeader, PageText, WarningBox } from "#styles/common";
-import { handleAddSsoAccessToken, handleSsoLogin } from "#utils/authentication";
+import { handleSsoLogin } from "#utils/authentication";
 import {
   getStorageItem,
   STORAGENAME_MASTERDATA_EDIT_MODE,
@@ -57,20 +49,9 @@ function AccessTokenPresence({
 }: {
   hasSubscriptionKey: boolean;
 }) {
-  const queryClient = useQueryClient();
-  const { accessToken } = Route.useRouteContext();
+  const { setRequestAcquireSsoAccessToken } = Route.useRouteContext();
   const { instance: msalInstance } = useMsal();
   const isAuthenticated = useIsAuthenticated();
-
-  const { mutate: patchAccessTokenMutate, isPending } = useMutation({
-    ...sessionPatchAccessTokenMutation(),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: smdaGetHealthQueryKey(),
-      });
-    },
-    meta: { errorPrefix: "Error adding access token to session" },
-  });
 
   return (
     <PageText>
@@ -78,15 +59,15 @@ function AccessTokenPresence({
         <>
           ✅ You are logged in with SSO and an <strong>access token</strong> is
           present
-          {hasSubscriptionKey && accessToken !== "" && (
+          {hasSubscriptionKey && (
             <>
               . Try adding it to the session:{" "}
               <Button
                 onClick={() => {
-                  handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
+                  setRequestAcquireSsoAccessToken(true);
                 }}
               >
-                {isPending ? <DotProgress /> : "Add to session"}
+                Add to session
               </Button>
             </>
           )}
