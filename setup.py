@@ -67,7 +67,7 @@ class SdistCommand(sdist):
 setup(
     cmdclass={
         "build_py": BuildPyCommand,
-        "develop:": DevelopCommand,
+        "develop": DevelopCommand,
         "sdist": SdistCommand,
     },
 )
