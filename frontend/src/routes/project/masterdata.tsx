@@ -29,14 +29,11 @@ export const Route = createFileRoute("/project/masterdata")({
   component: RouteComponent,
 });
 
-function SubscriptionKeyPresence() {
-  const { data: userData } = useSuspenseQuery(userGetUserOptions());
-
-  const hasSubscriptionKey =
-    "smda_subscription" in userData.user_api_keys &&
-    typeof userData.user_api_keys.smda_subscription === "string" &&
-    userData.user_api_keys.smda_subscription !== "";
-
+function SubscriptionKeyPresence({
+  hasSubscriptionKey,
+}: {
+  hasSubscriptionKey: boolean;
+}) {
   return (
     <PageText>
       {hasSubscriptionKey ? (
@@ -55,7 +52,11 @@ function SubscriptionKeyPresence() {
   );
 }
 
-function AccessTokenPresence() {
+function AccessTokenPresence({
+  hasSubscriptionKey,
+}: {
+  hasSubscriptionKey: boolean;
+}) {
   const queryClient = useQueryClient();
   const { accessToken } = Route.useRouteContext();
   const { instance: msalInstance } = useMsal();
@@ -76,14 +77,19 @@ function AccessTokenPresence() {
       {isAuthenticated ? (
         <>
           ✅ You are logged in with SSO and an <strong>access token</strong> is
-          present. Try adding it to the session:{" "}
-          <Button
-            onClick={() => {
-              handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
-            }}
-          >
-            {isPending ? <DotProgress /> : "Add to session"}
-          </Button>
+          present
+          {hasSubscriptionKey && accessToken !== "" && (
+            <>
+              . Try adding it to the session:{" "}
+              <Button
+                onClick={() => {
+                  handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
+                }}
+              >
+                {isPending ? <DotProgress /> : "Add to session"}
+              </Button>
+            </>
+          )}
         </>
       ) : (
         <>
@@ -102,14 +108,22 @@ function AccessTokenPresence() {
 }
 
 function SmdaNotOk({ text }: { text: string }) {
+  const { data: userData } = useSuspenseQuery(userGetUserOptions());
+
+  const hasSubscriptionKey =
+    "smda_subscription" in userData.user_api_keys &&
+    typeof userData.user_api_keys.smda_subscription === "string" &&
+    userData.user_api_keys.smda_subscription !== "";
+
   return (
     <WarningBox>
       <PageText>Required data for editing masterdata is not present:</PageText>
 
       <PageCode>{text}</PageCode>
 
-      <SubscriptionKeyPresence />
-      <AccessTokenPresence />
+      <SubscriptionKeyPresence hasSubscriptionKey={hasSubscriptionKey} />
+
+      <AccessTokenPresence hasSubscriptionKey={hasSubscriptionKey} />
     </WarningBox>
   );
 }
