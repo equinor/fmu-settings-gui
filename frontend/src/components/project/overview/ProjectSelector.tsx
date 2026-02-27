@@ -161,6 +161,10 @@ function ProjectSelectorForm({
     setHelperTextProjectPath("");
   }, [form.state.values.projectPath]);
 
+  const hasProjectSelected =
+    form.state.values.projectPath !== "" ||
+    form.state.values.recentProjectPath !== "";
+
   return (
     <EditDialog open={isDialogOpen} $minWidth="40em">
       <form
@@ -239,10 +243,14 @@ function ProjectSelectorForm({
           <form.AppForm>
             <form.SubmitButton
               label="Select"
-              disabled={submitDisabled || projectReadOnly}
+              disabled={
+                submitDisabled || (projectReadOnly && !hasProjectSelected)
+              }
               isPending={isPending}
               helperTextDisabled={
-                projectReadOnly ? "Project is read-only" : undefined
+                projectReadOnly && !hasProjectSelected
+                  ? "Project is read-only"
+                  : undefined
               }
             />
             <form.CancelButton
