@@ -207,7 +207,7 @@ export function App() {
         setHasResponseInterceptor(false);
       }
     };
-  }, [createSessionMutateAsync, apiToken, apiTokenStatus.valid]);
+  }, [apiToken, apiTokenStatus.valid]);
 
   useEffect(() => {
     async function callCreateSessionAsync() {

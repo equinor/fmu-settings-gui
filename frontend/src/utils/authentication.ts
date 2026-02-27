@@ -1,4 +1,4 @@
-import { type IPublicClientApplication } from "@azure/msal-browser";
+import type { IPublicClientApplication } from "@azure/msal-browser";
 import type {
   UseMutateAsyncFunction,
   UseMutateFunction,
