@@ -1,11 +1,12 @@
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { Button, Typography } from "@equinor/eds-core-react";
+import { Typography } from "@equinor/eds-core-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Suspense, useEffect, useState } from "react";
 
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { Loading } from "#components/common";
+import { GeneralButton } from "#components/form/button";
 import { Overview } from "#components/project/masterdata/Overview";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
@@ -62,26 +63,24 @@ function AccessTokenPresence({
           {hasSubscriptionKey && (
             <>
               . Try adding it to the session:{" "}
-              <Button
+              <GeneralButton
+                label="Add to session"
                 onClick={() => {
                   setRequestAcquireSsoAccessToken(true);
                 }}
-              >
-                Add to session
-              </Button>
+              />
             </>
           )}
         </>
       ) : (
         <>
           ⛔ An SSO <strong>access token</strong> is not present, please log in:{" "}
-          <Button
+          <GeneralButton
+            label="Log in"
             onClick={() => {
               handleSsoLogin(msalInstance);
             }}
-          >
-            Log in
-          </Button>
+          />
         </>
       )}
     </PageText>
