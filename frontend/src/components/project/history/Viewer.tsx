@@ -21,7 +21,7 @@ import type {
   ListUpdatedEntry,
   ScalarFieldDiff,
 } from "#client/types.gen";
-import { GeneralButton } from "#components/form/button";
+import { CancelButton, GeneralButton } from "#components/form/button";
 import {
   GenericDialog,
   GenericInnerBox,
@@ -531,14 +531,11 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
             tooltipText={projectReadOnly ? "Project is read-only" : undefined}
             onClick={restoreSelectedCache}
           />
-          <Button
-            variant="outlined"
+          <CancelButton
             onClick={() => {
               setIsRestoreDialogOpen(false);
             }}
-          >
-            Cancel
-          </Button>
+          />
         </Dialog.Actions>
       </GenericDialog>
     </ViewerContainer>
