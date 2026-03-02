@@ -179,6 +179,70 @@ export const ChangeTypeSchema = {
     description: 'The types of change that can be made on a file.'
 } as const;
 
+export const CacheRetentionSchema = {
+    properties: {
+        cache_max_revisions: {
+            type: 'integer',
+            minimum: 5,
+            title: 'Cache Max Revisions',
+            description: 'Maximum number of cache revisions to keep per resource.',
+            default: 5
+        }
+    },
+    type: 'object',
+    title: 'CacheRetention',
+    description: 'Cache retention setting for project resources.'
+} as const;
+
+export const ChangeInfoSchema = {
+    properties: {
+        timestamp: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Timestamp'
+        },
+        change_type: {
+            '$ref': '#/components/schemas/ChangeType'
+        },
+        user: {
+            type: 'string',
+            title: 'User'
+        },
+        path: {
+            type: 'string',
+            format: 'path',
+            title: 'Path'
+        },
+        change: {
+            type: 'string',
+            title: 'Change'
+        },
+        hostname: {
+            type: 'string',
+            title: 'Hostname'
+        },
+        file: {
+            type: 'string',
+            title: 'File'
+        },
+        key: {
+            type: 'string',
+            title: 'Key'
+        }
+    },
+    type: 'object',
+    required: ['change_type', 'user', 'path', 'change', 'hostname', 'file', 'key'],
+    title: 'ChangeInfo',
+    description: 'Represents a change in the changelog file.'
+} as const;
+
+export const ChangeTypeSchema = {
+    type: 'string',
+    enum: ['update', 'remove', 'add', 'reset', 'merge', 'copy'],
+    title: 'ChangeType',
+    description: 'The types of change that can be made on a file.'
+} as const;
+
 export const ClassificationSchema = {
     type: 'string',
     enum: ['asset', 'internal', 'restricted'],
@@ -433,7 +497,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.22.0'
+            default: '0.21.1.dev1+g1bc6e98f6.d20260224'
         }
     },
     type: 'object',
