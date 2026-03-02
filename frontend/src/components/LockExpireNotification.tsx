@@ -11,7 +11,11 @@ import {
 import { projectLockTimeoutWarningThreshold } from "#config";
 import { GenericDialog, PageText } from "#styles/common";
 
-export function LockExpireDialog({ lockStatus }: { lockStatus: LockStatus }) {
+export function LockExpireNotification({
+  lockStatus,
+}: {
+  lockStatus: LockStatus;
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [timeUntilExpire, setTimeUntilExpire] = useState<number>(
     Number.POSITIVE_INFINITY,

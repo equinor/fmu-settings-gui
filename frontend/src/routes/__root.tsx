@@ -17,9 +17,11 @@ import { ToastContainer } from "react-toastify";
 
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { Header } from "#components/Header";
+import { LockExpireNotification } from "#components/LockExpireNotification";
 import { ProjectRecoveryNotification } from "#components/ProjectRecoveryNotification";
 import { Sidebar } from "#components/Sidebar";
 import type { RouterContext } from "#main";
+import { useProject } from "#services/project";
 import { PageHeader, PageText } from "#styles/common";
 import GlobalStyle from "#styles/global";
 import { getApiToken, isApiTokenNonEmpty } from "#utils/authentication";
@@ -94,6 +96,14 @@ function ErrorFallbackComponent({
   );
 }
 
+function LockExpireWatcher() {
+  const { lockStatus } = useProject();
+
+  if (!lockStatus?.is_lock_acquired || !lockStatus.lock_info) return null;
+
+  return <LockExpireNotification lockStatus={lockStatus} />;
+}
+
 function RootComponent() {
   const location = useLocation();
   const { apiTokenStatus } = Route.useRouteContext();
@@ -116,6 +126,7 @@ function RootComponent() {
       <GlobalStyle />
       <ToastContainer theme="colored" />
       <ProjectRecoveryNotification />
+      <LockExpireWatcher />
 
       <AppContainer>
         <div className="header">
