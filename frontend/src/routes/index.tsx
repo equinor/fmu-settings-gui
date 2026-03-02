@@ -10,6 +10,7 @@ import {
   PageText,
 } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
+
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });

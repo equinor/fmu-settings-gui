@@ -20,12 +20,11 @@ import { useState } from "react";
 
 import fmuLogo from "#assets/fmu-logo.svg";
 import type { LockInfo } from "#client/types.gen";
-import { LockExpireDialog } from "#components/LockExpireDialog";
+import { LockExpireDialog } from "#components/LockExpireNotification";
 import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { useTaskList } from "#services/tasks";
 import { GenericDialog, PageText } from "#styles/common";
-import { AppMenu } from "./AppMenu";
 import {
   FmuLogo,
   HeaderActionButton,
@@ -272,7 +271,6 @@ export function Header() {
       <TopBar>
         <TopBar.Header>
           <TopBarContainer>
-            <AppMenu />
             <Button
               variant="ghost"
               as={Link}
