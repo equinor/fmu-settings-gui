@@ -106,10 +106,12 @@ export const InfoChip = styled(Chip)`
 export const GenericDialog = styled(Dialog).attrs<{
   $minWidth?: string;
   $maxWidth?: string;
-}>(({ $minWidth = "10em", $maxWidth = undefined }) => ({
+  $width?: string;
+}>(({ $minWidth = "10em", $maxWidth = undefined, $width = undefined }) => ({
   style: {
     minWidth: $minWidth,
     maxWidth: $maxWidth,
+    width: $width,
   },
 }))`
   width: 100%;
