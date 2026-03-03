@@ -223,7 +223,10 @@ function TaskIndicator() {
           <Popover.Title>Setup Checklist</Popover.Title>
         </Popover.Header>
         <Popover.Content>
-          <TaskProgressLabel $allDone={allDone}>
+          <TaskProgressLabel
+            $allDone={allDone}
+            $marginBottom={tokens.spacings.comfortable.small}
+          >
             {tasks.length - pendingCount} / {tasks.length} completed
           </TaskProgressLabel>
           {tasks.map((task) => (
@@ -271,8 +274,8 @@ export function Header() {
           </TopBarContainer>
         </TopBar.Header>
         <TopBar.Actions>
-          <FeedbackDialog />
           <TaskIndicator />
+          <FeedbackDialog />
           <ProjectInfo />
         </TopBar.Actions>
       </TopBar>

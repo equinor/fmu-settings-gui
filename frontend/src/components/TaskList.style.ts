@@ -2,13 +2,6 @@ import { Typography } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-export const TaskListHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${tokens.spacings.comfortable.small};
-`;
-
 export const TaskRow = styled.div`
   display: flex;
   align-items: center;
@@ -21,11 +14,14 @@ export const TaskLabel = styled(Typography)`
   text-decoration: line-through;
 `;
 
-export const TaskProgressLabel = styled(Typography)<{ $allDone: boolean }>`
+export const TaskProgressLabel = styled(Typography)<{
+  $allDone: boolean;
+  $marginBottom?: string;
+}>`
   color: ${({ $allDone }) =>
     $allDone
       ? tokens.colors.interactive.success__resting.hex
       : tokens.colors.interactive.warning__resting.hex};
   font-weight: 500;
-  margin-bottom: ${tokens.spacings.comfortable.small};
+  ${({ $marginBottom }) => $marginBottom && `margin-bottom: ${$marginBottom};`}
 `;

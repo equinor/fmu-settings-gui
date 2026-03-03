@@ -17,6 +17,7 @@ export const TopBarContainer = styled.div`
 export const ProjectInfoContainer = styled.div`
   height: ${tokens.spacings.comfortable.x_large};
   padding: 0.4em ${tokens.spacings.comfortable.medium};
+  margin-left: ${tokens.spacings.comfortable.medium};
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
   background: ${tokens.colors.ui.background__light.hex};
@@ -77,5 +78,4 @@ export const TaskBadgeDone = styled.span`
 export const TaskIndicatorContainer = styled.div`
   display: flex;
   align-items: center;
-  margin-right: ${tokens.spacings.comfortable.medium};
 `;
