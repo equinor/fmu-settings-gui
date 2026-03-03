@@ -15,6 +15,7 @@ import type { LockInfo } from "#client/types.gen";
 import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { GenericDialog, PageText } from "#styles/common";
+import { AppMenu } from "./AppMenu";
 import {
   FmuLogo,
   HeaderActionButton,
@@ -23,7 +24,6 @@ import {
   ProjectInfoItemContainer,
   TopBarContainer,
 } from "./Header.style";
-import { AppMenu } from "./home/AppMenu";
 
 function LockStatusIcon({
   isReadOnly,
