@@ -20,7 +20,6 @@ import { useState } from "react";
 
 import fmuLogo from "#assets/fmu-logo.svg";
 import type { LockInfo } from "#client/types.gen";
-import { LockExpireDialog } from "#components/LockExpireNotification";
 import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { useTaskList } from "#services/tasks";
@@ -37,6 +36,7 @@ import {
   TaskIndicatorContainer,
   TopBarContainer,
 } from "./Header.style";
+import { AppMenu } from "./home/AppMenu";
 import {
   TaskCompletedLabel,
   TaskRow,
@@ -84,36 +84,30 @@ function ProjectInfo() {
   const lockStatus = project.lockStatus;
 
   return (
-    <>
-      {project.lockStatus && (
-        <LockExpireDialog lockStatus={project.lockStatus} />
+    <ProjectInfoContainer>
+      {project.status && project.data ? (
+        <>
+          <LockStatusIcon
+            isReadOnly={!(lockStatus?.is_lock_acquired ?? false)}
+            lockInfo={lockStatus?.lock_info}
+          />
+          <ProjectInfoItem
+            label="Asset"
+            value={project.data.config.access?.asset.name}
+          />
+          <ProjectInfoItem
+            label="Model"
+            value={project.data.config.model?.name}
+          />
+          <ProjectInfoItem
+            label="Revision"
+            value={project.data.config.model?.revision}
+          />
+        </>
+      ) : (
+        "No project selected"
       )}
-
-      <ProjectInfoContainer>
-        {project.status && project.data ? (
-          <>
-            <LockStatusIcon
-              isReadOnly={!(lockStatus?.is_lock_acquired ?? false)}
-              lockInfo={lockStatus?.lock_info}
-            />
-            <ProjectInfoItem
-              label="Asset"
-              value={project.data.config.access?.asset.name}
-            />
-            <ProjectInfoItem
-              label="Model"
-              value={project.data.config.model?.name}
-            />
-            <ProjectInfoItem
-              label="Revision"
-              value={project.data.config.model?.revision}
-            />
-          </>
-        ) : (
-          "No project selected"
-        )}
-      </ProjectInfoContainer>
-    </>
+    </ProjectInfoContainer>
   );
 }
 
@@ -271,6 +265,7 @@ export function Header() {
       <TopBar>
         <TopBar.Header>
           <TopBarContainer>
+            <AppMenu />
             <Button
               variant="ghost"
               as={Link}

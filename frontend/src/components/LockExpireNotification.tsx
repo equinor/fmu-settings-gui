@@ -2,27 +2,25 @@ import { Button, Dialog } from "@equinor/eds-core-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import type { LockStatus } from "#client";
 import {
   projectGetLockStatusQueryKey,
   projectPostLockRefreshMutation,
   projectPostLockReleaseMutation,
 } from "#client/@tanstack/react-query.gen";
-import { projectLockTimeoutWarningThreshold } from "#config";
+import { projectLockExpireNotificationThreshold } from "#config";
+import { useProject } from "#services/project";
 import { GenericDialog, PageText } from "#styles/common";
 
-export function LockExpireNotification({
-  lockStatus,
-}: {
-  lockStatus: LockStatus;
-}) {
+export function LockExpireNotification() {
+  const project = useProject();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [timeUntilExpire, setTimeUntilExpire] = useState<number>(
     Number.POSITIVE_INFINITY,
   );
 
-  const lockInfo = lockStatus.lock_info;
-  const isLockAcquired = lockStatus.is_lock_acquired;
+  const lockInfo = project.lockStatus?.lock_info;
+  const isLockAcquired = project.lockStatus?.is_lock_acquired;
   const isExpired = !isLockAcquired;
 
   const queryClient = useQueryClient();
@@ -43,6 +41,7 @@ export function LockExpireNotification({
   const lockReleaseMutation = useMutation({
     ...projectPostLockReleaseMutation(),
     onSuccess: () => {
+      setTimeUntilExpire(Number.POSITIVE_INFINITY);
       void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),
       });
@@ -52,14 +51,6 @@ export function LockExpireNotification({
       errorPrefix: "Error releasing the lock",
     },
   });
-
-  const onLockRefresh = () => {
-    lockRefreshMutation.mutate({});
-  };
-
-  const onLockRelease = () => {
-    lockReleaseMutation.mutate({});
-  };
 
   useEffect(() => {
     if (isLockAcquired && lockInfo) {
@@ -81,22 +72,28 @@ export function LockExpireNotification({
   }, [isLockAcquired, lockInfo]);
 
   useEffect(() => {
-    if (
-      isLockAcquired &&
-      timeUntilExpire <= projectLockTimeoutWarningThreshold
-    ) {
-      setIsDialogOpen(true);
-    }
-
     if (timeUntilExpire === 0) {
       void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),
       });
+    } else if (
+      isLockAcquired &&
+      timeUntilExpire <= projectLockExpireNotificationThreshold
+    ) {
+      setIsDialogOpen(true);
     }
   }, [isLockAcquired, timeUntilExpire, queryClient]);
 
+  const onLockRefresh = () => {
+    lockRefreshMutation.mutate({});
+  };
+
+  const onLockRelease = () => {
+    lockReleaseMutation.mutate({});
+  };
+
   return (
-    <GenericDialog open={isDialogOpen} $minWidth="20em">
+    <GenericDialog open={isDialogOpen} $width="35em">
       <Dialog.Header>
         {isExpired ? "Lock expired" : "Lock about to expire"}
       </Dialog.Header>
