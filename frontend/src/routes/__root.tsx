@@ -17,6 +17,7 @@ import { ToastContainer } from "react-toastify";
 
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { Header } from "#components/Header";
+import { ProjectRecoveryNotification } from "#components/ProjectRecoveryNotification";
 import { Sidebar } from "#components/Sidebar";
 import type { RouterContext } from "#main";
 import { PageHeader, PageText } from "#styles/common";
@@ -114,6 +115,7 @@ function RootComponent() {
     <>
       <GlobalStyle />
       <ToastContainer theme="colored" />
+      <ProjectRecoveryNotification />
 
       <AppContainer>
         <div className="header">

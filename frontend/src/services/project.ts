@@ -27,6 +27,7 @@ type GetProject = {
   text?: string;
   data?: FmuProject;
   lockStatus?: LockStatus;
+  errorStatus?: number;
 };
 
 export function useProject(options?: Options<ProjectGetProjectData>) {
@@ -44,7 +45,9 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
           return { status: true, data } as GetProject;
         } catch (error) {
           let text = "";
+          let errorStatus: number | undefined;
           if (isAxiosError(error)) {
+            errorStatus = error.status;
             // Use normal handling for unauthorized response
             if (error.status === HTTP_STATUS_UNAUTHORIZED) {
               return Promise.reject(error);
@@ -55,7 +58,11 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
             }
           }
 
-          return { status: false, text } as GetProject;
+          return {
+            status: false,
+            text,
+            errorStatus,
+          } as GetProject;
         }
       },
       queryKey: projectGetProjectQueryKey(options),
