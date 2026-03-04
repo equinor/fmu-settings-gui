@@ -5,7 +5,11 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { useTaskList } from "#services/tasks";
-import { TaskLabel, TaskProgressLabel, TaskRow } from "./TaskList.style";
+import {
+  TaskCompletedLabel,
+  TaskRow,
+  TasksProgressLabel,
+} from "./TaskList.style";
 
 export function TaskList() {
   const tasks = useTaskList();
@@ -26,16 +30,16 @@ export function TaskList() {
       <Accordion.Item isExpanded={open} onExpandedChange={setOpen}>
         <Accordion.Header>
           Setup Checklist
-          <TaskProgressLabel $allDone={allDone}>
+          <TasksProgressLabel $allDone={allDone}>
             {completedCount} / {tasks.length} completed
-          </TaskProgressLabel>
+          </TasksProgressLabel>
         </Accordion.Header>
         <Accordion.Panel>
           {tasks.map((task) => (
             <TaskRow key={task.id}>
               <Icon
                 data={task.done ? checkbox : warning_filled}
-                size={18}
+                size={16}
                 color={
                   task.done
                     ? tokens.colors.interactive.success__resting.hex
@@ -43,7 +47,7 @@ export function TaskList() {
                 }
               />
               {task.done ? (
-                <TaskLabel>{task.label}</TaskLabel>
+                <TaskCompletedLabel>{task.label}</TaskCompletedLabel>
               ) : (
                 <Typography link as={Link} to={task.to}>
                   {task.label}

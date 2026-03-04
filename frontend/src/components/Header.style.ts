@@ -39,6 +39,11 @@ export const HeaderActionButton = styled(Button).attrs({
   }
 `;
 
+export const TaskIndicatorContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 export const TaskBadgeWrapper = styled.span`
   position: relative;
   display: inline-flex;
@@ -73,9 +78,4 @@ export const TaskBadgeDone = styled.span`
   width: 14px;
   height: 14px;
   background: ${tokens.colors.interactive.success__resting.hex};
-`;
-
-export const TaskIndicatorContainer = styled.div`
-  display: flex;
-  align-items: center;
 `;

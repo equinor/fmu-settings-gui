@@ -2,11 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 
 import { projectGetMappings } from "#client";
-import {
-  projectGetMappingsQueryKey,
-  userGetUserOptions,
-} from "#client/@tanstack/react-query.gen";
-import type { MappingGroup, Smda } from "#client/types.gen";
+import { projectGetMappingsQueryKey } from "#client/@tanstack/react-query.gen";
+import type { MappingGroup } from "#client/types.gen";
 import { useProject } from "#services/project";
 import type { FileRouteTypes } from "../routeTree.gen";
 
@@ -17,22 +14,8 @@ export type Task = {
   to: FileRouteTypes["to"];
 };
 
-function isMasterdataComplete(masterdata: Smda | null | undefined): boolean {
-  return !!(
-    masterdata &&
-    masterdata.field.length > 0 &&
-    masterdata.country.length > 0 &&
-    masterdata.discovery.length > 0 &&
-    masterdata.coordinate_system.identifier !== "(none)" &&
-    masterdata.coordinate_system.uuid !== "0" &&
-    masterdata.stratigraphic_column.identifier !== "(none)" &&
-    masterdata.stratigraphic_column.uuid !== "0"
-  );
-}
-
 export function useTaskList(): Task[] {
   const project = useProject();
-  const { data: user } = useQuery(userGetUserOptions());
   const projectPath = project.data?.path;
   const mappingsPath = {
     mapping_type: "stratigraphy" as const,
@@ -75,25 +58,19 @@ export function useTaskList(): Task[] {
   return [
     {
       id: "model",
-      label: "Set Model and Access Control",
+      label: "Set model information and access control",
       done: !!(config.model?.name && config.access?.asset.name),
       to: "/project",
     },
     {
-      id: "smda-key",
-      label: "Set SMDA Subscription Key",
-      done: !!user?.user_api_keys.smda_subscription,
-      to: "/user/keys",
-    },
-    {
       id: "masterdata",
-      label: "Set Masterdata",
-      done: isMasterdataComplete(config.masterdata?.smda),
+      label: "Set masterdata",
+      done: !!config.masterdata?.smda,
       to: "/project/masterdata",
     },
     {
       id: "rms",
-      label: "Set RMS Project and RMS Stratigraphy",
+      label: "Set RMS project and stratigraphy",
       done:
         !!config.rms?.path &&
         (config.rms.zones?.length ?? 0) > 0 &&
@@ -102,7 +79,7 @@ export function useTaskList(): Task[] {
     },
     {
       id: "mappings",
-      label: "Set Mappings",
+      label: "Set stratigraphy mappings",
       done: mappings.length > 0,
       // TODO: update `to` when the mappings page is implemented
       to: "/project",

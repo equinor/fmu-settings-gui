@@ -37,7 +37,11 @@ import {
   TaskIndicatorContainer,
   TopBarContainer,
 } from "./Header.style";
-import { TaskLabel, TaskProgressLabel, TaskRow } from "./home/TaskList.style";
+import {
+  TaskCompletedLabel,
+  TaskRow,
+  TasksProgressLabel,
+} from "./home/TaskList.style";
 
 function LockStatusIcon({
   isReadOnly,
@@ -223,17 +227,17 @@ function TaskIndicator() {
           <Popover.Title>Setup Checklist</Popover.Title>
         </Popover.Header>
         <Popover.Content>
-          <TaskProgressLabel
+          <TasksProgressLabel
             $allDone={allDone}
             $marginBottom={tokens.spacings.comfortable.small}
           >
             {tasks.length - pendingCount} / {tasks.length} completed
-          </TaskProgressLabel>
+          </TasksProgressLabel>
           {tasks.map((task) => (
             <TaskRow key={task.id}>
               <Icon
                 data={task.done ? checkbox : warning_filled}
-                size={18}
+                size={16}
                 color={
                   task.done
                     ? tokens.colors.interactive.success__resting.hex
@@ -241,7 +245,7 @@ function TaskIndicator() {
                 }
               />
               {task.done ? (
-                <TaskLabel>{task.label}</TaskLabel>
+                <TaskCompletedLabel>{task.label}</TaskCompletedLabel>
               ) : (
                 <Typography link as={Link} to={task.to} onClick={handleClose}>
                   {task.label}
