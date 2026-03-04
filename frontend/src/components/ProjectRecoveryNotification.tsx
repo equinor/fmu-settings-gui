@@ -63,12 +63,9 @@ export function ProjectRecoveryNotification() {
             : null,
         );
         setIsOpen(true);
-      } catch (error) {
+      } catch {
         setLatestRevision(null);
-        setIsOpen(false);
-        toast.error(
-          `Error getting project snapshots for recovery: ${String(error)}`,
-        );
+        setIsOpen(true);
       }
     }
 
@@ -94,12 +91,12 @@ export function ProjectRecoveryNotification() {
 
       <Dialog.CustomContent>
         {latestRevision ? (
-          <PageText>
+          <PageText $marginBottom="0">
             This project configuration is invalid or corrupted. Do you want to
             restore it from the latest snapshot?
           </PageText>
         ) : (
-          <PageText>
+          <PageText $marginBottom="0">
             This project configuration is invalid or corrupted and no snapshots
             were found in cache. You may be able to restore it by finding a
             backup on the project disk in the <code>.snapshots</code> folder.
