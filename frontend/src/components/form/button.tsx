@@ -11,6 +11,7 @@ type GeneralButtonProps = {
   disabled?: boolean;
   tooltipText?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 } & Pick<ButtonProps, "variant" | "color" | "type">;
 
 export function GeneralButton({
@@ -22,6 +23,7 @@ export function GeneralButton({
   isPending,
   tooltipText,
   onClick,
+  onMouseDown,
 }: GeneralButtonProps) {
   return (
     <Tooltip title={tooltipText ?? ""}>
@@ -37,6 +39,7 @@ export function GeneralButton({
               }
             : onClick
         }
+        onMouseDown={onMouseDown}
       >
         {isPending && (
           <DotProgress
@@ -76,8 +79,10 @@ export function SubmitButton({
 
 export function CancelButton({
   onClick,
+  onMouseDown,
 }: {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
   return (
     <GeneralButton
@@ -85,6 +90,7 @@ export function CancelButton({
       variant="outlined"
       label="Cancel"
       onClick={onClick}
+      onMouseDown={onMouseDown}
     />
   );
 }

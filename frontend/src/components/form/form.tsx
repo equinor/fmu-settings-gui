@@ -61,7 +61,7 @@ export function EditableTextFieldForm({
   const [isReadonly, setIsReadonly] = useState(true);
   const [submitDisabled, setSubmitDisabled] = useState(true);
 
-  const validator = handleValidator({ length, minLength });
+  const validator = handleValidator({ length, minLength, initialValue: value });
 
   const formSubmitCallback = ({
     message,
@@ -134,6 +134,10 @@ export function EditableTextFieldForm({
                   e.preventDefault();
                   form.reset();
                   setIsReadonly(true);
+                }}
+                onMouseDown={(e) => {
+                  // Prevent onBlur of the input field so validation message does not flash
+                  e.preventDefault();
                 }}
               />
             </>
