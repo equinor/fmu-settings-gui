@@ -29,7 +29,7 @@ export function TaskList() {
     <Accordion>
       <Accordion.Item isExpanded={open} onExpandedChange={setOpen}>
         <Accordion.Header>
-          Setup Checklist
+          Project setup checklist
           <TasksProgressLabel $allDone={allDone}>
             {completedCount} / {tasks.length} completed
           </TasksProgressLabel>

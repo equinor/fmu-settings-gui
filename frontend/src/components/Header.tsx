@@ -224,7 +224,7 @@ function TaskIndicator() {
         trapFocus
       >
         <Popover.Header>
-          <Popover.Title>Setup Checklist</Popover.Title>
+          <Popover.Title>Project setup checklist</Popover.Title>
         </Popover.Header>
         <Popover.Content>
           <TasksProgressLabel
