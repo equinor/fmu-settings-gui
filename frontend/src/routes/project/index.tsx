@@ -93,7 +93,7 @@ function Content() {
             projectData={project.data}
             lockStatus={project.lockStatus}
           />
-          <ProjectSelector buttonLabel="Change project" />
+          <ProjectSelector actionLabel="Change project" />
 
           <PageSectionSpacer />
 
