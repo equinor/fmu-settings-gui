@@ -57,9 +57,11 @@ type ValueSource = "recentProjectPath" | "projectPath" | "";
 
 function ProjectSelectorForm({
   closeDialog,
+  dialogTitle,
   isDialogOpen,
 }: {
   closeDialog: () => void;
+  dialogTitle: string;
   isDialogOpen: boolean;
 }) {
   const [initConfirmDialogOpen, setInitConfirmDialogOpen] = useState(false);
@@ -179,7 +181,7 @@ function ProjectSelectorForm({
         }}
       >
         <Dialog.Header>
-          <Dialog.Title>Select project</Dialog.Title>
+          <Dialog.Title>{dialogTitle}</Dialog.Title>
         </Dialog.Header>
 
         <Dialog.CustomContent>
@@ -384,7 +386,13 @@ function ConfirmInitProjectDialog({
   );
 }
 
-export function ProjectSelector() {
+export function ProjectSelector({
+  buttonLabel = "Select project",
+  dialogTitle = buttonLabel,
+}: {
+  buttonLabel?: string;
+  dialogTitle?: string;
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleOpen = () => {
@@ -396,9 +404,10 @@ export function ProjectSelector() {
 
   return (
     <>
-      <Button onClick={handleOpen}>Select project</Button>
+      <Button onClick={handleOpen}>{buttonLabel}</Button>
       <ProjectSelectorForm
         closeDialog={handleClose}
+        dialogTitle={dialogTitle}
         isDialogOpen={isDialogOpen}
       />
     </>

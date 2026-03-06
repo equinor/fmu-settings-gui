@@ -308,7 +308,7 @@ function RmsProjectActions({
 
       <ActionButtonsContainer>
         <GeneralButton
-          label="Select project"
+          label={rmsData?.path ? "Change project" : "Select project"}
           disabled={
             !!projectIsReadOnly ||
             isRmsProjectOpen ||
