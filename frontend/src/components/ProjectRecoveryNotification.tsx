@@ -1,5 +1,6 @@
 import { Dialog } from "@equinor/eds-core-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -19,11 +20,9 @@ const CACHE_RESOURCE_PROJECT_CONFIG: CacheResource = "config.json";
 export function ProjectRecoveryNotification() {
   const project = useProject();
   const queryClient = useQueryClient();
-  const { data: retryAttempt } = useQuery({
-    queryKey: ["projectRecoveryRetry"] as const,
-    queryFn: () => 0,
-    initialData: 0,
-    staleTime: Number.POSITIVE_INFINITY,
+  const selectProjectInvalidAttempt = useRouteContext({
+    from: "__root__",
+    select: (context) => context.selectProjectInvalidAttempt,
   });
   const [isOpen, setIsOpen] = useState(false);
   const [latestRevision, setLatestRevision] = useState<string | null>(null);
@@ -56,7 +55,7 @@ export function ProjectRecoveryNotification() {
       meta: { errorPrefix: "Error restoring project from latest snapshot" },
     });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: retryAttempt intentionally retriggers this effect
+  // biome-ignore lint/correctness/useExhaustiveDependencies: selectProjectInvalidAttempt intentionally retriggers this effect
   useEffect(() => {
     async function checkSnapshots() {
       try {
@@ -82,7 +81,7 @@ export function ProjectRecoveryNotification() {
       setLatestRevision(null);
       setIsOpen(false);
     }
-  }, [project.errorStatus, retryAttempt]);
+  }, [project.errorStatus, selectProjectInvalidAttempt]);
 
   return (
     <GenericDialog

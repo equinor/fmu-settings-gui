@@ -50,6 +50,8 @@ export interface RouterContext {
   setApiToken: Dispatch<SetStateAction<string>>;
   apiTokenStatus: TokenStatus;
   setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>;
+  selectProjectInvalidAttempt: number;
+  setSelectProjectInvalidAttempt: Dispatch<SetStateAction<number>>;
   hasResponseInterceptor: boolean;
   accessToken: string;
   createSessionMutateAsync: UseMutateAsyncFunction<
@@ -137,6 +139,10 @@ const router = createRouter({
     setApiTokenStatus: undefined as unknown as Dispatch<
       SetStateAction<TokenStatus>
     >,
+    selectProjectInvalidAttempt: 0,
+    setSelectProjectInvalidAttempt: undefined as unknown as Dispatch<
+      SetStateAction<number>
+    >,
     hasResponseInterceptor: false,
     accessToken: undefined as unknown as string,
     createSessionMutateAsync: undefined as unknown as UseMutateAsyncFunction<
@@ -158,6 +164,8 @@ export function App() {
   const { instance: msalInstance } = useMsal();
   const [apiToken, setApiToken] = useState("");
   const [apiTokenStatus, setApiTokenStatus] = useState<TokenStatus>({});
+  const [selectProjectInvalidAttempt, setSelectProjectInvalidAttempt] =
+    useState(0);
   const [hasResponseInterceptor, setHasResponseInterceptor] = useState(false);
   const [accessToken, setAccessToken] = useState("");
   const [requestSessionCreation, setRequestSessionCreation] = useState(false);
@@ -252,7 +260,7 @@ export function App() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: Invalidate router context when some of the content changes
   useEffect(() => {
     void router.invalidate();
-  }, [hasResponseInterceptor, accessToken]);
+  }, [hasResponseInterceptor, accessToken, selectProjectInvalidAttempt]);
 
   useEffect(() => {
     const id = msalInstance.addEventCallback(
@@ -298,6 +306,8 @@ export function App() {
         setApiToken,
         apiTokenStatus,
         setApiTokenStatus,
+        selectProjectInvalidAttempt,
+        setSelectProjectInvalidAttempt,
         hasResponseInterceptor,
         accessToken,
         createSessionMutateAsync,

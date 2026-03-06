@@ -12,6 +12,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useRouteContext } from "@tanstack/react-router";
 import { type ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -81,6 +82,10 @@ function ProjectSelectorForm({
   };
 
   const queryClient = useQueryClient();
+  const setSelectProjectInvalidAttempt = useRouteContext({
+    from: "__root__",
+    select: (context) => context.setSelectProjectInvalidAttempt,
+  });
   const { mutate, isPending } = useMutation({
     ...projectPostProjectMutation(),
     onSuccess: () => {
@@ -139,11 +144,8 @@ function ProjectSelectorForm({
               void queryClient.invalidateQueries({
                 queryKey: projectGetProjectQueryKey(),
               });
-              queryClient.setQueryData<number>(
-                ["projectRecoveryRetry"] as const,
-                (current) => (current ?? 0) + 1,
-              );
               closeProjectSelector({ formReset: formApi.reset });
+              setSelectProjectInvalidAttempt((current) => current + 1);
 
               return;
             }
