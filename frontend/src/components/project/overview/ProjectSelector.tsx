@@ -387,11 +387,12 @@ function ConfirmInitProjectDialog({
 }
 
 export function ProjectSelector({
-  actionLabel = "Select project",
+  hasSelectedProject = false,
 }: {
-  actionLabel?: string;
+  hasSelectedProject?: boolean;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const actionLabel = hasSelectedProject ? "Change project" : "Select project";
 
   const handleOpen = () => {
     setIsDialogOpen(true);
