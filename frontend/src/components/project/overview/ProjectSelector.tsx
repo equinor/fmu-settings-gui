@@ -139,6 +139,10 @@ function ProjectSelectorForm({
               void queryClient.invalidateQueries({
                 queryKey: projectGetProjectQueryKey(),
               });
+              queryClient.setQueryData<number>(
+                ["projectRecoveryRetry"] as const,
+                (current) => (current ?? 0) + 1,
+              );
               closeProjectSelector({ formReset: formApi.reset });
 
               return;
