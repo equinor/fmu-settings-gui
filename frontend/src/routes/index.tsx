@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import type { FmuProject } from "#client";
+import { ChangeLog } from "#components/home/ChangeLog";
 import { TaskList } from "#components/home/TaskList";
 import { ProjectSelector } from "#components/project/overview/ProjectSelector";
 import { useProject } from "#services/project";
@@ -69,6 +70,8 @@ function RouteComponent() {
         <>
           <ProjectInfoBox projectData={project.data} />
           <TaskList />
+          <PageSectionSpacer />
+          <ChangeLog />
         </>
       ) : (
         <>
