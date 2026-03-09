@@ -20,10 +20,15 @@ const diffPalette: Record<DiffKind, { background: string; color: string }> = {
   },
 };
 
-export const ViewerContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${tokens.spacings.comfortable.medium};
+export const ResourcePickerContainer = styled.div`
+  max-width: 15em;
+  margin-bottom: ${tokens.spacings.comfortable.medium};
+`;
+
+export const SnapshotInfo = styled.div`
+  > div + div {
+    margin-top: ${tokens.spacings.comfortable.small};
+  }
 `;
 
 export const CacheInfoBox = styled(InfoBox)<{
