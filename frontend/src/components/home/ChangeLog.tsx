@@ -1,17 +1,19 @@
-import { Button, Dialog } from "@equinor/eds-core-react";
+import { Accordion } from "@equinor/eds-core-react";
 import { useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { useState } from "react";
 
-import type { ChangeInfo } from "#client";
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
-import { GenericDialog, InfoBox, PageHeader, PageText } from "#styles/common";
+import { InfoBox, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import {
-  ChangeDetailsCode,
-  ChangeDetailsMeta,
-  ChangeLogTable,
-  TypeCell,
+  ChangeDescription,
+  ChangeItem,
+  ChangeItemHeader,
+  ChangeItemMeta,
+  ChangeList,
+  ChangeTypeBadge,
+  ChangeTypeDot,
 } from "./ChangeLog.style";
 
 function formatTimestamp(value?: string) {
@@ -32,14 +34,26 @@ function timestampToNumber(value?: string) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-function formatChangeDescription(change: string) {
-  return change
-    .replace(/Old value:\s*/g, "Old value:\n")
-    .replace(/\s*->\s*New value:\s*/g, "\n\nNew value:\n");
+function toTitleCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function formatBriefDescription(change: string) {
+  const compact = change.replace(/\s+/g, " ").trim();
+
+  if (compact.length <= 140) {
+    return compact;
+  }
+
+  return `${compact.slice(0, 137)}...`;
+}
+
+function getTypeLabel(changeType: string) {
+  return toTitleCase(changeType);
 }
 
 export function ChangeLog() {
-  const [selectedChange, setSelectedChange] = useState<ChangeInfo | null>(null);
+  const [open, setOpen] = useState(true);
   const { data, isPending, isError, error } = useQuery(
     projectGetChangelogOptions(),
   );
@@ -67,105 +81,45 @@ export function ChangeLog() {
     .slice(0, 5);
 
   return (
-    <InfoBox>
-      <PageHeader $variant="h4">Recent changes (last 5)</PageHeader>
-
-      <ChangeLogTable>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>User</th>
-            <th>Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          {latestChanges.map((entry) => (
-            <tr
-              key={`${entry.timestamp ?? "no-time"}-${entry.user}-${entry.change_type}-${entry.file}-${entry.path}-${entry.key}`}
-            >
-              <td>{formatTimestamp(entry.timestamp)}</td>
-              <td>{entry.user}</td>
-              <td>
-                <TypeCell>
-                  {entry.change_type}
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setSelectedChange(entry);
-                    }}
-                  >
-                    Details
-                  </Button>
-                </TypeCell>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </ChangeLogTable>
-
-      <GenericDialog
-        isDismissable={true}
-        open={selectedChange !== null}
-        onClose={() => {
-          setSelectedChange(null);
-        }}
-        $maxWidth="56em"
-      >
-        <Dialog.Header>
-          <Dialog.Title>Change details</Dialog.Title>
-        </Dialog.Header>
-
-        <Dialog.Content>
-          {selectedChange && (
-            <>
-              <ChangeDetailsMeta>
-                <tbody>
-                  <tr>
-                    <th>Time</th>
-                    <td>{formatTimestamp(selectedChange.timestamp)}</td>
-                  </tr>
-                  <tr>
-                    <th>User</th>
-                    <td>{selectedChange.user}</td>
-                  </tr>
-                  <tr>
-                    <th>Type</th>
-                    <td>{selectedChange.change_type}</td>
-                  </tr>
-                  <tr>
-                    <th>Key</th>
-                    <td>{selectedChange.key}</td>
-                  </tr>
-                  <tr>
-                    <th>File</th>
-                    <td>{selectedChange.file}</td>
-                  </tr>
-                  <tr>
-                    <th>Path</th>
-                    <td>{selectedChange.path}</td>
-                  </tr>
-                </tbody>
-              </ChangeDetailsMeta>
-              <PageText>
-                <span className="emphasis">Description:</span>
+    <>
+      <Accordion>
+        <Accordion.Item isExpanded={open} onExpandedChange={setOpen}>
+          <Accordion.Header>Changelog</Accordion.Header>
+          <Accordion.Panel>
+            <PageText>
+              Quick summary of the latest project configuration changes.
+            </PageText>
+            <InfoBox>
+              <PageText $marginBottom="0">
+                {latestChanges.length} changes since last snapshot.
               </PageText>
-              <ChangeDetailsCode>
-                {formatChangeDescription(selectedChange.change)}
-              </ChangeDetailsCode>
-            </>
-          )}
-        </Dialog.Content>
-
-        <Dialog.Actions>
-          <Button
-            onClick={() => {
-              setSelectedChange(null);
-            }}
-          >
-            Close
-          </Button>
-        </Dialog.Actions>
-      </GenericDialog>
-    </InfoBox>
+              <ChangeList>
+                {latestChanges.map((entry) => (
+                  <ChangeItem
+                    key={`${entry.timestamp ?? "no-time"}-${entry.user}-${entry.change_type}-${entry.file}-${entry.path}-${entry.key}`}
+                  >
+                    <ChangeItemHeader>
+                      <ChangeTypeDot $changeType={entry.change_type} />
+                      <ChangeTypeBadge $changeType={entry.change_type}>
+                        {getTypeLabel(entry.change_type)}
+                      </ChangeTypeBadge>
+                    </ChangeItemHeader>
+                    <ChangeDescription>
+                      {formatBriefDescription(entry.change)}
+                    </ChangeDescription>
+                    <ChangeItemMeta>
+                      <span>{formatTimestamp(entry.timestamp)}</span>
+                      <span>{entry.user}</span>
+                      <span>Type: {getTypeLabel(entry.change_type)}</span>
+                      <span>Key: {entry.key}</span>
+                    </ChangeItemMeta>
+                  </ChangeItem>
+                ))}
+              </ChangeList>
+            </InfoBox>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </>
   );
 }
