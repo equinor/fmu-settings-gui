@@ -226,6 +226,48 @@ function ConfirmItemsOperationDialog({
   );
 }
 
+function ConfirmCloseDialog({
+  isOpen,
+  handleConfirmCloseDecision,
+}: {
+  isOpen: boolean;
+  handleConfirmCloseDecision: (confirm: boolean) => void;
+}) {
+  return (
+    <GenericDialog open={isOpen} $minWidth="32em">
+      <Dialog.Header>
+        <Dialog.Title>Discard changes?</Dialog.Title>
+      </Dialog.Header>
+
+      <Dialog.CustomContent>
+        <PageText>
+          You have unsaved changes. If you close now, all changes in this form
+          will be lost.
+        </PageText>
+        <PageText $marginBottom="0">
+          Do you want to discard your changes?
+        </PageText>
+      </Dialog.CustomContent>
+
+      <Dialog.Actions>
+        <GeneralButton
+          label="Discard changes"
+          onClick={() => {
+            handleConfirmCloseDecision(true);
+          }}
+        />
+        <GeneralButton
+          label="Keep editing"
+          variant="outlined"
+          onClick={() => {
+            handleConfirmCloseDecision(false);
+          }}
+        />
+      </Dialog.Actions>
+    </GenericDialog>
+  );
+}
+
 function Items({
   fields,
   itemType,
@@ -309,6 +351,7 @@ export function Edit({
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [confirmItemsOperationDialogOpen, setConfirmItemsOperationDialogOpen] =
     useState(false);
+  const [confirmCloseDialogOpen, setConfirmCloseDialogOpen] = useState(false);
   const [smdaFields, setSmdaFields] = useState<Array<string>>([]);
   const [projectData, setProjectData] = useState<FormMasterdataProject>(
     emptyFormMasterdataProject(),
@@ -469,6 +512,8 @@ export function Edit({
           .map((field) => field.identifier)
           .sort((a, b) => stringCompare(a, b)),
       );
+    } else {
+      setConfirmCloseDialogOpen(false);
     }
   }, [isOpen, projectMasterdata]);
 
@@ -512,10 +557,24 @@ export function Edit({
     startItemsOperation,
   ]);
 
-  function handleClose({ formReset }: { formReset: () => void }) {
-    formReset();
+  function closeAndResetDialog() {
+    form.reset();
     resetEditData(setProjectData, setAvailableData, setOrphanData);
+    setConfirmCloseDialogOpen(false);
     closeDialog();
+  }
+
+  function handleCloseRequest() {
+    const hasUnsavedChanges =
+      JSON.stringify(form.state.values) !== JSON.stringify(projectMasterdata);
+
+    if (hasUnsavedChanges) {
+      setConfirmCloseDialogOpen(true);
+
+      return;
+    }
+
+    closeAndResetDialog();
   }
 
   function openSearchDialog() {
@@ -546,6 +605,16 @@ export function Edit({
     }
     setConfirmItemsOperationDialogOpen(false);
     finishItemsOperation();
+  }
+
+  function handleConfirmCloseDecision(confirm: boolean) {
+    if (confirm) {
+      closeAndResetDialog();
+
+      return;
+    }
+
+    setConfirmCloseDialogOpen(false);
   }
 
   const mutationCallback = ({
@@ -592,7 +661,17 @@ export function Edit({
         }
       />
 
-      <EditDialog open={isOpen} $maxWidth="200em">
+      <ConfirmCloseDialog
+        isOpen={confirmCloseDialogOpen}
+        handleConfirmCloseDecision={handleConfirmCloseDecision}
+      />
+
+      <EditDialog
+        open={isOpen}
+        isDismissable={true}
+        onClose={handleCloseRequest}
+        $maxWidth="200em"
+      >
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -839,8 +918,9 @@ export function Edit({
                     />
 
                     <form.CancelButton
-                      onClick={() => {
-                        handleClose({ formReset: form.reset });
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleCloseRequest();
                       }}
                     />
                   </>
