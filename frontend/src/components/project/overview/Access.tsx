@@ -8,22 +8,23 @@ import {
   Typography,
 } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 import type { FmuProject } from "#client";
 import {
   projectGetProjectQueryKey,
+  projectGetSumoAssetsOptions,
   projectPatchAccessMutation,
 } from "#client/@tanstack/react-query.gen";
-import type { Access, Classification } from "#client/types.gen";
+import type { Access, Classification, SumoAsset } from "#client/types.gen";
 import {
   CancelButton,
   GeneralButton,
   SubmitButton,
 } from "#components/form/button";
-import { TextField } from "#components/form/field";
+import { AutocompleteField, TextField } from "#components/form/field";
 import {
   EditDialog,
   InfoBox,
@@ -38,11 +39,20 @@ import {
   httpValidationErrorToString,
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
+import { stringCompare } from "#utils/string";
 import { requiredStringValidator } from "#utils/validator";
+
+type AccessEditorProps = {
+  accessData: Access | null | undefined;
+  projectReadOnly: boolean;
+  isDialogOpen: boolean;
+  setIsDialogOpen: (open: boolean) => void;
+};
 
 const { useAppForm: useAppFormAccessEditor } = createFormHook({
   fieldComponents: {
     TextField,
+    AutocompleteField,
     Radio,
   },
   formComponents: {
@@ -53,16 +63,38 @@ const { useAppForm: useAppFormAccessEditor } = createFormHook({
   formContext,
 });
 
-function AccessEditorForm({
+function AccessEditor({
   accessData,
   projectReadOnly,
   isDialogOpen,
   setIsDialogOpen,
-}: {
-  accessData: Access | null | undefined;
-  projectReadOnly: boolean;
-  isDialogOpen: boolean;
-  setIsDialogOpen: (open: boolean) => void;
+}: AccessEditorProps) {
+  const { data: sumoAssets } = useQuery({
+    ...projectGetSumoAssetsOptions(),
+    enabled: isDialogOpen,
+  });
+
+  return (
+    sumoAssets && (
+      <AccessEditorForm
+        accessData={accessData}
+        sumoAssets={sumoAssets}
+        projectReadOnly={projectReadOnly}
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+      />
+    )
+  );
+}
+
+function AccessEditorForm({
+  accessData,
+  sumoAssets,
+  projectReadOnly,
+  isDialogOpen,
+  setIsDialogOpen,
+}: AccessEditorProps & {
+  sumoAssets: SumoAsset[];
 }) {
   const closeDialog = ({ formReset }: { formReset: () => void }) => {
     formReset();
@@ -89,17 +121,32 @@ function AccessEditorForm({
     },
   });
 
+  const assetName = accessData?.asset.name ?? "";
+  const assetInAvailable = sumoAssets.some((asset) => asset.name === assetName);
+
   const form = useAppFormAccessEditor({
     defaultValues: {
-      assetName: accessData?.asset.name ?? "",
+      assetName: assetInAvailable ? assetName : "",
+      manualAssetName: assetInAvailable ? "" : assetName,
       classification: accessData?.classification ?? "",
     },
-
+    validators: {
+      onChange: ({ value }) =>
+        value.manualAssetName.trim() || value.assetName.trim()
+          ? undefined
+          : {
+              fields: {
+                assetName: "Asset name is required",
+              },
+            },
+    },
     onSubmit: ({ value, formApi }) => {
+      const assetName = value.manualAssetName.trim() || value.assetName.trim();
+
       mutate(
         {
           body: {
-            asset: { name: value.assetName.trim() },
+            asset: { name: assetName },
             classification: value.classification as Classification,
           },
         },
@@ -114,7 +161,7 @@ function AccessEditorForm({
   });
 
   return (
-    <EditDialog open={isDialogOpen}>
+    <EditDialog open={isDialogOpen} $minWidth="25em">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -127,12 +174,36 @@ function AccessEditorForm({
         </Dialog.Header>
 
         <Dialog.Content>
-          <form.AppField
-            name="assetName"
-            validators={{ onBlur: requiredStringValidator() }}
-          >
-            {(field) => <field.TextField label="Sumo target asset" />}
-          </form.AppField>
+          <form.Subscribe selector={(state) => [state.values]}>
+            {([formValues]) => (
+              <>
+                <form.AppField name="assetName">
+                  {(field) => (
+                    <field.AutocompleteField
+                      label="Select Sumo target asset"
+                      options={sumoAssets
+                        .map((asset) => asset.name)
+                        .sort((a, b) => stringCompare(a, b))}
+                      noOptionsText="No assets found"
+                      disabled={!!formValues.manualAssetName}
+                      helperText="Newly onboarded assets may not exist in the list yet"
+                    />
+                  )}
+                </form.AppField>
+
+                <PageSectionSpacer />
+
+                <form.AppField name="manualAssetName">
+                  {(field) => (
+                    <field.TextField
+                      label="Alternatively, enter asset manually"
+                      disabled={!!formValues.assetName}
+                    />
+                  )}
+                </form.AppField>
+              </>
+            )}
+          </form.Subscribe>
 
           <PageSectionSpacer />
 
@@ -282,7 +353,7 @@ export function EditableAccessInfo({
         }}
       />
 
-      <AccessEditorForm
+      <AccessEditor
         accessData={accessData}
         projectReadOnly={projectReadOnly}
         isDialogOpen={isDialogOpen}
