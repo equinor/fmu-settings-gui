@@ -4,7 +4,7 @@ import type {
   ScalarFieldDiff,
 } from "#client/types.gen";
 import { displayDateTime } from "#utils/datetime";
-import type { DiffKind } from "./Viewer.style";
+import type { DiffKind } from "./types";
 
 export const RESOURCE_OPTIONS: CacheResource[] = [
   "config.json",

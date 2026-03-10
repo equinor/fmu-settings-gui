@@ -2,8 +2,7 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 import { GenericBox, GenericInnerBox, InfoBox } from "#styles/common";
-
-export type DiffKind = "added" | "removed" | "updated";
+import type { DiffKind } from "./types";
 
 const diffPalette: Record<DiffKind, { background: string; color: string }> = {
   added: {

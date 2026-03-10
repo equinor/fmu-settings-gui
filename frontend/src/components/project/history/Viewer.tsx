@@ -29,7 +29,7 @@ import {
   PageText,
 } from "#styles/common";
 import { ReadableValue } from "./ReadableValue";
-import type { CacheEntry } from "./types";
+import type { CacheEntry, DiffKind } from "./types";
 import {
   formatCacheDateTime,
   formatFieldPath,
@@ -48,7 +48,6 @@ import {
   DiffDialogContent,
   DiffFieldHeader,
   DiffGroup,
-  type DiffKind,
   DiffLegend,
   ResourcePickerContainer,
   SnapshotInfo,

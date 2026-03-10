@@ -4,3 +4,5 @@ export type CacheEntry = {
   dateTimeLabel: string;
   isAutoBackup: boolean;
 };
+
+export type DiffKind = "added" | "removed" | "updated";
