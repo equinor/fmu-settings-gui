@@ -40,12 +40,18 @@ function toTitleCase(value: string) {
 
 function formatBriefDescription(change: string) {
   const compact = change.replace(/\s+/g, " ").trim();
+  const withoutDiffPayload = compact
+    .replace(/Old value:\s*[\s\S]*$/i, "")
+    .replace(/New value:\s*[\s\S]*$/i, "")
+    .replace(/\s*->\s*/g, " ")
+    .trim();
+  const concise = withoutDiffPayload || compact;
 
-  if (compact.length <= 140) {
-    return compact;
+  if (concise.length <= 96) {
+    return concise;
   }
 
-  return `${compact.slice(0, 137)}...`;
+  return `${concise.slice(0, 93)}...`;
 }
 
 function getTypeLabel(changeType: string) {
