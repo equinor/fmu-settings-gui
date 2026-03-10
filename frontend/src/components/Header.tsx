@@ -24,6 +24,7 @@ import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { useTaskList } from "#services/tasks";
 import { GenericDialog, PageText } from "#styles/common";
+import { AppMenu } from "./AppMenu";
 import {
   FmuLogo,
   HeaderActionButton,
@@ -36,7 +37,6 @@ import {
   TaskIndicatorContainer,
   TopBarContainer,
 } from "./Header.style";
-import { AppMenu } from "./home/AppMenu";
 import {
   TaskCompletedLabel,
   TaskRow,

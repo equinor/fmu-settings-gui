@@ -28,6 +28,7 @@ export function LockExpireNotification() {
   const lockRefreshMutation = useMutation({
     ...projectPostLockRefreshMutation(),
     onSuccess: () => {
+      setTimeUntilExpire(Number.POSITIVE_INFINITY);
       void queryClient.invalidateQueries({
         queryKey: projectGetLockStatusQueryKey(),
       });
@@ -53,22 +54,29 @@ export function LockExpireNotification() {
   });
 
   useEffect(() => {
-    if (isLockAcquired && lockInfo) {
-      const updateTimeUntilExpire = () => {
-        const lockExpireAt = new Date(lockInfo.expires_at * 1000).getTime();
+    if (!isLockAcquired || !lockInfo) {
+      setTimeUntilExpire(Number.POSITIVE_INFINITY);
 
-        const timeLeft = Math.max(0, lockExpireAt - Date.now());
-        setTimeUntilExpire(timeLeft);
-      };
-
-      updateTimeUntilExpire();
-
-      const interval = setInterval(updateTimeUntilExpire, 1000); // setInterval : countdown
-
-      return () => {
-        clearInterval(interval);
-      };
+      return;
     }
+
+    const updateTimeUntilExpire = () => {
+      const lockExpireAt = new Date(lockInfo.expires_at * 1000).getTime();
+      const timeLeft = Math.max(
+        0,
+        Math.ceil((lockExpireAt - Date.now()) / 1000) * 1000,
+      );
+
+      setTimeUntilExpire(timeLeft);
+    };
+
+    updateTimeUntilExpire();
+
+    const interval = setInterval(updateTimeUntilExpire, 1000); // setInterval : countdown
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [isLockAcquired, lockInfo]);
 
   useEffect(() => {
@@ -78,11 +86,19 @@ export function LockExpireNotification() {
       });
     } else if (
       isLockAcquired &&
+      !isDialogOpen &&
       timeUntilExpire <= projectLockExpireNotificationThreshold
     ) {
       setIsDialogOpen(true);
+    } else if (
+      !isLockAcquired &&
+      timeUntilExpire !== Number.POSITIVE_INFINITY
+    ) {
+      setTimeUntilExpire(Number.POSITIVE_INFINITY);
+    } else {
+      return;
     }
-  }, [isLockAcquired, timeUntilExpire, queryClient]);
+  }, [isDialogOpen, isLockAcquired, timeUntilExpire, queryClient]);
 
   const onLockRefresh = () => {
     lockRefreshMutation.mutate({});
