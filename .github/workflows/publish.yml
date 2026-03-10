@@ -2,7 +2,7 @@ name: Publish to PyPI
 
 on:
   release:
-    types: [released]
+    types: [published]
 
 permissions:
   contents: read
@@ -49,4 +49,10 @@ jobs:
       run: python -m build -vv
 
     - name: Publish package distributions to PyPI
+      if: ${{ !github.event.release.prerelease }}
       uses: pypa/gh-action-pypi-publish@release/v1
+    
+    - name: Upload package distributions to GitHub release
+      if: ${{ github.event.release.prerelease }}
+      run:
+        gh release upload ${{github.event.release.tag_name}} dist/* --clobber
