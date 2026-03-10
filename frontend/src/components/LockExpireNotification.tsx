@@ -1,4 +1,4 @@
-import { Button, Dialog } from "@equinor/eds-core-react";
+import { Dialog } from "@equinor/eds-core-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -7,6 +7,7 @@ import {
   projectPostLockRefreshMutation,
   projectPostLockReleaseMutation,
 } from "#client/@tanstack/react-query.gen";
+import { GeneralButton } from "#components/form/button";
 import { projectLockExpireNotificationThreshold } from "#config";
 import { useProject } from "#services/project";
 import { GenericDialog, PageText } from "#styles/common";
@@ -136,19 +137,20 @@ export function LockExpireNotification() {
 
       <Dialog.Actions>
         {isExpired ? (
-          <Button
+          <GeneralButton
+            label="Close"
             onClick={() => {
               setIsDialogOpen(false);
             }}
-          >
-            Close
-          </Button>
+          />
         ) : (
           <>
-            <Button onClick={onLockRefresh}>Extend lock</Button>
-            <Button variant="outlined" onClick={onLockRelease}>
-              Release lock
-            </Button>
+            <GeneralButton label="Extend lock" onClick={onLockRefresh} />
+            <GeneralButton
+              label="Release lock"
+              variant="outlined"
+              onClick={onLockRelease}
+            />
           </>
         )}
       </Dialog.Actions>
