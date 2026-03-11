@@ -1,4 +1,4 @@
-name: Publish to PyPI
+name: Publish to PyPI or upload to bleeding release
 
 on:
   release:
@@ -56,3 +56,5 @@ jobs:
       if: ${{ github.event.release.prerelease }}
       run:
         gh release upload ${{github.event.release.tag_name}} dist/* --clobber
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
