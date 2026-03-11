@@ -13,7 +13,9 @@ import {
   projectGetCacheOptions,
   projectGetCacheQueryKey,
   projectGetProjectQueryKey,
+  projectPatchCacheMaxRevisionsMutation,
   projectPostCacheRestoreMutation,
+  sessionPostRestoreMutation,
 } from "#client/@tanstack/react-query.gen";
 import type {
   CacheResource,
@@ -25,7 +27,9 @@ import { CancelButton, GeneralButton } from "#components/form/button";
 import {
   GenericDialog,
   GenericInnerBox,
+  PageHeader,
   PageList,
+  PageSectionSpacer,
   PageText,
 } from "#styles/common";
 import { ReadableValue } from "./ReadableValue";
@@ -49,7 +53,11 @@ import {
   DiffFieldHeader,
   DiffGroup,
   DiffLegend,
+  MaxSnapshotsControls,
+  MaxSnapshotsSelectContainer,
   ResourcePickerContainer,
+  ScrollableCardStack,
+  SelectorRow,
   SnapshotInfo,
   ValuePanel,
 } from "./Viewer.style";
@@ -361,20 +369,86 @@ function RestoreSnapshotDialog({
   );
 }
 
-export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
+function RecoverFilesDialog({
+  isOpen,
+  isPending,
+  isDisabled,
+  recoverTooltipText,
+  onRecover,
+  onCancel,
+}: {
+  isOpen: boolean;
+  isPending: boolean;
+  isDisabled: boolean;
+  recoverTooltipText?: string;
+  onRecover: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <GenericDialog open={isOpen} $maxWidth="36em">
+      <Dialog.Header>
+        <Dialog.Title>Recover .fmu files</Dialog.Title>
+      </Dialog.Header>
+
+      <Dialog.Content>
+        <PageText>
+          This will attempt to recover deleted files from the user .fmu
+          directory and the current project's .fmu directory (if a project is
+          selected).
+        </PageText>
+
+        <PageText $marginBottom="0">
+          Files can only be recovered if they were deleted while the application
+          was running. Files that were not deleted will not be affected.
+        </PageText>
+      </Dialog.Content>
+
+      <Dialog.Actions>
+        <GeneralButton
+          label="Recover"
+          isPending={isPending}
+          disabled={isDisabled}
+          tooltipText={recoverTooltipText}
+          onClick={onRecover}
+        />
+        <CancelButton onClick={onCancel} />
+      </Dialog.Actions>
+    </GenericDialog>
+  );
+}
+
+export function Viewer({
+  hasProject,
+  projectReadOnly,
+  cacheMaxRevisions,
+}: {
+  hasProject: boolean;
+  projectReadOnly: boolean;
+  cacheMaxRevisions?: number;
+}) {
   const queryClient = useQueryClient();
   const [resource, setResource] = useState<CacheResource>("config.json");
   const [selectedCacheId, setSelectedCacheId] = useState<string | null>(null);
   const [isDiffDialogOpen, setIsDiffDialogOpen] = useState(false);
   const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+  const [isRestoreMemoryDialogOpen, setIsRestoreMemoryDialogOpen] =
+    useState(false);
   const [lastRestoredCacheId, setLastRestoredCacheId] = useState<string | null>(
     null,
   );
+  const [maxRevisions, setMaxRevisions] = useState<number | undefined>(
+    cacheMaxRevisions,
+  );
+
+  useEffect(() => {
+    setMaxRevisions(cacheMaxRevisions);
+  }, [cacheMaxRevisions]);
 
   const cachesQuery = useQuery({
     ...projectGetCacheOptions({ query: { resource } }),
     // Cache revisions can change outside this page (after editing config for example)
     refetchOnMount: "always",
+    enabled: hasProject,
     meta: { errorPrefix: "Error loading snapshot history" },
   });
 
@@ -404,6 +478,20 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
     (entry) => entry.cacheId === selectedCacheId,
   );
   const resourceLabel = RESOURCE_LABELS[resource];
+  const maxRevisionOptions = useMemo(() => {
+    const options = [5, 10, 15, 20];
+
+    if (
+      cacheMaxRevisions !== undefined &&
+      cacheMaxRevisions >= 5 &&
+      !options.includes(cacheMaxRevisions)
+    ) {
+      options.push(cacheMaxRevisions);
+      options.sort((a, b) => a - b);
+    }
+
+    return options;
+  }, [cacheMaxRevisions]);
 
   useEffect(() => {
     if (allCaches.length === 0) {
@@ -422,7 +510,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
       path: { revision_id: selectedCacheId ?? "" },
       query: { resource },
     }),
-    enabled: isDiffDialogOpen && selectedCacheId !== null,
+    enabled: hasProject && isDiffDialogOpen && selectedCacheId !== null,
     staleTime: 0, // Force a fresh fetch whenever a diff is opened.
     refetchOnMount: "always", // Diffs depend on current version, avoid stale dialog data.
     meta: { errorPrefix: "Error loading snapshot details" },
@@ -464,6 +552,53 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
     },
   });
 
+  const maxRevisionsMutation = useMutation({
+    ...projectPatchCacheMaxRevisionsMutation(),
+    meta: { errorPrefix: "Error saving max snapshots" },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: projectGetProjectQueryKey(),
+      });
+      toast.info("Max snapshots saved");
+    },
+  });
+
+  const restoreFromMemoryMutation = useMutation({
+    ...sessionPostRestoreMutation(),
+    meta: { errorPrefix: "Error recovering deleted files" },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: projectGetProjectQueryKey(),
+      });
+      // Restoring from memory can rewrite both config.json and mappings.json,
+      // so invalidate all related history, diff, and mappings queries.
+      void queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0] as { _id?: string } | undefined;
+
+          return [
+            "projectGetCache",
+            "projectGetCacheDiff",
+            "projectGetMappings",
+          ].includes(key?._id ?? "");
+        },
+      });
+      toast.info("Deleted files successfully recovered");
+      setIsRestoreMemoryDialogOpen(false);
+    },
+  });
+
+  const isRecoverFilesDisabled =
+    restoreFromMemoryMutation.isPending || (hasProject && projectReadOnly);
+  const recoverFilesTooltipText =
+    hasProject && projectReadOnly ? "Project is read-only" : undefined;
+
+  function handleSaveMaxRevisions() {
+    maxRevisionsMutation.mutate({
+      body: { cache_max_revisions: maxRevisions },
+    });
+  }
+
   function openDiffDialog(cacheId: string) {
     setSelectedCacheId(cacheId);
     setIsDiffDialogOpen(true);
@@ -491,6 +626,14 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
       query: { resource },
     });
   }
+
+  useEffect(() => {
+    if (!hasProject) {
+      setIsDiffDialogOpen(false);
+      setIsRestoreDialogOpen(false);
+      setSelectedCacheId(null);
+    }
+  }, [hasProject]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset pre-restore state when resource changes.
   useEffect(() => {
@@ -546,66 +689,157 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         }}
       />
 
+      <RecoverFilesDialog
+        isOpen={isRestoreMemoryDialogOpen}
+        isPending={restoreFromMemoryMutation.isPending}
+        isDisabled={isRecoverFilesDisabled}
+        recoverTooltipText={recoverFilesTooltipText}
+        onRecover={() => {
+          restoreFromMemoryMutation.mutate({});
+        }}
+        onCancel={() => {
+          setIsRestoreMemoryDialogOpen(false);
+        }}
+      />
+
+      {hasProject ? (
+        <>
+          <PageText>
+            Choose a resource to view its snapshots, listed from newest to
+            oldest.
+          </PageText>
+
+          <PageText>
+            Use <strong>"View details"</strong> to see what has changed between
+            the snapshot and the current version.{" "}
+            {projectReadOnly ? (
+              <>
+                The project is currently read-only, so restore of the snapshot
+                is not possible.
+              </>
+            ) : (
+              <>
+                You can also <strong>restore</strong> from the snapshot.
+              </>
+            )}
+          </PageText>
+
+          <SelectorRow>
+            <ResourcePickerContainer>
+              <NativeSelect
+                id="history-resource"
+                label="Resource"
+                value={resource}
+                onChange={(e) => {
+                  setResource(e.target.value as CacheResource);
+                }}
+              >
+                {RESOURCE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {RESOURCE_LABELS[option]}
+                  </option>
+                ))}
+              </NativeSelect>
+            </ResourcePickerContainer>
+
+            <MaxSnapshotsControls>
+              <MaxSnapshotsSelectContainer>
+                <NativeSelect
+                  id="history-max-snapshots"
+                  label="Max snapshots"
+                  value={maxRevisions?.toString() ?? ""}
+                  disabled={projectReadOnly || maxRevisionsMutation.isPending}
+                  onChange={(e) => {
+                    setMaxRevisions(
+                      e.target.value === ""
+                        ? undefined
+                        : Number(e.target.value),
+                    );
+                  }}
+                >
+                  <option value="">Select</option>
+                  {maxRevisionOptions.map((option) => (
+                    <option key={option} value={String(option)}>
+                      {String(option)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </MaxSnapshotsSelectContainer>
+
+              <GeneralButton
+                label="Save"
+                isPending={maxRevisionsMutation.isPending}
+                disabled={
+                  projectReadOnly ||
+                  maxRevisionsMutation.isPending ||
+                  maxRevisions === cacheMaxRevisions
+                }
+                tooltipText={
+                  projectReadOnly
+                    ? "Project is read-only"
+                    : maxRevisions === cacheMaxRevisions
+                      ? "No changes to save"
+                      : undefined
+                }
+                onClick={handleSaveMaxRevisions}
+              />
+            </MaxSnapshotsControls>
+          </SelectorRow>
+
+          {cachesQuery.isPending && <PageText>Loading snapshots...</PageText>}
+
+          {cachesQuery.isError && (
+            <PageText>Unable to load snapshot history.</PageText>
+          )}
+
+          {!cachesQuery.isPending &&
+            !cachesQuery.isError &&
+            allCaches.length === 0 && (
+              <PageText>No snapshots found for {resourceLabel}.</PageText>
+            )}
+
+          {cacheEntries.length > 0 && (
+            <ScrollableCardStack>
+              {cacheEntries.map((entry) => (
+                <CacheRow
+                  key={entry.cacheId}
+                  entry={entry}
+                  isSelected={selectedCacheId === entry.cacheId}
+                  onViewDetails={openDiffDialog}
+                />
+              ))}
+            </ScrollableCardStack>
+          )}
+        </>
+      ) : (
+        <PageText>
+          Project not set. Select a project to view and restore snapshots.
+        </PageText>
+      )}
+
+      <PageSectionSpacer />
+
+      <PageHeader $variant="h3">Recover .fmu files</PageHeader>
+
       <PageText>
-        Choose a resource to view its snapshots, listed from newest to oldest.
+        Deleted files can be recovered from the user .fmu directory and the
+        current project's .fmu directory (if a project is selected).
       </PageText>
 
       <PageText>
-        Use <strong>"View details"</strong> to see what has changed between the
-        snapshot and the current version.{" "}
-        {projectReadOnly ? (
-          <>
-            The project is currently read-only, so restore of the snapshot is
-            not possible.
-          </>
-        ) : (
-          <>
-            You can also <strong>restore</strong> from the snapshot.
-          </>
-        )}
+        Files can only be recovered if they were deleted while the application
+        was running. Files that were not deleted will not be affected.
       </PageText>
 
-      <ResourcePickerContainer>
-        <NativeSelect
-          id="history-resource"
-          label="Resource"
-          value={resource}
-          onChange={(e) => {
-            setResource(e.target.value as CacheResource);
-          }}
-        >
-          {RESOURCE_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {RESOURCE_LABELS[option]}
-            </option>
-          ))}
-        </NativeSelect>
-      </ResourcePickerContainer>
-
-      {cachesQuery.isPending && <PageText>Loading snapshots...</PageText>}
-
-      {cachesQuery.isError && (
-        <PageText>Unable to load snapshot history.</PageText>
-      )}
-
-      {!cachesQuery.isPending &&
-        !cachesQuery.isError &&
-        allCaches.length === 0 && (
-          <PageText>No snapshots found for {resourceLabel}.</PageText>
-        )}
-
-      {cacheEntries.length > 0 && (
-        <CardStack>
-          {cacheEntries.map((entry) => (
-            <CacheRow
-              key={entry.cacheId}
-              entry={entry}
-              isSelected={selectedCacheId === entry.cacheId}
-              onViewDetails={openDiffDialog}
-            />
-          ))}
-        </CardStack>
-      )}
+      <GeneralButton
+        label="Recover files"
+        isPending={restoreFromMemoryMutation.isPending}
+        disabled={isRecoverFilesDisabled}
+        tooltipText={recoverFilesTooltipText}
+        onClick={() => {
+          setIsRestoreMemoryDialogOpen(true);
+        }}
+      />
     </>
   );
 }
