@@ -25,6 +25,7 @@ export function Sidebar() {
     ProjectSubItems.push({ label: "Stratigraphy", to: "/stratigraphy" });
     ProjectSubItems.push({ label: "History", to: "/history" });
   }
+  ProjectSubItems.push({ label: "History", to: "/project/history" });
 
   return (
     <EdsSideBar open>
