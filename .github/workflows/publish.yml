@@ -56,6 +56,13 @@ jobs:
     - name: Upload package distributions to GitHub release
       if: ${{ github.event.release.prerelease }}
       run:
-        gh release upload ${{github.event.release.tag_name}} dist/* --clobber
+        dir_dist="dist/"
+        whl_file=$(find "$dir_dist" -maxdepth 1 -name "*.whl")
+
+        fixed_bleeding_name="fmu_settings_gui-bleeding.whl"
+        echo "Renaming .whl file to $fixed_bleeding_name"
+        mv "$whl_file" "$dir_dist$fixed_bleeding_name"
+
+        gh release upload ${{github.event.release.tag_name}} $dir_dist$fixed_bleeding_name --clobber
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
