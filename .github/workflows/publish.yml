@@ -55,7 +55,7 @@ jobs:
     
     - name: Upload package distributions to GitHub release
       if: ${{ github.event.release.prerelease }}
-      run:
+      run: |
         dir_dist="dist/"
         whl_file=$(find "$dir_dist" -maxdepth 1 -name "*.whl")
 
