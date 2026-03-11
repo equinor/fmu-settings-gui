@@ -3,6 +3,7 @@ import {
   type AnyFormApi,
   createFormHookContexts,
 } from "@tanstack/react-form";
+import { useEffect, useState } from "react";
 
 import type { Smda } from "#client";
 import type { OptionProps } from "#components/form/field";
@@ -29,6 +30,63 @@ export function findOptionValueInNameUuidArray<T extends NameUuidType>(
   const result = array.filter((element) => String(element.uuid) === value);
 
   return result.length === 1 ? result[0] : undefined;
+}
+
+export function hasUnsavedFormChanges(formContext: AnyFormApi): boolean {
+  return Boolean(formContext.state.isDirty);
+}
+
+export function useConfirmClose({
+  formContext,
+  isOpen,
+  closeDialog,
+  onCloseConfirmed,
+}: {
+  formContext: AnyFormApi;
+  isOpen: boolean;
+  closeDialog: () => void;
+  onCloseConfirmed?: () => void;
+}) {
+  const [confirmCloseDialogOpen, setConfirmCloseDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmCloseDialogOpen(false);
+    }
+  }, [isOpen]);
+
+  const closeAndResetDialog = () => {
+    formContext.reset();
+    onCloseConfirmed?.();
+    setConfirmCloseDialogOpen(false);
+    closeDialog();
+  };
+
+  const handleCloseRequest = () => {
+    if (hasUnsavedFormChanges(formContext)) {
+      setConfirmCloseDialogOpen(true);
+
+      return;
+    }
+
+    closeAndResetDialog();
+  };
+
+  const handleConfirmCloseDecision = (confirm: boolean) => {
+    if (confirm) {
+      closeAndResetDialog();
+
+      return;
+    }
+
+    setConfirmCloseDialogOpen(false);
+  };
+
+  return {
+    confirmCloseDialogOpen,
+    handleCloseRequest,
+    handleConfirmCloseDecision,
+  };
 }
 
 /**

@@ -16,6 +16,7 @@ import {
   rmsGetHorizonsOptions,
   rmsGetZonesOptions,
 } from "#client/@tanstack/react-query.gen";
+import { ConfirmCloseDialog } from "#components/common";
 import {
   CancelButton,
   GeneralButton,
@@ -36,7 +37,12 @@ import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api.ts";
-import { fieldContext, formContext, useFormContext } from "#utils/form";
+import {
+  fieldContext,
+  formContext,
+  useConfirmClose,
+  useFormContext,
+} from "#utils/form";
 import { StratigraphicFramework } from "./StratigraphicFramework";
 import {
   ActionButtonsContainer,
@@ -356,57 +362,79 @@ function Edit({
     formReset();
   };
 
-  return (
-    <EditDialog open={isDialogOpen} $minWidth="60em" $maxWidth="">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
-        }}
-      >
-        <Dialog.Header>Set project stratigraphy</Dialog.Header>
+  const {
+    confirmCloseDialogOpen,
+    handleCloseRequest,
+    handleConfirmCloseDecision,
+  } = useConfirmClose({
+    formContext: form,
+    isOpen: isDialogOpen,
+    closeDialog,
+  });
 
-        <Dialog.CustomContent>
-          <form.AppForm>
-            <form.Subscribe selector={(state) => state.values}>
-              {() => (
-                <form.StratigraphyEditor
-                  availableHorizons={availableHorizons ?? []}
-                  availableZones={availableZones ?? []}
+  return (
+    <>
+      <ConfirmCloseDialog
+        isOpen={confirmCloseDialogOpen}
+        handleConfirmCloseDecision={handleConfirmCloseDecision}
+      />
+
+      <EditDialog
+        open={isDialogOpen}
+        isDismissable={true}
+        onClose={handleCloseRequest}
+        $minWidth="60em"
+        $maxWidth=""
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            void form.handleSubmit();
+          }}
+        >
+          <Dialog.Header>Set project stratigraphy</Dialog.Header>
+
+          <Dialog.CustomContent>
+            <form.AppForm>
+              <form.Subscribe selector={(state) => state.values}>
+                {() => (
+                  <form.StratigraphyEditor
+                    availableHorizons={availableHorizons ?? []}
+                    availableZones={availableZones ?? []}
+                  />
+                )}
+              </form.Subscribe>
+            </form.AppForm>
+          </Dialog.CustomContent>
+
+          <Dialog.Actions>
+            <form.Subscribe
+              selector={(state) => [state.isDefaultValue, state.canSubmit]}
+            >
+              {([isDefaultValue, canSubmit]) => (
+                <form.SubmitButton
+                  label="Save"
+                  disabled={isDefaultValue || !canSubmit || projectReadOnly}
+                  isPending={rmsStratigraphyMutation.isPending}
+                  helperTextDisabled={
+                    projectReadOnly
+                      ? "Project is read-only"
+                      : "Form can be submitted when the values have changed"
+                  }
                 />
               )}
             </form.Subscribe>
-          </form.AppForm>
-        </Dialog.CustomContent>
-
-        <Dialog.Actions>
-          <form.Subscribe
-            selector={(state) => [state.isDefaultValue, state.canSubmit]}
-          >
-            {([isDefaultValue, canSubmit]) => (
-              <form.SubmitButton
-                label="Save"
-                disabled={isDefaultValue || !canSubmit || projectReadOnly}
-                isPending={rmsStratigraphyMutation.isPending}
-                helperTextDisabled={
-                  projectReadOnly
-                    ? "Project is read-only"
-                    : "Form can be submitted when the values have changed"
-                }
-              />
-            )}
-          </form.Subscribe>
-          <form.CancelButton
-            onClick={(e) => {
-              e.preventDefault();
-              form.reset();
-              closeDialog();
-            }}
-          />
-        </Dialog.Actions>
-      </form>
-    </EditDialog>
+            <form.CancelButton
+              onClick={(e) => {
+                e.preventDefault();
+                handleCloseRequest();
+              }}
+            />
+          </Dialog.Actions>
+        </form>
+      </EditDialog>
+    </>
   );
 }
 
