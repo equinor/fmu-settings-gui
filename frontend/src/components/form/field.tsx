@@ -1,10 +1,11 @@
 import {
+  Autocomplete,
   TextField as EdsTextField,
   Icon,
   InputWrapper,
   NativeSelect,
 } from "@equinor/eds-core-react";
-import { error_filled } from "@equinor/eds-icons";
+import { error_filled, info_circle } from "@equinor/eds-icons";
 import {
   type ChangeEvent,
   type Dispatch,
@@ -17,7 +18,7 @@ import { useFieldContext } from "#utils/form";
 import type { ValidatorProps } from "#utils/validator";
 import { CommonInputWrapper, SearchFieldInput } from "./field.style";
 
-Icon.add({ error_filled });
+Icon.add({ error_filled, info_circle });
 
 export interface BasicTextFieldProps {
   name: string;
@@ -43,6 +44,7 @@ export function TextField({
   multiline = false,
   rows,
   placeholder,
+  disabled,
   helperText,
   isReadOnly,
   toUpperCase,
@@ -52,6 +54,7 @@ export function TextField({
   multiline?: boolean;
   rows?: number;
   placeholder?: string;
+  disabled?: boolean;
   helperText?: string;
   isReadOnly?: boolean;
   toUpperCase?: boolean;
@@ -80,6 +83,7 @@ export function TextField({
         multiline={multiline}
         rows={rows}
         readOnly={isReadOnly}
+        disabled={disabled}
         value={field.state.value}
         placeholder={placeholder}
         onBlur={field.handleBlur}
@@ -177,6 +181,56 @@ export function Select({
           </option>
         ))}
       </NativeSelect>
+    </CommonInputWrapper>
+  );
+}
+
+export function AutocompleteField({
+  label,
+  options,
+  noOptionsText,
+  helperText,
+  disabled,
+  loadingOptions,
+}: {
+  label: string;
+  options: string[];
+  noOptionsText?: string;
+  disabled?: boolean;
+  helperText?: string;
+  loadingOptions?: boolean;
+}) {
+  const field = useFieldContext<string>();
+
+  return (
+    <CommonInputWrapper
+      helperIcon={<Icon name="info_circle" title="Info" size={16} />}
+      helperProps={
+        field.state.meta.isValid || loadingOptions
+          ? { text: loadingOptions ? helperTextLoadingOptions : helperText }
+          : {
+              className: "errorText",
+              icon: <Icon name="error_filled" title="Error" size={16} />,
+              text: field.state.meta.errors
+                .map((err: string) => err)
+                .join(", "),
+            }
+      }
+    >
+      <Autocomplete
+        autoWidth
+        id={field.name}
+        label={label}
+        options={options}
+        loading={loadingOptions}
+        initialSelectedOptions={[field.state.value]}
+        noOptionsText={noOptionsText}
+        onOptionsChange={({ selectedItems }) => {
+          field.handleChange(selectedItems[0] ?? "");
+        }}
+        disabled={disabled}
+        variant={!field.state.meta.isValid ? "error" : undefined}
+      />
     </CommonInputWrapper>
   );
 }
