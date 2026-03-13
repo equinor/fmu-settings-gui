@@ -111,7 +111,7 @@ function ModelEditorForm({
   });
 
   return (
-    <EditDialog open={isDialogOpen} $minWidth="32em">
+    <EditDialog open={isDialogOpen} $minWidth="25em">
       <form
         onSubmit={(e) => {
           e.preventDefault();

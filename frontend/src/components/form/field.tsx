@@ -191,37 +191,46 @@ export function AutocompleteField({
   noOptionsText,
   helperText,
   disabled,
-  isPending,
+  loadingOptions,
 }: {
   label: string;
   options: string[];
   noOptionsText?: string;
   disabled?: boolean;
   helperText?: string;
-  isPending?: boolean;
+  loadingOptions?: boolean;
 }) {
   const field = useFieldContext<string>();
 
   return (
-    <InputWrapper
-      helperProps={{
-        text: helperText,
-        icon: <Icon name="info_circle" title="Info" size={16} />,
-      }}
+    <CommonInputWrapper
+      helperIcon={<Icon name="info_circle" title="Info" size={16} />}
+      helperProps={
+        field.state.meta.isValid || loadingOptions
+          ? { text: loadingOptions ? helperTextLoadingOptions : helperText }
+          : {
+              className: "errorText",
+              icon: <Icon name="error_filled" title="Error" size={16} />,
+              text: field.state.meta.errors
+                .map((err: string) => err)
+                .join(", "),
+            }
+      }
     >
       <Autocomplete
         autoWidth
         id={field.name}
         label={label}
         options={options}
-        loading={isPending}
+        loading={loadingOptions}
         initialSelectedOptions={[field.state.value]}
         noOptionsText={noOptionsText}
         onOptionsChange={({ selectedItems }) => {
           field.handleChange(selectedItems[0] ?? "");
         }}
         disabled={disabled}
+        variant={!field.state.meta.isValid ? "error" : undefined}
       />
-    </InputWrapper>
+    </CommonInputWrapper>
   );
 }
