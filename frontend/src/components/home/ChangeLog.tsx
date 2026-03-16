@@ -12,10 +12,11 @@ import {
   ChangeList,
   ChangeTypeChip,
 } from "./ChangeLog.style";
+import { FILE_LABELS, formatEntryDescription } from "./utils";
 
 function formatTimestamp(value?: string) {
   if (!value) {
-    return "unknown";
+    return "(unknown)";
   }
 
   return displayDateTime(value);
@@ -35,30 +36,18 @@ function toTitleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function formatBriefDescription(change: string) {
-  const compact = change.replace(/\s+/g, " ").trim();
-  const withoutDiffPayload = compact
-    .replace(/Old value:\s*[\s\S]*$/i, "")
-    .replace(/New value:\s*[\s\S]*$/i, "")
-    .replace(/\s*->\s*/g, " ")
-    .trim();
-  const concise = withoutDiffPayload || compact;
-
-  if (concise.length <= 72) {
-    return concise;
-  }
-
-  return `${concise.slice(0, 69)}...`;
-}
-
 function getTypeLabel(changeType: string) {
   return toTitleCase(changeType);
 }
 
 export function ChangeLog() {
-  const { data, isPending, isError, error } = useQuery(
-    projectGetChangelogOptions(),
-  );
+  const { data, isPending, isError, error } = useQuery({
+    ...projectGetChangelogOptions(),
+    meta: { preventDefaultErrorHandling: [404] },
+    retry: (failureCount, queryError) =>
+      !(isAxiosError(queryError) && queryError.response?.status === 404) &&
+      failureCount < 3,
+  });
 
   if (isPending) {
     return (
@@ -105,10 +94,11 @@ export function ChangeLog() {
   return (
     <>
       <PageHeader $variant="h3">Changelog</PageHeader>
-      <PageText>Recent changes to this project&apos;s settings.</PageText>
+      <PageText>Recent changes to this project&apos;s .fmu files.</PageText>
       <PageText $marginBottom="0">
-        Showing the last {latestChanges.length} change
-        {latestChanges.length === 1 ? "" : "s"}.
+        {latestChanges.length === 1
+          ? "Showing the most recent change."
+          : `Showing the ${latestChanges.length} most recent changes.`}
       </PageText>
       <ChangeList>
         {latestChanges.map((entry) => {
@@ -124,11 +114,11 @@ export function ChangeLog() {
               </ChangeItemHeader>
 
               <ChangeDescription>
-                {formatBriefDescription(entry.change)}
+                {formatEntryDescription(entry)}
               </ChangeDescription>
               <ChangeItemMeta>
                 <span>{entry.user}</span>
-                <span>Key: {entry.key}</span>
+                <span>File: {FILE_LABELS[entry.file] ?? entry.file}</span>
               </ChangeItemMeta>
             </ChangeItem>
           );

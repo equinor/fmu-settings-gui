@@ -2217,6 +2217,51 @@ export type SessionPatchAccessTokenResponses = {
 
 export type SessionPatchAccessTokenResponse = SessionPatchAccessTokenResponses[keyof SessionPatchAccessTokenResponses];
 
+export type SessionPostRestoreData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/session/restore';
+};
+
+export type SessionPostRestoreErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Permission denied while restoring a .fmu directory
+     */
+    403: unknown;
+    /**
+     * A .fmu path exists but is not a directory
+     */
+    409: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Project is locked by another process and cannot be restored
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type SessionPostRestoreError = SessionPostRestoreErrors[keyof SessionPostRestoreErrors];
+
+export type SessionPostRestoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type SessionPostRestoreResponse = SessionPostRestoreResponses[keyof SessionPostRestoreResponses];
+
 export type RmsDeleteRmsProjectData = {
     body?: never;
     path?: never;

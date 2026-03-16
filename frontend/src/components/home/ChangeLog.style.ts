@@ -2,7 +2,7 @@ import { Chip } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-type ChangeType = "add" | "copy" | "merge" | "remove" | "reset" | "update";
+import type { ChangeType } from "./types";
 
 function changeTypeColor(changeType: ChangeType) {
   if (changeType === "add" || changeType === "copy") {
@@ -38,6 +38,7 @@ export const ChangeItemHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: ${tokens.spacings.comfortable.x_small};
+  font-size: 0.875rem;
 `;
 
 export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
@@ -51,6 +52,7 @@ export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
 
 export const ChangeDescription = styled.p`
   margin: 0;
+  font-size: 1.125rem;
   color: ${tokens.colors.text.static_icons__default.hex};
 `;
 export const ChangeItemMeta = styled.div`

@@ -433,7 +433,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.21.1.dev1+g1bc6e98f6.d20260224'
+            default: '0.22.0'
         }
     },
     type: 'object',
