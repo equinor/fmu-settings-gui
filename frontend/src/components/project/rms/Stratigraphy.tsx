@@ -370,6 +370,7 @@ function Edit({
     formContext: form,
     isOpen: isDialogOpen,
     closeDialog,
+    isReadOnly: projectReadOnly,
   });
 
   return (

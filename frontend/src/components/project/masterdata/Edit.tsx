@@ -403,6 +403,7 @@ export function Edit({
     onCloseConfirmed: () => {
       resetEditData(setProjectData, setAvailableData, setOrphanData);
     },
+    isReadOnly: projectReadOnly,
   });
 
   const handleItemsOperation = useCallback(() => {

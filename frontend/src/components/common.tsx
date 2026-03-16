@@ -11,10 +11,10 @@ export function ConfirmCloseDialog({
   isOpen,
   handleConfirmCloseDecision,
   title = "Discard changes",
-  description = "You have unsaved changes. If you close now, all changes in this form will be lost.",
-  question = "Do you want to discard your changes?",
-  confirmLabel = "OK",
-  cancelLabel = "Cancel",
+  description = "There are unsaved changes in the form. If the editing is cancelled, all changes will be lost.",
+  question = "Do you want to discard the changes?",
+  confirmLabel = "Keep editing",
+  cancelLabel = "Discard changes",
 }: {
   isOpen: boolean;
   handleConfirmCloseDecision: (confirm: boolean) => void;
@@ -25,7 +25,7 @@ export function ConfirmCloseDialog({
   cancelLabel?: string;
 }) {
   return (
-    <GenericDialog open={isOpen} $minWidth="32em">
+    <GenericDialog open={isOpen} $width="32em">
       <Dialog.Header>
         <Dialog.Title>{title}</Dialog.Title>
       </Dialog.Header>
@@ -39,14 +39,14 @@ export function ConfirmCloseDialog({
         <GeneralButton
           label={confirmLabel}
           onClick={() => {
-            handleConfirmCloseDecision(true);
+            handleConfirmCloseDecision(false);
           }}
         />
         <GeneralButton
           label={cancelLabel}
           variant="outlined"
           onClick={() => {
-            handleConfirmCloseDecision(false);
+            handleConfirmCloseDecision(true);
           }}
         />
       </Dialog.Actions>
