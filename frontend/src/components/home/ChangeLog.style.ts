@@ -1,3 +1,4 @@
+import { Chip } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
@@ -28,42 +29,30 @@ export const ChangeList = styled.div`
 
 export const ChangeItem = styled.article`
   padding: ${tokens.spacings.comfortable.small};
-  border-left: 4px solid ${tokens.colors.ui.background__medium.hex};
+  border: 1px solid ${tokens.colors.ui.background__medium.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
-  background: ${tokens.colors.ui.background__default.hex};
 `;
 
 export const ChangeItemHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: ${tokens.spacings.comfortable.x_small};
+  justify-content: space-between;
   margin-bottom: ${tokens.spacings.comfortable.x_small};
 `;
 
-export const ChangeTypeDot = styled.span<{ $changeType: ChangeType }>`
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: ${({ $changeType }) => changeTypeColor($changeType)};
-`;
-
-export const ChangeTypeBadge = styled.span<{ $changeType: ChangeType }>`
+export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
   display: inline-flex;
   align-items: center;
   font-size: 0.75rem;
-  font-weight: 500;
-  line-height: 1;
-  padding: ${tokens.spacings.comfortable.x_small};
-  border-radius: ${tokens.shape.corners.borderRadius};
   color: ${({ $changeType }) => changeTypeColor($changeType)};
   background: ${tokens.colors.ui.background__light.hex};
+  border: 0;
 `;
 
 export const ChangeDescription = styled.p`
   margin: 0;
   color: ${tokens.colors.text.static_icons__default.hex};
 `;
-
 export const ChangeItemMeta = styled.div`
   margin-top: ${tokens.spacings.comfortable.x_small};
   display: flex;
