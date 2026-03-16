@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 import type { FmuProject } from "#client";
 import {
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectPatchModelMutation,
 } from "#client/@tanstack/react-query.gen";
@@ -65,6 +66,9 @@ function ModelEditorForm({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
     },
     onError: (error) => {
