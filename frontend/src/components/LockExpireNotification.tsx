@@ -61,19 +61,22 @@ export function LockExpireNotification() {
       return;
     }
 
-    const updateTimeUntilExpire = () => {
-      const lockExpireAt = new Date(lockInfo.expires_at * 1000).getTime();
-      const timeLeft = Math.max(
-        0,
-        Math.ceil((lockExpireAt - Date.now()) / 1000) * 1000,
-      );
+    const initialTimeLeft = Math.max(
+      0,
+      Math.ceil(lockInfo.expires_at - Date.now() / 1000),
+    );
 
-      setTimeUntilExpire(timeLeft);
-    };
+    setTimeUntilExpire(initialTimeLeft);
 
-    updateTimeUntilExpire();
+    const interval = setInterval(() => {
+      setTimeUntilExpire((currentTimeLeft) => {
+        if (!Number.isFinite(currentTimeLeft) || currentTimeLeft <= 0) {
+          return currentTimeLeft;
+        }
 
-    const interval = setInterval(updateTimeUntilExpire, 1000); // setInterval : countdown
+        return currentTimeLeft - 1;
+      });
+    }, 1000);
 
     return () => {
       clearInterval(interval);
@@ -96,8 +99,6 @@ export function LockExpireNotification() {
       timeUntilExpire !== Number.POSITIVE_INFINITY
     ) {
       setTimeUntilExpire(Number.POSITIVE_INFINITY);
-    } else {
-      return;
     }
   }, [isDialogOpen, isLockAcquired, timeUntilExpire, queryClient]);
 
@@ -125,7 +126,7 @@ export function LockExpireNotification() {
           <>
             <PageText>
               Your lock will expire and the project will become read-only in{" "}
-              <b>{Math.ceil(timeUntilExpire / 1000)}</b> seconds.
+              <b>{timeUntilExpire}</b> seconds.
             </PageText>
 
             <PageText $marginBottom="0">
