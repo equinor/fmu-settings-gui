@@ -12,6 +12,7 @@ import {
   projectGetCacheDiffOptions,
   projectGetCacheOptions,
   projectGetCacheQueryKey,
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectPostCacheRestoreMutation,
 } from "#client/@tanstack/react-query.gen";
@@ -434,6 +435,9 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetCacheQueryKey({

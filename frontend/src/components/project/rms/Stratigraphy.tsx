@@ -11,6 +11,7 @@ import type {
   RmsStratigraphicZone,
 } from "#client";
 import {
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectPatchRmsStratigraphicFrameworkMutation,
   rmsGetHorizonsOptions,
@@ -307,6 +308,9 @@ function Edit({
     onSuccess: () => {
       void queryClient.refetchQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
     },
     onError: (error) => {

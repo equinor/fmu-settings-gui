@@ -657,37 +657,6 @@ export const sessionPatchAccessTokenMutation = (options?: Partial<Options<Sessio
     return mutationOptions;
 };
 
-export const sessionPostRestoreQueryKey = (options?: Options<SessionPostRestoreData>) => createQueryKey('sessionPostRestore', options);
-
-export const sessionPostRestoreOptions = (options?: Options<SessionPostRestoreData>) => {
-    return queryOptions({
-        queryFn: async ({ queryKey, signal }) => {
-            const { data } = await sessionPostRestore({
-                ...options,
-                ...queryKey[0],
-                signal,
-                throwOnError: true
-            });
-            return data;
-        },
-        queryKey: sessionPostRestoreQueryKey(options)
-    });
-};
-
-export const sessionPostRestoreMutation = (options?: Partial<Options<SessionPostRestoreData>>): UseMutationOptions<SessionPostRestoreResponse, AxiosError<SessionPostRestoreError>, Options<SessionPostRestoreData>> => {
-    const mutationOptions: UseMutationOptions<SessionPostRestoreResponse, AxiosError<SessionPostRestoreError>, Options<SessionPostRestoreData>> = {
-        mutationFn: async (localOptions) => {
-            const { data } = await sessionPostRestore({
-                ...options,
-                ...localOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
 export const rmsDeleteRmsProjectMutation = (options?: Partial<Options<RmsDeleteRmsProjectData>>): UseMutationOptions<RmsDeleteRmsProjectResponse, AxiosError<RmsDeleteRmsProjectError>, Options<RmsDeleteRmsProjectData>> => {
     const mutationOptions: UseMutationOptions<RmsDeleteRmsProjectResponse, AxiosError<RmsDeleteRmsProjectError>, Options<RmsDeleteRmsProjectData>> = {
         mutationFn: async (localOptions) => {

@@ -1,10 +1,8 @@
-import { Accordion } from "@equinor/eds-core-react";
 import { useQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
-import { useState } from "react";
 
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
-import { InfoBox, PageText } from "#styles/common";
+import { PageHeader, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import {
   ChangeDescription,
@@ -12,8 +10,7 @@ import {
   ChangeItemHeader,
   ChangeItemMeta,
   ChangeList,
-  ChangeTypeBadge,
-  ChangeTypeDot,
+  ChangeTypeChip,
 } from "./ChangeLog.style";
 
 function formatTimestamp(value?: string) {
@@ -47,11 +44,11 @@ function formatBriefDescription(change: string) {
     .trim();
   const concise = withoutDiffPayload || compact;
 
-  if (concise.length <= 96) {
+  if (concise.length <= 72) {
     return concise;
   }
 
-  return `${concise.slice(0, 93)}...`;
+  return `${concise.slice(0, 69)}...`;
 }
 
 function getTypeLabel(changeType: string) {
@@ -59,25 +56,44 @@ function getTypeLabel(changeType: string) {
 }
 
 export function ChangeLog() {
-  const [open, setOpen] = useState(true);
   const { data, isPending, isError, error } = useQuery(
     projectGetChangelogOptions(),
   );
 
   if (isPending) {
-    return <PageText>Loading changelog...</PageText>;
+    return (
+      <>
+        <PageHeader $variant="h3">Changelog</PageHeader>
+        <PageText>Loading changelog...</PageText>
+      </>
+    );
   }
 
   if (isError) {
     if (isAxiosError(error) && error.response?.status === 404) {
-      return <PageText>No changelog found for this project.</PageText>;
+      return (
+        <>
+          <PageHeader $variant="h3">Changelog</PageHeader>
+          <PageText>No changelog found for this project.</PageText>
+        </>
+      );
     }
 
-    return <PageText>Unable to load changelog.</PageText>;
+    return (
+      <>
+        <PageHeader $variant="h3">Changelog</PageHeader>
+        <PageText>Unable to load changelog.</PageText>
+      </>
+    );
   }
 
   if (data.length === 0) {
-    return <PageText>No changelog entries yet.</PageText>;
+    return (
+      <>
+        <PageHeader $variant="h3">Changelog</PageHeader>
+        <PageText>No changelog entries yet.</PageText>
+      </>
+    );
   }
 
   const latestChanges = [...data]
@@ -88,44 +104,36 @@ export function ChangeLog() {
 
   return (
     <>
-      <Accordion>
-        <Accordion.Item isExpanded={open} onExpandedChange={setOpen}>
-          <Accordion.Header>Changelog</Accordion.Header>
-          <Accordion.Panel>
-            <PageText>
-              Quick summary of the latest project configuration changes.
-            </PageText>
-            <InfoBox>
-              <PageText $marginBottom="0">
-                {latestChanges.length} changes since last snapshot.
-              </PageText>
-              <ChangeList>
-                {latestChanges.map((entry) => (
-                  <ChangeItem
-                    key={`${entry.timestamp ?? "no-time"}-${entry.user}-${entry.change_type}-${entry.file}-${entry.path}-${entry.key}`}
-                  >
-                    <ChangeItemHeader>
-                      <ChangeTypeDot $changeType={entry.change_type} />
-                      <ChangeTypeBadge $changeType={entry.change_type}>
-                        {getTypeLabel(entry.change_type)}
-                      </ChangeTypeBadge>
-                    </ChangeItemHeader>
-                    <ChangeDescription>
-                      {formatBriefDescription(entry.change)}
-                    </ChangeDescription>
-                    <ChangeItemMeta>
-                      <span>{formatTimestamp(entry.timestamp)}</span>
-                      <span>{entry.user}</span>
-                      <span>Type: {getTypeLabel(entry.change_type)}</span>
-                      <span>Key: {entry.key}</span>
-                    </ChangeItemMeta>
-                  </ChangeItem>
-                ))}
-              </ChangeList>
-            </InfoBox>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
+      <PageHeader $variant="h3">Changelog</PageHeader>
+      <PageText>Recent changes to this project&apos;s settings.</PageText>
+      <PageText $marginBottom="0">
+        Showing the last {latestChanges.length} change
+        {latestChanges.length === 1 ? "" : "s"}.
+      </PageText>
+      <ChangeList>
+        {latestChanges.map((entry) => {
+          return (
+            <ChangeItem
+              key={`${entry.timestamp ?? "no-time"}-${entry.user}-${entry.change_type}-${entry.file}-${entry.path}-${entry.key}`}
+            >
+              <ChangeItemHeader>
+                <span>{formatTimestamp(entry.timestamp)}</span>
+                <ChangeTypeChip $changeType={entry.change_type}>
+                  {getTypeLabel(entry.change_type)}
+                </ChangeTypeChip>
+              </ChangeItemHeader>
+
+              <ChangeDescription>
+                {formatBriefDescription(entry.change)}
+              </ChangeDescription>
+              <ChangeItemMeta>
+                <span>{entry.user}</span>
+                <span>Key: {entry.key}</span>
+              </ChangeItemMeta>
+            </ChangeItem>
+          );
+        })}
+      </ChangeList>
     </>
   );
 }

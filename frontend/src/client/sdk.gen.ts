@@ -537,20 +537,6 @@ export const sessionPatchAccessToken = <ThrowOnError extends boolean = false>(op
 };
 
 /**
- * Restores missing .fmu resources for the current session
- * Attempts to recover missing .fmu content from in-memory state.
- *
- * For all sessions this restores the user .fmu directory. If a project is
- * attached to the session, the project .fmu directory is restored as well.
- */
-export const sessionPostRestore = <ThrowOnError extends boolean = false>(options?: Options<SessionPostRestoreData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).post<SessionPostRestoreResponse, SessionPostRestoreError, ThrowOnError>({
-        url: '/api/v1/session/restore',
-        ...options
-    });
-};
-
-/**
  * Close the RMS project in the session
  * Close the RMS project that is currently open in the session.
  *

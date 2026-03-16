@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 import type { RmsProject } from "#client";
 import {
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectGetRmsProjectsOptions,
   projectGetRmsProjectsQueryKey,
@@ -87,6 +88,9 @@ function RmsEditorForm({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
     },
     onError: (error) => {
