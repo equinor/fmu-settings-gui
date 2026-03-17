@@ -103,7 +103,7 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
       },
       queryKey: projectGetLockStatusQueryKey(options),
     }),
-    refetchInterval: projectLockStatusRefetchInterval,
+    refetchInterval: projectLockStatusRefetchInterval * 1000,
     enabled: project.status && project.data !== undefined,
   });
 

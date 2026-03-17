@@ -17,6 +17,7 @@ import { ToastContainer } from "react-toastify";
 
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { Header } from "#components/Header";
+import { LockExpireNotification } from "#components/LockExpireNotification";
 import { ProjectRecoveryNotification } from "#components/ProjectRecoveryNotification";
 import { Sidebar } from "#components/Sidebar";
 import type { RouterContext } from "#main";
@@ -116,6 +117,7 @@ function RootComponent() {
       <GlobalStyle />
       <ToastContainer theme="colored" />
       <ProjectRecoveryNotification />
+      <LockExpireNotification />
 
       <AppContainer>
         <div className="header">
