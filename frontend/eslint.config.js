@@ -1,13 +1,13 @@
 import js from "@eslint/js";
-import globals from "globals";
+import stylistic from "@stylistic/eslint-plugin";
+import pluginQuery from "@tanstack/eslint-plugin-query";
+import pluginRouter from "@tanstack/eslint-plugin-router";
 import reactDom from "eslint-plugin-react-dom";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import reactX from "eslint-plugin-react-x";
+import globals from "globals";
 import tseslint from "typescript-eslint";
-import pluginQuery from "@tanstack/eslint-plugin-query";
-import pluginRouter from "@tanstack/eslint-plugin-router";
-import stylistic from "@stylistic/eslint-plugin"
 
 export default tseslint.config(
   { ignores: ["dist", "src/client"] },
@@ -34,15 +34,19 @@ export default tseslint.config(
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
       "react-x": reactX,
-      "stylistic": stylistic,
+      stylistic: stylistic,
     },
     rules: {
       ...reactDom.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      "stylistic/padding-line-between-statements" : [
-        "error", 
-        { blankLine: "always", prev: "*", next: "function" },  
-        { blankLine: "always", prev: "*", next: "return" }
+      "stylistic/jsx-curly-brace-presence": [
+        "warn",
+        { props: "never", children: "never", propElementValues: "always" },
+      ],
+      "stylistic/padding-line-between-statements": [
+        "error",
+        { blankLine: "always", prev: "*", next: "function" },
+        { blankLine: "always", prev: "*", next: "return" },
       ],
       "react-refresh/only-export-components": [
         "warn",
@@ -54,10 +58,9 @@ export default tseslint.config(
       "@typescript-eslint/restrict-template-expressions": [
         "error",
         {
-          "allowNumber": true,
-        }
-      ]
-    },    
-
+          allowNumber: true,
+        },
+      ],
+    },
   },
 );
