@@ -14,7 +14,7 @@ from starlette.responses import FileResponse
 
 app = FastAPI(title="FMU Settings GUI")
 
-current_dir = Path(__file__).parent.absolute()
+current_dir = Path(__file__).parent.resolve()
 static_dir = current_dir / "static"
 
 
