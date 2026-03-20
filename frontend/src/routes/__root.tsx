@@ -1,27 +1,22 @@
-import { Button } from "@equinor/eds-core-react";
-import {
-  QueryErrorResetBoundary,
-  useQueryErrorResetBoundary,
-} from "@tanstack/react-query";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   createRootRouteWithContext,
   ErrorComponent,
   Outlet,
-  useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import { ToastContainer } from "react-toastify";
 
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
+import { QueryErrorBoundary } from "#components/common";
 import { Header } from "#components/Header";
 import { LockExpireNotification } from "#components/LockExpireNotification";
 import { ProjectRecoveryNotification } from "#components/ProjectRecoveryNotification";
 import { Sidebar } from "#components/Sidebar";
 import type { RouterContext } from "#main";
-import { PageContainer, PageHeader, PageText } from "#styles/common";
+import { PageContainer } from "#styles/common";
 import GlobalStyle from "#styles/global";
 import { getApiToken, isApiTokenNonEmpty } from "#utils/authentication";
 import { AppContainer } from "./index.style";
@@ -75,28 +70,7 @@ function StandardErrorComponent(error: Error) {
   return <ErrorComponent error={error} />;
 }
 
-function ErrorFallbackComponent({
-  error,
-  resetErrorBoundary,
-}: {
-  error: Error;
-  resetErrorBoundary: () => void;
-}) {
-  return (
-    <>
-      <PageHeader>Error</PageHeader>
-
-      <PageText>An error occured: {error.message}</PageText>
-
-      <PageText>Please try again, or go to another page.</PageText>
-
-      <Button onClick={resetErrorBoundary}>Retry</Button>
-    </>
-  );
-}
-
 function RootComponent() {
-  const location = useLocation();
   const { apiTokenStatus } = Route.useRouteContext();
 
   if (!apiTokenStatus.present || !apiTokenStatus.valid) {
@@ -128,17 +102,9 @@ function RootComponent() {
         </div>
         <div className="content">
           <PageContainer>
-            <QueryErrorResetBoundary>
-              {({ reset }) => (
-                <ErrorBoundary
-                  resetKeys={[location.pathname]}
-                  onReset={reset}
-                  FallbackComponent={ErrorFallbackComponent}
-                >
-                  <Outlet />
-                </ErrorBoundary>
-              )}
-            </QueryErrorResetBoundary>
+            <QueryErrorBoundary header="Error">
+              <Outlet />
+            </QueryErrorBoundary>
           </PageContainer>
         </div>
       </AppContainer>
