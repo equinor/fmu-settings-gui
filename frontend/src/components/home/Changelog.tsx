@@ -11,7 +11,7 @@ import {
   ChangeItemMeta,
   ChangeList,
   ChangeTypeChip,
-} from "./ChangeLog.style";
+} from "./Changelog.style";
 import { FILE_LABELS, formatEntryDescription } from "./utils";
 
 function formatTimestamp(value?: string) {
@@ -32,15 +32,22 @@ function timestampToNumber(value?: string) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-function toTitleCase(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+import type { ChangeType } from "./types";
+
+const TYPE_LABELS: Record<ChangeType, string> = {
+  update: "Modified",
+  add: "Added",
+  remove: "Removed",
+  reset: "Reset",
+  merge: "Merged",
+  copy: "Copied",
+};
+
+function getTypeLabel(changeType: ChangeType) {
+  return TYPE_LABELS[changeType];
 }
 
-function getTypeLabel(changeType: string) {
-  return toTitleCase(changeType);
-}
-
-export function ChangeLog() {
+export function Changelog() {
   const { data, isPending, isError, error } = useQuery({
     ...projectGetChangelogOptions(),
     meta: { preventDefaultErrorHandling: [404] },
@@ -94,31 +101,29 @@ export function ChangeLog() {
   return (
     <>
       <PageHeader $variant="h3">Changelog</PageHeader>
-      <PageText>Recent changes to this project&apos;s .fmu files.</PageText>
-      <PageText $marginBottom="0">
+      <PageText>
         {latestChanges.length === 1
-          ? "Showing the most recent change."
-          : `Showing the ${latestChanges.length} most recent changes.`}
+          ? "Showing the most recent change to this project&apos;s .fmu files."
+          : `Showing the ${latestChanges.length} most recent changes to this project's .fmu files.`}
       </PageText>
       <ChangeList>
         {latestChanges.map((entry) => {
           return (
             <ChangeItem
               key={`${entry.timestamp ?? "no-time"}-${entry.user}-${entry.change_type}-${entry.file}-${entry.path}-${entry.key}`}
+              $changeType={entry.change_type}
             >
               <ChangeItemHeader>
-                <span>{formatTimestamp(entry.timestamp)}</span>
+                <ChangeDescription>
+                  {formatEntryDescription(entry)} in{" "}
+                  {FILE_LABELS[entry.file] ?? entry.file}
+                </ChangeDescription>
                 <ChangeTypeChip $changeType={entry.change_type}>
                   {getTypeLabel(entry.change_type)}
                 </ChangeTypeChip>
               </ChangeItemHeader>
-
-              <ChangeDescription>
-                {formatEntryDescription(entry)}
-              </ChangeDescription>
               <ChangeItemMeta>
-                <span>{entry.user}</span>
-                <span>File: {FILE_LABELS[entry.file] ?? entry.file}</span>
+                {formatTimestamp(entry.timestamp)} by {entry.user}
               </ChangeItemMeta>
             </ChangeItem>
           );
