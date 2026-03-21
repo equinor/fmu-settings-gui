@@ -27,9 +27,10 @@ export const ChangeList = styled.div`
   gap: ${tokens.spacings.comfortable.small};
 `;
 
-export const ChangeItem = styled.article`
-  padding: ${tokens.spacings.comfortable.small};
-  border: 1px solid ${tokens.colors.ui.background__medium.hex};
+export const ChangeItem = styled.article<{ $changeType: ChangeType }>`
+  padding: ${tokens.spacings.comfortable.small} ${tokens.spacings.comfortable.medium};
+  border-left: 3px solid ${({ $changeType }) => changeTypeColor($changeType)};
+  background: ${tokens.colors.ui.background__light.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
 `;
 
@@ -37,8 +38,7 @@ export const ChangeItemHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: ${tokens.spacings.comfortable.x_small};
-  font-size: 0.875rem;
+  gap: ${tokens.spacings.comfortable.small};
 `;
 
 export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
@@ -50,16 +50,13 @@ export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
   border: 0;
 `;
 
-export const ChangeDescription = styled.p`
-  margin: 0;
-  font-size: 1.125rem;
+export const ChangeDescription = styled.span`
+  font-size: 1rem;
+  font-weight: 500;
   color: ${tokens.colors.text.static_icons__default.hex};
 `;
 export const ChangeItemMeta = styled.div`
-  margin-top: ${tokens.spacings.comfortable.x_small};
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${tokens.spacings.comfortable.small};
+  margin-top: ${tokens.spacings.comfortable.xx_small};
   color: ${tokens.colors.text.static_icons__secondary.hex};
   font-size: 0.875rem;
 `;
