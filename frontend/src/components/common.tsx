@@ -31,9 +31,9 @@ function ErrorFallback({
 
   return (
     <>
-      {header !== undefined && <PageHeader>{header}</PageHeader>}
+      {header && <PageHeader>{header}</PageHeader>}
 
-      {messages !== undefined &&
+      {messages &&
       isAxiosError(error) &&
       error.response &&
       messageCodes.includes(error.response.status.toString()) ? (
@@ -83,6 +83,7 @@ export function QueryErrorBoundary({
     </QueryErrorResetBoundary>
   );
 }
+
 export function ConfirmCloseDialog({
   isOpen,
   handleConfirmCloseDecision,
