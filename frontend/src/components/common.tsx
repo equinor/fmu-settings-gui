@@ -12,9 +12,14 @@ import {
 import { GeneralButton } from "#components/form/button";
 import { GenericDialog, PageHeader, PageText } from "#styles/common";
 
+type StatusCodeHandlingProps = {
+  message: string;
+  enableRetry?: boolean;
+};
+
 type ErrorFallbackProps = {
   header?: string;
-  messages?: Record<number, string>;
+  statusCodeHandling?: Record<number, StatusCodeHandlingProps>;
 };
 
 export function Loading() {
@@ -25,23 +30,32 @@ function ErrorFallback({
   error,
   resetErrorBoundary,
   header,
-  messages,
+  statusCodeHandling,
 }: FallbackProps & ErrorFallbackProps) {
-  const messageCodes = messages ? Object.keys(messages) : [];
+  let message = "";
+  let enableRetry = true;
+
+  if (
+    statusCodeHandling &&
+    isAxiosError(error) &&
+    error.response &&
+    error.response.status in statusCodeHandling
+  ) {
+    const handling = statusCodeHandling[error.response.status];
+    message = handling.message;
+    enableRetry = handling.enableRetry ?? true;
+  } else {
+    message = `An error occured: ${getErrorMessage(error)}`;
+  }
 
   return (
     <>
       {header && <PageHeader>{header}</PageHeader>}
 
-      {messages &&
-      isAxiosError(error) &&
-      error.response &&
-      messageCodes.includes(error.response.status.toString()) ? (
-        <PageText>{messages[error.response.status]}</PageText>
-      ) : (
-        <>
-          <PageText>An error occured: {getErrorMessage(error)}</PageText>
+      <PageText>{message}</PageText>
 
+      {enableRetry && (
+        <>
           <PageText>Please try again.</PageText>
 
           <GeneralButton label="Retry" onClick={resetErrorBoundary} />
@@ -55,12 +69,16 @@ function ErrorFallback({
  * Defines an error boundary when using a query.
  * @param children The children around which the error boundary is defined.
  * @param header An optional header for the error message.
- * @param messages An object for optionally defining error messages for individual HTTP status codes.
+ * @param statusCodeHandling An object for optionally defining the handling
+ *   of individual HTTP status codes. For each HTTP status code the following
+ *   can be set:
+ *   - message - The error message to show.
+ *   - enableRetry - Whether to show a retry button. Defaults to true.
  * @returns
  */
 export function QueryErrorBoundary({
   header,
-  messages,
+  statusCodeHandling,
   children,
 }: ErrorFallbackProps & {
   children: ReactNode;
@@ -74,7 +92,11 @@ export function QueryErrorBoundary({
           resetKeys={[location.pathname]}
           onReset={reset}
           fallbackRender={(props) => (
-            <ErrorFallback header={header} messages={messages} {...props} />
+            <ErrorFallback
+              header={header}
+              statusCodeHandling={statusCodeHandling}
+              {...props}
+            />
           )}
         >
           {children}
