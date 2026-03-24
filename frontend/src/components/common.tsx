@@ -13,7 +13,7 @@ import { GeneralButton } from "#components/form/button";
 import { GenericDialog, PageHeader, PageText } from "#styles/common";
 
 type StatusCodeHandlingProps = {
-  message: string;
+  message?: string;
   enableRetry?: boolean;
 };
 
@@ -32,7 +32,7 @@ function ErrorFallback({
   header,
   statusCodeHandling,
 }: FallbackProps & ErrorFallbackProps) {
-  let message = "";
+  let message = `An error occured: ${getErrorMessage(error)}`;
   let enableRetry = true;
 
   if (
@@ -42,10 +42,12 @@ function ErrorFallback({
     error.response.status in statusCodeHandling
   ) {
     const handling = statusCodeHandling[error.response.status];
-    message = handling.message;
-    enableRetry = handling.enableRetry ?? true;
-  } else {
-    message = `An error occured: ${getErrorMessage(error)}`;
+    if (handling.message !== undefined) {
+      message = handling.message;
+    }
+    if (handling.enableRetry !== undefined) {
+      enableRetry = handling.enableRetry;
+    }
   }
 
   return (
