@@ -1,4 +1,5 @@
-import { Typography } from "@equinor/eds-core-react";
+import { Icon, Typography } from "@equinor/eds-core-react";
+import { info_circle } from "@equinor/eds-icons";
 import {
   useMutation,
   useQueryClient,
@@ -22,7 +23,16 @@ import {
   type StringObject,
 } from "#components/form/form";
 import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
-import { KeysFormContainer } from "./keys.style";
+import {
+  KeysFormContainer,
+  TipBox,
+  TipContent,
+  TipIcon,
+  TipText,
+  TipTitle,
+} from "./keys.style";
+
+Icon.add({ info_circle });
 
 export const Route = createFileRoute("/user/keys")({
   component: RouteComponent,
@@ -148,10 +158,25 @@ function Content() {
           value of the primary key, and copy the value
         </li>
         <li>
-          Add the copied key value to the edit field here. After saving the
-          value will be shown masked with &quot;***...&quot;
+          Click Edit below, paste the copied key value into the field, and save
+          it. After saving the value will be shown masked with
+          &quot;***...&quot;
         </li>
       </Typography>
+
+      <TipBox>
+        <TipIcon>
+          <Icon name="info_circle" title="Tip" size={18} />
+        </TipIcon>
+        <TipContent>
+          <TipTitle>Tip</TipTitle>
+          <TipText>
+            Sign in from Windows on your local computer if possible, then copy
+            the SMDA key into FMU Settings in TGX. Authentication is often
+            easier there than in Firefox in TGX.
+          </TipText>
+        </TipContent>
+      </TipBox>
 
       <PageSectionSpacer />
 
