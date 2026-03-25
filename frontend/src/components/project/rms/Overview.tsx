@@ -308,7 +308,7 @@ function RmsProjectActions({
 
       <ActionButtonsContainer>
         <GeneralButton
-          label={rmsData?.path ? "Change project" : "Select project"}
+          label={rmsData?.path ? "Change RMS project" : "Select RMS project"}
           disabled={
             !!projectIsReadOnly ||
             isRmsProjectOpen ||
@@ -332,7 +332,9 @@ function RmsProjectActions({
         {rmsData?.path && (
           <>
             <GeneralButton
-              label={isRmsProjectOpen ? "Reload project" : "Open project"}
+              label={
+                isRmsProjectOpen ? "Reload RMS project" : "Open RMS project"
+              }
               isPending={projectOpenMutation.isPending}
               disabled={projectCloseMutation.isPending}
               variant={isRmsProjectOpen ? "outlined" : "contained"}
@@ -345,7 +347,7 @@ function RmsProjectActions({
 
             {isRmsProjectOpen && !projectOpenMutation.isPending && (
               <GeneralButton
-                label="Close project"
+                label="Close RMS project"
                 variant="outlined"
                 isPending={projectCloseMutation.isPending}
                 onClick={() => {
