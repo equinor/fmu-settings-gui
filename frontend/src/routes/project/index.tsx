@@ -45,8 +45,6 @@ function ProjectInfoBox({ projectData }: { projectData: FmuProject }) {
         ) : (
           <span className="missingValue">unknown</span>
         )}
-        <br />
-        Version: {projectData.config.version}
       </PageText>
     </InfoBox>
   );
