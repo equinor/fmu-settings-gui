@@ -1,8 +1,9 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
+  projectGetLockStatusOptions,
   projectGetLockStatusQueryKey,
   projectPostLockRefreshMutation,
   projectPostLockReleaseMutation,
@@ -16,6 +17,7 @@ export function LockExpireNotification() {
   const project = useProject();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const isCheckingThreshold = useRef(false);
   const [timeUntilExpire, setTimeUntilExpire] = useState<number>(
     Number.POSITIVE_INFINITY,
   );
@@ -90,10 +92,43 @@ export function LockExpireNotification() {
       });
     } else if (
       isLockAcquired &&
+      isDialogOpen &&
+      timeUntilExpire > projectLockExpireNotificationThreshold
+    ) {
+      setIsDialogOpen(false);
+    } else if (
+      isLockAcquired &&
       !isDialogOpen &&
       timeUntilExpire <= projectLockExpireNotificationThreshold
     ) {
-      setIsDialogOpen(true);
+      if (isCheckingThreshold.current) {
+        return;
+      }
+
+      isCheckingThreshold.current = true;
+
+      void queryClient
+        .fetchQuery({
+          ...projectGetLockStatusOptions(),
+          staleTime: 0,
+        })
+        .then((freshLockStatus) => {
+          const freshLockInfo = freshLockStatus.lock_info;
+          const freshTimeUntilExpire =
+            freshLockStatus.is_lock_acquired && freshLockInfo
+              ? Math.max(
+                  0,
+                  Math.ceil(freshLockInfo.expires_at - Date.now() / 1000),
+                )
+              : Number.POSITIVE_INFINITY;
+
+          setIsDialogOpen(
+            freshTimeUntilExpire <= projectLockExpireNotificationThreshold,
+          );
+        })
+        .finally(() => {
+          isCheckingThreshold.current = false;
+        });
     } else if (
       !isLockAcquired &&
       timeUntilExpire !== Number.POSITIVE_INFINITY
