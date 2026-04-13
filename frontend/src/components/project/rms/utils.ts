@@ -6,18 +6,8 @@ import type {
   RmsStratigraphicZone,
 } from "#client";
 import { useFormContext } from "#utils/form";
-
-export type ZoneWithColumn = RmsStratigraphicZone & {
-  gridColumn: number;
-  topHorizonIndex: number;
-  baseHorizonIndex: number;
-};
-
-export type ItemType = RmsHorizon | RmsStratigraphicZone;
-
-export function findIndexByName(items: ItemType[], name: string) {
-  return items.findIndex((item) => item.name === name);
-}
+import type { ItemType } from "../stratigraphicFramework/types";
+import { findIndexByName } from "../stratigraphicFramework/utils";
 
 export function sortByOrderInReferenceList<T extends ItemType>(
   items: T[],

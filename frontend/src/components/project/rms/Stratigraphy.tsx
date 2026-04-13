@@ -43,7 +43,8 @@ import {
   useConfirmClose,
   useFormContext,
 } from "#utils/form";
-import { StratigraphicFramework } from "./StratigraphicFramework";
+import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework.tsx";
+import { Zones } from "./StratigraphicFramework";
 import {
   ActionButtonsContainer,
   OrphanTypesContainer,
@@ -197,6 +198,7 @@ function StratigraphyEditor({
     <StratigraphyEditorContainer>
       <div>
         <PageHeader $variant="h4">Project stratigraphy</PageHeader>
+
         <StratigraphicFramework
           maxHeight="55vh"
           horizons={projectHorizons}
@@ -209,7 +211,9 @@ function StratigraphyEditor({
           onHorizonClick={(horizon) => {
             removeHorizon(horizon);
           }}
-        />
+        >
+          <Zones />
+        </StratigraphicFramework>
 
         {hasOrphans && (
           <OrphanWarningBox
@@ -245,7 +249,9 @@ function StratigraphyEditor({
           onHorizonClick={(horizon, isUnselected) => {
             isUnselected ? addHorizon(horizon) : removeHorizon(horizon);
           }}
-        />
+        >
+          <Zones />
+        </StratigraphicFramework>
 
         <ActionButtonsContainer>
           <GeneralButton
@@ -472,10 +478,9 @@ export function Stratigraphy({
       </PageText>
 
       {projectHorizons.length ? (
-        <StratigraphicFramework
-          horizons={projectHorizons}
-          zones={projectZones}
-        />
+        <StratigraphicFramework horizons={projectHorizons} zones={projectZones}>
+          <Zones />
+        </StratigraphicFramework>
       ) : (
         <PageCode>
           No stratigraphy information currently stored in the project.
