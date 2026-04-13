@@ -4,7 +4,7 @@ import { isAxiosError } from "axios";
 import { type Options, type SmdaGetHealthData, smdaGetHealth } from "#client";
 import { smdaGetHealthQueryKey } from "#client/@tanstack/react-query.gen";
 
-type HealthCheck = {
+export type HealthCheck = {
   status: boolean;
   text: string;
 };

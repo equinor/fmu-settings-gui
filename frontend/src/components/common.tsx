@@ -1,16 +1,29 @@
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { Dialog } from "@equinor/eds-core-react";
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { useLocation } from "@tanstack/react-router";
+import {
+  QueryErrorResetBoundary,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { Link, useLocation } from "@tanstack/react-router";
 import { isAxiosError } from "axios";
-import type { ReactNode } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import {
   ErrorBoundary,
   type FallbackProps,
   getErrorMessage,
 } from "react-error-boundary";
 
+import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { GeneralButton } from "#components/form/button";
-import { GenericDialog, PageHeader, PageText } from "#styles/common";
+import type { HealthCheck } from "#services/smda";
+import {
+  GenericDialog,
+  PageCode,
+  PageHeader,
+  PageText,
+  WarningBox,
+} from "#styles/common";
+import { handleSsoLogin } from "#utils/authentication";
 
 type StatusCodeHandlingProps = {
   message?: string;
@@ -152,5 +165,107 @@ export function ConfirmCloseDialog({
         />
       </Dialog.Actions>
     </GenericDialog>
+  );
+}
+
+function SmdaSubscriptionKeyPresence({
+  hasSubscriptionKey,
+}: {
+  hasSubscriptionKey: boolean;
+}) {
+  return (
+    <PageText>
+      {hasSubscriptionKey ? (
+        <>
+          ✅ SMDA <strong>subscription key</strong> is present
+        </>
+      ) : (
+        <>
+          ⛔ An SMDA <strong>subscription key</strong> is not present, please{" "}
+          <Link to="/user/keys" hash="smda_subscription">
+            add this key
+          </Link>
+        </>
+      )}
+    </PageText>
+  );
+}
+
+function AccessTokenPresence({
+  hasSubscriptionKey,
+  setRequestAcquireSsoAccessToken,
+}: {
+  hasSubscriptionKey: boolean;
+  setRequestAcquireSsoAccessToken: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { instance: msalInstance } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+
+  return (
+    <PageText>
+      {isAuthenticated ? (
+        <>
+          ✅ You are logged in with SSO and an <strong>access token</strong> is
+          present
+          {hasSubscriptionKey && (
+            <>
+              . Try adding it to the session:{" "}
+              <GeneralButton
+                label="Add to session"
+                onClick={() => {
+                  setRequestAcquireSsoAccessToken(true);
+                }}
+              />
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          ⛔ An SSO <strong>access token</strong> is not present, please log in:{" "}
+          <GeneralButton
+            label="Log in"
+            onClick={() => {
+              handleSsoLogin(msalInstance);
+            }}
+          />
+        </>
+      )}
+    </PageText>
+  );
+}
+
+export function SmdaHealthCheckInfo({
+  feature,
+  healthCheck,
+  setRequestAcquireSsoAccessToken,
+}: {
+  feature: string;
+  healthCheck: HealthCheck;
+  setRequestAcquireSsoAccessToken: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { data: userData } = useSuspenseQuery(userGetUserOptions());
+
+  const hasSubscriptionKey =
+    "smda_subscription" in userData.user_api_keys &&
+    typeof userData.user_api_keys.smda_subscription === "string" &&
+    userData.user_api_keys.smda_subscription !== "";
+
+  if (healthCheck.status) {
+    return null;
+  }
+
+  return (
+    <WarningBox>
+      <PageText>Required data for {feature} is not present:</PageText>
+
+      <PageCode>{healthCheck.text}</PageCode>
+
+      <SmdaSubscriptionKeyPresence hasSubscriptionKey={hasSubscriptionKey} />
+
+      <AccessTokenPresence
+        hasSubscriptionKey={hasSubscriptionKey}
+        setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
+      />
+    </WarningBox>
   );
 }
