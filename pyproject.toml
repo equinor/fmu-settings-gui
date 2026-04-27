@@ -72,9 +72,6 @@ warn_redundant_casts = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[tool.pylint]
-disable = "missing-module-docstring"
-
 [tool.pytest.ini_options]
 norecursedirs = [
     ".git",
@@ -97,7 +94,6 @@ ignore = [
 ]
 select = [
     "B",  # flake-8-bugbear
-    "C",  # pylint-convention
     "C90",  # mccabe
     "D",  # pydocstyle
     "E",  # pycodestyle-error
@@ -106,7 +102,6 @@ select = [
     "NPY",  # numpy
     "PD",  # pandas-vet
     "PIE",  # flake8-pie
-    "PL",  # pylint
     "Q",  # flake-8 quotes
     "Q",  # flake8-quotes
     "RET",  # flake8-return
@@ -115,7 +110,6 @@ select = [
     "TCH",  # flake8-type-checking
     "TID",  # flake8-tidy-imports
     "UP",  # pyupgrade
-    "W",  # pylint-warnings
 ]
 
 [tool.ruff.lint.isort]
