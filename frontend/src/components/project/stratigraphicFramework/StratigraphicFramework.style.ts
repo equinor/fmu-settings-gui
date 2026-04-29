@@ -41,7 +41,7 @@ export const StratigraphicFrameworkContent = styled(GenericInnerBox).attrs<{
   $numRows: number;
 }>((props) => ({
   style: {
-    gridTemplateRows: `repeat(${props.$numRows}, 14px)`,
+    gridTemplateRows: `repeat(${props.$numRows}, minmax(14px, max-content))`,
     gridTemplateColumns: `minmax(max-content, 2fr) repeat(${props.$numStratColumns}, 3fr)`,
   },
 }))`
@@ -60,6 +60,8 @@ export const GridLine = styled.div<{
 
 export const HorizonItem = styled.div`
   grid-column: 1;
+  align-self: self-start;
+  padding-top: 2px;
 
   button {
     height: 100%;  

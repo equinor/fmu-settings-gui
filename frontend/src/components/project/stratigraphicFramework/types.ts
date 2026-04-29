@@ -19,7 +19,6 @@ export type FrameworkData = {
   horizonsUsedByZones: Set<string>;
   onHorizonClick?: (horizon: RmsHorizon, isUnselected: boolean) => void;
   onZoneClick?: (zone: RmsStratigraphicZone, isUnselected: boolean) => void;
-  isInteractive: boolean;
   zoneGridPlacement: Map<string, ZonePlacementInfo>;
   numGridRows: number;
   numStratColumns: number;

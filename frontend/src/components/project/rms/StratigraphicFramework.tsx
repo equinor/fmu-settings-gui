@@ -32,13 +32,7 @@ export function Zones() {
     const isUnselected = frameworkData.unselectedZoneNamesSet.has(zone.name);
 
     return (
-      <ZoneItem
-        key={zone.name}
-        style={{
-          gridRow: `${grid.rowStart * 2 + 2} / ${grid.rowEnd * 2 + 2}`,
-          gridColumn: grid.gridColumn + 1,
-        }}
-      >
+      <ZoneItem key={zone.name} $zoneGrid={grid}>
         <Tooltip title={ZoneTooltipContent(zone, isOrphan)}>
           <Button
             className={isOrphan ? "orphan" : isUnselected ? "unselected" : ""}

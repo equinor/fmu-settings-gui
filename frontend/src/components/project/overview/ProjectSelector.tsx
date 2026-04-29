@@ -28,6 +28,7 @@ import {
 } from "#client/@tanstack/react-query.gen";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import { TextField } from "#components/form/field";
+import { mappingsPaths } from "#services/project";
 import { EditDialog, PageSectionSpacer, PageText } from "#styles/common";
 import { HTTP_STATUS_UNPROCESSABLE_CONTENT } from "#utils/api";
 import {
@@ -94,11 +95,7 @@ function ProjectSelectorForm({
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetMappingsQueryKey({
-          path: {
-            mapping_type: "stratigraphy",
-            source_system: "rms",
-            target_system: "smda",
-          },
+          path: mappingsPaths.stratigraphyRmsSmda,
         }),
       });
       void queryClient.invalidateQueries({
@@ -352,11 +349,7 @@ function ConfirmInitProjectDialog({
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetMappingsQueryKey({
-          path: {
-            mapping_type: "stratigraphy",
-            source_system: "rms",
-            target_system: "smda",
-          },
+          path: mappingsPaths.stratigraphyRmsSmda,
         }),
       });
       void queryClient.invalidateQueries({

@@ -9,8 +9,18 @@ export function httpValidationErrorToString(
   error: AxiosError,
   maxErrors: number = 2,
 ) {
+  const messagePrefix = "Error in API value validation";
   const mainSeparator = ": ";
   const errorSeparator = "; ";
+
+  if (
+    error.response?.data &&
+    typeof error.response.data === "object" &&
+    "detail" in error.response.data &&
+    !Array.isArray(error.response.data.detail)
+  ) {
+    return `${messagePrefix}: ${error.response.data.detail as string}`;
+  }
 
   const validationErrors = (
     error.response?.data &&
@@ -32,7 +42,7 @@ export function httpValidationErrorToString(
       return `${locString}: ${valError.msg}`;
     });
 
-  let message = "Error in API value validation";
+  let message = messagePrefix;
   if (errorStrings.length) {
     message += mainSeparator + errorStrings.join(errorSeparator);
   }

@@ -44,6 +44,7 @@ export function StratigraphicFramework({
   onZoneClick,
   onHorizonClick,
   maxHeight,
+  disablePointerEvents = false,
   children,
 }: {
   horizons: RmsHorizon[];
@@ -55,6 +56,7 @@ export function StratigraphicFramework({
   onZoneClick?: (zone: RmsStratigraphicZone, isUnselected: boolean) => void;
   onHorizonClick?: (horizon: RmsHorizon, isUnselected: boolean) => void;
   maxHeight?: string;
+  disablePointerEvents?: boolean;
   children: React.ReactNode;
 }) {
   const frameworkData = useMemo(() => {
@@ -75,7 +77,6 @@ export function StratigraphicFramework({
       ),
       onHorizonClick,
       onZoneClick,
-      isInteractive: Boolean(onZoneClick ?? onHorizonClick),
       zoneGridPlacement,
       numGridRows: Math.max(1, horizons.length * 2),
       numStratColumns: Math.max(
@@ -96,8 +97,8 @@ export function StratigraphicFramework({
 
   return (
     <StratigraphicFrameworkContainer
-      $disablePointerEvents={!frameworkData.isInteractive}
       $maxHeight={maxHeight}
+      $disablePointerEvents={disablePointerEvents}
     >
       <StratigraphicFrameworkHeader
         $numStratColumns={frameworkData.numStratColumns}

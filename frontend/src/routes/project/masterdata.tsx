@@ -20,21 +20,17 @@ export const Route = createFileRoute("/project/masterdata")({
 function Content() {
   const project = useProject();
   const { data: healthCheck } = useSmdaHealthCheck();
-  const [masterdataEditMode, setMasterdataEditMode] = useState(
+  const [editMode, setEditMode] = useState(
     getStorageItem(sessionStorage, STORAGENAME_MASTERDATA_EDIT_MODE, "boolean"),
   );
   const { setRequestAcquireSsoAccessToken } = Route.useRouteContext();
 
   useEffect(() => {
-    setStorageItem(
-      sessionStorage,
-      STORAGENAME_MASTERDATA_EDIT_MODE,
-      masterdataEditMode,
-    );
-  }, [masterdataEditMode]);
+    setStorageItem(sessionStorage, STORAGENAME_MASTERDATA_EDIT_MODE, editMode);
+  }, [editMode]);
 
-  function toggleMasterdataEditMode() {
-    setMasterdataEditMode((prevMode) => !prevMode);
+  function toggleEditMode() {
+    setEditMode((prevMode) => !prevMode);
   }
 
   if (!project.status) {
@@ -47,10 +43,10 @@ function Content() {
         projectMasterdata={project.data?.config.masterdata?.smda ?? undefined}
         smdaHealthStatus={healthCheck.status}
         projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
-        masterdataEditMode={masterdataEditMode}
+        editMode={editMode}
       />
 
-      {masterdataEditMode ? (
+      {editMode ? (
         <SmdaHealthCheckInfo
           feature="editing masterdata"
           healthCheck={healthCheck}
@@ -59,7 +55,7 @@ function Content() {
       ) : (
         <PageText>
           💡 To manage masterdata,{" "}
-          <Typography onClick={toggleMasterdataEditMode} link>
+          <Typography onClick={toggleEditMode} link>
             enable editing mode.
           </Typography>
         </PageText>

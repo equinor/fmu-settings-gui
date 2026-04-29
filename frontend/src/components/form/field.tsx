@@ -5,7 +5,12 @@ import {
   InputWrapper,
   NativeSelect,
 } from "@equinor/eds-core-react";
-import { error_filled, info_circle } from "@equinor/eds-icons";
+import {
+  add_circle_filled,
+  error_filled,
+  info_circle,
+  remove,
+} from "@equinor/eds-icons";
 import {
   type ChangeEvent,
   type Dispatch,
@@ -18,7 +23,7 @@ import { useFieldContext } from "#utils/form";
 import type { ValidatorProps } from "#utils/validator";
 import { CommonInputWrapper, SearchFieldInput } from "./field.style";
 
-Icon.add({ error_filled, info_circle });
+Icon.add({ add_circle_filled, error_filled, info_circle, remove });
 
 export interface BasicTextFieldProps {
   name: string;
@@ -133,6 +138,57 @@ export function SearchField({
         }}
       />
     </InputWrapper>
+  );
+}
+
+export function ArrayTextField({ removeValue }: { removeValue: () => void }) {
+  const field = useFieldContext<string>();
+
+  return (
+    <>
+      <EdsTextField
+        id={field.name}
+        name={field.name}
+        value={field.state.value}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          field.handleChange(e.target.value);
+        }}
+      />
+      <Icon
+        className="removeIcon"
+        name="remove"
+        title="Remove"
+        size={16}
+        onClick={removeValue}
+      />
+    </>
+  );
+}
+
+export function ArrayTextAddItem({
+  emptyText,
+  pushEmpty,
+}: {
+  emptyText?: string;
+  pushEmpty: () => void;
+}) {
+  const field = useFieldContext<string>();
+
+  return (
+    <>
+      <div className="emptyRow">
+        {field.state.value.length === 0 && emptyText !== undefined && (
+          <span className="missingValue">{emptyText}</span>
+        )}
+      </div>
+      <Icon
+        className="addIcon"
+        name="add_circle_filled"
+        title="Add"
+        size={16}
+        onClick={pushEmpty}
+      />
+    </>
   );
 }
 

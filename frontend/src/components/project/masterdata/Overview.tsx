@@ -11,12 +11,12 @@ export function Overview({
   projectMasterdata,
   smdaHealthStatus,
   projectReadOnly,
-  masterdataEditMode,
+  editMode,
 }: {
   projectMasterdata: Smda | undefined;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
-  masterdataEditMode: boolean;
+  editMode: boolean;
 }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export function Overview({
         <PageText>No masterdata is currently stored in the project.</PageText>
       )}
 
-      {masterdataEditMode && smdaHealthStatus && (
+      {editMode && smdaHealthStatus && (
         <GeneralButton
           label={projectMasterdata ? "Edit" : "Add"}
           onClick={openEditDialog}

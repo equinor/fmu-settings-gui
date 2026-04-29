@@ -129,7 +129,7 @@ export type CountryItem = {
 /**
  * The system or application data is being mapping to or from.
  */
-export type DataSystem = 'rms' | 'smda' | 'fmu';
+export type DataSystem = 'rms' | 'smda' | 'fmu' | 'simulator' | 'pdm';
 
 /**
  * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
@@ -189,6 +189,24 @@ export type GlobalConfigPath = {
 
 export type HttpValidationError = {
     detail?: Array<ValidationError>;
+};
+
+/**
+ * A mapping entry exposed by the mappings API.
+ */
+export type IdentifierMappingResponse = {
+    /**
+     * Relationship between the source identifier and the official identifier.
+     */
+    relation_type: RelationType;
+    /**
+     * Identifier from the source system.
+     */
+    source_id: string;
+    /**
+     * Optional UUID associated with the source identifier.
+     */
+    source_uuid?: string | null;
 };
 
 /**
@@ -270,8 +288,34 @@ export type LockStatus = {
 
 export type LogChangeInfo = Array<ChangeInfo>;
 
-export type MappingGroup = {
-    [key: string]: unknown;
+/**
+ * Mappings grouped by official target identifier for API responses.
+ */
+export type MappingGroupResponse = {
+    /**
+     * Official target identifier shared by all mappings in the group.
+     */
+    official_name: string;
+    /**
+     * Optional UUID associated with the official identifier.
+     */
+    target_uuid?: string | null;
+    /**
+     * Kind of mapping represented by this group.
+     */
+    mapping_type: MappingType;
+    /**
+     * Target system that owns the official identifier.
+     */
+    target_system: DataSystem;
+    /**
+     * Source system that owns the mapped identifiers.
+     */
+    source_system: DataSystem;
+    /**
+     * Mappings that point to the same official identifier.
+     */
+    mappings: Array<IdentifierMappingResponse>;
 };
 
 /**
@@ -280,7 +324,7 @@ export type MappingGroup = {
  * Each of these types should have their own mapping class derived from a base
  * mapping type, e.g. IdentifierMapping.
  */
-export type MappingType = 'stratigraphy';
+export type MappingType = 'stratigraphy' | 'wellbore';
 
 /**
  * The ``masterdata`` block contains information related to masterdata.
@@ -341,6 +385,16 @@ export type ProjectConfig = {
  * The kind of relation this mapping represents.
  */
 export type RelationType = 'primary' | 'alias' | 'equivalent';
+
+/**
+ * A list of missing .fmu files that can be restored or were restored.
+ */
+export type RestorableFilesResponse = {
+    /**
+     * Relative paths to the restorable or restored files.
+     */
+    files: Array<string>;
+};
 
 /**
  * The project coordinate system of an RMS project.
@@ -504,6 +558,10 @@ export type SessionResponse = {
      */
     expires_at: string;
     /**
+     * Timestamp when the RMS session will expire.
+     */
+    rms_expires_at: string | null;
+    /**
      * Timestamp when the session was last accessed.
      */
     last_accessed: string;
@@ -560,6 +618,10 @@ export type SmdaFieldUuid = {
      * The SMDA UUID identifier corresponding to the field identifier.
      */
     uuid: string;
+    /**
+     * The country identifier corresponding to the field identifier.
+     */
+    country: string;
 };
 
 /**
@@ -595,6 +657,20 @@ export type SmdaMasterdataResult = {
      * applies to the model they are working on.
      */
     coordinate_systems: Array<CoordinateSystem>;
+};
+
+/**
+ * A selected field for masterdata lookup.
+ */
+export type SmdaSelectedField = {
+    /**
+     * A field identifier (name).
+     */
+    identifier: string;
+    /**
+     * The SMDA UUID identifier corresponding to the field identifier.
+     */
+    uuid?: string | null;
 };
 
 /**
@@ -748,10 +824,22 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
-    input?: unknown;
-    ctx?: {
-        [key: string]: unknown;
-    };
+};
+
+/**
+ * Represents a wellbore mapping.
+ *
+ * This is a mapping from wellbore identifiers to official identifiers in SMDA/PDM.
+ */
+export type WellboreIdentifierMapping = {
+    source_system: DataSystem;
+    target_system: DataSystem;
+    mapping_type?: 'wellbore';
+    relation_type: RelationType;
+    source_id: string;
+    source_uuid?: string | null;
+    target_id: string;
+    target_uuid?: string | null;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -994,16 +1082,14 @@ export type ProjectPostInitProjectErrors = {
      */
     409: unknown;
     /**
-     * Validation Error
+     * The requested path exists but is not a valid FMU project root.
      */
-    422: HttpValidationError;
+    422: unknown;
     /**
      * Something unexpected has happened
      */
     500: unknown;
 };
-
-export type ProjectPostInitProjectError = ProjectPostInitProjectErrors[keyof ProjectPostInitProjectErrors];
 
 export type ProjectPostInitProjectResponses = {
     /**
@@ -1848,6 +1934,101 @@ export type ProjectPostCacheRestoreResponses = {
 
 export type ProjectPostCacheRestoreResponse = ProjectPostCacheRestoreResponses[keyof ProjectPostCacheRestoreResponses];
 
+export type ProjectGetRestoreCheckData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/restore/check';
+};
+
+export type ProjectGetRestoreCheckErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetRestoreCheckError = ProjectGetRestoreCheckErrors[keyof ProjectGetRestoreCheckErrors];
+
+export type ProjectGetRestoreCheckResponses = {
+    /**
+     * Successful Response
+     */
+    200: RestorableFilesResponse;
+};
+
+export type ProjectGetRestoreCheckResponse = ProjectGetRestoreCheckResponses[keyof ProjectGetRestoreCheckResponses];
+
+export type ProjectPostRestoreData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/restore';
+};
+
+export type ProjectPostRestoreErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostRestoreError = ProjectPostRestoreErrors[keyof ProjectPostRestoreErrors];
+
+export type ProjectPostRestoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: RestorableFilesResponse;
+};
+
+export type ProjectPostRestoreResponse = ProjectPostRestoreResponses[keyof ProjectPostRestoreResponses];
+
 export type ProjectGetMappingsData = {
     body?: never;
     path: {
@@ -1890,17 +2071,19 @@ export type ProjectGetMappingsErrors = {
 
 export type ProjectGetMappingsResponses = {
     /**
-     * Successful Response
+     * Mappings grouped by target context.
      */
-    200: Array<MappingGroup>;
+    200: Array<MappingGroupResponse>;
 };
 
 export type ProjectGetMappingsResponse = ProjectGetMappingsResponses[keyof ProjectGetMappingsResponses];
 
 export type ProjectPutMappingsData = {
-    body: Array<{
+    body: Array<({
         mapping_type?: 'stratigraphy';
-    } & StratigraphyIdentifierMapping>;
+    } & StratigraphyIdentifierMapping) | ({
+        mapping_type?: 'wellbore';
+    } & WellboreIdentifierMapping)>;
     path: {
         mapping_type: MappingType;
         source_system: DataSystem;
@@ -2147,10 +2330,7 @@ export type SessionPostSessionErrors = {
     403: unknown;
     /**
      *
-     * Occurs in two cases:
-     *
-     * - When attempting to create a session when one already exists
-     * - When trying to create a user .fmu directory, but it already
+     * Occurs when trying to create a user .fmu directory, but it already
      * exists. Typically means that .fmu exists as a file.
      *
      */
@@ -2217,6 +2397,39 @@ export type SessionPatchAccessTokenResponses = {
 
 export type SessionPatchAccessTokenResponse = SessionPatchAccessTokenResponses[keyof SessionPatchAccessTokenResponses];
 
+export type SessionGetRestoreCheckData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/session/restore/check';
+};
+
+export type SessionGetRestoreCheckErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type SessionGetRestoreCheckError = SessionGetRestoreCheckErrors[keyof SessionGetRestoreCheckErrors];
+
+export type SessionGetRestoreCheckResponses = {
+    /**
+     * Successful Response
+     */
+    200: RestorableFilesResponse;
+};
+
+export type SessionGetRestoreCheckResponse = SessionGetRestoreCheckResponses[keyof SessionGetRestoreCheckResponses];
+
 export type SessionPostRestoreData = {
     body?: never;
     path?: never;
@@ -2242,10 +2455,6 @@ export type SessionPostRestoreErrors = {
      */
     422: HttpValidationError;
     /**
-     * Project is locked by another process and cannot be restored
-     */
-    423: unknown;
-    /**
      * Something unexpected has happened
      */
     500: unknown;
@@ -2257,7 +2466,7 @@ export type SessionPostRestoreResponses = {
     /**
      * Successful Response
      */
-    200: Message;
+    200: RestorableFilesResponse;
 };
 
 export type SessionPostRestoreResponse = SessionPostRestoreResponses[keyof SessionPostRestoreResponses];
@@ -2569,7 +2778,7 @@ export type SmdaPostFieldResponses = {
 export type SmdaPostFieldResponse = SmdaPostFieldResponses[keyof SmdaPostFieldResponses];
 
 export type SmdaPostMasterdataData = {
-    body: Array<SmdaField>;
+    body: Array<SmdaSelectedField>;
     path?: never;
     query?: never;
     url: '/api/v1/smda/masterdata';

@@ -4,6 +4,13 @@ import { toast } from "react-toastify";
 import { HTTP_STATUS_UNAUTHORIZED } from "./api";
 import { isApiUrlSession, isExternalApi } from "./authentication";
 
+export type QueryServiceBase<T> = {
+  status: boolean;
+  text?: string;
+  data?: T;
+  errorStatus?: number;
+};
+
 export const defaultErrorHandling = (error: Error, errorPrefix: string) => {
   const message =
     `${errorPrefix}: ` +
