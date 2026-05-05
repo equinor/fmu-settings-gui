@@ -17,6 +17,7 @@ import { type ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
+  projectGetChangelogQueryKey,
   projectGetLockStatusQueryKey,
   projectGetMappingsQueryKey,
   projectGetProjectQueryKey,
@@ -93,6 +94,9 @@ function ProjectSelectorForm({
         queryKey: projectGetProjectQueryKey(),
       });
       void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
+      });
+      void queryClient.invalidateQueries({
         queryKey: projectGetMappingsQueryKey({
           path: {
             mapping_type: "stratigraphy",
@@ -154,6 +158,9 @@ function ProjectSelectorForm({
             if (status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
               void queryClient.invalidateQueries({
                 queryKey: projectGetProjectQueryKey(),
+              });
+              void queryClient.invalidateQueries({
+                queryKey: projectGetChangelogQueryKey(),
               });
               closeProjectSelector({ formReset: formApi.reset });
               setSelectProjectInvalidAttempt((current) => current + 1);
@@ -349,6 +356,9 @@ function ConfirmInitProjectDialog({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetMappingsQueryKey({

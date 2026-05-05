@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 
 import type { FmuProject } from "#client";
 import {
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectGetSumoAssetsOptions,
   projectPatchAccessMutation,
@@ -106,6 +107,9 @@ function AccessEditorForm({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
     },
     onError: (error) => {
