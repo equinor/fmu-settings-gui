@@ -194,7 +194,7 @@ function RmsEditorForm({
                 label="Save"
                 disabled={isDefaultValue || !canSubmit}
                 isPending={isPending}
-                helperTextDisabled="Value can be submitted when it has been changed and is valid"
+                helperTextDisabled="Value can be saved when it has been changed and is valid"
               />
             )}
           </form.Subscribe>

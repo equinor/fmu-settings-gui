@@ -1,7 +1,16 @@
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-export const ZoneItem = styled.div`
+import type { ZonePlacementInfo } from "../stratigraphicFramework/types";
+
+export const ZoneItem = styled.div.attrs<{ $zoneGrid: ZonePlacementInfo }>(
+  ({ $zoneGrid }) => ({
+    style: {
+      gridRow: `${$zoneGrid.rowStart * 2 + 2} / ${$zoneGrid.rowEnd * 2 + 2}`,
+      gridColumn: $zoneGrid.gridColumn + 1,
+    },
+  }),
+)`
   padding: ${tokens.spacings.comfortable.x_small};
 
   button {

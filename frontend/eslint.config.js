@@ -53,7 +53,12 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       ...reactX.configs["recommended-typescript"].rules,
-      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          ignoreRestSiblings: true,
+        },
+      ],
       "no-unused-vars": "off",
       "@typescript-eslint/restrict-template-expressions": [
         "error",

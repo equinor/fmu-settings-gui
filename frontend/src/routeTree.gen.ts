@@ -14,6 +14,7 @@ import { Route as rootRoute } from "./routes/__root";
 import { Route as IndexImport } from "./routes/index";
 import { Route as ProjectIndexImport } from "./routes/project/index";
 import { Route as UserKeysImport } from "./routes/user/keys";
+import { Route as ProjectStratigraphyImport } from "./routes/project/stratigraphy";
 import { Route as ProjectRmsImport } from "./routes/project/rms";
 import { Route as ProjectMasterdataImport } from "./routes/project/masterdata";
 import { Route as ProjectHistoryImport } from "./routes/project/history";
@@ -35,6 +36,12 @@ const ProjectIndexRoute = ProjectIndexImport.update({
 const UserKeysRoute = UserKeysImport.update({
   id: "/user/keys",
   path: "/user/keys",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const ProjectStratigraphyRoute = ProjectStratigraphyImport.update({
+  id: "/project/stratigraphy",
+  path: "/project/stratigraphy",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -88,6 +95,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof ProjectRmsImport;
       parentRoute: typeof rootRoute;
     };
+    "/project/stratigraphy": {
+      id: "/project/stratigraphy";
+      path: "/project/stratigraphy";
+      fullPath: "/project/stratigraphy";
+      preLoaderRoute: typeof ProjectStratigraphyImport;
+      parentRoute: typeof rootRoute;
+    };
     "/user/keys": {
       id: "/user/keys";
       path: "/user/keys";
@@ -112,6 +126,7 @@ export interface FileRoutesByFullPath {
   "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRoute;
+  "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
   "/project": typeof ProjectIndexRoute;
 }
@@ -121,6 +136,7 @@ export interface FileRoutesByTo {
   "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRoute;
+  "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
   "/project": typeof ProjectIndexRoute;
 }
@@ -131,6 +147,7 @@ export interface FileRoutesById {
   "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRoute;
+  "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
   "/project/": typeof ProjectIndexRoute;
 }
@@ -142,6 +159,7 @@ export interface FileRouteTypes {
     | "/project/history"
     | "/project/masterdata"
     | "/project/rms"
+    | "/project/stratigraphy"
     | "/user/keys"
     | "/project";
   fileRoutesByTo: FileRoutesByTo;
@@ -150,6 +168,7 @@ export interface FileRouteTypes {
     | "/project/history"
     | "/project/masterdata"
     | "/project/rms"
+    | "/project/stratigraphy"
     | "/user/keys"
     | "/project";
   id:
@@ -158,6 +177,7 @@ export interface FileRouteTypes {
     | "/project/history"
     | "/project/masterdata"
     | "/project/rms"
+    | "/project/stratigraphy"
     | "/user/keys"
     | "/project/";
   fileRoutesById: FileRoutesById;
@@ -168,6 +188,7 @@ export interface RootRouteChildren {
   ProjectHistoryRoute: typeof ProjectHistoryRoute;
   ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
   ProjectRmsRoute: typeof ProjectRmsRoute;
+  ProjectStratigraphyRoute: typeof ProjectStratigraphyRoute;
   UserKeysRoute: typeof UserKeysRoute;
   ProjectIndexRoute: typeof ProjectIndexRoute;
 }
@@ -177,6 +198,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectHistoryRoute: ProjectHistoryRoute,
   ProjectMasterdataRoute: ProjectMasterdataRoute,
   ProjectRmsRoute: ProjectRmsRoute,
+  ProjectStratigraphyRoute: ProjectStratigraphyRoute,
   UserKeysRoute: UserKeysRoute,
   ProjectIndexRoute: ProjectIndexRoute,
 };
@@ -195,6 +217,7 @@ export const routeTree = rootRoute
         "/project/history",
         "/project/masterdata",
         "/project/rms",
+        "/project/stratigraphy",
         "/user/keys",
         "/project/"
       ]
@@ -210,6 +233,9 @@ export const routeTree = rootRoute
     },
     "/project/rms": {
       "filePath": "project/rms.tsx"
+    },
+    "/project/stratigraphy": {
+      "filePath": "project/stratigraphy.tsx"
     },
     "/user/keys": {
       "filePath": "user/keys.tsx"

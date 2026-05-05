@@ -427,7 +427,7 @@ function Edit({
                   helperTextDisabled={
                     projectReadOnly
                       ? "Project is read-only"
-                      : "Form can be submitted when the values have changed"
+                      : "Form can be saved when the values have changed"
                   }
                 />
               )}
@@ -478,7 +478,11 @@ export function Stratigraphy({
       </PageText>
 
       {projectHorizons.length ? (
-        <StratigraphicFramework horizons={projectHorizons} zones={projectZones}>
+        <StratigraphicFramework
+          horizons={projectHorizons}
+          zones={projectZones}
+          disablePointerEvents={false}
+        >
           <Zones />
         </StratigraphicFramework>
       ) : (

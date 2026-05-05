@@ -230,7 +230,7 @@ known to SMDA.`
 
 export const DataSystemSchema = {
     type: 'string',
-    enum: ['rms', 'smda', 'fmu'],
+    enum: ['rms', 'smda', 'fmu', 'simulator', 'pdm'],
     title: 'DataSystem',
     description: 'The system or application data is being mapping to or from.'
 } as const;
@@ -349,6 +349,37 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const IdentifierMappingResponseSchema = {
+    properties: {
+        relation_type: {
+            '$ref': '#/components/schemas/RelationType',
+            description: 'Relationship between the source identifier and the official identifier.'
+        },
+        source_id: {
+            type: 'string',
+            title: 'Source Id',
+            description: 'Identifier from the source system.'
+        },
+        source_uuid: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Source Uuid',
+            description: 'Optional UUID associated with the source identifier.'
+        }
+    },
+    type: 'object',
+    required: ['relation_type', 'source_id'],
+    title: 'IdentifierMappingResponse',
+    description: 'A mapping entry exposed by the mappings API.'
+} as const;
+
 export const ListFieldDiffSchema = {
     properties: {
         field_path: {
@@ -433,7 +464,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.22.0'
+            default: '0.28.2.dev4+g0c50a96a5'
         }
     },
     type: 'object',
@@ -540,14 +571,56 @@ export const Log_ChangeInfo_Schema = {
     title: 'Log[ChangeInfo]'
 } as const;
 
-export const MappingGroupSchema = {
-    additionalProperties: true,
-    type: 'object'
+export const MappingGroupResponseSchema = {
+    properties: {
+        official_name: {
+            type: 'string',
+            title: 'Official Name',
+            description: 'Official target identifier shared by all mappings in the group.'
+        },
+        target_uuid: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Target Uuid',
+            description: 'Optional UUID associated with the official identifier.'
+        },
+        mapping_type: {
+            '$ref': '#/components/schemas/MappingType',
+            description: 'Kind of mapping represented by this group.'
+        },
+        target_system: {
+            '$ref': '#/components/schemas/DataSystem',
+            description: 'Target system that owns the official identifier.'
+        },
+        source_system: {
+            '$ref': '#/components/schemas/DataSystem',
+            description: 'Source system that owns the mapped identifiers.'
+        },
+        mappings: {
+            items: {
+                '$ref': '#/components/schemas/IdentifierMappingResponse'
+            },
+            type: 'array',
+            title: 'Mappings',
+            description: 'Mappings that point to the same official identifier.'
+        }
+    },
+    type: 'object',
+    required: ['official_name', 'mapping_type', 'target_system', 'source_system', 'mappings'],
+    title: 'MappingGroupResponse',
+    description: 'Mappings grouped by official target identifier for API responses.'
 } as const;
 
 export const MappingTypeSchema = {
     type: 'string',
-    enum: ['stratigraphy'],
+    enum: ['stratigraphy', 'wellbore'],
     title: 'MappingType',
     description: `The discriminator used between mapping types.
 
@@ -733,6 +806,24 @@ export const RelationTypeSchema = {
     enum: ['primary', 'alias', 'equivalent'],
     title: 'RelationType',
     description: 'The kind of relation this mapping represents.'
+} as const;
+
+export const RestorableFilesResponseSchema = {
+    properties: {
+        files: {
+            items: {
+                type: 'string',
+                format: 'path'
+            },
+            type: 'array',
+            title: 'Files',
+            description: 'Relative paths to the restorable or restored files.'
+        }
+    },
+    type: 'object',
+    required: ['files'],
+    title: 'RestorableFilesResponse',
+    description: 'A list of missing .fmu files that can be restored or were restored.'
 } as const;
 
 export const RmsCoordinateSystemSchema = {
@@ -1059,6 +1150,19 @@ export const SessionResponseSchema = {
             title: 'Expires At',
             description: 'Timestamp when the session will expire.'
         },
+        rms_expires_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rms Expires At',
+            description: 'Timestamp when the RMS session will expire.'
+        },
         last_accessed: {
             type: 'string',
             format: 'date-time',
@@ -1067,7 +1171,7 @@ export const SessionResponseSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'created_at', 'expires_at', 'last_accessed'],
+    required: ['id', 'created_at', 'expires_at', 'rms_expires_at', 'last_accessed'],
     title: 'SessionResponse',
     description: 'Serializable representation of the current session.'
 } as const;
@@ -1082,6 +1186,7 @@ export const SmdaSchema = {
                 '$ref': '#/components/schemas/CountryItem'
             },
             type: 'array',
+            minItems: 1,
             title: 'Country'
         },
         discovery: {
@@ -1096,6 +1201,7 @@ export const SmdaSchema = {
                 '$ref': '#/components/schemas/FieldItem'
             },
             type: 'array',
+            minItems: 1,
             title: 'Field'
         },
         stratigraphic_column: {
@@ -1163,10 +1269,15 @@ export const SmdaFieldUUIDSchema = {
             format: 'uuid',
             title: 'Uuid',
             description: 'The SMDA UUID identifier corresponding to the field identifier.'
+        },
+        country: {
+            type: 'string',
+            title: 'Country',
+            description: 'The country identifier corresponding to the field identifier.'
         }
     },
     type: 'object',
-    required: ['identifier', 'uuid'],
+    required: ['identifier', 'uuid', 'country'],
     title: 'SmdaFieldUUID',
     description: 'Name-UUID identifier for a field as known by SMDA.'
 } as const;
@@ -1227,6 +1338,34 @@ applies to the model they are working on.`
     required: ['field', 'country', 'discovery', 'stratigraphic_columns', 'field_coordinate_system', 'coordinate_systems'],
     title: 'SmdaMasterdataResult',
     description: 'Contains SMDA-related attributes.'
+} as const;
+
+export const SmdaSelectedFieldSchema = {
+    properties: {
+        identifier: {
+            type: 'string',
+            title: 'Identifier',
+            description: 'A field identifier (name).',
+            examples: ['TROLL']
+        },
+        uuid: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Uuid',
+            description: 'The SMDA UUID identifier corresponding to the field identifier.'
+        }
+    },
+    type: 'object',
+    required: ['identifier'],
+    title: 'SmdaSelectedField',
+    description: 'A selected field for masterdata lookup.'
 } as const;
 
 export const SmdaStratColumnSchema = {
@@ -1583,16 +1722,67 @@ export const ValidationErrorSchema = {
         type: {
             type: 'string',
             title: 'Error Type'
-        },
-        input: {
-            title: 'Input'
-        },
-        ctx: {
-            type: 'object',
-            title: 'Context'
         }
     },
     type: 'object',
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
+} as const;
+
+export const WellboreIdentifierMappingSchema = {
+    properties: {
+        source_system: {
+            '$ref': '#/components/schemas/DataSystem'
+        },
+        target_system: {
+            '$ref': '#/components/schemas/DataSystem'
+        },
+        mapping_type: {
+            type: 'string',
+            const: 'wellbore',
+            title: 'Mapping Type',
+            default: 'wellbore'
+        },
+        relation_type: {
+            '$ref': '#/components/schemas/RelationType'
+        },
+        source_id: {
+            type: 'string',
+            title: 'Source Id'
+        },
+        source_uuid: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Source Uuid'
+        },
+        target_id: {
+            type: 'string',
+            title: 'Target Id'
+        },
+        target_uuid: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Target Uuid'
+        }
+    },
+    type: 'object',
+    required: ['source_system', 'target_system', 'relation_type', 'source_id', 'target_id'],
+    title: 'WellboreIdentifierMapping',
+    description: `Represents a wellbore mapping.
+
+This is a mapping from wellbore identifiers to official identifiers in SMDA/PDM.`
 } as const;

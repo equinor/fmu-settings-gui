@@ -20,9 +20,10 @@ export function Sidebar() {
 
   const ProjectSubItems: AccordianSubItem[] = [];
   if (project.status) {
-    ProjectSubItems.push({ label: "Masterdata", to: "/project/masterdata" });
-    ProjectSubItems.push({ label: "RMS", to: "/project/rms" });
-    ProjectSubItems.push({ label: "History", to: "/project/history" });
+    ProjectSubItems.push({ label: "Masterdata", to: "/masterdata" });
+    ProjectSubItems.push({ label: "RMS", to: "/rms" });
+    ProjectSubItems.push({ label: "Stratigraphy", to: "/stratigraphy" });
+    ProjectSubItems.push({ label: "History", to: "/history" });
   }
 
   return (
@@ -48,15 +49,19 @@ export function Sidebar() {
             active={currentPath === "/project"}
           />
 
-          {ProjectSubItems.map((item) => (
-            <EdsSideBar.AccordionItem
-              key={item.to}
-              label={item.label}
-              as={Link}
-              to={item.to}
-              active={currentPath === item.to}
-            />
-          ))}
+          {ProjectSubItems.map((item) => {
+            const to = `/project${item.to}`;
+
+            return (
+              <EdsSideBar.AccordionItem
+                key={to}
+                label={item.label}
+                as={Link}
+                to={to}
+                active={currentPath === to}
+              />
+            );
+          })}
         </EdsSideBar.Accordion>
 
         <EdsSideBar.Accordion

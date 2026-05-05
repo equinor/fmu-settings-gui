@@ -23,6 +23,15 @@ export function identifierUuidArrayToOptionsArray(
   }));
 }
 
+export function findOptionValueInOptionsArray(
+  array: OptionProps[],
+  value: string,
+): OptionProps | undefined {
+  const result = array.filter((element) => String(element.value) === value);
+
+  return result.length === 1 ? result[0] : undefined;
+}
+
 export function findOptionValueInNameUuidArray<T extends NameUuidType>(
   array: T[],
   value: string,
