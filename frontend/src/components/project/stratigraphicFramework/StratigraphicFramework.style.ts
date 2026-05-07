@@ -38,10 +38,8 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
 
 export const StratigraphicFrameworkContent = styled(GenericInnerBox).attrs<{
   $numStratColumns: number;
-  $numRows: number;
 }>((props) => ({
   style: {
-    gridTemplateRows: `repeat(${props.$numRows}, minmax(14px, max-content))`,
     gridTemplateColumns: `minmax(max-content, 2fr) repeat(${props.$numStratColumns}, 3fr)`,
   },
 }))`
@@ -56,6 +54,8 @@ export const GridLine = styled.div<{
 }>`
   grid-row: ${({ $rowStart }) => $rowStart};
   grid-column: 2 / -1;
+  align-self: center;
+
   border-bottom: 1px ${tokens.colors.ui.background__overlay.hex};
   border-bottom-style: ${({ $lineStyle }) => $lineStyle};
 `;

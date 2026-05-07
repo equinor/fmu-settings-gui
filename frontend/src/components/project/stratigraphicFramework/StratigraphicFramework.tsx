@@ -55,10 +55,9 @@ export function StratigraphicFramework({
       onHorizonClick,
       onZoneClick,
       zoneGridPlacement,
-      numGridRows: Math.max(1, horizons.length * 2),
       numStratColumns: Math.max(
         1,
-        ...Array.from(zoneGridPlacement.values(), (z) => z.gridColumn),
+        ...Array.from(zoneGridPlacement.values(), (z) => z.gridColumn - 1),
       ),
     };
   }, [
@@ -86,13 +85,12 @@ export function StratigraphicFramework({
 
       <StratigraphicFrameworkContent
         $numStratColumns={frameworkData.numStratColumns}
-        $numRows={frameworkData.numGridRows}
       >
         <FrameworkDataContext value={frameworkData}>
           {horizons.map((horizon, idx) => (
             <GridLine
               key={horizon.name}
-              $rowStart={idx * 2 + 1}
+              $rowStart={(idx + 1) * 3 - 1}
               $lineStyle={
                 horizon.type.startsWith("interpreted") ? "solid" : "dashed"
               }

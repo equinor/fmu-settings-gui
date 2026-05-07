@@ -269,13 +269,27 @@ function Edit({
   );
 }
 
-function Horizons() {
+function Horizons({
+  smdaHealthStatus,
+  projectReadOnly,
+  editMode,
+}: {
+  smdaHealthStatus: boolean;
+  projectReadOnly: boolean;
+  editMode: boolean;
+}) {
   const frameworkData = useFrameworkData();
   const aliasCount = frameworkData.horizons.length;
 
+  const canEdit = useMemo(
+    () => editMode && !projectReadOnly && smdaHealthStatus,
+    // && stratigraphicColumn !== undefined
+    [editMode, projectReadOnly, smdaHealthStatus],
+  );
+
   return frameworkData.horizons.map((horizon, idx) => {
     return (
-      <HorizonItem key={horizon.name} $rowStart={idx * 2 + 1}>
+      <HorizonItem key={horizon.name} $rowStart={(idx + 1) * 3 - 2}>
         <ElementSystems>
           <ElementSystem>
             <ElementInfo>
@@ -296,7 +310,7 @@ function Horizons() {
           </ElementSystem>
 
           <ElementSystem>
-            <ElementInfo>
+            <ElementInfo $targetSystem={true}>
               <HorizonSystemName>SMDA</HorizonSystemName>
               <ElementName $targetSystem={true} $missingvalue={false}>
                 {horizon.name}
@@ -305,16 +319,18 @@ function Horizons() {
           </ElementSystem>
         </ElementSystems>
 
-        <ElementActions>
-          <Icon
-            data={edit}
-            title="Edit"
-            size={16}
-            // onClick={() => {
-            //   editClick(zoneMappings[zone.name]);
-            // }}
-          />
-        </ElementActions>
+        {canEdit && (
+          <ElementActions>
+            <Icon
+              data={edit}
+              title="Edit"
+              size={16}
+              // onClick={() => {
+              //   editClick(zoneMappings[zone.name]);
+              // }}
+            />
+          </ElementActions>
+        )}
       </HorizonItem>
     );
   });
@@ -518,7 +534,7 @@ function Zones({
               </ElementSystem>
 
               <ElementSystem>
-                <ElementInfo>
+                <ElementInfo $targetSystem={true}>
                   <ElementSystemName>SMDA</ElementSystemName>
                   <ElementName
                     $targetSystem={true}
@@ -571,8 +587,8 @@ export function Overview({
   return (
     <>
       <PageText>
-        The following are the mappings for zones, showing zone names in RMS and
-        SMDA.
+        The following are the mappings for horizons and zones, showing the names
+        in RMS and SMDA.
       </PageText>
 
       {rmsProject.horizons !== undefined &&
@@ -584,7 +600,11 @@ export function Overview({
             horizons={rmsProject.horizons}
             zones={rmsProject.zones}
           >
-            <Horizons />
+            <Horizons
+              smdaHealthStatus={smdaHealthStatus}
+              projectReadOnly={projectReadOnly}
+              editMode={editMode}
+            />
             <Zones
               mappings={mappings}
               stratigraphicColumn={stratigraphicColumn}

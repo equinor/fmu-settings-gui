@@ -49,7 +49,7 @@ export function Horizons() {
     );
 
     return (
-      <HorizonItem key={horizon.name} $rowStart={idx * 2 + 1}>
+      <HorizonItem key={horizon.name} $rowStart={(idx + 1) * 3 - 2}>
         <Tooltip title={HorizonTooltipContent(horizon, isOrphan, isUsedByZone)}>
           <Button
             className={isOrphan ? "orphan" : isUnselected ? "unselected" : ""}

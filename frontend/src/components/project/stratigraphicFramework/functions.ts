@@ -19,12 +19,21 @@ export function getZoneGridPlacement(
   zones: RmsStratigraphicZone[],
   horizons: RmsHorizon[],
 ) {
-  const defaultColumn = 1;
+  const defaultColumn = 2;
   const gridPlacement = new Map<string, ZonePlacementInfo>();
 
   zones.forEach((zone) => {
     const topHorizonIndex = findIndexByName(horizons, zone.top_horizon_name);
     const baseHorizonIndex = findIndexByName(horizons, zone.base_horizon_name);
+    if (topHorizonIndex < 0 || baseHorizonIndex < 0) {
+      console.warn(
+        "Top or base horizon for zone",
+        zone.name,
+        "not found when calculcating grid placement, ignoring this zone",
+      );
+
+      return;
+    }
 
     const horizonIndices: number[] = [];
     for (let i = topHorizonIndex; i < baseHorizonIndex; i++) {
@@ -33,8 +42,8 @@ export function getZoneGridPlacement(
 
     gridPlacement.set(zone.name, {
       horizonIndices,
-      rowStart: topHorizonIndex,
-      rowEnd: baseHorizonIndex,
+      rowStart: topHorizonIndex + 1,
+      rowEnd: baseHorizonIndex + 1,
       gridColumn: defaultColumn,
     });
   });

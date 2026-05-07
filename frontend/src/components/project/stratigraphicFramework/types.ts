@@ -20,6 +20,5 @@ export type FrameworkData = {
   onHorizonClick?: (horizon: RmsHorizon, isUnselected: boolean) => void;
   onZoneClick?: (zone: RmsStratigraphicZone, isUnselected: boolean) => void;
   zoneGridPlacement: Map<string, ZonePlacementInfo>;
-  numGridRows: number;
   numStratColumns: number;
 };

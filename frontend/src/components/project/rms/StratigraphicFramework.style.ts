@@ -4,10 +4,14 @@ import styled from "styled-components";
 import type { ZonePlacementInfo } from "../stratigraphicFramework/types";
 
 export const HorizonItem = styled.div<{ $rowStart: number }>`
-  grid-row: ${({ $rowStart }) => `${$rowStart} / span 2`};
+  grid-row: ${({ $rowStart }) => `${$rowStart} / span 3`};
   grid-column: 1;
-  align-self: self-start;
-  padding-top: 2px;
+  align-self: center;
+
+  margin: ${tokens.spacings.comfortable.x_small};
+	border: solid 1px #cccccc;
+	border-radius: ${tokens.shape.corners.borderRadius};
+	background: ${tokens.colors.ui.background__default.hex};
 
   button {
     height: 100%;  
@@ -32,12 +36,12 @@ export const HorizonItem = styled.div<{ $rowStart: number }>`
 export const ZoneItem = styled.div.attrs<{ $zoneGrid: ZonePlacementInfo }>(
   ({ $zoneGrid }) => ({
     style: {
-      gridRow: `${$zoneGrid.rowStart * 2 + 2} / ${$zoneGrid.rowEnd * 2 + 2}`,
-      gridColumn: $zoneGrid.gridColumn + 1,
+      gridRow: `${$zoneGrid.rowStart * 3} / ${$zoneGrid.rowEnd * 3 - 1}`,
+      gridColumn: $zoneGrid.gridColumn,
     },
   }),
 )`
-  padding: ${tokens.spacings.comfortable.x_small};
+  margin: ${tokens.spacings.comfortable.x_small};
 
   button {
     width: 100%;

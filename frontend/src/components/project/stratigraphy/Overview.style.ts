@@ -30,7 +30,13 @@ export const ElementSystem = styled.div`
 	align-items: center;
 `;
 
-export const ElementInfo = styled.div`
+export const ElementInfo = styled.div.attrs<{
+  $targetSystem?: boolean;
+}>((props) => ({
+  $targetSystem: props.$targetSystem ?? false,
+}))`
+	justify-self: ${({ $targetSystem }) => ($targetSystem ? "right" : undefined)};
+
 	cursor: default;
 `;
 
@@ -82,9 +88,9 @@ export const ElementName = styled.div.attrs<{
 `;
 
 export const HorizonItem = styled.div<{ $rowStart: number }>`
-  grid-row: ${({ $rowStart }) => `${$rowStart} / span 2`};
+  grid-row: ${({ $rowStart }) => `${$rowStart} / span 3`};
   grid-column: 1;
-  align-self: self-start;
+  align-self: center;
 
   margin: ${tokens.spacings.comfortable.x_small};
 	border: solid 1px #cccccc;
@@ -104,8 +110,8 @@ export const HorizonSystemName = styled(ElementSystemName)`
 export const ZoneItem = styled.div.attrs<{ $zoneGrid: ZonePlacementInfo }>(
   ({ $zoneGrid }) => ({
     style: {
-      gridRow: `${$zoneGrid.rowStart * 2 + 2} / ${$zoneGrid.rowEnd * 2 + 2}`,
-      gridColumn: $zoneGrid.gridColumn + 1,
+      gridRow: `${$zoneGrid.rowStart * 3} / ${$zoneGrid.rowEnd * 3 - 1}`,
+      gridColumn: $zoneGrid.gridColumn,
     },
   }),
 )`
