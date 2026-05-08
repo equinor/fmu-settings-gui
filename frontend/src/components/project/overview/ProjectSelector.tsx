@@ -95,7 +95,7 @@ function ProjectSelectorForm({
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRmsSmda,
+          path: mappingsPaths.stratigraphyRms,
         }),
       });
       void queryClient.invalidateQueries({
@@ -349,7 +349,7 @@ function ConfirmInitProjectDialog({
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRmsSmda,
+          path: mappingsPaths.stratigraphyRms,
         }),
       });
       void queryClient.invalidateQueries({

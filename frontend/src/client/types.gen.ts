@@ -129,7 +129,7 @@ export type CountryItem = {
 /**
  * The system or application data is being mapping to or from.
  */
-export type DataSystem = 'rms' | 'smda' | 'fmu' | 'simulator' | 'pdm';
+export type DataSystem = 'rms' | 'smda' | 'simulator' | 'pdm';
 
 /**
  * A single discovery in the ``masterdata.smda.discovery`` list of discoveries
@@ -192,22 +192,78 @@ export type HttpValidationError = {
 };
 
 /**
- * A mapping entry exposed by the mappings API.
+ * Represents the .fmu/mappings.json storage schema.
  */
-export type IdentifierMappingResponse = {
-    /**
-     * Relationship between the source identifier and the official identifier.
-     */
-    relation_type: RelationType;
-    /**
-     * Identifier from the source system.
-     */
-    source_id: string;
-    /**
-     * Optional UUID associated with the source identifier.
-     */
-    source_uuid?: string | null;
+export type InternalMappings = {
+    stratigraphy?: InternalStratigraphyMappingsOutput;
+    wellbore?: InternalWellboreMappings;
 };
+
+/**
+ * The kind of relation this internal .fmu mapping represents.
+ */
+export type InternalRelationType = 'primary' | 'alias' | 'unmappable';
+
+/**
+ * Stratigraphy identifier mapping stored in .fmu/mappings.json.
+ *
+ * Use ``to_stratigraphy_mappings()`` on the collection model when consumers
+ * need the fmu-datamodels mapping schema.
+ */
+export type InternalStratigraphyIdentifierMapping = {
+    source_system: DataSystem;
+    target_system: DataSystem;
+    mapping_type?: 'stratigraphy';
+    relation_type: InternalRelationType;
+    source_id: string;
+    source_uuid?: string | null;
+    target_id?: string | null;
+    target_uuid?: string | null;
+};
+
+/**
+ * Collection of stratigraphy mappings stored in .fmu/mappings.json.
+ *
+ * This internal model can keep same-system alias information and unmappable
+ * relation. Converting to fmu-datamodels drops unmappable entries and expands
+ * same-system aliases onto matching cross-system primary mappings.
+ */
+export type InternalStratigraphyMappingsInput = Array<InternalStratigraphyIdentifierMapping>;
+
+/**
+ * Collection of stratigraphy mappings stored in .fmu/mappings.json.
+ *
+ * This internal model can keep same-system alias information and unmappable
+ * relation. Converting to fmu-datamodels drops unmappable entries and expands
+ * same-system aliases onto matching cross-system primary mappings.
+ */
+export type InternalStratigraphyMappingsOutput = Array<InternalStratigraphyIdentifierMapping>;
+
+/**
+ * Wellbore identifier mapping stored in .fmu/mappings.json.
+ *
+ * Use ``to_wellbore_mappings()`` on the collection model when consumers need
+ * the fmu-datamodels mapping schema.
+ */
+export type InternalWellboreIdentifierMapping = {
+    source_system: DataSystem;
+    target_system: DataSystem;
+    mapping_type?: 'wellbore';
+    relation_type: InternalRelationType;
+    source_id: string;
+    source_uuid?: string | null;
+    target_id?: string | null;
+    target_uuid?: string | null;
+};
+
+/**
+ * Collection of wellbore mappings stored in .fmu/mappings.json.
+ *
+ * This internal model can keep same-system alias information and unmappable
+ * relation. Converting to fmu-datamodels drops unmappable entries and expands
+ * same-system aliases onto matching cross-system primary mappings.
+ */
+export type InternalWellboreMappings = Array<InternalWellboreIdentifierMapping>;
 
 /**
  * Diff entry for list fields with per-item changes.
@@ -289,36 +345,6 @@ export type LockStatus = {
 export type LogChangeInfo = Array<ChangeInfo>;
 
 /**
- * Mappings grouped by official target identifier for API responses.
- */
-export type MappingGroupResponse = {
-    /**
-     * Official target identifier shared by all mappings in the group.
-     */
-    official_name: string;
-    /**
-     * Optional UUID associated with the official identifier.
-     */
-    target_uuid?: string | null;
-    /**
-     * Kind of mapping represented by this group.
-     */
-    mapping_type: MappingType;
-    /**
-     * Target system that owns the official identifier.
-     */
-    target_system: DataSystem;
-    /**
-     * Source system that owns the mapped identifiers.
-     */
-    source_system: DataSystem;
-    /**
-     * Mappings that point to the same official identifier.
-     */
-    mappings: Array<IdentifierMappingResponse>;
-};
-
-/**
  * The discriminator used between mapping types.
  *
  * Each of these types should have their own mapping class derived from a base
@@ -380,11 +406,6 @@ export type ProjectConfig = {
     cache_max_revisions?: number;
     rms?: RmsProject | null;
 };
-
-/**
- * The kind of relation this mapping represents.
- */
-export type RelationType = 'primary' | 'alias' | 'equivalent';
 
 /**
  * A list of missing .fmu files that can be restored or were restored.
@@ -526,10 +547,11 @@ export type RmsVersion = {
 };
 
 /**
- * A well from an RMS project.
+ * A well from an RMS project with added metadata.
  */
 export type RmsWell = {
     name: string;
+    planned?: boolean;
 };
 
 /**
@@ -727,9 +749,17 @@ export type StratigraphicUnit = {
      */
     top: string;
     /**
+     * The SMDA UUID identifier corresponding to the top horizon.
+     */
+    top_uuid: string | null;
+    /**
      * The identifier (name) of the stratigraphic unit base pick (horizon).
      */
     base: string;
+    /**
+     * The SMDA UUID identifier corresponding to the base horizon.
+     */
+    base_uuid: string | null;
     /**
      * The age (in Ma) at the top of the stratigraphic unit.
      */
@@ -762,23 +792,6 @@ export type StratigraphicUnit = {
      * The blue component of the RGB color.
      */
     color_b: number | null;
-};
-
-/**
- * Represents a stratigraphy mapping.
- *
- * This is a mapping from stratigraphic identifiers (tops, zones, etc.) to official
- * identifiers in SMDA.
- */
-export type StratigraphyIdentifierMapping = {
-    source_system: DataSystem;
-    target_system: DataSystem;
-    mapping_type?: 'stratigraphy';
-    relation_type: RelationType;
-    source_id: string;
-    source_uuid?: string | null;
-    target_id: string;
-    target_uuid?: string | null;
 };
 
 /**
@@ -824,22 +837,6 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
-};
-
-/**
- * Represents a wellbore mapping.
- *
- * This is a mapping from wellbore identifiers to official identifiers in SMDA/PDM.
- */
-export type WellboreIdentifierMapping = {
-    source_system: DataSystem;
-    target_system: DataSystem;
-    mapping_type?: 'wellbore';
-    relation_type: RelationType;
-    source_id: string;
-    source_uuid?: string | null;
-    target_id: string;
-    target_uuid?: string | null;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -2034,10 +2031,9 @@ export type ProjectGetMappingsData = {
     path: {
         mapping_type: MappingType;
         source_system: DataSystem;
-        target_system: DataSystem;
     };
     query?: never;
-    url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}';
+    url: '/api/v1/project/mappings/{mapping_type}/{source_system}';
 };
 
 export type ProjectGetMappingsErrors = {
@@ -2054,7 +2050,10 @@ export type ProjectGetMappingsErrors = {
      */
     403: unknown;
     /**
-     * Mappings resource file not found
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
      */
     404: unknown;
     /**
@@ -2071,26 +2070,21 @@ export type ProjectGetMappingsErrors = {
 
 export type ProjectGetMappingsResponses = {
     /**
-     * Mappings grouped by target context.
+     * Mappings for the requested mapping type.
      */
-    200: Array<MappingGroupResponse>;
+    200: InternalMappings;
 };
 
 export type ProjectGetMappingsResponse = ProjectGetMappingsResponses[keyof ProjectGetMappingsResponses];
 
 export type ProjectPutMappingsData = {
-    body: Array<({
-        mapping_type?: 'stratigraphy';
-    } & StratigraphyIdentifierMapping) | ({
-        mapping_type?: 'wellbore';
-    } & WellboreIdentifierMapping)>;
+    body: InternalStratigraphyMappingsInput;
     path: {
         mapping_type: MappingType;
         source_system: DataSystem;
-        target_system: DataSystem;
     };
     query?: never;
-    url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}';
+    url: '/api/v1/project/mappings/{mapping_type}/{source_system}';
 };
 
 export type ProjectPutMappingsErrors = {
@@ -2107,7 +2101,7 @@ export type ProjectPutMappingsErrors = {
      */
     403: unknown;
     /**
-     * Mappings resource file not found
+     * Project mappings could not be updated because the project path was missing
      */
     404: unknown;
     /**

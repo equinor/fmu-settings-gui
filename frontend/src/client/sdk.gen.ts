@@ -412,45 +412,34 @@ export const projectPostRestore = <ThrowOnError extends boolean = false>(options
 };
 
 /**
- * Returns mappings for a specific mapping type and system combination.
- * Retrieves mappings for the specified mapping_type, source_system, and
- * target_system from the project's .fmu directory.
+ * Returns internal mappings for a specific mapping type and source system.
+ * Retrieves internal mappings for the specified mapping_type and source_system
+ * from the project's .fmu directory.
  *
- * Mappings are returned grouped by target context (target_id/target_uuid).
- *
- * Example: GET /project/mappings/stratigraphy/rms/smda returns all
- * stratigraphy mappings from RMS to SMDA.
+ * Example: GET /project/mappings/stratigraphy/rms returns the
+ * internal stratigraphy mappings whose source system is RMS.
  */
 export const projectGetMappings = <ThrowOnError extends boolean = false>(options: Options<ProjectGetMappingsData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).get<ProjectGetMappingsResponse, unknown, ThrowOnError>({
-        url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}',
+        url: '/api/v1/project/mappings/{mapping_type}/{source_system}',
         ...options
     });
 };
 
 /**
- * Updates mappings for a specific mapping type and system combination
- * Replaces mappings for the specified mapping_type, source_system, and
- * target_system in the project's .fmu directory.
+ * Updates internal mappings for a specific mapping type and source system
+ * Replaces internal mappings for the specified mapping_type and source system in
+ * the project's .fmu directory.
  *
- * This operation only affects mappings for the specified system combination.
- * Mappings for other source/target combinations are preserved.
+ * The request body should contain the internal mappings collection for the
+ * specified source system.
  *
- * The request body should contain a list of mapping objects.
- * The mappings will be validated for:
- * - Correct mapping_type, source_system, and target_system matching URL parameters
- * - No duplicate mappings (same source_id, source_uuid, target_id, target_uuid,
- * and relation_type)
- * - Valid group structure (at most one primary per target, all mappings share
- * the same target context)
- * - Valid data according to the mapping schema
- *
- * Example: PUT /project/mappings/stratigraphy/rms/smda updates only the
- * stratigraphy mappings from RMS to SMDA, leaving other mappings unchanged.
+ * Example: PUT /project/mappings/stratigraphy/rms replaces the stored
+ * internal stratigraphy mappings whose source system is RMS.
  */
 export const projectPutMappings = <ThrowOnError extends boolean = false>(options: Options<ProjectPutMappingsData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).put<ProjectPutMappingsResponse, unknown, ThrowOnError>({
-        url: '/api/v1/project/mappings/{mapping_type}/{source_system}/{target_system}',
+        url: '/api/v1/project/mappings/{mapping_type}/{source_system}',
         ...options,
         headers: {
             'Content-Type': 'application/json',

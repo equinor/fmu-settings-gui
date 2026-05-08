@@ -1,8 +1,7 @@
-import {
-  mappingsPaths,
-  useProject,
-  useProjectMappings,
-} from "#services/project";
+import { useSuspenseQuery } from "@tanstack/react-query";
+
+import { projectGetMappingsOptions } from "#client/@tanstack/react-query.gen";
+import { mappingsPaths, useProject } from "#services/project";
 import type { FileRouteTypes } from "../routeTree.gen";
 
 export type Task = {
@@ -14,7 +13,9 @@ export type Task = {
 
 export function useTaskList(): Task[] {
   const project = useProject();
-  const mappings = useProjectMappings(mappingsPaths.stratigraphyRmsSmda);
+  const { data: mappings } = useSuspenseQuery(
+    projectGetMappingsOptions({ path: mappingsPaths.stratigraphyRms }),
+  );
 
   if (!project.status || !project.data) {
     return [];
@@ -47,7 +48,11 @@ export function useTaskList(): Task[] {
     {
       id: "mappings",
       label: "Set stratigraphy mappings",
-      done: mappings.status && (mappings.data?.length ?? 0) > 0,
+      done:
+        (mappings.stratigraphy ?? []).findIndex(
+          (mapping) =>
+            mapping.source_system === "rms" && mapping.target_system === "smda",
+        ) >= 0,
       to: "/project/stratigraphy",
     },
   ];

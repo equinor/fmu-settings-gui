@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import type {
-  MappingGroupResponse,
+  InternalStratigraphyMappingsOutput,
   RmsProject,
   StratigraphicColumn,
 } from "#client";
@@ -48,7 +48,7 @@ import { useFrameworkData } from "../stratigraphicFramework/functions";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework";
 import {
   createMutationValue,
-  createSmdaMappingsLookup,
+  createRmsMappingsLookup,
   createSmdaNameOptions,
   handleErrorUnknownInitialValue,
   updateZoneMappings,
@@ -65,8 +65,9 @@ import {
 import type { ZoneMapping, ZoneMappings } from "./types";
 import {
   emptyName,
+  emptyZoneMapping,
+  noZoneName,
   specialOptions,
-  tempUnmappable,
   validateSelectValue,
 } from "./utils";
 
@@ -101,7 +102,7 @@ function Edit({
   const form = useAppForm({
     defaultValues: {
       ...zoneMapping,
-      ...(zoneMapping?.smdaUuid === tempUnmappable.uuid && {
+      ...(zoneMapping?.unmappable && {
         smdaUuid: specialOptions.unmappableZone.value,
       }),
     } as ZoneMapping,
@@ -122,8 +123,9 @@ function Edit({
       "smdaUuid",
       smdaNameOptions,
       {
-        value:
-          (zoneMapping?.smdaUuid ?? "") === ""
+        value: zoneMapping?.unmappable
+          ? specialOptions.unmappableZone.value
+          : (zoneMapping?.smdaUuid ?? "") === ""
             ? specialOptions.empty.value
             : (zoneMapping?.smdaUuid ?? ""),
         label: zoneMapping?.smdaName ?? "",
@@ -131,6 +133,7 @@ function Edit({
     );
   }, [
     form.setFieldMeta,
+    zoneMapping?.unmappable,
     zoneMapping?.smdaName,
     zoneMapping?.smdaUuid,
     smdaNameOptions,
@@ -268,13 +271,13 @@ function Edit({
 }
 
 function Zones({
-  mappings,
+  stratigraphyMappings,
   stratigraphicColumn,
   smdaHealthStatus,
   projectReadOnly,
   editMode,
 }: {
-  mappings: MappingGroupResponse[];
+  stratigraphyMappings: InternalStratigraphyMappingsOutput;
   stratigraphicColumn?: StratigraphicColumn;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
@@ -310,7 +313,7 @@ function Zones({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRmsSmda,
+          path: mappingsPaths.stratigraphyRms,
         }),
       });
     },
@@ -328,38 +331,18 @@ function Zones({
   });
 
   useEffect(() => {
-    const lookup = createSmdaMappingsLookup(mappings);
+    const lookup = createRmsMappingsLookup(stratigraphyMappings);
     const zoneMappings: ZoneMappings = {};
 
     frameworkData.zones.forEach((rmsZone) => {
-      const key = rmsZone.name;
-      zoneMappings[key] = {
+      zoneMappings[rmsZone.name] = lookup[rmsZone.name] ?? {
+        ...emptyZoneMapping(),
         rmsName: rmsZone.name,
-        ...(key in lookup
-          ? {
-              unmappable: lookup[key].target_uuid === tempUnmappable.uuid,
-              smdaName:
-                lookup[key].target_uuid === tempUnmappable.uuid
-                  ? specialOptions.unmappableZone.label
-                  : lookup[key].official_name,
-              smdaUuid:
-                lookup[key].target_uuid === tempUnmappable.uuid
-                  ? specialOptions.unmappableZone.value
-                  : (lookup[key].target_uuid ?? ""),
-              aliases: lookup[key].mappings
-                .filter((mapping) => mapping.relation_type === "alias")
-                .map((alias) => alias.source_id),
-            }
-          : {
-              unmappable: false,
-              smdaName: "",
-              smdaUuid: "",
-              aliases: [],
-            }),
       };
     });
+
     setZoneMappings(zoneMappings);
-  }, [frameworkData.zones, mappings]);
+  }, [frameworkData.zones, stratigraphyMappings]);
 
   useEffect(() => {
     if (stratigraphicUnits !== undefined) {
@@ -400,7 +383,7 @@ function Zones({
 
     mappingsMutation.mutate(
       {
-        path: mappingsPaths.stratigraphyRmsSmda,
+        path: mappingsPaths.stratigraphyRms,
         body: mutationValue,
       },
       {
@@ -438,7 +421,8 @@ function Zones({
 
         const hasSmdaName =
           zone.name in zoneMappings && zoneMappings[zone.name].smdaName !== "";
-        const isUnmappable = hasSmdaName && zoneMappings[zone.name].unmappable;
+        const isUnmappable =
+          zone.name in zoneMappings && zoneMappings[zone.name].unmappable;
         const aliasCount =
           zone.name in zoneMappings
             ? zoneMappings[zone.name].aliases.length
@@ -472,10 +456,10 @@ function Zones({
                     $missingvalue={!hasSmdaName || isUnmappable}
                   >
                     {hasSmdaName
-                      ? isUnmappable
-                        ? "No zone"
-                        : zoneMappings[zone.name].smdaName
-                      : emptyName}
+                      ? zoneMappings[zone.name].smdaName
+                      : isUnmappable
+                        ? noZoneName
+                        : emptyName}
                   </ZoneName>
                 </ZoneInfo>
               </ZoneSystem>
@@ -502,14 +486,14 @@ function Zones({
 
 export function Overview({
   rmsProject,
-  mappings,
+  stratigraphyMappings,
   smdaHealthStatus,
   stratigraphicColumn,
   projectReadOnly,
   editMode,
 }: {
   rmsProject: RmsProject;
-  mappings: MappingGroupResponse[];
+  stratigraphyMappings: InternalStratigraphyMappingsOutput;
   stratigraphicColumn?: StratigraphicColumn;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
@@ -532,7 +516,7 @@ export function Overview({
             zones={rmsProject.zones}
           >
             <Zones
-              mappings={mappings}
+              stratigraphyMappings={stratigraphyMappings}
               stratigraphicColumn={stratigraphicColumn}
               smdaHealthStatus={smdaHealthStatus}
               projectReadOnly={projectReadOnly}
