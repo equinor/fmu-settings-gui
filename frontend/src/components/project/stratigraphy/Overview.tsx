@@ -382,9 +382,6 @@ function Zones({
 
     const mutationValue = createMutationValue(
       updateZoneMappings(zoneMappings, formValue, stratUnit),
-      "stratigraphy",
-      "rms",
-      "smda",
     );
 
     mappingsMutation.mutate(

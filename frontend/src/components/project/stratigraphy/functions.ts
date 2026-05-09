@@ -3,6 +3,7 @@ import type { AnyFieldMetaBase, Updater } from "@tanstack/react-form";
 import type {
   DataSystem,
   InternalStratigraphyMappingsOutput,
+  MappingType,
   StratigraphicUnit,
 } from "#client";
 import type { OptionProps } from "#components/form/field";
@@ -13,10 +14,12 @@ import { emptyZoneMapping, specialOptions } from "./utils";
 export function createRmsMappingsLookup(
   stratigraphyMappings: InternalStratigraphyMappingsOutput,
 ) {
+  const sourceSystem: DataSystem = "rms";
+  const targetSystem: DataSystem = "smda";
   const lookup: Record<string, ZoneMapping> = {};
 
   stratigraphyMappings
-    .filter((mapping) => mapping.source_system === "rms")
+    .filter((mapping) => mapping.source_system === sourceSystem)
     .forEach((mapping) => {
       const rmsName =
         mapping.relation_type === "alias" && mapping.target_id != null
@@ -29,14 +32,14 @@ export function createRmsMappingsLookup(
         };
       }
 
-      if (mapping.target_system === "smda") {
+      if (mapping.target_system === targetSystem) {
         if (mapping.relation_type === "primary") {
           lookup[rmsName].smdaName = mapping.target_id ?? "";
           lookup[rmsName].smdaUuid = mapping.target_uuid ?? "";
         } else if (mapping.relation_type === "unmappable") {
           lookup[rmsName].unmappable = true;
         }
-      } else if (mapping.target_system === "rms") {
+      } else if (mapping.target_system === sourceSystem) {
         if (mapping.relation_type === "alias") {
           lookup[rmsName].aliases.push(mapping.source_id);
         }
@@ -145,12 +148,10 @@ export function updateZoneMappings(
   }
 }
 
-export function createMutationValue(
-  zoneMappings: ZoneMappings,
-  mappingType: "stratigraphy",
-  sourceSystem: DataSystem,
-  targetSystem: DataSystem,
-) {
+export function createMutationValue(zoneMappings: ZoneMappings) {
+  const mappingType: MappingType = "stratigraphy";
+  const sourceSystem: DataSystem = "rms";
+  const targetSystem: DataSystem = "smda";
   const result: InternalStratigraphyMappingsOutput = [];
 
   Object.values(zoneMappings).forEach((mapping) => {
