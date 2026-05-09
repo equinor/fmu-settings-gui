@@ -1,7 +1,12 @@
 import { Dialog, Icon } from "@equinor/eds-core-react";
 import { edit, link } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
@@ -12,6 +17,7 @@ import type {
   StratigraphicColumn,
 } from "#client";
 import {
+  projectGetMappingsOptions,
   projectGetMappingsQueryKey,
   projectPutMappingsMutation,
   smdaPostStratUnitsOptions,
@@ -486,19 +492,23 @@ function Zones({
 
 export function Overview({
   rmsProject,
-  stratigraphyMappings,
   smdaHealthStatus,
   stratigraphicColumn,
   projectReadOnly,
   editMode,
 }: {
   rmsProject: RmsProject;
-  stratigraphyMappings: InternalStratigraphyMappingsOutput;
   stratigraphicColumn?: StratigraphicColumn;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   editMode: boolean;
 }) {
+  const { data: mappings } = useSuspenseQuery(
+    projectGetMappingsOptions({
+      path: mappingsPaths.stratigraphyRms,
+    }),
+  );
+
   return (
     <>
       <PageText>
@@ -516,7 +526,7 @@ export function Overview({
             zones={rmsProject.zones}
           >
             <Zones
-              stratigraphyMappings={stratigraphyMappings}
+              stratigraphyMappings={mappings.stratigraphy ?? []}
               stratigraphicColumn={stratigraphicColumn}
               smdaHealthStatus={smdaHealthStatus}
               projectReadOnly={projectReadOnly}
