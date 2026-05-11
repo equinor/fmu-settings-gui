@@ -123,9 +123,14 @@ export function updateZoneMappings(
   stratUnit?: StratigraphicUnit,
 ) {
   if (value.smdaUuid === specialOptions.empty.value) {
-    const { [value.rmsName]: _, ...updated } = zoneMappings;
-
-    return updated as ZoneMappings;
+    return {
+      ...zoneMappings,
+      [value.rmsName]: {
+        ...value,
+        smdaName: "",
+        smdaUuid: "",
+      },
+    } as ZoneMappings;
   } else if (value.smdaUuid === specialOptions.unmappableZone.value) {
     return {
       ...zoneMappings,
@@ -133,9 +138,9 @@ export function updateZoneMappings(
         ...value,
         unmappable: true,
       },
-    };
+    } as ZoneMappings;
   } else if (value.smdaUuid === specialOptions.divider.value) {
-    return { ...zoneMappings };
+    return { ...zoneMappings } as ZoneMappings;
   } else {
     return {
       ...zoneMappings,
@@ -144,7 +149,7 @@ export function updateZoneMappings(
         unmappable: false,
         smdaName: stratUnit?.identifier ?? "",
       },
-    };
+    } as ZoneMappings;
   }
 }
 
@@ -155,7 +160,11 @@ export function createMutationValue(zoneMappings: ZoneMappings) {
   const result: InternalStratigraphyMappingsOutput = [];
 
   Object.values(zoneMappings).forEach((mapping) => {
-    if (mapping.smdaUuid !== "" || mapping.unmappable) {
+    if (
+      mapping.smdaUuid !== "" ||
+      mapping.unmappable ||
+      mapping.aliases.length
+    ) {
       result.push({
         mapping_type: mappingType,
         source_system: sourceSystem,
@@ -164,15 +173,18 @@ export function createMutationValue(zoneMappings: ZoneMappings) {
         source_id: mapping.rmsName,
         target_id: mapping.rmsName,
       });
-      result.push({
-        mapping_type: mappingType,
-        source_system: sourceSystem,
-        target_system: targetSystem,
-        relation_type: mapping.unmappable ? "unmappable" : "primary",
-        source_id: mapping.rmsName,
-        target_id: mapping.unmappable ? null : mapping.smdaName,
-        target_uuid: mapping.unmappable ? null : mapping.smdaUuid,
-      });
+
+      if (mapping.smdaUuid !== "" || mapping.unmappable) {
+        result.push({
+          mapping_type: mappingType,
+          source_system: sourceSystem,
+          target_system: targetSystem,
+          relation_type: mapping.unmappable ? "unmappable" : "primary",
+          source_id: mapping.rmsName,
+          target_id: mapping.unmappable ? null : mapping.smdaName,
+          target_uuid: mapping.unmappable ? null : mapping.smdaUuid,
+        });
+      }
 
       mapping.aliases.forEach((alias) => {
         const name_trimmed = alias.trim();
