@@ -127,6 +127,7 @@ export function updateZoneMappings(
       ...zoneMappings,
       [value.rmsName]: {
         ...value,
+        unmappable: false,
         smdaName: "",
         smdaUuid: "",
       },
