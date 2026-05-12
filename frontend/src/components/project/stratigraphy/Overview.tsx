@@ -50,7 +50,10 @@ import {
   httpValidationErrorToString,
 } from "#utils/api";
 import { fieldContext, formContext, useConfirmClose } from "#utils/form";
-import { useFrameworkData } from "../stratigraphicFramework/functions";
+import {
+  getHorizonLineStyle,
+  useFrameworkData,
+} from "../stratigraphicFramework/functions";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework";
 import {
   createMutationValue,
@@ -298,7 +301,11 @@ function Horizons({
 
   return frameworkData.horizons.map((horizon, idx) => {
     return (
-      <HorizonItem key={horizon.name} $rowStart={(idx + 1) * 3 - 2}>
+      <HorizonItem
+        key={horizon.name}
+        $rowStart={(idx + 1) * 3 - 2}
+        $lineStyle={getHorizonLineStyle(horizon)}
+      >
         <ElementSystems>
           <ElementSystem>
             <ElementInfo>

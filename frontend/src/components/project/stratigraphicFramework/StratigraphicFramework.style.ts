@@ -2,6 +2,7 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 import { GenericBox, GenericInnerBox } from "#styles/common";
+import type { HorizonLineStyle } from "./types";
 
 export const StratigraphicFrameworkContainer = styled(GenericBox)<{
   $maxHeight?: string;
@@ -38,9 +39,9 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
 
 export const StratigraphicFrameworkContent = styled(GenericInnerBox).attrs<{
   $numStratColumns: number;
-}>((props) => ({
+}>(({ $numStratColumns }) => ({
   style: {
-    gridTemplateColumns: `minmax(max-content, 2fr) repeat(${props.$numStratColumns}, 3fr)`,
+    gridTemplateColumns: `minmax(max-content, 2fr) repeat(${$numStratColumns}, 3fr)`,
   },
 }))`
   display: grid;
@@ -50,12 +51,13 @@ export const StratigraphicFrameworkContent = styled(GenericInnerBox).attrs<{
 
 export const GridLine = styled.div<{
   $rowStart: number;
-  $lineStyle?: "solid" | "dashed";
+  $lineStyle: HorizonLineStyle;
 }>`
   grid-row: ${({ $rowStart }) => $rowStart};
-  grid-column: 2 / -1;
+  grid-column: 1 / -1;
   align-self: center;
 
-  border-bottom: 1px ${tokens.colors.ui.background__overlay.hex};
+  margin-left: ${tokens.spacings.comfortable.x_small};
+  border-bottom: 1px #999999;
   border-bottom-style: ${({ $lineStyle }) => $lineStyle};
 `;

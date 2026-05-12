@@ -22,3 +22,5 @@ export type FrameworkData = {
   zoneGridPlacement: Map<string, ZonePlacementInfo>;
   numStratColumns: number;
 };
+
+export type HorizonLineStyle = "solid" | "dashed";

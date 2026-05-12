@@ -2,7 +2,7 @@ import { use } from "react";
 
 import type { RmsHorizon, RmsStratigraphicZone } from "#client";
 import { FrameworkDataContext } from "./FrameworkData";
-import type { ZonePlacementInfo } from "./types";
+import type { HorizonLineStyle, ZonePlacementInfo } from "./types";
 import { findIndexByName } from "./utils";
 
 export function useFrameworkData() {
@@ -13,6 +13,10 @@ export function useFrameworkData() {
   }
 
   return data;
+}
+
+export function getHorizonLineStyle(horizon: RmsHorizon): HorizonLineStyle {
+  return horizon.type.startsWith("interpreted") ? "solid" : "dashed";
 }
 
 export function getZoneGridPlacement(

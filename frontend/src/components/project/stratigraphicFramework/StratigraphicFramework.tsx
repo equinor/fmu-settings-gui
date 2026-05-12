@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 import type { RmsHorizon, RmsStratigraphicZone } from "#client";
 import { FrameworkDataContext } from "./FrameworkData";
-import { getZoneGridPlacement } from "./functions";
+import { getHorizonLineStyle, getZoneGridPlacement } from "./functions";
 import {
   GridLine,
   StratigraphicFrameworkContainer,
@@ -91,10 +91,8 @@ export function StratigraphicFramework({
             <GridLine
               key={horizon.name}
               $rowStart={(idx + 1) * 3 - 1}
-              $lineStyle={
-                horizon.type.startsWith("interpreted") ? "solid" : "dashed"
-              }
-            />
+              $lineStyle={getHorizonLineStyle(horizon)}
+            ></GridLine>
           ))}
 
           {horizonsComponent}
