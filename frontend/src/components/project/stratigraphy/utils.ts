@@ -1,7 +1,18 @@
 import type { OptionProps } from "#components/form/field";
-import type { SpecialOptionId } from "./types";
+import type { SpecialOptionId, ZoneMapping } from "./types";
 
 export const emptyName = "(not set)";
+export const noZoneName = "No zone";
+
+export function emptyZoneMapping(): ZoneMapping {
+  return {
+    rmsName: "",
+    unmappable: false,
+    smdaName: "",
+    smdaUuid: "",
+    aliases: [],
+  };
+}
 
 export const specialOptions: Record<SpecialOptionId, OptionProps> = {
   empty: { value: "_empty", label: emptyName },
@@ -14,8 +25,3 @@ export function validateSelectValue(value: string) {
     ? "A value needs to be selected"
     : undefined;
 }
-
-export const tempUnmappable: { id: string; uuid: string } = {
-  id: "_unmappable",
-  uuid: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-};

@@ -2,27 +2,49 @@ import type { AnyFieldMetaBase, Updater } from "@tanstack/react-form";
 
 import type {
   DataSystem,
-  MappingGroupResponse,
+  InternalStratigraphyMappingsOutput,
   MappingType,
   StratigraphicUnit,
-  StratigraphyIdentifierMapping,
 } from "#client";
 import type { OptionProps } from "#components/form/field";
 import { findOptionValueInOptionsArray } from "#utils/form";
 import type { StratUnitRelation, ZoneMapping, ZoneMappings } from "./types";
-import { specialOptions, tempUnmappable } from "./utils";
+import { emptyZoneMapping, specialOptions } from "./utils";
 
-export function createSmdaMappingsLookup(mappings: MappingGroupResponse[]) {
-  const lookup: Record<string, MappingGroupResponse> = {};
+export function createRmsMappingsLookup(
+  stratigraphyMappings: InternalStratigraphyMappingsOutput,
+) {
+  const sourceSystem: DataSystem = "rms";
+  const targetSystem: DataSystem = "smda";
+  const lookup: Record<string, ZoneMapping> = {};
 
-  mappings.forEach((mapping) => {
-    const primary = mapping.mappings.find(
-      (m) => m.relation_type === "primary" || m.relation_type === "equivalent",
-    );
-    if (primary) {
-      lookup[primary.source_id] = mapping;
-    }
-  });
+  stratigraphyMappings
+    .filter((mapping) => mapping.source_system === sourceSystem)
+    .forEach((mapping) => {
+      const rmsName =
+        mapping.relation_type === "alias" && mapping.target_id != null
+          ? mapping.target_id
+          : mapping.source_id;
+      if (!(rmsName in lookup)) {
+        lookup[rmsName] = {
+          ...emptyZoneMapping(),
+          rmsName: rmsName,
+        };
+      }
+
+      if (mapping.target_system === targetSystem) {
+        if (mapping.relation_type === "primary") {
+          lookup[rmsName].smdaName = mapping.target_id ?? "";
+          lookup[rmsName].smdaUuid = mapping.target_uuid ?? "";
+        } else if (mapping.relation_type === "unmappable") {
+          lookup[rmsName].unmappable = true;
+        }
+      } else if (mapping.target_system === sourceSystem) {
+        if (mapping.relation_type === "alias") {
+          lookup[rmsName].aliases.push(mapping.source_id);
+        }
+      }
+    });
 
   return lookup;
 }
@@ -101,9 +123,14 @@ export function updateZoneMappings(
   stratUnit?: StratigraphicUnit,
 ) {
   if (value.smdaUuid === specialOptions.empty.value) {
-    const { [value.rmsName]: _, ...updated } = zoneMappings;
-
-    return updated as ZoneMappings;
+    return {
+      ...zoneMappings,
+      [value.rmsName]: {
+        ...value,
+        smdaName: "",
+        smdaUuid: "",
+      },
+    } as ZoneMappings;
   } else if (value.smdaUuid === specialOptions.unmappableZone.value) {
     return {
       ...zoneMappings,
@@ -111,9 +138,9 @@ export function updateZoneMappings(
         ...value,
         unmappable: true,
       },
-    };
+    } as ZoneMappings;
   } else if (value.smdaUuid === specialOptions.divider.value) {
-    return { ...zoneMappings };
+    return { ...zoneMappings } as ZoneMappings;
   } else {
     return {
       ...zoneMappings,
@@ -122,31 +149,42 @@ export function updateZoneMappings(
         unmappable: false,
         smdaName: stratUnit?.identifier ?? "",
       },
-    };
+    } as ZoneMappings;
   }
 }
 
-export function createMutationValue(
-  zoneMappings: ZoneMappings,
-  mappingType: MappingType,
-  sourceSystem: DataSystem,
-  targetSystem: DataSystem,
-) {
-  const result: StratigraphyIdentifierMapping[] = [];
+export function createMutationValue(zoneMappings: ZoneMappings) {
+  const mappingType: MappingType = "stratigraphy";
+  const sourceSystem: DataSystem = "rms";
+  const targetSystem: DataSystem = "smda";
+  const result: InternalStratigraphyMappingsOutput = [];
 
   Object.values(zoneMappings).forEach((mapping) => {
-    if (mapping.smdaUuid !== "" || mapping.unmappable) {
+    if (
+      mapping.smdaUuid !== "" ||
+      mapping.unmappable ||
+      mapping.aliases.length
+    ) {
       result.push({
         mapping_type: mappingType,
         source_system: sourceSystem,
-        target_system: targetSystem,
+        target_system: sourceSystem,
         relation_type: "primary",
         source_id: mapping.rmsName,
-        target_id: mapping.unmappable ? tempUnmappable.id : mapping.smdaName,
-        target_uuid: mapping.unmappable
-          ? tempUnmappable.uuid
-          : mapping.smdaUuid,
-      } as StratigraphyIdentifierMapping);
+        target_id: mapping.rmsName,
+      });
+
+      if (mapping.smdaUuid !== "" || mapping.unmappable) {
+        result.push({
+          mapping_type: mappingType,
+          source_system: sourceSystem,
+          target_system: targetSystem,
+          relation_type: mapping.unmappable ? "unmappable" : "primary",
+          source_id: mapping.rmsName,
+          target_id: mapping.unmappable ? null : mapping.smdaName,
+          target_uuid: mapping.unmappable ? null : mapping.smdaUuid,
+        });
+      }
 
       mapping.aliases.forEach((alias) => {
         const name_trimmed = alias.trim();
@@ -154,12 +192,12 @@ export function createMutationValue(
           result.push({
             mapping_type: mappingType,
             source_system: sourceSystem,
-            target_system: targetSystem,
+            target_system: sourceSystem,
             relation_type: "alias",
             source_id: name_trimmed,
-            target_id: mapping.smdaName,
-            target_uuid: mapping.smdaUuid,
-          } as StratigraphyIdentifierMapping);
+            target_id: mapping.rmsName,
+            target_uuid: null,
+          });
         }
       });
     }

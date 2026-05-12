@@ -4,11 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 
 import { Loading, SmdaHealthCheckInfo } from "#components/common";
 import { Overview } from "#components/project/stratigraphy/Overview";
-import {
-  mappingsPaths,
-  useProject,
-  useProjectMappings,
-} from "#services/project";
+import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import { PageHeader, PageText } from "#styles/common";
 import {
@@ -32,7 +28,6 @@ function Content() {
   const { setRequestAcquireSsoAccessToken } = Route.useRouteContext();
 
   const project = useProject();
-  const mappings = useProjectMappings(mappingsPaths.stratigraphyRmsSmda);
   const { data: healthCheck } = useSmdaHealthCheck();
 
   useEffect(() => {
@@ -58,11 +53,6 @@ function Content() {
         <>
           <Overview
             rmsProject={project.data.config.rms}
-            mappings={
-              mappings.status && mappings.data !== undefined
-                ? mappings.data
-                : []
-            }
             stratigraphicColumn={
               project.data.config.masterdata?.smda.stratigraphic_column
             }
@@ -88,7 +78,7 @@ function Content() {
           )}
         </>
       ) : (
-        <PageText>No RMS project is selected</PageText>
+        <PageText>No RMS project is selected.</PageText>
       )}
     </>
   );

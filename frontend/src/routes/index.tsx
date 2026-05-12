@@ -72,7 +72,7 @@ function RouteComponent() {
         </>
       ) : (
         <>
-          <PageText>No project selected</PageText>
+          <PageText>No project selected.</PageText>
 
           <ProjectSelector />
         </>
