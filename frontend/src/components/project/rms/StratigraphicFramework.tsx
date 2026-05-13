@@ -1,7 +1,10 @@
 import { Button, Tooltip } from "@equinor/eds-core-react";
 
 import type { RmsHorizon, RmsStratigraphicZone } from "#client";
-import { useFrameworkData } from "../stratigraphicFramework/functions.ts";
+import {
+  getHorizonLineStyle,
+  useFrameworkData,
+} from "../stratigraphicFramework/functions.ts";
 import { HorizonItem, ZoneItem } from "./StratigraphicFramework.style";
 
 function HorizonTooltipContent(
@@ -49,7 +52,11 @@ export function Horizons() {
     );
 
     return (
-      <HorizonItem key={horizon.name} $rowStart={(idx + 1) * 3 - 2}>
+      <HorizonItem
+        key={horizon.name}
+        $rowStart={(idx + 1) * 3 - 2}
+        $lineStyle={getHorizonLineStyle(horizon)}
+      >
         <Tooltip title={HorizonTooltipContent(horizon, isOrphan, isUsedByZone)}>
           <Button
             className={isOrphan ? "orphan" : isUnselected ? "unselected" : ""}

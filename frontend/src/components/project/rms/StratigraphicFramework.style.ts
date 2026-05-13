@@ -1,15 +1,22 @@
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-import type { ZonePlacementInfo } from "../stratigraphicFramework/types";
+import type {
+  HorizonLineStyle,
+  ZonePlacementInfo,
+} from "../stratigraphicFramework/types";
 
-export const HorizonItem = styled.div<{ $rowStart: number }>`
+export const HorizonItem = styled.div<{
+  $rowStart: number;
+  $lineStyle: HorizonLineStyle;
+}>`
   grid-row: ${({ $rowStart }) => `${$rowStart} / span 3`};
   grid-column: 1;
   align-self: center;
 
   margin: ${tokens.spacings.comfortable.x_small};
-	border: solid 1px #cccccc;
+	border: 1px #999999;
+	border-style: ${({ $lineStyle }) => $lineStyle};
 	border-radius: ${tokens.shape.corners.borderRadius};
 	background: ${tokens.colors.ui.background__default.hex};
 

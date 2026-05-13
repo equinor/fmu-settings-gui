@@ -99,10 +99,10 @@ export const HorizonItem = styled.div<{
   align-self: center;
 
   margin: ${tokens.spacings.comfortable.x_small};
-	border: solid 1px #999999;
+	border: 1px #999999;
+	border-style: ${({ $lineStyle }) => $lineStyle};
 	border-radius: ${tokens.shape.corners.borderRadius};
 	background: ${tokens.colors.ui.background__default.hex};
-	border-style: ${({ $lineStyle }) => $lineStyle};
 
 	display: flex;
 	flex-direction: column;
