@@ -25,7 +25,6 @@ export function Sidebar() {
     ProjectSubItems.push({ label: "Stratigraphy", to: "/stratigraphy" });
     ProjectSubItems.push({ label: "History", to: "/history" });
   }
-  ProjectSubItems.push({ label: "History", to: "/project/history" });
 
   return (
     <EdsSideBar open>
@@ -70,6 +69,13 @@ export function Sidebar() {
           icon={account_circle}
           isExpanded={userExpanded}
         >
+          <EdsSideBar.AccordionItem
+            label="Recovery"
+            as={Link}
+            to="/user/recovery"
+            active={currentPath === "/user/recovery"}
+          />
+
           <EdsSideBar.AccordionItem
             label="API keys"
             as={Link}

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { Loading } from "#components/common";
-import { Viewer } from "#components/project/history/Viewer";
+import { Overview } from "#components/project/history/Overview";
 import { useProject } from "#services/project";
 import { PageHeader } from "#styles/common";
 
@@ -17,7 +17,7 @@ function Content() {
     hasProject && !(project.lockStatus?.is_lock_acquired ?? false);
 
   return (
-    <Viewer
+    <Overview
       key={project.data?.path ?? "history-no-project"}
       hasProject={hasProject}
       projectReadOnly={projectReadOnly}
