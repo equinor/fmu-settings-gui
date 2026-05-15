@@ -70,17 +70,17 @@ export function Sidebar() {
           isExpanded={userExpanded}
         >
           <EdsSideBar.AccordionItem
-            label="Recovery"
-            as={Link}
-            to="/user/recovery"
-            active={currentPath === "/user/recovery"}
-          />
-
-          <EdsSideBar.AccordionItem
             label="API keys"
             as={Link}
             to="/user/keys"
             active={currentPath === "/user/keys"}
+          />
+
+          <EdsSideBar.AccordionItem
+            label="Recovery"
+            as={Link}
+            to="/user/recovery"
+            active={currentPath === "/user/recovery"}
           />
         </EdsSideBar.Accordion>
       </EdsSideBar.Content>

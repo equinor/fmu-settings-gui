@@ -55,7 +55,7 @@ import {
   SnapshotInfo,
   ValuePanel,
 } from "./SnapshotHistory.style";
-import type { CacheEntry, DiffKind } from "./types";
+import type { CacheEntry, DiffKind, SnapshotDeletionImpact } from "./types";
 import {
   formatCacheDateTime,
   formatFieldPath,
@@ -67,12 +67,6 @@ import {
   RESOURCE_LABELS,
   RESOURCE_OPTIONS,
 } from "./utils";
-
-type SnapshotDeletionImpact = {
-  resource: CacheResource;
-  label: string;
-  deleteCount: number;
-};
 
 function ListFieldGroup({
   kind,
@@ -411,7 +405,7 @@ function ConfirmMaxSnapshotsDialog({
             {" "}
             {maxRevisions !== undefined ? String(maxRevisions) : "this value"}
           </span>{" "}
-          will delete
+          will delete the
           <span className="emphasis"> {String(totalDeleteCount)} </span>
           oldest {totalDeleteCount === 1 ? "snapshot" : "snapshots"} from disk.
         </PageText>
