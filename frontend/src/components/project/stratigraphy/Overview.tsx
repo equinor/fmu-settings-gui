@@ -57,8 +57,8 @@ import {
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework";
 import {
   createMutationValue,
-  createRmsMappingsLookup,
-  createSmdaNameOptions,
+  createStratigraphyMappingsLookup,
+  createStratUnitOptions,
   handleErrorUnknownInitialValue,
   updateZoneMappings,
 } from "./functions";
@@ -73,7 +73,7 @@ import {
   HorizonSystemName,
   ZoneItem,
 } from "./Overview.style";
-import type { ZoneMapping, ZoneMappings } from "./types";
+import type { ElementMapping, ElementMappings, ElementType } from "./types";
 import {
   emptyName,
   emptyZoneMapping,
@@ -94,7 +94,7 @@ const { useAppForm } = createFormHook({
 });
 
 function Edit({
-  zoneMapping,
+  elementMapping,
   smdaNameOptions,
   projectReadOnly,
   mutationCallback,
@@ -102,21 +102,21 @@ function Edit({
   isOpen,
   closeDialog,
 }: {
-  zoneMapping: ZoneMapping | undefined;
-  smdaNameOptions: OptionProps[];
+  elementMapping: ElementMapping | undefined;
+  smdaNameOptions: Record<ElementType, OptionProps[]>;
   projectReadOnly: boolean;
-  mutationCallback: (props: MutationCallbackProps<ZoneMapping>) => void;
+  mutationCallback: (props: MutationCallbackProps<ElementMapping>) => void;
   mutationIsPending: boolean;
   isOpen: boolean;
   closeDialog: () => void;
 }) {
   const form = useAppForm({
     defaultValues: {
-      ...zoneMapping,
-      ...(zoneMapping?.unmappable && {
+      ...elementMapping,
+      ...(elementMapping?.unmappable && {
         smdaUuid: specialOptions.unmappableZone.value,
       }),
-    } as ZoneMapping,
+    } as ElementMapping,
     onSubmit: ({ formApi, value }) => {
       if (!projectReadOnly) {
         mutationCallback({
@@ -132,21 +132,24 @@ function Edit({
     handleErrorUnknownInitialValue(
       form.setFieldMeta,
       "smdaUuid",
-      smdaNameOptions,
+      elementMapping?.elementType
+        ? smdaNameOptions[elementMapping.elementType]
+        : [],
       {
-        value: zoneMapping?.unmappable
+        value: elementMapping?.unmappable
           ? specialOptions.unmappableZone.value
-          : (zoneMapping?.smdaUuid ?? "") === ""
+          : (elementMapping?.smdaUuid ?? "") === ""
             ? specialOptions.empty.value
-            : (zoneMapping?.smdaUuid ?? ""),
-        label: zoneMapping?.smdaName ?? "",
+            : (elementMapping?.smdaUuid ?? ""),
+        label: elementMapping?.smdaName ?? "",
       },
     );
   }, [
     form.setFieldMeta,
-    zoneMapping?.unmappable,
-    zoneMapping?.smdaName,
-    zoneMapping?.smdaUuid,
+    elementMapping?.elementType,
+    elementMapping?.unmappable,
+    elementMapping?.smdaUuid,
+    elementMapping?.smdaName,
     smdaNameOptions,
   ]);
 
@@ -169,7 +172,7 @@ function Edit({
     isReadOnly: projectReadOnly,
   });
 
-  if (zoneMapping === undefined) {
+  if (elementMapping === undefined) {
     return null;
   }
 
@@ -192,7 +195,9 @@ function Edit({
             void form.handleSubmit();
           }}
         >
-          <Dialog.Header>Edit zone: {zoneMapping.rmsName}</Dialog.Header>
+          <Dialog.Header>
+            Edit {elementMapping.elementType}: {elementMapping.rmsName}
+          </Dialog.Header>
 
           <Dialog.CustomContent>
             <form.AppField
@@ -205,7 +210,11 @@ function Edit({
                 <field.Select
                   label="SMDA name"
                   value={field.state.value}
-                  options={smdaNameOptions}
+                  options={
+                    elementMapping.elementType
+                      ? smdaNameOptions[elementMapping.elementType]
+                      : []
+                  }
                   onChange={(value) => {
                     field.handleChange(value);
                   }}
@@ -281,6 +290,249 @@ function Edit({
   );
 }
 
+function Element({
+  elementMapping,
+  unmappableName,
+  canEdit,
+  editClick,
+}: {
+  elementMapping: ElementMapping;
+  unmappableName: string;
+  canEdit: boolean;
+  editClick: (elementMapping: ElementMapping) => void;
+}) {
+  const aliasCount = elementMapping.aliases.length;
+
+  return (
+    <>
+      <ElementSystems>
+        <ElementSystem>
+          <ElementInfo>
+            <ElementSystemName>RMS</ElementSystemName>
+            <ElementName>
+              {elementMapping.rmsName}
+              {aliasCount > 0 && (
+                <Icon
+                  className="aliases"
+                  data={link}
+                  title={`${aliasCount === 1 ? "Alias" : "Aliases"}: ${elementMapping.aliases.join(", ")}`}
+                  size={16}
+                />
+              )}
+            </ElementName>
+          </ElementInfo>
+        </ElementSystem>
+
+        <ElementSystem>
+          <ElementInfo $targetSystem={true}>
+            <ElementSystemName>SMDA</ElementSystemName>
+            <ElementName
+              $targetSystem={true}
+              $missingvalue={
+                elementMapping.smdaName === "" || elementMapping.unmappable
+              }
+            >
+              {elementMapping.smdaName !== ""
+                ? elementMapping.smdaName
+                : elementMapping.unmappable
+                  ? unmappableName
+                  : emptyName}
+            </ElementName>
+          </ElementInfo>
+        </ElementSystem>
+      </ElementSystems>
+
+      {canEdit && (
+        <ElementActions>
+          <Icon
+            data={edit}
+            title="Edit"
+            size={16}
+            onClick={() => {
+              editClick(elementMapping);
+            }}
+          />
+        </ElementActions>
+      )}
+    </>
+  );
+}
+
+function Elements({
+  elementType,
+  stratigraphyMappings,
+  stratigraphicColumn,
+  smdaHealthStatus,
+  projectReadOnly,
+  editMode,
+}: {
+  elementType: ElementType;
+  stratigraphyMappings: InternalStratigraphyMappingsOutput;
+  stratigraphicColumn?: StratigraphicColumn;
+  smdaHealthStatus: boolean;
+  projectReadOnly: boolean;
+  editMode: boolean;
+}) {
+  const [elementMappings, setElementMappings] = useState<ElementMappings>({});
+  const [activeElementMapping, setActiveElementMapping] = useState<
+    ElementMapping | undefined
+  >();
+  const [smdaNameOptions, setSmdaNameOptions] = useState<
+    Record<ElementType, OptionProps[]>
+  >({} as Record<ElementType, OptionProps[]>);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const frameworkData = useFrameworkData();
+
+  const canEdit = useMemo(
+    () =>
+      editMode &&
+      !projectReadOnly &&
+      smdaHealthStatus &&
+      stratigraphicColumn !== undefined,
+    [editMode, projectReadOnly, smdaHealthStatus, stratigraphicColumn],
+  );
+
+  const { data: stratigraphicUnits } = useQuery({
+    ...smdaPostStratUnitsOptions({
+      body: { strat_column_identifier: stratigraphicColumn?.identifier ?? "" },
+    }),
+    enabled: canEdit,
+  });
+
+  const mappingsMutation = useMutation({
+    ...projectPutMappingsMutation(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: projectGetMappingsQueryKey({
+          path: mappingsPaths.stratigraphyRms,
+        }),
+      });
+    },
+    onError: (error) => {
+      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+        const message = httpValidationErrorToString(error);
+        console.error(message);
+        toast.error(message);
+      }
+    },
+    meta: {
+      errorPrefix: "Error saving stratigraphy mapping",
+      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
+    },
+  });
+
+  useEffect(() => {
+    const lookup = createStratigraphyMappingsLookup(stratigraphyMappings);
+    const elementMappings: ElementMappings = {};
+
+    frameworkData.zones.forEach((rmsZone) => {
+      elementMappings[rmsZone.name] = {
+        ...(lookup[rmsZone.name] ?? {
+          ...emptyZoneMapping(),
+          rmsName: rmsZone.name,
+        }),
+        elementType: "zone",
+      };
+    });
+
+    setElementMappings(elementMappings);
+  }, [frameworkData.zones, stratigraphyMappings]);
+
+  useEffect(() => {
+    if (stratigraphicUnits !== undefined) {
+      setSmdaNameOptions((options) => ({
+        ...options,
+        zone: [
+          specialOptions.empty,
+          specialOptions.unmappableZone,
+          specialOptions.divider,
+          ...createStratUnitOptions(stratigraphicUnits.stratigraphic_units),
+        ],
+      }));
+    }
+  }, [stratigraphicUnits]);
+
+  const editClick = (elementMapping: ElementMapping) => {
+    setActiveElementMapping(elementMapping);
+    setEditDialogOpen(true);
+  };
+
+  function closeEditDialog() {
+    setEditDialogOpen(false);
+    setActiveElementMapping(undefined);
+  }
+
+  const mutationCallback = ({
+    formValue,
+    formSubmitCallback,
+    formReset,
+  }: MutationCallbackProps<ElementMapping>) => {
+    const stratUnit = stratigraphicUnits?.stratigraphic_units.find(
+      (unit) => unit.uuid === formValue.smdaUuid,
+    );
+
+    const mutationValue = createMutationValue(
+      updateZoneMappings(elementMappings, formValue, stratUnit),
+    );
+
+    mappingsMutation.mutate(
+      {
+        path: mappingsPaths.stratigraphyRms,
+        body: mutationValue,
+      },
+      {
+        onSuccess: (data) => {
+          setElementMappings((elementMappings) =>
+            updateZoneMappings(elementMappings, formValue, stratUnit),
+          );
+          formSubmitCallback({ message: data.message, formReset });
+          closeEditDialog();
+        },
+      },
+    );
+  };
+
+  return (
+    <>
+      {editDialogOpen && (
+        <Edit
+          elementMapping={activeElementMapping}
+          smdaNameOptions={smdaNameOptions}
+          projectReadOnly={projectReadOnly}
+          mutationIsPending={mappingsMutation.isPending}
+          mutationCallback={mutationCallback}
+          isOpen={editDialogOpen}
+          closeDialog={closeEditDialog}
+        />
+      )}
+
+      {elementType === "zone" ? (
+        frameworkData.zones.map((zone) => {
+          const grid = frameworkData.zoneGridPlacement.get(zone.name);
+
+          if (!(grid && zone.name in elementMappings)) {
+            return null;
+          }
+
+          return (
+            <ZoneItem key={zone.name} $zoneGrid={grid}>
+              <Element
+                elementMapping={elementMappings[zone.name]}
+                unmappableName={noZoneName}
+                canEdit={canEdit}
+                editClick={editClick}
+              />
+            </ZoneItem>
+          );
+        })
+      ) : (
+        <div>Other</div>
+      )}
+    </>
+  );
+}
+
 function Horizons({
   smdaHealthStatus,
   projectReadOnly,
@@ -295,7 +547,6 @@ function Horizons({
 
   const canEdit = useMemo(
     () => editMode && !projectReadOnly && smdaHealthStatus,
-    // && stratigraphicColumn !== undefined
     [editMode, projectReadOnly, smdaHealthStatus],
   );
 
@@ -352,217 +603,6 @@ function Horizons({
   });
 }
 
-function Zones({
-  stratigraphyMappings,
-  stratigraphicColumn,
-  smdaHealthStatus,
-  projectReadOnly,
-  editMode,
-}: {
-  stratigraphyMappings: InternalStratigraphyMappingsOutput;
-  stratigraphicColumn?: StratigraphicColumn;
-  smdaHealthStatus: boolean;
-  projectReadOnly: boolean;
-  editMode: boolean;
-}) {
-  const [zoneMappings, setZoneMappings] = useState<ZoneMappings>({});
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [activeZoneMapping, setActiveZoneMapping] = useState<
-    ZoneMapping | undefined
-  >();
-  const [smdaNameOptions, setSmdaNameOptions] = useState<OptionProps[]>([]);
-  const queryClient = useQueryClient();
-  const frameworkData = useFrameworkData();
-
-  const canEdit = useMemo(
-    () =>
-      editMode &&
-      !projectReadOnly &&
-      smdaHealthStatus &&
-      stratigraphicColumn !== undefined,
-    [editMode, projectReadOnly, smdaHealthStatus, stratigraphicColumn],
-  );
-
-  const { data: stratigraphicUnits } = useQuery({
-    ...smdaPostStratUnitsOptions({
-      body: { strat_column_identifier: stratigraphicColumn?.identifier ?? "" },
-    }),
-    enabled: canEdit,
-  });
-
-  const mappingsMutation = useMutation({
-    ...projectPutMappingsMutation(),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRms,
-        }),
-      });
-    },
-    onError: (error) => {
-      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
-        const message = httpValidationErrorToString(error);
-        console.error(message);
-        toast.error(message);
-      }
-    },
-    meta: {
-      errorPrefix: "Error saving stratigraphy mapping",
-      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
-    },
-  });
-
-  useEffect(() => {
-    const lookup = createRmsMappingsLookup(stratigraphyMappings);
-    const zoneMappings: ZoneMappings = {};
-
-    frameworkData.zones.forEach((rmsZone) => {
-      zoneMappings[rmsZone.name] = lookup[rmsZone.name] ?? {
-        ...emptyZoneMapping(),
-        rmsName: rmsZone.name,
-      };
-    });
-
-    setZoneMappings(zoneMappings);
-  }, [frameworkData.zones, stratigraphyMappings]);
-
-  useEffect(() => {
-    if (stratigraphicUnits !== undefined) {
-      setSmdaNameOptions([
-        specialOptions.empty,
-        specialOptions.unmappableZone,
-        specialOptions.divider,
-        ...createSmdaNameOptions(stratigraphicUnits.stratigraphic_units),
-      ]);
-    }
-  }, [stratigraphicUnits]);
-
-  const editClick = (zoneMapping: ZoneMapping) => {
-    setActiveZoneMapping(zoneMapping);
-    setEditDialogOpen(true);
-  };
-
-  function closeEditDialog() {
-    setEditDialogOpen(false);
-    setActiveZoneMapping(undefined);
-  }
-
-  const mutationCallback = ({
-    formValue,
-    formSubmitCallback,
-    formReset,
-  }: MutationCallbackProps<ZoneMapping>) => {
-    const stratUnit = stratigraphicUnits?.stratigraphic_units.find(
-      (unit) => unit.uuid === formValue.smdaUuid,
-    );
-
-    const mutationValue = createMutationValue(
-      updateZoneMappings(zoneMappings, formValue, stratUnit),
-    );
-
-    mappingsMutation.mutate(
-      {
-        path: mappingsPaths.stratigraphyRms,
-        body: mutationValue,
-      },
-      {
-        onSuccess: (data) => {
-          setZoneMappings((zoneMappings) =>
-            updateZoneMappings(zoneMappings, formValue, stratUnit),
-          );
-          formSubmitCallback({ message: data.message, formReset });
-          closeEditDialog();
-        },
-      },
-    );
-  };
-
-  return (
-    <>
-      {editDialogOpen && (
-        <Edit
-          zoneMapping={activeZoneMapping}
-          smdaNameOptions={smdaNameOptions}
-          projectReadOnly={projectReadOnly}
-          mutationIsPending={mappingsMutation.isPending}
-          mutationCallback={mutationCallback}
-          isOpen={editDialogOpen}
-          closeDialog={closeEditDialog}
-        />
-      )}
-
-      {frameworkData.zones.map((zone) => {
-        const grid = frameworkData.zoneGridPlacement.get(zone.name);
-
-        if (!grid) {
-          return null;
-        }
-
-        const hasSmdaName =
-          zone.name in zoneMappings && zoneMappings[zone.name].smdaName !== "";
-        const isUnmappable =
-          zone.name in zoneMappings && zoneMappings[zone.name].unmappable;
-        const aliasCount =
-          zone.name in zoneMappings
-            ? zoneMappings[zone.name].aliases.length
-            : 0;
-
-        return (
-          <ZoneItem key={zone.name} $zoneGrid={grid}>
-            <ElementSystems>
-              <ElementSystem>
-                <ElementInfo>
-                  <ElementSystemName>RMS</ElementSystemName>
-                  <ElementName>
-                    {zone.name}
-                    {aliasCount > 0 && (
-                      <Icon
-                        className="aliases"
-                        data={link}
-                        title={`${aliasCount === 1 ? "Alias" : "Aliases"}: ${zoneMappings[zone.name].aliases.join(", ")}`}
-                        size={16}
-                      />
-                    )}
-                  </ElementName>
-                </ElementInfo>
-              </ElementSystem>
-
-              <ElementSystem>
-                <ElementInfo $targetSystem={true}>
-                  <ElementSystemName>SMDA</ElementSystemName>
-                  <ElementName
-                    $targetSystem={true}
-                    $missingvalue={!hasSmdaName || isUnmappable}
-                  >
-                    {hasSmdaName
-                      ? zoneMappings[zone.name].smdaName
-                      : isUnmappable
-                        ? noZoneName
-                        : emptyName}
-                  </ElementName>
-                </ElementInfo>
-              </ElementSystem>
-            </ElementSystems>
-
-            {canEdit && (
-              <ElementActions>
-                <Icon
-                  data={edit}
-                  title="Edit"
-                  size={16}
-                  onClick={() => {
-                    editClick(zoneMappings[zone.name]);
-                  }}
-                />
-              </ElementActions>
-            )}
-          </ZoneItem>
-        );
-      })}
-    </>
-  );
-}
-
 export function Overview({
   rmsProject,
   smdaHealthStatus,
@@ -603,7 +643,8 @@ export function Overview({
               projectReadOnly={projectReadOnly}
               editMode={editMode}
             />
-            <Zones
+            <Elements
+              elementType="zone"
               stratigraphyMappings={mappings.stratigraphy ?? []}
               stratigraphicColumn={stratigraphicColumn}
               smdaHealthStatus={smdaHealthStatus}

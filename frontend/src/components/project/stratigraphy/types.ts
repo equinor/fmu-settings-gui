@@ -1,6 +1,9 @@
 import type { StratigraphicUnit } from "#client";
 
-export type ZoneMapping = {
+export type ElementType = "horizon" | "zone";
+
+export type ElementMapping = {
+  elementType?: ElementType;
   rmsName: string;
   unmappable: boolean;
   smdaName: string;
@@ -8,7 +11,7 @@ export type ZoneMapping = {
   aliases: string[];
 };
 
-export type ZoneMappings = Record<string, ZoneMapping>;
+export type ElementMappings = Record<string, ElementMapping>;
 
 export type StratUnitRelation = Pick<
   StratigraphicUnit,

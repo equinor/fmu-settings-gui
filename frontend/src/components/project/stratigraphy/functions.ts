@@ -8,15 +8,23 @@ import type {
 } from "#client";
 import type { OptionProps } from "#components/form/field";
 import { findOptionValueInOptionsArray } from "#utils/form";
-import type { StratUnitRelation, ZoneMapping, ZoneMappings } from "./types";
-import { emptyZoneMapping, specialOptions } from "./utils";
+import type {
+  ElementMapping,
+  ElementMappings,
+  StratUnitRelation,
+} from "./types";
+import {
+  emptyZoneMapping,
+  getLabelForStratUnitOption,
+  specialOptions,
+} from "./utils";
 
-export function createRmsMappingsLookup(
+export function createStratigraphyMappingsLookup(
   stratigraphyMappings: InternalStratigraphyMappingsOutput,
 ) {
   const sourceSystem: DataSystem = "rms";
   const targetSystem: DataSystem = "smda";
-  const lookup: Record<string, ZoneMapping> = {};
+  const lookup: Record<string, ElementMapping> = {};
 
   stratigraphyMappings
     .filter((mapping) => mapping.source_system === sourceSystem)
@@ -51,10 +59,10 @@ export function createRmsMappingsLookup(
 
 export function handleErrorUnknownInitialValue(
   setFieldMeta: (
-    field: keyof ZoneMapping,
+    field: keyof ElementMapping,
     updater: Updater<AnyFieldMetaBase>,
   ) => void,
-  field: keyof ZoneMapping,
+  field: keyof ElementMapping,
   array: OptionProps[],
   initialValue: OptionProps,
 ): void {
@@ -68,12 +76,6 @@ export function handleErrorUnknownInitialValue(
   }));
 }
 
-function getLabelForSmdaName(name: string, level: number) {
-  const indent = "\xA0\xA0 ".repeat(level > 1 ? level - 1 : 0);
-
-  return `${indent}${name}`;
-}
-
 function getOptionPropsForChildren(
   stratUnits: StratUnitRelation[],
   level: number,
@@ -83,7 +85,7 @@ function getOptionPropsForChildren(
   stratUnits.forEach((unit) => {
     options.push({
       value: unit.uuid,
-      label: getLabelForSmdaName(unit.identifier, level),
+      label: getLabelForStratUnitOption(unit.identifier, level),
     });
     if (unit.children.length) {
       options.push(...getOptionPropsForChildren(unit.children, level + 1));
@@ -93,7 +95,7 @@ function getOptionPropsForChildren(
   return options;
 }
 
-export function createSmdaNameOptions(stratUnits: StratigraphicUnit[]) {
+export function createStratUnitOptions(stratUnits: StratigraphicUnit[]) {
   const lookup: { [key: string]: StratUnitRelation } = {};
   for (const stratUnit of stratUnits) {
     lookup[stratUnit.identifier] = {
@@ -118,8 +120,8 @@ export function createSmdaNameOptions(stratUnits: StratigraphicUnit[]) {
 }
 
 export function updateZoneMappings(
-  zoneMappings: ZoneMappings,
-  value: ZoneMapping,
+  zoneMappings: ElementMappings,
+  value: ElementMapping,
   stratUnit?: StratigraphicUnit,
 ) {
   if (value.smdaUuid === specialOptions.empty.value) {
@@ -131,7 +133,7 @@ export function updateZoneMappings(
         smdaName: "",
         smdaUuid: "",
       },
-    } as ZoneMappings;
+    } as ElementMappings;
   } else if (value.smdaUuid === specialOptions.unmappableZone.value) {
     return {
       ...zoneMappings,
@@ -139,9 +141,9 @@ export function updateZoneMappings(
         ...value,
         unmappable: true,
       },
-    } as ZoneMappings;
+    } as ElementMappings;
   } else if (value.smdaUuid === specialOptions.divider.value) {
-    return { ...zoneMappings } as ZoneMappings;
+    return { ...zoneMappings } as ElementMappings;
   } else {
     return {
       ...zoneMappings,
@@ -150,11 +152,11 @@ export function updateZoneMappings(
         unmappable: false,
         smdaName: stratUnit?.identifier ?? "",
       },
-    } as ZoneMappings;
+    } as ElementMappings;
   }
 }
 
-export function createMutationValue(zoneMappings: ZoneMappings) {
+export function createMutationValue(zoneMappings: ElementMappings) {
   const mappingType: MappingType = "stratigraphy";
   const sourceSystem: DataSystem = "rms";
   const targetSystem: DataSystem = "smda";
