@@ -20,4 +20,8 @@ export type StratUnitRelation = Pick<
   children: StratUnitRelation[];
 };
 
-export type SpecialOptionId = "empty" | "divider" | "unmappableZone";
+export type SpecialOptionId =
+  | "empty"
+  | "divider"
+  | "unmappableHorizon"
+  | "unmappableZone";

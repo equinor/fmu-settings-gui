@@ -11,10 +11,11 @@ import { findOptionValueInOptionsArray } from "#utils/form";
 import type {
   ElementMapping,
   ElementMappings,
+  ElementType,
   StratUnitRelation,
 } from "./types";
 import {
-  emptyZoneMapping,
+  emptyElementMapping,
   getLabelForStratUnitOption,
   specialOptions,
 } from "./utils";
@@ -26,33 +27,31 @@ export function createStratigraphyMappingsLookup(
   const targetSystem: DataSystem = "smda";
   const lookup: Record<string, ElementMapping> = {};
 
-  stratigraphyMappings
-    .filter((mapping) => mapping.source_system === sourceSystem)
-    .forEach((mapping) => {
-      const rmsName =
-        mapping.relation_type === "alias" && mapping.target_id != null
-          ? mapping.target_id
-          : mapping.source_id;
-      if (!(rmsName in lookup)) {
-        lookup[rmsName] = {
-          ...emptyZoneMapping(),
-          rmsName: rmsName,
-        };
-      }
+  stratigraphyMappings.forEach((mapping) => {
+    const rmsName =
+      mapping.relation_type === "alias" && mapping.target_id != null
+        ? mapping.target_id
+        : mapping.source_id;
+    if (!(rmsName in lookup)) {
+      lookup[rmsName] = {
+        ...emptyElementMapping(),
+        rmsName: rmsName,
+      };
+    }
 
-      if (mapping.target_system === targetSystem) {
-        if (mapping.relation_type === "primary") {
-          lookup[rmsName].smdaName = mapping.target_id ?? "";
-          lookup[rmsName].smdaUuid = mapping.target_uuid ?? "";
-        } else if (mapping.relation_type === "unmappable") {
-          lookup[rmsName].unmappable = true;
-        }
-      } else if (mapping.target_system === sourceSystem) {
-        if (mapping.relation_type === "alias") {
-          lookup[rmsName].aliases.push(mapping.source_id);
-        }
+    if (mapping.target_system === targetSystem) {
+      if (mapping.relation_type === "primary") {
+        lookup[rmsName].smdaName = mapping.target_id ?? "";
+        lookup[rmsName].smdaUuid = mapping.target_uuid ?? "";
+      } else if (mapping.relation_type === "unmappable") {
+        lookup[rmsName].unmappable = true;
       }
-    });
+    } else if (mapping.target_system === sourceSystem) {
+      if (mapping.relation_type === "alias") {
+        lookup[rmsName].aliases.push(mapping.source_id);
+      }
+    }
+  });
 
   return lookup;
 }
@@ -71,7 +70,7 @@ export function handleErrorUnknownInitialValue(
     errorMap: {
       onChange: findOptionValueInOptionsArray(array, initialValue.value)
         ? undefined
-        : `Initial value "${initialValue.value}" does not exist in selection list`,
+        : `Initial value "${initialValue.label}" (${initialValue.value}) does not exist in selection list`,
     },
   }));
 }
@@ -119,14 +118,15 @@ export function createStratUnitOptions(stratUnits: StratigraphicUnit[]) {
   return getOptionPropsForChildren(relations, 1);
 }
 
-export function updateZoneMappings(
-  zoneMappings: ElementMappings,
+export function updatedElementMappings(
+  elementMappings: ElementMappings,
   value: ElementMapping,
+  smdaNameOptions: Record<ElementType, OptionProps[]>,
   stratUnit?: StratigraphicUnit,
 ) {
   if (value.smdaUuid === specialOptions.empty.value) {
     return {
-      ...zoneMappings,
+      ...elementMappings,
       [value.rmsName]: {
         ...value,
         unmappable: false,
@@ -134,35 +134,45 @@ export function updateZoneMappings(
         smdaUuid: "",
       },
     } as ElementMappings;
-  } else if (value.smdaUuid === specialOptions.unmappableZone.value) {
+  } else if (
+    value.smdaUuid === specialOptions.unmappableHorizon.value ||
+    value.smdaUuid === specialOptions.unmappableZone.value
+  ) {
     return {
-      ...zoneMappings,
+      ...elementMappings,
       [value.rmsName]: {
         ...value,
         unmappable: true,
       },
     } as ElementMappings;
   } else if (value.smdaUuid === specialOptions.divider.value) {
-    return { ...zoneMappings } as ElementMappings;
+    return { ...elementMappings } as ElementMappings;
   } else {
     return {
-      ...zoneMappings,
+      ...elementMappings,
       [value.rmsName]: {
         ...value,
         unmappable: false,
-        smdaName: stratUnit?.identifier ?? "",
+        smdaName:
+          value.elementType === "horizon"
+            ? (
+                smdaNameOptions.horizon.find(
+                  (option) => option.value === value.smdaUuid,
+                ) ?? { value: "", label: "" }
+              ).label
+            : (stratUnit?.identifier ?? ""),
       },
     } as ElementMappings;
   }
 }
 
-export function createMutationValue(zoneMappings: ElementMappings) {
+export function createMutationValue(elementMappings: ElementMappings) {
   const mappingType: MappingType = "stratigraphy";
   const sourceSystem: DataSystem = "rms";
   const targetSystem: DataSystem = "smda";
   const result: InternalStratigraphyMappingsOutput = [];
 
-  Object.values(zoneMappings).forEach((mapping) => {
+  Object.values(elementMappings).forEach((mapping) => {
     if (
       mapping.smdaUuid !== "" ||
       mapping.unmappable ||

@@ -5,6 +5,41 @@ import type {
   HorizonLineStyle,
   ZonePlacementInfo,
 } from "../stratigraphicFramework/types";
+import type { ElementType } from "./types";
+
+export const HorizonItem = styled.div<{
+  $rowStart: number;
+  $lineStyle: HorizonLineStyle;
+}>`
+  grid-row: ${({ $rowStart }) => `${$rowStart} / span 3`};
+  grid-column: 1;
+  align-self: center;
+
+  margin: ${tokens.spacings.comfortable.x_small};
+	border: 1px #999999;
+	border-style: ${({ $lineStyle }) => $lineStyle};
+	border-radius: ${tokens.shape.corners.borderRadius};
+	background: ${tokens.colors.ui.background__default.hex};
+
+	display: flex;
+	flex-direction: column;
+`;
+
+export const ZoneItem = styled.div.attrs<{ $zoneGrid: ZonePlacementInfo }>(
+  ({ $zoneGrid }) => ({
+    style: {
+      gridRow: `${$zoneGrid.rowStart * 3} / ${$zoneGrid.rowEnd * 3 - 1}`,
+      gridColumn: $zoneGrid.gridColumn,
+    },
+  }),
+)`
+  margin: ${tokens.spacings.comfortable.x_small};
+	border-radius: ${tokens.shape.corners.borderRadius};
+  background: ${tokens.colors.infographic.primary__moss_green_21.hex};
+
+  display: flex;
+	flex-direction: column;
+`;
 
 export const ElementSystems = styled.div`
 	flex: 1;
@@ -43,9 +78,14 @@ export const ElementInfo = styled.div.attrs<{
 	cursor: default;
 `;
 
-export const ElementSystemName = styled.div`
+export const ElementSystemName = styled.div.attrs<{
+  $elementType?: ElementType;
+}>((props) => ({ $elementType: props.$elementType }))`
 	width: fit-content;
 	padding: 0 ${tokens.spacings.comfortable.small} 0 ${tokens.spacings.comfortable.small};
+	padding-top: ${(props) => (props.$elementType === "horizon" ? "1px" : undefined)};
+	border: ${(props) => (props.$elementType === "horizon" ? "solid 1px #cccccc" : undefined)};
+	border-bottom: none;
 	border-radius: ${tokens.shape.corners.borderRadius};
 	border-bottom-left-radius: 0%;
 	border-bottom-right-radius: 0%;
@@ -88,44 +128,4 @@ export const ElementName = styled.div.attrs<{
 	.aliases {
 		color: ${tokens.colors.infographic.substitute__purple_berry.hex}
 	}
-`;
-
-export const HorizonItem = styled.div<{
-  $rowStart: number;
-  $lineStyle: HorizonLineStyle;
-}>`
-  grid-row: ${({ $rowStart }) => `${$rowStart} / span 3`};
-  grid-column: 1;
-  align-self: center;
-
-  margin: ${tokens.spacings.comfortable.x_small};
-	border: 1px #999999;
-	border-style: ${({ $lineStyle }) => $lineStyle};
-	border-radius: ${tokens.shape.corners.borderRadius};
-	background: ${tokens.colors.ui.background__default.hex};
-
-	display: flex;
-	flex-direction: column;
-`;
-
-export const HorizonSystemName = styled(ElementSystemName)`
-	padding-top: 1px;
-	border: solid 1px #cccccc;
-	border-bottom: none;
-`;
-
-export const ZoneItem = styled.div.attrs<{ $zoneGrid: ZonePlacementInfo }>(
-  ({ $zoneGrid }) => ({
-    style: {
-      gridRow: `${$zoneGrid.rowStart * 3} / ${$zoneGrid.rowEnd * 3 - 1}`,
-      gridColumn: $zoneGrid.gridColumn,
-    },
-  }),
-)`
-  margin: ${tokens.spacings.comfortable.x_small};
-	border-radius: ${tokens.shape.corners.borderRadius};
-  background: ${tokens.colors.infographic.primary__moss_green_21.hex};
-
-  display: flex;
-	flex-direction: column;
 `;
