@@ -22,6 +22,7 @@ import {
   StrictMode,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import ReactDOM from "react-dom/client";
@@ -175,6 +176,9 @@ export function App() {
   >();
   const [requestAcquireSsoAccessToken, setRequestAcquireSsoAccessToken] =
     useState(false);
+  const acquireAndPatchSsoAccessTokenPromise = useRef<
+    Promise<void> | undefined
+  >(undefined);
 
   const { mutateAsync: createSessionMutateAsync } = useMutation({
     ...sessionPostSessionMutation(),
@@ -194,20 +198,26 @@ export function App() {
   });
 
   const acquireAndPatchSsoAccessToken = useCallback(async () => {
-    const result = await msalInstance
-      .acquireTokenSilent({ scopes: ssoScopes })
-      .catch((error: unknown) => {
-        if (error instanceof InteractionRequiredAuthError) {
-          return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
-        }
-      });
+    acquireAndPatchSsoAccessTokenPromise.current ??= (async () => {
+      const result = await msalInstance
+        .acquireTokenSilent({ scopes: ssoScopes })
+        .catch((error: unknown) => {
+          if (error instanceof InteractionRequiredAuthError) {
+            return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
+          }
+        });
 
-    if (result) {
-      setAccessToken(result.accessToken);
-      await patchAccessTokenMutateAsync({
-        body: { id: "smda_api", key: result.accessToken },
-      });
-    }
+      if (result) {
+        setAccessToken(result.accessToken);
+        await patchAccessTokenMutateAsync({
+          body: { id: "smda_api", key: result.accessToken },
+        });
+      }
+    })().finally(() => {
+      acquireAndPatchSsoAccessTokenPromise.current = undefined;
+    });
+
+    await acquireAndPatchSsoAccessTokenPromise.current;
   }, [msalInstance, patchAccessTokenMutateAsync]);
 
   useEffect(() => {
