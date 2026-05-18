@@ -11,6 +11,13 @@ export type QueryServiceBase<T> = {
   errorStatus?: number;
 };
 
+export const queryKeyProjectGetCache = "projectGetCache";
+export const queryKeyProjectGetCacheDiff = "projectGetCacheDiff";
+export const queryKeyProjectGetCacheRevision = "projectGetCacheRevision";
+export const queryKeyProjectGetMappings = "projectGetMappings";
+export const queryKeyProjectGetRestoreCheck = "projectGetRestoreCheck";
+export const queryKeySessionGetRestoreCheck = "sessionGetRestoreCheck";
+
 export const defaultErrorHandling = (error: Error, errorPrefix: string) => {
   const message =
     `${errorPrefix}: ` +

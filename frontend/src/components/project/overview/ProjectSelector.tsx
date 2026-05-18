@@ -38,6 +38,11 @@ import {
   useFormContext,
 } from "#utils/form";
 import {
+  queryKeyProjectGetCache,
+  queryKeyProjectGetCacheDiff,
+  queryKeyProjectGetCacheRevision,
+} from "#utils/query";
+import {
   removeStorageItem,
   STORAGENAME_RMS_PROJECT_OPEN,
 } from "#utils/storage";
@@ -103,9 +108,9 @@ function ProjectSelectorForm({
           const key = query.queryKey[0] as { _id?: string } | undefined;
 
           return (
-            key?._id === "projectGetCache" ||
-            key?._id === "projectGetCacheRevision" ||
-            key?._id === "projectGetCacheDiff"
+            key?._id === queryKeyProjectGetCache ||
+            key?._id === queryKeyProjectGetCacheRevision ||
+            key?._id === queryKeyProjectGetCacheDiff
           );
         },
       });

@@ -13,6 +13,7 @@
 import { Route as rootRoute } from "./routes/__root";
 import { Route as IndexImport } from "./routes/index";
 import { Route as ProjectIndexImport } from "./routes/project/index";
+import { Route as UserRecoveryImport } from "./routes/user/recovery";
 import { Route as UserKeysImport } from "./routes/user/keys";
 import { Route as ProjectStratigraphyImport } from "./routes/project/stratigraphy";
 import { Route as ProjectRmsImport } from "./routes/project/rms";
@@ -30,6 +31,12 @@ const IndexRoute = IndexImport.update({
 const ProjectIndexRoute = ProjectIndexImport.update({
   id: "/project/",
   path: "/project/",
+  getParentRoute: () => rootRoute,
+} as any);
+
+const UserRecoveryRoute = UserRecoveryImport.update({
+  id: "/user/recovery",
+  path: "/user/recovery",
   getParentRoute: () => rootRoute,
 } as any);
 
@@ -109,6 +116,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UserKeysImport;
       parentRoute: typeof rootRoute;
     };
+    "/user/recovery": {
+      id: "/user/recovery";
+      path: "/user/recovery";
+      fullPath: "/user/recovery";
+      preLoaderRoute: typeof UserRecoveryImport;
+      parentRoute: typeof rootRoute;
+    };
     "/project/": {
       id: "/project/";
       path: "/project";
@@ -128,6 +142,7 @@ export interface FileRoutesByFullPath {
   "/project/rms": typeof ProjectRmsRoute;
   "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
+  "/user/recovery": typeof UserRecoveryRoute;
   "/project": typeof ProjectIndexRoute;
 }
 
@@ -138,6 +153,7 @@ export interface FileRoutesByTo {
   "/project/rms": typeof ProjectRmsRoute;
   "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
+  "/user/recovery": typeof UserRecoveryRoute;
   "/project": typeof ProjectIndexRoute;
 }
 
@@ -149,6 +165,7 @@ export interface FileRoutesById {
   "/project/rms": typeof ProjectRmsRoute;
   "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
+  "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
 }
 
@@ -161,6 +178,7 @@ export interface FileRouteTypes {
     | "/project/rms"
     | "/project/stratigraphy"
     | "/user/keys"
+    | "/user/recovery"
     | "/project";
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -170,6 +188,7 @@ export interface FileRouteTypes {
     | "/project/rms"
     | "/project/stratigraphy"
     | "/user/keys"
+    | "/user/recovery"
     | "/project";
   id:
     | "__root__"
@@ -179,6 +198,7 @@ export interface FileRouteTypes {
     | "/project/rms"
     | "/project/stratigraphy"
     | "/user/keys"
+    | "/user/recovery"
     | "/project/";
   fileRoutesById: FileRoutesById;
 }
@@ -190,6 +210,7 @@ export interface RootRouteChildren {
   ProjectRmsRoute: typeof ProjectRmsRoute;
   ProjectStratigraphyRoute: typeof ProjectStratigraphyRoute;
   UserKeysRoute: typeof UserKeysRoute;
+  UserRecoveryRoute: typeof UserRecoveryRoute;
   ProjectIndexRoute: typeof ProjectIndexRoute;
 }
 
@@ -200,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectRmsRoute: ProjectRmsRoute,
   ProjectStratigraphyRoute: ProjectStratigraphyRoute,
   UserKeysRoute: UserKeysRoute,
+  UserRecoveryRoute: UserRecoveryRoute,
   ProjectIndexRoute: ProjectIndexRoute,
 };
 
@@ -219,6 +241,7 @@ export const routeTree = rootRoute
         "/project/rms",
         "/project/stratigraphy",
         "/user/keys",
+        "/user/recovery",
         "/project/"
       ]
     },
@@ -239,6 +262,9 @@ export const routeTree = rootRoute
     },
     "/user/keys": {
       "filePath": "user/keys.tsx"
+    },
+    "/user/recovery": {
+      "filePath": "user/recovery.tsx"
     },
     "/project/": {
       "filePath": "project/index.tsx"

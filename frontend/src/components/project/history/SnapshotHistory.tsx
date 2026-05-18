@@ -4,7 +4,12 @@ import {
   ListItem,
   NativeSelect,
 } from "@equinor/eds-core-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -13,6 +18,7 @@ import {
   projectGetCacheOptions,
   projectGetCacheQueryKey,
   projectGetProjectQueryKey,
+  projectPatchCacheMaxRevisionsMutation,
   projectPostCacheRestoreMutation,
 } from "#client/@tanstack/react-query.gen";
 import type {
@@ -28,8 +34,28 @@ import {
   PageList,
   PageText,
 } from "#styles/common";
+import {
+  queryKeyProjectGetCache,
+  queryKeyProjectGetCacheDiff,
+} from "#utils/query";
 import { ReadableValue } from "./ReadableValue";
-import type { CacheEntry, DiffKind } from "./types";
+import {
+  CacheInfoBox,
+  CardStack,
+  ChangeValueGrid,
+  DiffDialogContent,
+  DiffFieldHeader,
+  DiffGroup,
+  DiffLegend,
+  MaxSnapshotsControls,
+  MaxSnapshotsSelectContainer,
+  ResourcePickerContainer,
+  ScrollableCardStack,
+  SelectorRow,
+  SnapshotInfo,
+  ValuePanel,
+} from "./SnapshotHistory.style";
+import type { CacheEntry, DiffKind, SnapshotDeletionImpact } from "./types";
 import {
   formatCacheDateTime,
   formatFieldPath,
@@ -41,18 +67,6 @@ import {
   RESOURCE_LABELS,
   RESOURCE_OPTIONS,
 } from "./utils";
-import {
-  CacheInfoBox,
-  CardStack,
-  ChangeValueGrid,
-  DiffDialogContent,
-  DiffFieldHeader,
-  DiffGroup,
-  DiffLegend,
-  ResourcePickerContainer,
-  SnapshotInfo,
-  ValuePanel,
-} from "./Viewer.style";
 
 function ListFieldGroup({
   kind,
@@ -361,22 +375,109 @@ function RestoreSnapshotDialog({
   );
 }
 
-export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
+function ConfirmMaxSnapshotsDialog({
+  isOpen,
+  maxRevisions,
+  affectedResources,
+  totalDeleteCount,
+  isSavePending,
+  onConfirm,
+  onCancel,
+}: {
+  isOpen: boolean;
+  maxRevisions?: number;
+  affectedResources: SnapshotDeletionImpact[];
+  totalDeleteCount: number;
+  isSavePending: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <GenericDialog open={isOpen} $maxWidth="36em">
+      <Dialog.Header>
+        <Dialog.Title>Save max snapshots</Dialog.Title>
+      </Dialog.Header>
+
+      <Dialog.Content>
+        <PageText>
+          Reducing max snapshots to
+          <span className="emphasis">
+            {" "}
+            {maxRevisions !== undefined ? String(maxRevisions) : "this value"}
+          </span>{" "}
+          will delete the
+          <span className="emphasis"> {String(totalDeleteCount)} </span>
+          oldest {totalDeleteCount === 1 ? "snapshot" : "snapshots"} from disk.
+        </PageText>
+
+        {affectedResources.length > 0 && (
+          <PageList>
+            {affectedResources.map((item) => (
+              <ListItem key={item.resource}>
+                {item.label}: {String(item.deleteCount)}{" "}
+                {item.deleteCount === 1 ? "snapshot" : "snapshots"}
+              </ListItem>
+            ))}
+          </PageList>
+        )}
+
+        <PageText $marginBottom="0">This cannot be undone.</PageText>
+      </Dialog.Content>
+
+      <Dialog.Actions>
+        <GeneralButton
+          label="Save"
+          isPending={isSavePending}
+          disabled={isSavePending}
+          onClick={onConfirm}
+        />
+        <CancelButton onClick={onCancel} />
+      </Dialog.Actions>
+    </GenericDialog>
+  );
+}
+
+export function SnapshotHistory({
+  hasProject,
+  projectReadOnly,
+  cacheMaxRevisions,
+}: {
+  hasProject: boolean;
+  projectReadOnly: boolean;
+  cacheMaxRevisions?: number;
+}) {
   const queryClient = useQueryClient();
   const [resource, setResource] = useState<CacheResource>("config.json");
   const [selectedCacheId, setSelectedCacheId] = useState<string | null>(null);
   const [isDiffDialogOpen, setIsDiffDialogOpen] = useState(false);
   const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false);
+  const [isMaxRevisionsDialogOpen, setIsMaxRevisionsDialogOpen] =
+    useState(false);
   const [lastRestoredCacheId, setLastRestoredCacheId] = useState<string | null>(
     null,
   );
+  const [maxRevisions, setMaxRevisions] = useState<number | undefined>(
+    cacheMaxRevisions,
+  );
 
-  const cachesQuery = useQuery({
-    ...projectGetCacheOptions({ query: { resource } }),
-    // Cache revisions can change outside this page (after editing config for example)
-    refetchOnMount: "always",
-    meta: { errorPrefix: "Error loading snapshot history" },
+  useEffect(() => {
+    setMaxRevisions(cacheMaxRevisions);
+  }, [cacheMaxRevisions]);
+
+  const cacheQueries = useQueries({
+    queries: RESOURCE_OPTIONS.map((cacheResource) => ({
+      ...projectGetCacheOptions({ query: { resource: cacheResource } }),
+      // Cache revisions can change outside this page (after editing config for example)
+      refetchOnMount: "always" as const,
+      enabled: hasProject,
+      meta: {
+        errorPrefix: `Error loading ${RESOURCE_LABELS[cacheResource]} snapshot history`,
+      },
+    })),
   });
+
+  const selectedResourceIndex = RESOURCE_OPTIONS.indexOf(resource);
+  const cachesQuery = cacheQueries[selectedResourceIndex];
 
   const allCaches: string[] = useMemo(
     () => [...(cachesQuery.data?.revisions ?? [])].reverse(),
@@ -404,6 +505,61 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
     (entry) => entry.cacheId === selectedCacheId,
   );
   const resourceLabel = RESOURCE_LABELS[resource];
+  const isReducingMaxRevisions =
+    maxRevisions !== undefined &&
+    cacheMaxRevisions !== undefined &&
+    maxRevisions < cacheMaxRevisions;
+  const isSnapshotImpactPending =
+    isReducingMaxRevisions &&
+    cacheQueries.some((query) => query.isPending || query.isFetching);
+  const isSnapshotImpactError =
+    isReducingMaxRevisions && cacheQueries.some((query) => query.isError);
+
+  const snapshotDeletionImpact = (() => {
+    const nextMaxRevisions = maxRevisions;
+
+    if (!isReducingMaxRevisions || nextMaxRevisions === undefined) {
+      return [];
+    }
+
+    return RESOURCE_OPTIONS.reduce<SnapshotDeletionImpact[]>(
+      (impact, cacheResource, index) => {
+        const revisionCount = cacheQueries[index]?.data?.revisions.length ?? 0;
+        const deleteCount = Math.max(0, revisionCount - nextMaxRevisions);
+
+        if (deleteCount > 0) {
+          impact.push({
+            resource: cacheResource,
+            label: RESOURCE_LABELS[cacheResource],
+            deleteCount,
+          });
+        }
+
+        return impact;
+      },
+      [],
+    );
+  })();
+
+  const totalSnapshotDeleteCount = snapshotDeletionImpact.reduce(
+    (total, item) => total + item.deleteCount,
+    0,
+  );
+
+  const maxRevisionOptions = useMemo(() => {
+    const options = [5, 10, 15, 20];
+
+    if (
+      cacheMaxRevisions !== undefined &&
+      cacheMaxRevisions >= 5 &&
+      !options.includes(cacheMaxRevisions)
+    ) {
+      options.push(cacheMaxRevisions);
+      options.sort((a, b) => a - b);
+    }
+
+    return options;
+  }, [cacheMaxRevisions]);
 
   useEffect(() => {
     if (allCaches.length === 0) {
@@ -422,7 +578,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
       path: { revision_id: selectedCacheId ?? "" },
       query: { resource },
     }),
-    enabled: isDiffDialogOpen && selectedCacheId !== null,
+    enabled: hasProject && isDiffDialogOpen && selectedCacheId !== null,
     staleTime: 0, // Force a fresh fetch whenever a diff is opened.
     refetchOnMount: "always", // Diffs depend on current version, avoid stale dialog data.
     meta: { errorPrefix: "Error loading snapshot details" },
@@ -450,7 +606,7 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
             | undefined;
 
           return (
-            key?._id === "projectGetCacheDiff" &&
+            key?._id === queryKeyProjectGetCacheDiff &&
             key.query?.resource === variables.query.resource
           );
         },
@@ -463,6 +619,49 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
       setSelectedCacheId(null);
     },
   });
+
+  const maxRevisionsMutation = useMutation({
+    ...projectPatchCacheMaxRevisionsMutation(),
+    meta: { errorPrefix: "Error saving max snapshots" },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0] as { _id?: string } | undefined;
+
+          return key?._id === queryKeyProjectGetCache;
+        },
+      });
+      toast.info("Max snapshots saved");
+      setIsMaxRevisionsDialogOpen(false);
+    },
+  });
+
+  function saveMaxRevisions() {
+    if (maxRevisions === undefined) {
+      return;
+    }
+
+    maxRevisionsMutation.mutate({
+      body: { cache_max_revisions: maxRevisions },
+    });
+  }
+
+  function handleSaveMaxRevisions() {
+    if (maxRevisions === undefined) {
+      return;
+    }
+
+    if (totalSnapshotDeleteCount > 0) {
+      setIsMaxRevisionsDialogOpen(true);
+
+      return;
+    }
+
+    saveMaxRevisions();
+  }
 
   function openDiffDialog(cacheId: string) {
     setSelectedCacheId(cacheId);
@@ -491,6 +690,15 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
       query: { resource },
     });
   }
+
+  useEffect(() => {
+    if (!hasProject) {
+      setIsDiffDialogOpen(false);
+      setIsRestoreDialogOpen(false);
+      setIsMaxRevisionsDialogOpen(false);
+      setSelectedCacheId(null);
+    }
+  }, [hasProject]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset pre-restore state when resource changes.
   useEffect(() => {
@@ -546,65 +754,145 @@ export function Viewer({ projectReadOnly }: { projectReadOnly: boolean }) {
         }}
       />
 
-      <PageText>
-        Choose a resource to view its snapshots, listed from newest to oldest.
-      </PageText>
+      <ConfirmMaxSnapshotsDialog
+        isOpen={isMaxRevisionsDialogOpen}
+        maxRevisions={maxRevisions}
+        affectedResources={snapshotDeletionImpact}
+        totalDeleteCount={totalSnapshotDeleteCount}
+        isSavePending={maxRevisionsMutation.isPending}
+        onConfirm={saveMaxRevisions}
+        onCancel={() => {
+          setIsMaxRevisionsDialogOpen(false);
+        }}
+      />
 
-      <PageText>
-        Use <strong>"View details"</strong> to see what has changed between the
-        snapshot and the current version.{" "}
-        {projectReadOnly ? (
-          <>
-            The project is currently read-only, so restore of the snapshot is
-            not possible.
-          </>
-        ) : (
-          <>
-            You can also <strong>restore</strong> from the snapshot.
-          </>
-        )}
-      </PageText>
+      {hasProject ? (
+        <>
+          <PageText>
+            Choose a settings type to view its snapshots, listed from newest to
+            oldest.
+          </PageText>
 
-      <ResourcePickerContainer>
-        <NativeSelect
-          id="history-resource"
-          label="Resource"
-          value={resource}
-          onChange={(e) => {
-            setResource(e.target.value as CacheResource);
-          }}
-        >
-          {RESOURCE_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {RESOURCE_LABELS[option]}
-            </option>
-          ))}
-        </NativeSelect>
-      </ResourcePickerContainer>
+          <PageText>
+            Use <strong>View details</strong> to see what has changed between
+            the snapshot and the current version.{" "}
+            {projectReadOnly ? (
+              <>
+                The project is currently read-only, so restore of the snapshot
+                is not possible.
+              </>
+            ) : (
+              <>
+                You can also <strong>restore</strong> from the snapshot.
+              </>
+            )}
+          </PageText>
 
-      {cachesQuery.isPending && <PageText>Loading snapshots...</PageText>}
+          <PageText>
+            Use <strong>Max snapshots</strong> to control how many snapshots are
+            kept on disk for this project.
+          </PageText>
 
-      {cachesQuery.isError && (
-        <PageText>Unable to load snapshot history.</PageText>
-      )}
+          <SelectorRow>
+            <ResourcePickerContainer>
+              <NativeSelect
+                id="history-resource"
+                label="Settings type"
+                value={resource}
+                onChange={(e) => {
+                  setResource(e.target.value as CacheResource);
+                }}
+              >
+                {RESOURCE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {RESOURCE_LABELS[option]}
+                  </option>
+                ))}
+              </NativeSelect>
+            </ResourcePickerContainer>
 
-      {!cachesQuery.isPending &&
-        !cachesQuery.isError &&
-        allCaches.length === 0 && (
-          <PageText>No snapshots found for {resourceLabel}.</PageText>
-        )}
+            <MaxSnapshotsControls>
+              <MaxSnapshotsSelectContainer>
+                <NativeSelect
+                  id="history-max-snapshots"
+                  label="Max snapshots"
+                  value={maxRevisions?.toString() ?? ""}
+                  disabled={projectReadOnly || maxRevisionsMutation.isPending}
+                  onChange={(e) => {
+                    setMaxRevisions(
+                      e.target.value === ""
+                        ? undefined
+                        : Number(e.target.value),
+                    );
+                  }}
+                >
+                  <option value="">(not set)</option>
+                  {maxRevisionOptions.map((option) => (
+                    <option key={option} value={String(option)}>
+                      {String(option)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </MaxSnapshotsSelectContainer>
 
-      {cacheEntries.length > 0 && (
-        <CardStack>
-          {cacheEntries.map((entry) => (
-            <CacheRow
-              key={entry.cacheId}
-              entry={entry}
-              isSelected={selectedCacheId === entry.cacheId}
-              onViewDetails={openDiffDialog}
-            />
-          ))}
-        </CardStack>
+              <GeneralButton
+                label="Save"
+                isPending={maxRevisionsMutation.isPending}
+                disabled={
+                  projectReadOnly ||
+                  maxRevisionsMutation.isPending ||
+                  maxRevisions === undefined ||
+                  maxRevisions === cacheMaxRevisions ||
+                  isSnapshotImpactPending ||
+                  isSnapshotImpactError
+                }
+                tooltipText={
+                  projectReadOnly
+                    ? "Project is read-only"
+                    : maxRevisions === undefined
+                      ? "Select a max snapshots value to save"
+                      : maxRevisions === cacheMaxRevisions
+                        ? "No changes to save"
+                        : isSnapshotImpactPending
+                          ? "Checking whether snapshots will be deleted"
+                          : isSnapshotImpactError
+                            ? "Unable to check snapshot deletion impact"
+                            : undefined
+                }
+                onClick={handleSaveMaxRevisions}
+              />
+            </MaxSnapshotsControls>
+          </SelectorRow>
+
+          {cachesQuery.isPending && <PageText>Loading snapshots...</PageText>}
+
+          {cachesQuery.isError && (
+            <PageText>Unable to load snapshot history.</PageText>
+          )}
+
+          {!cachesQuery.isPending &&
+            !cachesQuery.isError &&
+            allCaches.length === 0 && (
+              <PageText>No snapshots found for {resourceLabel}.</PageText>
+            )}
+
+          {cacheEntries.length > 0 && (
+            <ScrollableCardStack>
+              {cacheEntries.map((entry) => (
+                <CacheRow
+                  key={entry.cacheId}
+                  entry={entry}
+                  isSelected={selectedCacheId === entry.cacheId}
+                  onViewDetails={openDiffDialog}
+                />
+              ))}
+            </ScrollableCardStack>
+          )}
+        </>
+      ) : (
+        <PageText>
+          Project not set. Select a project to view and restore snapshots.
+        </PageText>
       )}
     </>
   );

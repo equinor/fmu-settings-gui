@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { Loading } from "#components/common";
-import { Viewer } from "#components/project/history/Viewer";
+import { Overview } from "#components/project/history/Overview";
 import { useProject } from "#services/project";
-import { PageHeader, PageText } from "#styles/common";
+import { PageHeader } from "#styles/common";
 
 export const Route = createFileRoute("/project/history")({
   component: RouteComponent,
@@ -12,15 +12,17 @@ export const Route = createFileRoute("/project/history")({
 
 function Content() {
   const project = useProject();
-  const projectReadOnly = !(project.lockStatus?.is_lock_acquired ?? false);
+  const hasProject = project.status && project.data !== undefined;
+  const projectReadOnly =
+    hasProject && !(project.lockStatus?.is_lock_acquired ?? false);
 
-  return project.status ? (
-    <Viewer
+  return (
+    <Overview
       key={project.data?.path ?? "history-no-project"}
+      hasProject={hasProject}
       projectReadOnly={projectReadOnly}
+      cacheMaxRevisions={project.data?.config.cache_max_revisions}
     />
-  ) : (
-    <PageText>Project not set.</PageText>
   );
 }
 

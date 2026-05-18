@@ -20,8 +20,17 @@ const diffPalette: Record<DiffKind, { background: string; color: string }> = {
 };
 
 export const ResourcePickerContainer = styled.div`
-  max-width: 15em;
-  margin-bottom: ${tokens.spacings.comfortable.medium};
+  min-width: 13em;
+`;
+
+export const MaxSnapshotsControls = styled.div`
+  display: flex;
+  align-items: flex-end;
+  gap: ${tokens.spacings.comfortable.small};
+`;
+
+export const MaxSnapshotsSelectContainer = styled.div`
+  min-width: 7em;
 `;
 
 export const SnapshotInfo = styled.div`
@@ -72,6 +81,12 @@ export const CardStack = styled.div`
   gap: ${tokens.spacings.comfortable.small};
 `;
 
+export const ScrollableCardStack = styled(CardStack)`
+  max-height: 26.5em;
+  overflow-y: auto;
+  padding-right: ${tokens.spacings.comfortable.small};
+`;
+
 export const DiffFieldHeader = styled.div`
   margin-bottom: ${tokens.spacings.comfortable.small};
 `;
@@ -109,4 +124,13 @@ export const ValuePanel = styled(GenericInnerBox)`
   p {
     margin-top: 0;
   }
+`;
+
+export const SelectorRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: ${tokens.spacings.comfortable.medium};
+  flex-wrap: wrap;
+  margin-bottom: ${tokens.spacings.comfortable.medium};
 `;
