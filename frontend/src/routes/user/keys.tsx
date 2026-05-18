@@ -1,5 +1,4 @@
-import { Icon, Typography } from "@equinor/eds-core-react";
-import { info_circle } from "@equinor/eds-icons";
+import { List, Typography } from "@equinor/eds-core-react";
 import {
   useMutation,
   useQueryClient,
@@ -22,17 +21,13 @@ import {
   type MutationCallbackProps,
   type StringObject,
 } from "#components/form/form";
-import { PageHeader, PageSectionSpacer, PageText } from "#styles/common";
 import {
-  KeysFormContainer,
-  TipBox,
-  TipContent,
-  TipIcon,
-  TipText,
-  TipTitle,
-} from "./keys.style";
-
-Icon.add({ info_circle });
+  PageHeader,
+  PageList,
+  PageSectionSpacer,
+  PageText,
+} from "#styles/common";
+import { KeysFormContainer } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
   component: RouteComponent,
@@ -124,8 +119,8 @@ function Content() {
         API. This key can be created as follows:
       </PageText>
 
-      <Typography as="ol">
-        <li>
+      <PageList variant="numbered">
+        <List.Item>
           Go to the{" "}
           <Typography
             link
@@ -136,8 +131,8 @@ function Content() {
             Equinor API portal
           </Typography>{" "}
           and sign in
-        </li>
-        <li>
+        </List.Item>
+        <List.Item>
           Go to the{" "}
           <Typography
             link
@@ -147,36 +142,29 @@ function Content() {
           >
             SMDA product page
           </Typography>
-        </li>
-        <li>
+        </List.Item>
+        <List.Item>
           Subscribe to the API. The subscription name can be given as
           &quot;SMDA&quot;
-        </li>
-        <li>
+        </List.Item>
+        <List.Item>
           The subscription will be listed on the Profile page, with a primary
           and a secondary key, masked with &quot;XXX...&quot;. Show the actual
           value of the primary key, and copy the value
-        </li>
-        <li>
+        </List.Item>
+        <List.Item>
           Click Edit below, paste the copied key value into the field, and save
           it. After saving the value will be shown masked with
           &quot;***...&quot;
-        </li>
-      </Typography>
+        </List.Item>
+      </PageList>
 
-      <TipBox>
-        <TipIcon>
-          <Icon name="info_circle" title="Tip" size={18} />
-        </TipIcon>
-        <TipContent>
-          <TipTitle>Tip</TipTitle>
-          <TipText>
-            Sign in from Windows on your local computer if possible, then copy
-            the SMDA key into FMU Settings in TGX. Authentication is often
-            easier there than in Firefox in TGX.
-          </TipText>
-        </TipContent>
-      </TipBox>
+      <PageText>
+        💡 If you have authentication problems when using TGX and Firefox you
+        can perform the steps in Windows on your local computer instead. When
+        the subscription has been set up the primary key can be pasted into the
+        edit field here, as described in the last step.
+      </PageText>
 
       <PageSectionSpacer />
 
