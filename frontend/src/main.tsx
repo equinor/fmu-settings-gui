@@ -20,6 +20,7 @@ import {
   type Dispatch,
   type SetStateAction,
   StrictMode,
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -179,7 +180,10 @@ export function App() {
     ...sessionPostSessionMutation(),
     meta: { errorPrefix: "Error creating session" },
   });
-  const { mutate: patchAccessTokenMutate } = useMutation({
+  const {
+    mutate: patchAccessTokenMutate,
+    mutateAsync: patchAccessTokenMutateAsync,
+  } = useMutation({
     ...sessionPatchAccessTokenMutation(),
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -188,6 +192,23 @@ export function App() {
     },
     meta: { errorPrefix: "Error adding access token to session" },
   });
+
+  const acquireAndPatchSsoAccessToken = useCallback(async () => {
+    const result = await msalInstance
+      .acquireTokenSilent({ scopes: ssoScopes })
+      .catch((error: unknown) => {
+        if (error instanceof InteractionRequiredAuthError) {
+          return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
+        }
+      });
+
+    if (result) {
+      setAccessToken(result.accessToken);
+      await patchAccessTokenMutateAsync({
+        body: { id: "smda_api", key: result.accessToken },
+      });
+    }
+  }, [msalInstance, patchAccessTokenMutateAsync]);
 
   useEffect(() => {
     let id: number | undefined;
@@ -203,7 +224,7 @@ export function App() {
           apiTokenStatus.valid ?? false,
           setApiTokenStatus,
           setRequestSessionCreation,
-          setRequestAcquireSsoAccessToken,
+          acquireAndPatchSsoAccessToken,
         ),
       );
       setHasResponseInterceptor(true);
@@ -215,7 +236,7 @@ export function App() {
         setHasResponseInterceptor(false);
       }
     };
-  }, [apiToken, apiTokenStatus.valid]);
+  }, [acquireAndPatchSsoAccessToken, apiToken, apiTokenStatus.valid]);
 
   useEffect(() => {
     async function callCreateSessionAsync() {
@@ -246,16 +267,10 @@ export function App() {
 
   useEffect(() => {
     if (requestAcquireSsoAccessToken) {
-      msalInstance
-        .acquireTokenSilent({ scopes: ssoScopes })
-        .catch((error: unknown) => {
-          if (error instanceof InteractionRequiredAuthError) {
-            return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
-          }
-        });
+      void acquireAndPatchSsoAccessToken();
       setRequestAcquireSsoAccessToken(false);
     }
-  }, [msalInstance, requestAcquireSsoAccessToken]);
+  }, [acquireAndPatchSsoAccessToken, requestAcquireSsoAccessToken]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Invalidate router context when some of the content changes
   useEffect(() => {
@@ -270,21 +285,9 @@ export function App() {
           if (event.eventType === EventType.LOGIN_SUCCESS) {
             const account = payload.account;
             msalInstance.setActiveAccount(account);
-            msalInstance
-              .acquireTokenSilent({ scopes: ssoScopes })
-              .catch((error: unknown) => {
-                if (error instanceof InteractionRequiredAuthError) {
-                  return msalInstance.acquireTokenRedirect({
-                    scopes: ssoScopes,
-                  });
-                }
-              });
+            void acquireAndPatchSsoAccessToken();
           } else if (event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
             setAccessToken(payload.accessToken);
-            handleAddSsoAccessToken(
-              patchAccessTokenMutate,
-              payload.accessToken,
-            );
           }
         }
 
@@ -296,7 +299,7 @@ export function App() {
       },
       [EventType.LOGIN_SUCCESS, EventType.ACQUIRE_TOKEN_SUCCESS],
     );
-  }, [msalInstance, patchAccessTokenMutate]);
+  }, [acquireAndPatchSsoAccessToken, msalInstance]);
 
   return (
     <RouterProvider
