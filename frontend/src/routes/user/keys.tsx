@@ -21,12 +21,7 @@ import {
   type MutationCallbackProps,
   type StringObject,
 } from "#components/form/form";
-import {
-  PageHeader,
-  PageList,
-  PageSectionSpacer,
-  PageText,
-} from "#styles/common";
+import { PageHeader, PageList, PageText } from "#styles/common";
 import { KeysFormContainer } from "./keys.style";
 
 export const Route = createFileRoute("/user/keys")({
@@ -165,8 +160,6 @@ function Content() {
         the subscription has been set up the primary key can be pasted into the
         edit field here, as described in the last step.
       </PageText>
-
-      <PageSectionSpacer />
 
       <KeysFormContainer>
         <KeysTextFieldForm
