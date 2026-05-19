@@ -683,11 +683,8 @@ export function Overview({
             smdaHealthStatus &&
             (stratigraphicColumn ? (
               <PageText>
-                💡 When editing horizons the options for SMDA names are drawn
-                from the top and base horizons of the zones that have SMDA
-                names. SMDA names should thus be set for zones first, so that
-                the SMDA names for horizons are available for the horizon
-                editing
+                💡 Set SMDA names for zones first. Horizon options are derived
+                from the top and base horizons of mapped zones.
               </PageText>
             ) : (
               <WarningBox>

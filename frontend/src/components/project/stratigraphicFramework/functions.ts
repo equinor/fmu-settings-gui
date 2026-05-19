@@ -33,7 +33,7 @@ export function getZoneGridPlacement(
       console.warn(
         "Top or base horizon for zone",
         zone.name,
-        "not found when calculcating grid placement, ignoring this zone",
+        "not found when calculating grid placement, ignoring this zone",
       );
 
       return;
