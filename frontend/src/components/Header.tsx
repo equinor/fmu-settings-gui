@@ -12,6 +12,7 @@ import {
   check,
   checkbox,
   comment,
+  external_link,
   warning_filled,
 } from "@equinor/eds-icons";
 import { tokens } from "@equinor/eds-tokens";
@@ -279,7 +280,19 @@ export function Header() {
         </TopBar.Header>
         <TopBar.Actions>
           <TaskIndicator />
+
           <FeedbackDialog />
+
+          <HeaderActionButton
+            variant="ghost"
+            forwardedAs="a"
+            href="https://equinor.github.io/fmu-settings/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Documentation <Icon data={external_link} size={18} />
+          </HeaderActionButton>
+
           <ProjectInfo />
         </TopBar.Actions>
       </TopBar>
