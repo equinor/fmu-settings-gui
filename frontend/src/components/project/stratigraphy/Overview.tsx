@@ -117,7 +117,10 @@ function Edit({
     defaultValues: {
       ...elementMapping,
       ...(elementMapping?.unmappable && {
-        smdaUuid: specialOptions.unmappableZone.value,
+        smdaUuid:
+          elementMapping.elementType === "horizon"
+            ? specialOptions.unmappableHorizon.value
+            : specialOptions.unmappableZone.value,
       }),
     } as ElementMapping,
     onSubmit: ({ formApi, value }) => {
@@ -140,7 +143,9 @@ function Edit({
         : [],
       {
         value: elementMapping?.unmappable
-          ? specialOptions.unmappableZone.value
+          ? elementMapping.elementType === "horizon"
+            ? specialOptions.unmappableHorizon.value
+            : specialOptions.unmappableZone.value
           : (elementMapping?.smdaUuid ?? "") === ""
             ? specialOptions.empty.value
             : (elementMapping?.smdaUuid ?? ""),
