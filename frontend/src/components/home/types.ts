@@ -1,7 +1,1 @@
-export type ChangeType =
-  | "add"
-  | "copy"
-  | "merge"
-  | "remove"
-  | "reset"
-  | "update";
+export type { ChangeType } from "#client/types.gen";

@@ -2,7 +2,7 @@ import { Chip } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-import type { ChangeType } from "./types";
+import type { ChangeType } from "./types.ts";
 
 function changeTypeColor(changeType: ChangeType) {
   if (changeType === "add" || changeType === "copy") {
