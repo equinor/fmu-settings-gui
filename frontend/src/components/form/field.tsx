@@ -11,12 +11,7 @@ import {
   info_circle,
   remove,
 } from "@equinor/eds-icons";
-import {
-  type ChangeEvent,
-  type Dispatch,
-  type SetStateAction,
-  useEffect,
-} from "react";
+import type { ChangeEvent } from "react";
 import type z from "zod";
 
 import { useFieldContext } from "#utils/form";
@@ -53,7 +48,6 @@ export function TextField({
   helperText,
   isReadOnly,
   toUpperCase,
-  setSubmitDisabled,
 }: {
   label: string;
   multiline?: boolean;
@@ -63,21 +57,8 @@ export function TextField({
   helperText?: string;
   isReadOnly?: boolean;
   toUpperCase?: boolean;
-  setSubmitDisabled?: Dispatch<SetStateAction<boolean>>;
 }) {
   const field = useFieldContext<string>();
-
-  useEffect(() => {
-    if (setSubmitDisabled) {
-      setSubmitDisabled(
-        field.state.meta.isDefaultValue || !field.state.meta.isValid,
-      );
-    }
-  }, [
-    setSubmitDisabled,
-    field.state.meta.isDefaultValue,
-    field.state.meta.isValid,
-  ]);
 
   return (
     <InputWrapper helperProps={{ text: helperText }}>

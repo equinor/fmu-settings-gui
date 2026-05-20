@@ -59,7 +59,6 @@ export function EditableTextFieldForm({
   mutationIsPending,
 }: EditableTextFieldFormProps) {
   const [isReadonly, setIsReadonly] = useState(true);
-  const [submitDisabled, setSubmitDisabled] = useState(true);
 
   const validator = handleValidator({ length, minLength, initialValue: value });
 
@@ -108,7 +107,6 @@ export function EditableTextFieldForm({
               placeholder={placeholder}
               helperText={helperText}
               isReadOnly={isReadonly}
-              setSubmitDisabled={setSubmitDisabled}
             />
           )}
         </form.AppField>
@@ -123,12 +121,16 @@ export function EditableTextFieldForm({
             />
           ) : (
             <>
-              <form.SubmitButton
-                label="Save"
-                disabled={submitDisabled}
-                isPending={mutationIsPending}
-                helperTextDisabled="Value can be submitted when it has been changed and is valid"
-              />
+              <form.Subscribe>
+                {(state) => (
+                  <form.SubmitButton
+                    label="Save"
+                    disabled={state.isDefaultValue || !state.canSubmit}
+                    isPending={mutationIsPending}
+                    helperTextDisabled="Value can be submitted when it has been changed and is valid"
+                  />
+                )}
+              </form.Subscribe>
               <form.CancelButton
                 onClick={(e) => {
                   e.preventDefault();
