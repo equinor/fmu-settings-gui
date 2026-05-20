@@ -5,42 +5,50 @@ export const FILE_LABELS: Record<string, string> = {
   "mappings.json": "Mappings",
 };
 
-export const PATH_LABELS: Record<string, string> = {
+const PATH_LABELS: Record<string, string> = {
+  access: "access control",
+  "access.asset": "asset",
+  "access.asset.name": "asset name",
+  "access.classification": "classification",
+  cache_max_revisions: "max snapshots",
+  masterdata: "masterdata",
+  "masterdata.smda": "SMDA",
   "masterdata.smda.coordinate_system": "SMDA coordinate system",
-  "masterdata.smda.stratigraphic_column": "SMDA stratigraphic column",
   "masterdata.smda.country": "SMDA countries",
   "masterdata.smda.discovery": "SMDA discoveries",
   "masterdata.smda.field": "SMDA fields",
-  "masterdata.smda": "SMDA",
-  masterdata: "masterdata",
+  "masterdata.smda.stratigraphic_column": "SMDA stratigraphic column",
+  model: "model information",
+  "model.description": "model description",
   "model.name": "model name",
   "model.revision": "model revision",
-  "model.description": "model description",
-  model: "model information",
-  "access.asset.name": "asset name",
-  "access.asset": "asset",
-  "access.classification": "classification",
-  access: "access control",
-  cache_max_revisions: "max snapshots",
+  rms: "RMS project",
+  "rms.coordinate_system": "RMS coordinate system",
+  "rms.horizons": "RMS horizons",
   "rms.path": "RMS project path",
   "rms.version": "RMS version",
-  "rms.coordinate_system": "RMS coordinate system",
-  "rms.zones": "RMS stratigraphic zones",
-  "rms.horizons": "RMS horizons",
   "rms.wells": "RMS wells",
-  rms: "RMS project",
+  "rms.zones": "RMS stratigraphic zones",
 };
 
-export const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
-  update: "Updated",
-  remove: "Removed",
+const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   add: "Added",
-  reset: "Reset",
-  merge: "Merged",
   copy: "Copied",
+  merge: "Merged",
+  remove: "Removed",
+  reset: "Reset",
+  update: "Updated",
 };
 
-export function getFieldLabel(path: string): string | undefined {
+export function getTypeLabel(changeType: ChangeType) {
+  if (changeType === "update") {
+    return "Modified";
+  }
+
+  return CHANGE_TYPE_VERBS[changeType];
+}
+
+function getFieldLabel(path: string): string | undefined {
   if (path in PATH_LABELS) {
     return PATH_LABELS[path];
   }
@@ -84,7 +92,7 @@ export function formatEntryDescription(entry: {
     const verb = CHANGE_TYPE_VERBS[entry.change_type];
 
     return `${verb} ${label}`;
+  } else {
+    return formatBriefDescription(entry.change);
   }
-
-  return formatBriefDescription(entry.change);
 }
