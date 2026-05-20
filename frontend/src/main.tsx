@@ -3,6 +3,7 @@ import {
   type EventMessage,
   EventType,
   InteractionRequiredAuthError,
+  InteractionType,
   PublicClientApplication,
 } from "@azure/msal-browser";
 import { MsalProvider, useMsal } from "@azure/msal-react";
@@ -298,18 +299,24 @@ export function App() {
             void acquireAndPatchSsoAccessToken();
           } else if (event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
             setAccessToken(payload.accessToken);
+            if (event.interactionType === InteractionType.Redirect) {
+              handleAddSsoAccessToken(
+                patchAccessTokenMutate,
+                payload.accessToken,
+              );
+            }
           }
         }
-
-        return () => {
-          if (id !== null) {
-            msalInstance.removeEventCallback(id);
-          }
-        };
       },
       [EventType.LOGIN_SUCCESS, EventType.ACQUIRE_TOKEN_SUCCESS],
     );
-  }, [acquireAndPatchSsoAccessToken, msalInstance]);
+
+    return () => {
+      if (id !== null) {
+        msalInstance.removeEventCallback(id);
+      }
+    };
+  }, [acquireAndPatchSsoAccessToken, msalInstance, patchAccessTokenMutate]);
 
   return (
     <RouterProvider
