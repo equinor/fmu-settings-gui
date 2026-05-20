@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Suspense } from "react";
 
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
+import { Loading, QueryErrorBoundary } from "#components/common";
 import { PageHeader, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import {
@@ -12,15 +13,7 @@ import {
   ChangeList,
   ChangeTypeChip,
 } from "./Changelog.style";
-import { FILE_LABELS, formatEntryDescription } from "./utils";
-
-function formatTimestamp(value?: string) {
-  if (!value) {
-    return "(unknown)";
-  }
-
-  return displayDateTime(value);
-}
+import { FILE_LABELS, formatEntryDescription, getTypeLabel } from "./utils";
 
 function timestampToNumber(value?: string) {
   if (!value) {
@@ -32,64 +25,14 @@ function timestampToNumber(value?: string) {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-import type { ChangeType } from "./types";
-
-const TYPE_LABELS: Record<ChangeType, string> = {
-  update: "Modified",
-  add: "Added",
-  remove: "Removed",
-  reset: "Reset",
-  merge: "Merged",
-  copy: "Copied",
-};
-
-function getTypeLabel(changeType: ChangeType) {
-  return TYPE_LABELS[changeType];
-}
-
-export function Changelog() {
-  const { data, isPending, isError, error } = useQuery({
+function Content() {
+  const { data } = useSuspenseQuery({
     ...projectGetChangelogOptions(),
     meta: { preventDefaultErrorHandling: [404] },
-    retry: (failureCount, queryError) =>
-      !(isAxiosError(queryError) && queryError.response?.status === 404) &&
-      failureCount < 3,
   });
 
-  if (isPending) {
-    return (
-      <>
-        <PageHeader $variant="h3">Changelog</PageHeader>
-        <PageText>Loading changelog...</PageText>
-      </>
-    );
-  }
-
-  if (isError) {
-    if (isAxiosError(error) && error.response?.status === 404) {
-      return (
-        <>
-          <PageHeader $variant="h3">Changelog</PageHeader>
-          <PageText>No changelog found for this project.</PageText>
-        </>
-      );
-    }
-
-    return (
-      <>
-        <PageHeader $variant="h3">Changelog</PageHeader>
-        <PageText>Unable to load changelog.</PageText>
-      </>
-    );
-  }
-
   if (data.length === 0) {
-    return (
-      <>
-        <PageHeader $variant="h3">Changelog</PageHeader>
-        <PageText>No changelog entries yet.</PageText>
-      </>
-    );
+    return <PageText>No changelog entries yet.</PageText>;
   }
 
   const latestChanges = [...data]
@@ -100,12 +43,12 @@ export function Changelog() {
 
   return (
     <>
-      <PageHeader $variant="h3">Changelog</PageHeader>
       <PageText>
         {latestChanges.length === 1
-          ? "Showing the most recent change to this project&apos;s .fmu files."
-          : `Showing the ${latestChanges.length} most recent changes to this project's .fmu files.`}
+          ? "Showing the most recent change to this project's settings."
+          : `Showing the ${latestChanges.length} most recent changes to this project's settings.`}
       </PageText>
+
       <ChangeList>
         {latestChanges.map((entry) => {
           return (
@@ -115,7 +58,8 @@ export function Changelog() {
             >
               <ChangeItemHeader>
                 <ChangeDescription>
-                  {formatEntryDescription(entry)} in{" "}
+                  {formatEntryDescription(entry)}{" "}
+                  <span style={{ fontWeight: "normal" }}>in</span>{" "}
                   {FILE_LABELS[entry.file] ?? entry.file}
                 </ChangeDescription>
                 <ChangeTypeChip $changeType={entry.change_type}>
@@ -123,12 +67,36 @@ export function Changelog() {
                 </ChangeTypeChip>
               </ChangeItemHeader>
               <ChangeItemMeta>
-                {formatTimestamp(entry.timestamp)} by {entry.user}
+                {entry.timestamp
+                  ? displayDateTime(entry.timestamp)
+                  : "(unknown date)"}{" "}
+                by {entry.user}
               </ChangeItemMeta>
             </ChangeItem>
           );
         })}
       </ChangeList>
+    </>
+  );
+}
+
+export function Changelog() {
+  return (
+    <>
+      <PageHeader $variant="h3">Changelog</PageHeader>
+
+      <QueryErrorBoundary
+        statusCodeHandling={{
+          404: {
+            message: "No changelog found for this project.",
+            enableRetry: false,
+          },
+        }}
+      >
+        <Suspense fallback={<Loading />}>
+          <Content />
+        </Suspense>
+      </QueryErrorBoundary>
     </>
   );
 }
