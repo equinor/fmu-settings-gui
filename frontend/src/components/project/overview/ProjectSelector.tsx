@@ -23,6 +23,7 @@ import {
   projectGetRmsProjectsQueryKey,
   projectPostInitProjectMutation,
   projectPostProjectMutation,
+  rmsDeleteRmsProjectMutation,
   userGetUserOptions,
   userGetUserQueryKey,
 } from "#client/@tanstack/react-query.gen";
@@ -87,6 +88,15 @@ function ProjectSelectorForm({
     closeDialog();
   };
 
+  const rmsProjectCloseMutation = useMutation({
+    ...rmsDeleteRmsProjectMutation(),
+  });
+
+  const closeRmsProject = () => {
+    rmsProjectCloseMutation.mutate({});
+    removeStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN);
+  };
+
   const queryClient = useQueryClient();
   const setSelectProjectInvalidAttempt = useRouteContext({
     from: "__root__",
@@ -123,7 +133,7 @@ function ProjectSelectorForm({
       void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),
       });
-      removeStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN);
+      closeRmsProject();
     },
     meta: {
       preventDefaultErrorHandling: codes,
