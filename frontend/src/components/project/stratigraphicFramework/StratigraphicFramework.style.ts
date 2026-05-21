@@ -2,6 +2,7 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 import { GenericBox, GenericInnerBox } from "#styles/common";
+import type { HorizonLineStyle } from "./types";
 
 export const StratigraphicFrameworkContainer = styled(GenericBox)<{
   $maxHeight?: string;
@@ -38,11 +39,9 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
 
 export const StratigraphicFrameworkContent = styled(GenericInnerBox).attrs<{
   $numStratColumns: number;
-  $numRows: number;
-}>((props) => ({
+}>(({ $numStratColumns }) => ({
   style: {
-    gridTemplateRows: `repeat(${props.$numRows}, minmax(14px, max-content))`,
-    gridTemplateColumns: `minmax(max-content, 2fr) repeat(${props.$numStratColumns}, 3fr)`,
+    gridTemplateColumns: `minmax(max-content, 2fr) repeat(${$numStratColumns}, 3fr)`,
   },
 }))`
   display: grid;
@@ -51,34 +50,14 @@ export const StratigraphicFrameworkContent = styled(GenericInnerBox).attrs<{
 `;
 
 export const GridLine = styled.div<{
-  $lineStyle?: "solid" | "dashed";
+  $rowStart: number;
+  $lineStyle: HorizonLineStyle;
 }>`
+  grid-row: ${({ $rowStart }) => $rowStart};
   grid-column: 1 / -1;
-  border-bottom: 1px ${tokens.colors.ui.background__overlay.hex};
+  align-self: center;
+
+  margin-left: ${tokens.spacings.comfortable.x_small};
+  border-bottom: 1px #999999;
   border-bottom-style: ${({ $lineStyle }) => $lineStyle};
-`;
-
-export const HorizonItem = styled.div`
-  grid-column: 1;
-  align-self: self-start;
-  padding-top: 2px;
-
-  button {
-    height: 100%;  
-    width: 100%;
-    padding: ${tokens.spacings.comfortable.x_small};
-    background-color: ${tokens.colors.ui.background__default.hex};
-
-    span {
-      justify-content: flex-start;
-    }
-
-    &:disabled:not(.orphan) {    
-      background-color: ${tokens.colors.ui.background__default.hex};
-      color: ${tokens.colors.text.static_icons__default.hex};
-    }
-    &.unselected:not(:hover) {
-      color: ${tokens.colors.interactive.disabled__text.hex};
-    }
-  }
 `;

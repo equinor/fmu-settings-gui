@@ -8,53 +8,60 @@ import type {
 } from "#client";
 import type { OptionProps } from "#components/form/field";
 import { findOptionValueInOptionsArray } from "#utils/form";
-import type { StratUnitRelation, ZoneMapping, ZoneMappings } from "./types";
-import { emptyZoneMapping, specialOptions } from "./utils";
+import type {
+  ElementMapping,
+  ElementMappings,
+  ElementType,
+  StratUnitRelation,
+} from "./types";
+import {
+  emptyElementMapping,
+  getLabelForStratUnitOption,
+  specialOptions,
+} from "./utils";
 
-export function createRmsMappingsLookup(
+export function createStratigraphyMappingsLookup(
   stratigraphyMappings: InternalStratigraphyMappingsOutput,
 ) {
   const sourceSystem: DataSystem = "rms";
   const targetSystem: DataSystem = "smda";
-  const lookup: Record<string, ZoneMapping> = {};
+  const lookup: Record<string, ElementMapping> = {};
 
-  stratigraphyMappings
-    .filter((mapping) => mapping.source_system === sourceSystem)
-    .forEach((mapping) => {
-      const rmsName =
-        mapping.relation_type === "alias" && mapping.target_id != null
-          ? mapping.target_id
-          : mapping.source_id;
-      if (!(rmsName in lookup)) {
-        lookup[rmsName] = {
-          ...emptyZoneMapping(),
-          rmsName: rmsName,
-        };
-      }
+  stratigraphyMappings.forEach((mapping) => {
+    const rmsName =
+      mapping.relation_type === "alias" && mapping.target_id != null
+        ? mapping.target_id
+        : mapping.source_id;
+    if (!(rmsName in lookup)) {
+      lookup[rmsName] = {
+        ...emptyElementMapping(),
+        rmsName: rmsName,
+      };
+    }
 
-      if (mapping.target_system === targetSystem) {
-        if (mapping.relation_type === "primary") {
-          lookup[rmsName].smdaName = mapping.target_id ?? "";
-          lookup[rmsName].smdaUuid = mapping.target_uuid ?? "";
-        } else if (mapping.relation_type === "unmappable") {
-          lookup[rmsName].unmappable = true;
-        }
-      } else if (mapping.target_system === sourceSystem) {
-        if (mapping.relation_type === "alias") {
-          lookup[rmsName].aliases.push(mapping.source_id);
-        }
+    if (mapping.target_system === targetSystem) {
+      if (mapping.relation_type === "primary") {
+        lookup[rmsName].smdaName = mapping.target_id ?? "";
+        lookup[rmsName].smdaUuid = mapping.target_uuid ?? "";
+      } else if (mapping.relation_type === "unmappable") {
+        lookup[rmsName].unmappable = true;
       }
-    });
+    } else if (mapping.target_system === sourceSystem) {
+      if (mapping.relation_type === "alias") {
+        lookup[rmsName].aliases.push(mapping.source_id);
+      }
+    }
+  });
 
   return lookup;
 }
 
 export function handleErrorUnknownInitialValue(
   setFieldMeta: (
-    field: keyof ZoneMapping,
+    field: keyof ElementMapping,
     updater: Updater<AnyFieldMetaBase>,
   ) => void,
-  field: keyof ZoneMapping,
+  field: keyof ElementMapping,
   array: OptionProps[],
   initialValue: OptionProps,
 ): void {
@@ -63,15 +70,9 @@ export function handleErrorUnknownInitialValue(
     errorMap: {
       onChange: findOptionValueInOptionsArray(array, initialValue.value)
         ? undefined
-        : `Initial value "${initialValue.value}" does not exist in selection list`,
+        : `Initial value "${initialValue.label}" (${initialValue.value}) does not exist in selection list`,
     },
   }));
-}
-
-function getLabelForSmdaName(name: string, level: number) {
-  const indent = "\xA0\xA0 ".repeat(level > 1 ? level - 1 : 0);
-
-  return `${indent}${name}`;
 }
 
 function getOptionPropsForChildren(
@@ -83,7 +84,7 @@ function getOptionPropsForChildren(
   stratUnits.forEach((unit) => {
     options.push({
       value: unit.uuid,
-      label: getLabelForSmdaName(unit.identifier, level),
+      label: getLabelForStratUnitOption(unit.identifier, level),
     });
     if (unit.children.length) {
       options.push(...getOptionPropsForChildren(unit.children, level + 1));
@@ -93,7 +94,7 @@ function getOptionPropsForChildren(
   return options;
 }
 
-export function createSmdaNameOptions(stratUnits: StratigraphicUnit[]) {
+export function createStratUnitOptions(stratUnits: StratigraphicUnit[]) {
   const lookup: { [key: string]: StratUnitRelation } = {};
   for (const stratUnit of stratUnits) {
     lookup[stratUnit.identifier] = {
@@ -117,49 +118,61 @@ export function createSmdaNameOptions(stratUnits: StratigraphicUnit[]) {
   return getOptionPropsForChildren(relations, 1);
 }
 
-export function updateZoneMappings(
-  zoneMappings: ZoneMappings,
-  value: ZoneMapping,
+export function updatedElementMappings(
+  elementMappings: ElementMappings,
+  value: ElementMapping,
+  smdaNameOptions: Record<ElementType, OptionProps[]>,
   stratUnit?: StratigraphicUnit,
 ) {
   if (value.smdaUuid === specialOptions.empty.value) {
     return {
-      ...zoneMappings,
+      ...elementMappings,
       [value.rmsName]: {
         ...value,
+        unmappable: false,
         smdaName: "",
         smdaUuid: "",
       },
-    } as ZoneMappings;
-  } else if (value.smdaUuid === specialOptions.unmappableZone.value) {
+    } as ElementMappings;
+  } else if (
+    value.smdaUuid === specialOptions.unmappableHorizon.value ||
+    value.smdaUuid === specialOptions.unmappableZone.value
+  ) {
     return {
-      ...zoneMappings,
+      ...elementMappings,
       [value.rmsName]: {
         ...value,
         unmappable: true,
       },
-    } as ZoneMappings;
+    } as ElementMappings;
   } else if (value.smdaUuid === specialOptions.divider.value) {
-    return { ...zoneMappings } as ZoneMappings;
+    return { ...elementMappings } as ElementMappings;
   } else {
     return {
-      ...zoneMappings,
+      ...elementMappings,
       [value.rmsName]: {
         ...value,
         unmappable: false,
-        smdaName: stratUnit?.identifier ?? "",
+        smdaName:
+          value.elementType === "horizon"
+            ? (
+                smdaNameOptions.horizon.find(
+                  (option) => option.value === value.smdaUuid,
+                ) ?? { value: "", label: "" }
+              ).label
+            : (stratUnit?.identifier ?? ""),
       },
-    } as ZoneMappings;
+    } as ElementMappings;
   }
 }
 
-export function createMutationValue(zoneMappings: ZoneMappings) {
+export function createMutationValue(elementMappings: ElementMappings) {
   const mappingType: MappingType = "stratigraphy";
   const sourceSystem: DataSystem = "rms";
   const targetSystem: DataSystem = "smda";
   const result: InternalStratigraphyMappingsOutput = [];
 
-  Object.values(zoneMappings).forEach((mapping) => {
+  Object.values(elementMappings).forEach((mapping) => {
     if (
       mapping.smdaUuid !== "" ||
       mapping.unmappable ||

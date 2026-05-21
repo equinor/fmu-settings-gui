@@ -609,7 +609,7 @@ export function Edit({
 
       <EditDialog
         open={isOpen}
-        isDismissable={true}
+        isDismissable={!searchDialogOpen}
         onClose={handleCloseRequest}
         $maxWidth="200em"
       >

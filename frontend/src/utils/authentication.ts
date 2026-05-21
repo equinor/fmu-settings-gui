@@ -7,6 +7,7 @@ import type {
   AxiosError,
   AxiosResponse,
   AxiosResponseHeaders,
+  InternalAxiosRequestConfig,
   RawAxiosResponseHeaders,
 } from "axios";
 import type { Dispatch, SetStateAction } from "react";
@@ -19,6 +20,7 @@ import type {
   SessionPostSessionData,
   SessionResponse,
 } from "#client";
+import { client } from "#client/client.gen";
 import { ssoScopes } from "#config";
 import { HTTP_STATUS_UNAUTHORIZED } from "./api";
 import {
@@ -146,6 +148,10 @@ export const responseInterceptorFulfilled =
     return response;
   };
 
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retried?: boolean;
+};
+
 export const responseInterceptorRejected =
   (
     apiToken: string,
@@ -153,7 +159,7 @@ export const responseInterceptorRejected =
     apiTokenStatusValid: boolean,
     setApiTokenStatus: Dispatch<SetStateAction<TokenStatus>>,
     setRequestSessionCreation: Dispatch<SetStateAction<boolean>>,
-    setRequestAcquireSsoAccessToken: Dispatch<SetStateAction<boolean>>,
+    acquireAndPatchSsoAccessToken: () => Promise<void>,
   ) =>
   async (error: AxiosError) => {
     if (error.status === HTTP_STATUS_UNAUTHORIZED) {
@@ -167,7 +173,13 @@ export const responseInterceptorRejected =
         }
       } else if (isExternalApi(error.response?.headers)) {
         if (!isApiUrlSmdaHealthcheck(error.response?.config.url)) {
-          setRequestAcquireSsoAccessToken(true);
+          const config = error.config as RetryableRequestConfig | undefined;
+          if (config && !config._retried) {
+            config._retried = true;
+            await acquireAndPatchSsoAccessToken();
+
+            return await client.instance(config);
+          }
         }
       } else {
         setRequestSessionCreation(true);

@@ -1,8 +1,31 @@
 import { Button, Tooltip } from "@equinor/eds-core-react";
 
-import type { RmsStratigraphicZone } from "#client";
-import { useFrameworkData } from "../stratigraphicFramework/functions.ts";
-import { ZoneItem } from "./StratigraphicFramework.style";
+import type { RmsHorizon, RmsStratigraphicZone } from "#client";
+import {
+  getHorizonLineStyle,
+  useFrameworkData,
+} from "../stratigraphicFramework/functions.ts";
+import { HorizonItem, ZoneItem } from "./StratigraphicFramework.style";
+
+function HorizonTooltipContent(
+  horizon: RmsHorizon,
+  isOrphan: boolean,
+  isUsedByZone: boolean,
+) {
+  return (
+    <>
+      {horizon.name}
+      <br />
+      Type: {horizon.type}
+      <br />
+      {isOrphan
+        ? "Horizon does not exist in RMS"
+        : isUsedByZone
+          ? "Horizon is used by one or more zones"
+          : ""}
+    </>
+  );
+}
 
 function ZoneTooltipContent(zone: RmsStratigraphicZone, isOrphan: boolean) {
   return (
@@ -16,6 +39,40 @@ function ZoneTooltipContent(zone: RmsStratigraphicZone, isOrphan: boolean) {
       {isOrphan ? "Zone does not exist in RMS" : ""}
     </>
   );
+}
+
+export function Horizons() {
+  const frameworkData = useFrameworkData();
+
+  return frameworkData.horizons.map((horizon, idx) => {
+    const isOrphan = frameworkData.orphanHorizonNamesSet.has(horizon.name);
+    const isUsedByZone = frameworkData.horizonsUsedByZones.has(horizon.name);
+    const isUnselected = frameworkData.unselectedHorizonNamesSet.has(
+      horizon.name,
+    );
+
+    return (
+      <HorizonItem
+        key={horizon.name}
+        $rowStart={(idx + 1) * 3 - 2}
+        $lineStyle={getHorizonLineStyle(horizon)}
+      >
+        <Tooltip title={HorizonTooltipContent(horizon, isOrphan, isUsedByZone)}>
+          <Button
+            className={isOrphan ? "orphan" : isUnselected ? "unselected" : ""}
+            onClick={() =>
+              frameworkData.onHorizonClick?.(horizon, isUnselected)
+            }
+            variant="ghost"
+            color={isOrphan ? "danger" : "primary"}
+            disabled={isUsedByZone && !isOrphan}
+          >
+            {horizon.name}
+          </Button>
+        </Tooltip>
+      </HorizonItem>
+    );
+  });
 }
 
 export function Zones() {

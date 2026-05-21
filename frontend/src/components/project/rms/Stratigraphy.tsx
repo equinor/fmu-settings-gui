@@ -44,7 +44,7 @@ import {
   useFormContext,
 } from "#utils/form";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework.tsx";
-import { Zones } from "./StratigraphicFramework";
+import { Horizons, Zones } from "./StratigraphicFramework";
 import {
   ActionButtonsContainer,
   OrphanTypesContainer,
@@ -212,6 +212,7 @@ function StratigraphyEditor({
             removeHorizon(horizon);
           }}
         >
+          <Horizons />
           <Zones />
         </StratigraphicFramework>
 
@@ -250,6 +251,7 @@ function StratigraphyEditor({
             isUnselected ? addHorizon(horizon) : removeHorizon(horizon);
           }}
         >
+          <Horizons />
           <Zones />
         </StratigraphicFramework>
 
@@ -483,6 +485,7 @@ export function Stratigraphy({
           zones={projectZones}
           disablePointerEvents={false}
         >
+          <Horizons />
           <Zones />
         </StratigraphicFramework>
       ) : (

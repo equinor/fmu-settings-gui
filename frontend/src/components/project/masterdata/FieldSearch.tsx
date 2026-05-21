@@ -122,7 +122,12 @@ export function FieldSearch({
   };
 
   return (
-    <EditDialog open={isOpen} $maxWidth="200em">
+    <EditDialog
+      open={isOpen}
+      isDismissable={true}
+      onClose={handleClose}
+      $maxWidth="200em"
+    >
       <Dialog.Header>Field search</Dialog.Header>
 
       <Dialog.CustomContent>
