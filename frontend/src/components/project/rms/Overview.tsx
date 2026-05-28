@@ -333,7 +333,7 @@ function RmsProjectActions({
           <>
             <GeneralButton
               label={
-                isRmsProjectOpen ? "Reload RMS project" : "Open RMS project"
+                isRmsProjectOpen ? "Reload RMS project" : "Access RMS project"
               }
               isPending={projectOpenMutation.isPending}
               disabled={projectCloseMutation.isPending}

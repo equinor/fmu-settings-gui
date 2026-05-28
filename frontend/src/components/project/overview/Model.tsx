@@ -221,9 +221,7 @@ export function EditableModelInfo({
 
   return (
     <>
-      <PageHeader $variant="h3">Model</PageHeader>
-
-      <PageText>This section contains information about the model.</PageText>
+      <PageHeader $variant="h3">Model information</PageHeader>
 
       <PageText>
         Each model needs a <i>name</i> and <i>revision</i>, usually matching
