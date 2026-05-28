@@ -1,4 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import { Suspense } from "react";
 
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
@@ -19,6 +20,9 @@ function Content() {
   const { data } = useSuspenseQuery({
     ...projectGetChangelogOptions(),
     meta: { preventDefaultErrorHandling: [404] },
+    retry: (failureCount, queryError) =>
+      !(isAxiosError(queryError) && queryError.response?.status === 404) &&
+      failureCount < 3,
   });
 
   if (data.length === 0) {
