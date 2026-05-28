@@ -117,7 +117,7 @@ export function handleSsoLogin(msalInstance: IPublicClientApplication) {
     void msalInstance.loginRedirect({ scopes: ssoScopes });
   } catch (error) {
     console.error("Error when logging in to SSO: ", error);
-    toast.error(String(error));
+    toast.error(String(error), { autoClose: false });
   }
 }
 
