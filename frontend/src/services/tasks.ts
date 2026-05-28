@@ -23,6 +23,13 @@ export function useTaskList(): Task[] {
   }
 
   const config = project.data.config;
+  const zones = config.rms?.zones ?? [];
+  const horizons = config.rms?.horizons ?? [];
+  const mappedRmsIds = new Set(
+    (mappings?.stratigraphy ?? [])
+      .filter((m) => m.source_system === "rms")
+      .map((m) => m.source_id),
+  );
 
   return [
     {
@@ -50,10 +57,8 @@ export function useTaskList(): Task[] {
       id: "mappings",
       label: "Set stratigraphy mappings",
       done:
-        (mappings?.stratigraphy ?? []).findIndex(
-          (mapping) =>
-            mapping.source_system === "rms" && mapping.target_system === "smda",
-        ) >= 0,
+        (zones.length > 0 || horizons.length > 0) &&
+        [...zones, ...horizons].every((item) => mappedRmsIds.has(item.name)),
       to: "/project/stratigraphy",
     },
   ];
