@@ -121,11 +121,13 @@ export function EditableTextFieldForm({
             />
           ) : (
             <>
-              <form.Subscribe>
-                {(state) => (
+              <form.Subscribe
+                selector={(state) => [state.isDefaultValue, state.canSubmit]}
+              >
+                {([isDefaultValue, canSubmit]) => (
                   <form.SubmitButton
                     label="Save"
-                    disabled={state.isDefaultValue || !state.canSubmit}
+                    disabled={isDefaultValue || !canSubmit}
                     isPending={mutationIsPending}
                     helperTextDisabled="Value can be submitted when it has been changed and is valid"
                   />
