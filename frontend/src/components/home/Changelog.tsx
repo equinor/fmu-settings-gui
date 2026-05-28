@@ -15,16 +15,6 @@ import {
 } from "./Changelog.style";
 import { FILE_LABELS, formatEntryDescription, getTypeLabel } from "./utils";
 
-function timestampToNumber(value?: string) {
-  if (!value) {
-    return 0;
-  }
-
-  const parsed = Date.parse(value);
-
-  return Number.isNaN(parsed) ? 0 : parsed;
-}
-
 function Content() {
   const { data } = useSuspenseQuery({
     ...projectGetChangelogOptions(),
@@ -36,9 +26,7 @@ function Content() {
   }
 
   const latestChanges = [...data]
-    .sort(
-      (a, b) => timestampToNumber(b.timestamp) - timestampToNumber(a.timestamp),
-    )
+    .sort((a, b) => (b.timestamp ?? "").localeCompare(a.timestamp ?? ""))
     .slice(0, 5);
 
   return (
@@ -53,7 +41,7 @@ function Content() {
         {latestChanges.map((entry) => {
           return (
             <ChangeItem
-              key={`${entry.timestamp ?? "no-time"}-${entry.user}-${entry.change_type}-${entry.file}-${entry.path}-${entry.key}`}
+              key={entry.timestamp ?? "no-time"}
               $changeType={entry.change_type}
             >
               <ChangeItemHeader>

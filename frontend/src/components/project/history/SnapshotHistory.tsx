@@ -632,6 +632,9 @@ export function SnapshotHistory({
         queryKey: projectGetProjectQueryKey(),
       });
       void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
+      });
+      void queryClient.invalidateQueries({
         predicate: (query) => {
           const key = query.queryKey[0] as { _id?: string } | undefined;
 
