@@ -52,6 +52,10 @@ function FieldResults({
       accessorKey: "identifier",
       header: "Field",
     },
+    {
+      accessorKey: "country",
+      header: "Country",
+    },
   ];
 
   if (!data) {
@@ -62,8 +66,10 @@ function FieldResults({
     return <PageText>No fields found.</PageText>;
   }
 
-  const rows = data.results.sort((a, b) =>
-    stringCompare(a.identifier, b.identifier),
+  const rows = data.results.sort(
+    (a, b) =>
+      stringCompare(a.identifier, b.identifier) ||
+      stringCompare(a.country, b.country),
   );
 
   return (
