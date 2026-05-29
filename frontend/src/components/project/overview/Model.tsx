@@ -71,7 +71,7 @@ function ModelEditorForm({
       if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
         const message = httpValidationErrorToString(error);
         console.error(message);
-        toast.error(message);
+        toast.error(message, { autoClose: false });
       }
     },
     meta: {
@@ -221,9 +221,7 @@ export function EditableModelInfo({
 
   return (
     <>
-      <PageHeader $variant="h3">Model</PageHeader>
-
-      <PageText>This section contains information about the model.</PageText>
+      <PageHeader $variant="h3">Model information</PageHeader>
 
       <PageText>
         Each model needs a <i>name</i> and <i>revision</i>, usually matching

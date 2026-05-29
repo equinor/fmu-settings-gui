@@ -28,7 +28,7 @@ export const defaultErrorHandling = (error: Error, errorPrefix: string) => {
         String(error.response.data.detail)
       : error.message);
   console.error(message);
-  toast.error(message);
+  toast.error(message, { autoClose: false });
 };
 
 export const mutationRetry = (failureCount: number, error: Error) => {

@@ -39,6 +39,7 @@ function EnableEditingButton({ lockStatus }: { lockStatus?: LockStatus }) {
                 toast.error(
                   "An error occured and project remains read-only. " +
                     (lockStatus?.last_lock_acquire_error ?? ""),
+                  { autoClose: false },
                 );
               }
             },
