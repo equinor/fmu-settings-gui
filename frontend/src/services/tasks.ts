@@ -27,7 +27,12 @@ export function useTaskList(): Task[] {
   const horizons = config.rms?.horizons ?? [];
   const mappedRmsIds = new Set(
     (mappings?.stratigraphy ?? [])
-      .filter((m) => m.source_system === "rms")
+      .filter(
+        (m) =>
+          m.source_system === "rms" &&
+          m.target_system === "smda" &&
+          (m.relation_type === "primary" || m.relation_type === "unmappable"),
+      )
       .map((m) => m.source_id),
   );
 
