@@ -276,7 +276,7 @@ function RmsProjectActions({
       }
     },
     meta: {
-      errorPrefix: "Error opening the RMS project",
+      errorPrefix: "Error accessing the RMS project",
       preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
     },
   });
@@ -296,14 +296,12 @@ function RmsProjectActions({
       {rmsData?.path &&
         (projectOpenMutation.isPending ? (
           <PageText>
-            ⏳ Opening the RMS project. This might take a while...
+            ⏳ Accessing the RMS project. This might take a while...
           </PageText>
         ) : isRmsProjectOpen ? (
-          <PageText>✅ The RMS project is open and data is accessible</PageText>
+          <PageText>✅ The RMS project is ready for access</PageText>
         ) : (
-          <PageText>
-            ⛔ The RMS project needs to be opened to access data
-          </PageText>
+          <PageText>⛔ The RMS project is not ready for access</PageText>
         ))}
 
       <ActionButtonsContainer>
@@ -347,7 +345,7 @@ function RmsProjectActions({
 
             {isRmsProjectOpen && !projectOpenMutation.isPending && (
               <GeneralButton
-                label="Close RMS project"
+                label="Close RMS project for access"
                 variant="outlined"
                 isPending={projectCloseMutation.isPending}
                 onClick={() => {
