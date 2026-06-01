@@ -310,6 +310,8 @@ function Element({
   canEdit: boolean;
   editClick: (elementMapping: ElementMapping) => void;
 }) {
+  const isMissingValue =
+    elementMapping.smdaName === "" && !elementMapping.unmappable;
   const aliasCount = elementMapping.aliases.length;
 
   return (
@@ -335,15 +337,17 @@ function Element({
         </ElementSystem>
 
         <ElementSystem>
-          <ElementInfo $targetSystem={true}>
-            <ElementSystemName $elementType={elementMapping.elementType}>
+          <ElementInfo $isTargetSystem={true}>
+            <ElementSystemName
+              $elementType={elementMapping.elementType}
+              $isMissingvalue={isMissingValue}
+            >
               SMDA
             </ElementSystemName>
             <ElementName
-              $targetSystem={true}
-              $missingvalue={
-                elementMapping.smdaName === "" || elementMapping.unmappable
-              }
+              $isTargetSystem={true}
+              $isUnmappable={elementMapping.unmappable}
+              $isMissingvalue={isMissingValue}
             >
               {elementMapping.smdaName !== ""
                 ? elementMapping.smdaName
