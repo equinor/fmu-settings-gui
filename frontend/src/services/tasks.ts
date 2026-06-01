@@ -52,10 +52,7 @@ export function useTaskList(): Task[] {
     {
       id: "rms",
       label: "Set RMS project and stratigraphy",
-      done:
-        !!config.rms?.path &&
-        (config.rms.zones?.length ?? 0) > 0 &&
-        (config.rms.horizons?.length ?? 0) > 0,
+      done: !!config.rms?.path && (zones.length > 0 || horizons.length > 0),
       to: "/project/rms",
     },
     {
