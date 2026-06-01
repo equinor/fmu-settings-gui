@@ -87,11 +87,8 @@ function getFieldLabel(file: string, path: string): string | undefined {
 }
 
 function formatBriefDescription(change: string) {
-  const compact = change.replace(/\s+/g, " ").trim();
-  const withoutDiffPayload = compact
-    .replace(/\. Old value:.*/i, "")
-    .replace(/\s*->\s*/g, " ")
-    .trim();
+  const compact = change.replace(/\s+/g, " ");
+  const withoutDiffPayload = compact.replace(/\. Old value:.*/, "");
   const concise = withoutDiffPayload || compact;
 
   if (concise.length <= 72) {
