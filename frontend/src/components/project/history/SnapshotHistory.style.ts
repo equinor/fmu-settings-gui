@@ -19,18 +19,10 @@ const diffPalette: Record<DiffKind, { background: string; color: string }> = {
   },
 };
 
-export const ResourcePickerContainer = styled.div`
-  min-width: 13em;
-`;
-
 export const MaxSnapshotsControls = styled.div`
   display: flex;
   align-items: flex-end;
   gap: ${tokens.spacings.comfortable.small};
-`;
-
-export const MaxSnapshotsSelectContainer = styled.div`
-  min-width: 7em;
 `;
 
 export const SnapshotInfo = styled.div`

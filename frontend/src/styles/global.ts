@@ -6,6 +6,11 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Equinor", sans-serif;
   }
 
+  /* Fixes to EDS components */
+  div[class^=NativeSelect__Container] {
+    padding-right: 12px;
+  }
+
   .Toastify__toast {
     overflow-y: auto;
   }

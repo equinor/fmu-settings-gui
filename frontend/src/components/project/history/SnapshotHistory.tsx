@@ -49,8 +49,6 @@ import {
   DiffGroup,
   DiffLegend,
   MaxSnapshotsControls,
-  MaxSnapshotsSelectContainer,
-  ResourcePickerContainer,
   ScrollableCardStack,
   SelectorRow,
   SnapshotInfo,
@@ -801,7 +799,7 @@ export function SnapshotHistory({
           </PageText>
 
           <SelectorRow>
-            <ResourcePickerContainer>
+            <div>
               <NativeSelect
                 id="history-resource"
                 label="Settings type"
@@ -816,10 +814,10 @@ export function SnapshotHistory({
                   </option>
                 ))}
               </NativeSelect>
-            </ResourcePickerContainer>
+            </div>
 
             <MaxSnapshotsControls>
-              <MaxSnapshotsSelectContainer>
+              <div>
                 <NativeSelect
                   id="history-max-snapshots"
                   label="Max snapshots"
@@ -840,7 +838,7 @@ export function SnapshotHistory({
                     </option>
                   ))}
                 </NativeSelect>
-              </MaxSnapshotsSelectContainer>
+              </div>
 
               <GeneralButton
                 label="Save"
