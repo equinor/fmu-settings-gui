@@ -22,6 +22,8 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
     gridTemplateColumns: `minmax(max-content, 2fr) repeat(${$numStratColumns}, 3fr)`,
   },
 }))`
+  padding-bottom: ${tokens.spacings.comfortable.small};
+
   display: grid;
   font-weight: ${tokens.typography.table.cell_header.fontWeight};
   font-size: ${tokens.typography.table.cell_text.fontSize};
@@ -41,6 +43,10 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
       justify-content: right;
       grid-row: 1;
       grid-column: 2 / -1;
+
+      position: relative;
+      top: -8px;
+      height: 16px;
     }
   }
 `;
