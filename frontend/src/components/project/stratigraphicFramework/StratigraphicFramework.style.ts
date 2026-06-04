@@ -32,21 +32,22 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
     padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
 
     &:nth-child(2) {
-      display: flex;
-      justify-content: center;
       grid-row: 1;
       grid-column: 2 / -1;
+
+      display: flex;
+      justify-content: center;
     }
 
     &:nth-child(3) {
-      display: flex;
-      justify-content: right;
       grid-row: 1;
       grid-column: 2 / -1;
-
-      position: relative;
-      top: -8px;
       height: 16px;
+
+      display: flex;
+      justify-content: right;
+      align-items: center;
+
     }
   }
 `;
