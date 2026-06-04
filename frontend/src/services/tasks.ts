@@ -23,6 +23,18 @@ export function useTaskList(): Task[] {
   }
 
   const config = project.data.config;
+  const zones = config.rms?.zones ?? [];
+  const horizons = config.rms?.horizons ?? [];
+  const mappedRmsIds = new Set(
+    (mappings?.stratigraphy ?? [])
+      .filter(
+        (m) =>
+          m.source_system === "rms" &&
+          m.target_system === "smda" &&
+          (m.relation_type === "primary" || m.relation_type === "unmappable"),
+      )
+      .map((m) => m.source_id),
+  );
 
   return [
     {
@@ -40,20 +52,15 @@ export function useTaskList(): Task[] {
     {
       id: "rms",
       label: "Set RMS project and stratigraphy",
-      done:
-        !!config.rms?.path &&
-        (config.rms.zones?.length ?? 0) > 0 &&
-        (config.rms.horizons?.length ?? 0) > 0,
+      done: !!config.rms?.path && (zones.length > 0 || horizons.length > 0),
       to: "/project/rms",
     },
     {
       id: "mappings",
       label: "Set stratigraphy mappings",
       done:
-        (mappings?.stratigraphy ?? []).findIndex(
-          (mapping) =>
-            mapping.source_system === "rms" && mapping.target_system === "smda",
-        ) >= 0,
+        (zones.length > 0 || horizons.length > 0) &&
+        [...zones, ...horizons].every((item) => mappedRmsIds.has(item.name)),
       to: "/project/stratigraphy",
     },
   ];
