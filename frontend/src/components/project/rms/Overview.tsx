@@ -97,7 +97,7 @@ function RmsEditorForm({
       if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
         const message = httpValidationErrorToString(error);
         console.error(message);
-        toast.error(message);
+        toast.error(message, { autoClose: false });
       }
     },
     meta: {
@@ -276,7 +276,7 @@ function RmsProjectActions({
       if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
         const message = (error.response.data as { detail?: string }).detail;
         console.error(message);
-        toast.error(message);
+        toast.error(message, { autoClose: false });
       }
     },
     meta: {

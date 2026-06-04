@@ -436,7 +436,7 @@ function Elements({
       if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
         const message = httpValidationErrorToString(error);
         console.error(message);
-        toast.error(message);
+        toast.error(message, { autoClose: false });
       }
     },
     meta: {

@@ -74,7 +74,6 @@ function ProjectSelectorForm({
   isDialogOpen: boolean;
 }) {
   const [initConfirmDialogOpen, setInitConfirmDialogOpen] = useState(false);
-  const [submitDisabled, setSubmitDisabled] = useState(true);
   const [helperTextRecentProjects, sethelperTextRecentProjects] = useState("");
   const [helperTextProjectPath, setHelperTextProjectPath] = useState("");
   const [valueSource, setValueSource] = useState<ValueSource>("");
@@ -262,10 +261,7 @@ function ProjectSelectorForm({
                   icon: <Icon data={error_filled} size={16} />,
                 }}
               >
-                <field.TextField
-                  label="Alternatively, enter a path to the project"
-                  setSubmitDisabled={setSubmitDisabled}
-                />
+                <field.TextField label="Alternatively, enter a path to the project" />
               </InputWrapper>
             )}
           </form.AppField>
@@ -283,12 +279,16 @@ function ProjectSelectorForm({
 
         <Dialog.Actions>
           <form.AppForm>
-            <form.SubmitButton
-              label="Select"
-              disabled={submitDisabled}
-              isPending={isPending}
-              helperTextDisabled="Select a recent project or enter a valid project path"
-            />
+            <form.Subscribe>
+              {(state) => (
+                <form.SubmitButton
+                  label="Select"
+                  disabled={state.isDefaultValue || !state.canSubmit}
+                  isPending={isPending}
+                  helperTextDisabled="Select a recent project or enter a valid project path"
+                />
+              )}
+            </form.Subscribe>
             <form.CancelButton
               onClick={() => {
                 closeProjectSelector({ formReset: form.reset });
