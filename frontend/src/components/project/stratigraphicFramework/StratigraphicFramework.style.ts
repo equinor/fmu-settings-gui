@@ -22,6 +22,8 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
     gridTemplateColumns: `minmax(max-content, 2fr) repeat(${$numStratColumns}, 3fr)`,
   },
 }))`
+  padding-bottom: ${tokens.spacings.comfortable.small};
+
   display: grid;
   font-weight: ${tokens.typography.table.cell_header.fontWeight};
   font-size: ${tokens.typography.table.cell_text.fontSize};
@@ -30,17 +32,22 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
     padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
 
     &:nth-child(2) {
-      display: flex;
-      justify-content: center;
       grid-row: 1;
       grid-column: 2 / -1;
+
+      display: flex;
+      justify-content: center;
     }
 
     &:nth-child(3) {
-      display: flex;
-      justify-content: right;
       grid-row: 1;
       grid-column: 2 / -1;
+      height: 16px;
+
+      display: flex;
+      justify-content: right;
+      align-items: center;
+
     }
   }
 `;

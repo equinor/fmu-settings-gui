@@ -1,4 +1,4 @@
-import { Icon } from "@equinor/eds-core-react";
+import { Button, EdsProvider, Icon } from "@equinor/eds-core-react";
 import { collapse, expand } from "@equinor/eds-icons";
 import { useLocation } from "@tanstack/react-router";
 import type React from "react";
@@ -121,16 +121,22 @@ export function StratigraphicFramework({
           <div>Zones</div>
           {enableWidthExpansion && (
             <div>
-              <Icon
-                data={notWidthConstrained ? collapse : expand}
-                title={
-                  notWidthConstrained
-                    ? "Expand to full width"
-                    : "Collapse width"
-                }
-                size={16}
-                onClick={toggleNotWidthConstraint}
-              />
+              <EdsProvider density="compact">
+                <Button
+                  variant="ghost_icon"
+                  title={
+                    notWidthConstrained
+                      ? "Collapse width"
+                      : "Expand to full width"
+                  }
+                  onClick={toggleNotWidthConstraint}
+                >
+                  <Icon
+                    data={notWidthConstrained ? collapse : expand}
+                    size={16}
+                  />
+                </Button>
+              </EdsProvider>
             </div>
           )}
         </StratigraphicFrameworkHeader>
