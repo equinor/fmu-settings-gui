@@ -17,6 +17,7 @@ import {
   projectGetCacheDiffOptions,
   projectGetCacheOptions,
   projectGetCacheQueryKey,
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectPatchCacheMaxRevisionsMutation,
   projectPostCacheRestoreMutation,
@@ -592,6 +593,9 @@ export function SnapshotHistory({
         queryKey: projectGetProjectQueryKey(),
       });
       void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
+      });
+      void queryClient.invalidateQueries({
         queryKey: projectGetCacheQueryKey({
           query: { resource: variables.query.resource },
         }),
@@ -626,6 +630,9 @@ export function SnapshotHistory({
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
       void queryClient.invalidateQueries({
         predicate: (query) => {
