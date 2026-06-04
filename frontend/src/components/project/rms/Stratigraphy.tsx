@@ -505,7 +505,7 @@ export function Stratigraphy({
           projectReadOnly
             ? "Project is read-only"
             : !isRmsProjectOpen
-              ? "RMS project is not open"
+              ? "RMS project is not ready for access"
               : undefined
         }
         onClick={openDialog}
