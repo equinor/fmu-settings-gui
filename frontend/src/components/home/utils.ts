@@ -33,6 +33,7 @@ const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
   },
   "mappings.json": {
     stratigraphy: "stratigraphy",
+    wellbore: "wellbore",
   },
 };
 
