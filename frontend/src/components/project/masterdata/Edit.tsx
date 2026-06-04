@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 
 import type { CoordinateSystem, Smda, StratigraphicColumn } from "#client";
 import {
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectPatchMasterdataMutation,
   smdaPostMasterdataOptions,
@@ -333,6 +334,9 @@ export function Edit({
     onSuccess: () => {
       void queryClient.refetchQueries({
         queryKey: projectGetProjectQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
       });
     },
     onError: (error) => {

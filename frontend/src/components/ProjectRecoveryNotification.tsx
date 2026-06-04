@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 import { projectGetCache, projectPostCacheRestore } from "#client";
 import {
+  projectGetChangelogQueryKey,
   projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
 } from "#client/@tanstack/react-query.gen";
@@ -49,6 +50,9 @@ export function ProjectRecoveryNotification() {
         });
         void queryClient.invalidateQueries({
           queryKey: projectGetLockStatusQueryKey(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: projectGetChangelogQueryKey(),
         });
         setIsOpen(false);
       },

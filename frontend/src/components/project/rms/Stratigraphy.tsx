@@ -11,6 +11,7 @@ import type {
   RmsStratigraphicZone,
 } from "#client";
 import {
+  projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
   projectPatchRmsStratigraphicFrameworkMutation,
   rmsGetHorizonsOptions,
@@ -317,6 +318,9 @@ function Edit({
       void queryClient.refetchQueries({
         queryKey: projectGetProjectQueryKey(),
       });
+      void queryClient.invalidateQueries({
+        queryKey: projectGetChangelogQueryKey(),
+      });
     },
     onError: (error) => {
       if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
@@ -508,7 +512,7 @@ export function Stratigraphy({
             projectReadOnly
               ? "Project is read-only"
               : !isRmsProjectOpen
-                ? "RMS project is not open"
+                ? "RMS project is not ready for access"
                 : undefined
           }
           onClick={openDialog}
