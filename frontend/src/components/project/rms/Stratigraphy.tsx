@@ -31,6 +31,7 @@ import {
   GenericDialog,
   PageCode,
   PageHeader,
+  PageSectionWidthConstrained,
   PageText,
 } from "#styles/common";
 import {
@@ -470,42 +471,49 @@ export function Stratigraphy({
 
   return (
     <>
-      <PageHeader $variant="h3">Stratigraphy</PageHeader>
+      <PageSectionWidthConstrained>
+        <PageHeader $variant="h3">Stratigraphy</PageHeader>
 
-      <PageText>
-        The following is the model stratigraphy stored in the project, this can
-        be a subset or the full RMS stratigraphy. It is only the stored
-        stratigraphy that will be possible to map to official stratigraphic
-        names.
-      </PageText>
+        <PageText>
+          The following is the model stratigraphy stored in the project, this
+          can be a subset or the full RMS stratigraphy. It is only the stored
+          stratigraphy that will be possible to map to official stratigraphic
+          names.
+        </PageText>
+      </PageSectionWidthConstrained>
 
       {projectHorizons.length ? (
         <StratigraphicFramework
           horizons={projectHorizons}
           zones={projectZones}
           disablePointerEvents={false}
+          enableWidthExpansion={true}
         >
           <Horizons />
           <Zones />
         </StratigraphicFramework>
       ) : (
-        <PageCode>
-          No stratigraphy information currently stored in the project.
-        </PageCode>
+        <PageSectionWidthConstrained>
+          <PageCode>
+            No stratigraphy information currently stored in the project.
+          </PageCode>
+        </PageSectionWidthConstrained>
       )}
 
-      <GeneralButton
-        label={projectHorizons.length ? "Edit" : "Add"}
-        disabled={projectReadOnly || !isRmsProjectOpen}
-        tooltipText={
-          projectReadOnly
-            ? "Project is read-only"
-            : !isRmsProjectOpen
-              ? "RMS project is not open"
-              : undefined
-        }
-        onClick={openDialog}
-      />
+      <PageSectionWidthConstrained>
+        <GeneralButton
+          label={projectHorizons.length ? "Edit" : "Add"}
+          disabled={projectReadOnly || !isRmsProjectOpen}
+          tooltipText={
+            projectReadOnly
+              ? "Project is read-only"
+              : !isRmsProjectOpen
+                ? "RMS project is not open"
+                : undefined
+          }
+          onClick={openDialog}
+        />
+      </PageSectionWidthConstrained>
 
       <Edit
         projectHorizons={projectHorizons}

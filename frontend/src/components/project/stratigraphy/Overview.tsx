@@ -42,6 +42,7 @@ import { mappingsPaths } from "#services/project";
 import {
   EditDialog,
   PageSectionSpacer,
+  PageSectionWidthConstrained,
   PageText,
   WarningBox,
 } from "#styles/common";
@@ -646,10 +647,12 @@ export function Overview({
 
   return (
     <>
-      <PageText>
-        The following are the mappings for horizons and zones, showing the names
-        in RMS and SMDA.
-      </PageText>
+      <PageSectionWidthConstrained>
+        <PageText>
+          The following are the mappings for horizons and zones, showing the
+          names in RMS and SMDA.
+        </PageText>
+      </PageSectionWidthConstrained>
 
       {rmsProject.horizons !== undefined &&
       rmsProject.horizons !== null &&
@@ -659,6 +662,7 @@ export function Overview({
           <StratigraphicFramework
             horizons={rmsProject.horizons}
             zones={rmsProject.zones}
+            enableWidthExpansion={true}
           >
             <Elements
               elementType="horizon"
@@ -678,26 +682,29 @@ export function Overview({
             />
           </StratigraphicFramework>
 
-          {editMode &&
-            !projectReadOnly &&
-            smdaHealthStatus &&
-            (stratigraphicColumn ? (
-              <PageText>
-                💡 Set SMDA names for zones first. Horizon options are derived
-                from the top and base horizons of mapped zones.
-              </PageText>
-            ) : (
-              <WarningBox>
-                <PageText $marginBottom="0">
-                  No stratigraphic column is set in the masterdata.{" "}
-                  <Link to="/project/masterdata">Set this value</Link> to enable
-                  editing of stratigraphy mappings.
+          {editMode && !projectReadOnly && smdaHealthStatus && (
+            <PageSectionWidthConstrained>
+              {stratigraphicColumn ? (
+                <PageText>
+                  💡 Set SMDA names for zones first. Horizon options are derived
+                  from the top and base horizons of mapped zones.
                 </PageText>
-              </WarningBox>
-            ))}
+              ) : (
+                <WarningBox>
+                  <PageText $marginBottom="0">
+                    No stratigraphic column is set in the masterdata.{" "}
+                    <Link to="/project/masterdata">Set this value</Link> to
+                    enable editing of stratigraphy mappings.
+                  </PageText>
+                </WarningBox>
+              )}
+            </PageSectionWidthConstrained>
+          )}
         </>
       ) : (
-        <PageText>No horizons exist.</PageText>
+        <PageSectionWidthConstrained>
+          <PageText>No horizons exist.</PageText>
+        </PageSectionWidthConstrained>
       )}
     </>
   );

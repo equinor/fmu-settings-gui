@@ -1,7 +1,16 @@
+import { Icon } from "@equinor/eds-core-react";
+import { collapse, expand } from "@equinor/eds-icons";
+import { useLocation } from "@tanstack/react-router";
 import type React from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import type { RmsHorizon, RmsStratigraphicZone } from "#client";
+import { PageSectionWidthConstrained } from "#styles/common";
+import {
+  getStorageItem,
+  STORAGENAME_PAGESECTION_NOTWIDTHCONSTRAINED_BASE,
+  setStorageItem,
+} from "#utils/storage";
 import { FrameworkDataContext } from "./FrameworkData";
 import { getHorizonLineStyle, getZoneGridPlacement } from "./functions";
 import {
@@ -22,6 +31,7 @@ export function StratigraphicFramework({
   onHorizonClick,
   maxHeight,
   disablePointerEvents = false,
+  enableWidthExpansion = false,
   children: [horizonsComponent, zonesComponent],
 }: {
   horizons: RmsHorizon[];
@@ -34,8 +44,23 @@ export function StratigraphicFramework({
   onHorizonClick?: (horizon: RmsHorizon, isUnselected: boolean) => void;
   maxHeight?: string;
   disablePointerEvents?: boolean;
+  enableWidthExpansion?: boolean;
   children: React.ReactNode[];
 }) {
+  const locationPathname = useLocation({
+    select: (location) => location.pathname,
+  });
+  const storageKeyWidthConstraint = [
+    STORAGENAME_PAGESECTION_NOTWIDTHCONSTRAINED_BASE,
+    "stratigraphicFramework",
+    locationPathname,
+  ].join("-");
+
+  const [notWidthConstrained, setNotWidthConstrained] = useState(
+    enableWidthExpansion &&
+      getStorageItem(sessionStorage, storageKeyWidthConstraint, "boolean"),
+  );
+
   const frameworkData = useMemo(() => {
     const zoneGridPlacement = getZoneGridPlacement(zones, horizons);
     const unselectedZoneNamesSet = new Set(unselectedZoneNames);
@@ -71,35 +96,63 @@ export function StratigraphicFramework({
     onZoneClick,
   ]);
 
+  function toggleNotWidthConstraint() {
+    setNotWidthConstrained((notWidthConstrained) => {
+      setStorageItem(
+        sessionStorage,
+        storageKeyWidthConstraint,
+        !notWidthConstrained,
+      );
+
+      return !notWidthConstrained;
+    });
+  }
+
   return (
-    <StratigraphicFrameworkContainer
-      $maxHeight={maxHeight}
-      $disablePointerEvents={disablePointerEvents}
-    >
-      <StratigraphicFrameworkHeader
-        $numStratColumns={frameworkData.numStratColumns}
+    <PageSectionWidthConstrained $notConstrained={notWidthConstrained}>
+      <StratigraphicFrameworkContainer
+        $maxHeight={maxHeight}
+        $disablePointerEvents={disablePointerEvents}
       >
-        <div>Horizons</div>
-        <div>Zones</div>
-      </StratigraphicFrameworkHeader>
+        <StratigraphicFrameworkHeader
+          $numStratColumns={frameworkData.numStratColumns}
+        >
+          <div>Horizons</div>
+          <div>Zones</div>
+          {enableWidthExpansion && (
+            <div>
+              <Icon
+                data={notWidthConstrained ? collapse : expand}
+                title={
+                  notWidthConstrained
+                    ? "Expand to full width"
+                    : "Collapse width"
+                }
+                size={16}
+                onClick={toggleNotWidthConstraint}
+              />
+            </div>
+          )}
+        </StratigraphicFrameworkHeader>
 
-      <StratigraphicFrameworkContent
-        $numStratColumns={frameworkData.numStratColumns}
-      >
-        <FrameworkDataContext value={frameworkData}>
-          {horizons.map((horizon, idx) => (
-            <GridLine
-              key={horizon.name}
-              $rowStart={(idx + 1) * 3 - 1}
-              $lineStyle={getHorizonLineStyle(horizon)}
-            ></GridLine>
-          ))}
+        <StratigraphicFrameworkContent
+          $numStratColumns={frameworkData.numStratColumns}
+        >
+          <FrameworkDataContext value={frameworkData}>
+            {horizons.map((horizon, idx) => (
+              <GridLine
+                key={horizon.name}
+                $rowStart={(idx + 1) * 3 - 1}
+                $lineStyle={getHorizonLineStyle(horizon)}
+              ></GridLine>
+            ))}
 
-          {horizonsComponent}
+            {horizonsComponent}
 
-          {zonesComponent}
-        </FrameworkDataContext>
-      </StratigraphicFrameworkContent>
-    </StratigraphicFrameworkContainer>
+            {zonesComponent}
+          </FrameworkDataContext>
+        </StratigraphicFrameworkContent>
+      </StratigraphicFrameworkContainer>
+    </PageSectionWidthConstrained>
   );
 }

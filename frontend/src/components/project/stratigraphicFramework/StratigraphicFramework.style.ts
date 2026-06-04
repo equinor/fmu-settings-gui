@@ -29,9 +29,17 @@ export const StratigraphicFrameworkHeader = styled.div.attrs<{
   div {
     padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
 
-    &:nth-child(2) {    
+    &:nth-child(2) {
       display: flex;
       justify-content: center;
+      grid-row: 1;
+      grid-column: 2 / -1;
+    }
+
+    &:nth-child(3) {
+      display: flex;
+      justify-content: right;
+      grid-row: 1;
       grid-column: 2 / -1;
     }
   }

@@ -4,7 +4,12 @@ import { Suspense } from "react";
 import { Loading } from "#components/common";
 import { Overview } from "#components/project/rms/Overview";
 import { useProject } from "#services/project";
-import { PageHeader, PageText } from "#styles/common";
+import {
+  PageContainerNotWidthConstrained,
+  PageHeader,
+  PageSectionWidthConstrained,
+  PageText,
+} from "#styles/common";
 
 export const Route = createFileRoute("/project/rms")({
   component: RouteComponent,
@@ -19,18 +24,22 @@ function Content() {
       projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
     />
   ) : (
-    <PageText>Project not set.</PageText>
+    <PageSectionWidthConstrained>
+      <PageText>Project not set.</PageText>
+    </PageSectionWidthConstrained>
   );
 }
 
 function RouteComponent() {
   return (
-    <>
-      <PageHeader>RMS</PageHeader>
+    <PageContainerNotWidthConstrained>
+      <PageSectionWidthConstrained>
+        <PageHeader>RMS</PageHeader>
+      </PageSectionWidthConstrained>
 
       <Suspense fallback={<Loading />}>
         <Content />
       </Suspense>
-    </>
+    </PageContainerNotWidthConstrained>
   );
 }

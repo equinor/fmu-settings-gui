@@ -6,7 +6,12 @@ import { Loading, SmdaHealthCheckInfo } from "#components/common";
 import { Overview } from "#components/project/stratigraphy/Overview";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
-import { PageHeader, PageText } from "#styles/common";
+import {
+  PageContainerNotWidthConstrained,
+  PageHeader,
+  PageSectionWidthConstrained,
+  PageText,
+} from "#styles/common";
 import {
   getStorageItem,
   STORAGENAME_STRATIGRAPHY_EDIT_MODE,
@@ -43,7 +48,11 @@ function Content() {
   }
 
   if (!project.status) {
-    return <PageText>Project not set.</PageText>;
+    return (
+      <PageSectionWidthConstrained>
+        <PageText>Project not set.</PageText>
+      </PageSectionWidthConstrained>
+    );
   }
 
   return (
@@ -61,24 +70,30 @@ function Content() {
             editMode={editMode}
           />
 
-          {editMode ? (
-            <SmdaHealthCheckInfo
-              feature="editing mappings"
-              healthCheck={healthCheck}
-              setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
-            />
-          ) : (
-            <PageText>
-              {" "}
-              💡 To manage mappings,{" "}
-              <Typography onClick={toggleEditMode} link>
-                enable editing mode.
-              </Typography>
-            </PageText>
-          )}
+          <PageSectionWidthConstrained>
+            {editMode ? (
+              <SmdaHealthCheckInfo
+                feature="editing mappings"
+                healthCheck={healthCheck}
+                setRequestAcquireSsoAccessToken={
+                  setRequestAcquireSsoAccessToken
+                }
+              />
+            ) : (
+              <PageText>
+                {" "}
+                💡 To manage mappings,{" "}
+                <Typography onClick={toggleEditMode} link>
+                  enable editing mode.
+                </Typography>
+              </PageText>
+            )}
+          </PageSectionWidthConstrained>
         </>
       ) : (
-        <PageText>No RMS project is selected.</PageText>
+        <PageSectionWidthConstrained>
+          <PageText>No RMS project is selected.</PageText>
+        </PageSectionWidthConstrained>
       )}
     </>
   );
@@ -86,12 +101,14 @@ function Content() {
 
 function RouteComponent() {
   return (
-    <>
-      <PageHeader>Stratigraphy</PageHeader>
+    <PageContainerNotWidthConstrained>
+      <PageSectionWidthConstrained>
+        <PageHeader>Stratigraphy</PageHeader>
+      </PageSectionWidthConstrained>
 
       <Suspense fallback={<Loading />}>
         <Content />
       </Suspense>
-    </>
+    </PageContainerNotWidthConstrained>
   );
 }

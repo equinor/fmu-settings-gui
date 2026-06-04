@@ -8,8 +8,23 @@ import {
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
+const WidthConstraint = "55em";
+const NotWidthConstrainedName = "notWidthConstrained";
+
 export const PageContainer = styled.div`
-  max-width: 55em;
+  &:not(:has(> .${NotWidthConstrainedName})) {
+    max-width: ${WidthConstraint};
+  }
+`;
+
+export const PageContainerNotWidthConstrained = styled.div.attrs({
+  className: NotWidthConstrainedName,
+})``;
+
+export const PageSectionWidthConstrained = styled.div<{
+  $notConstrained?: boolean;
+}>`
+  max-width: ${({ $notConstrained }) => ($notConstrained ? undefined : WidthConstraint)};
 `;
 
 export const PageHeader = styled(Typography).attrs<{
