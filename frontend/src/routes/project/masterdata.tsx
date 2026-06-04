@@ -1,6 +1,6 @@
 import { Typography } from "@equinor/eds-core-react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 
 import { Loading, SmdaHealthCheckInfo } from "#components/common";
 import { Overview } from "#components/project/masterdata/Overview";
@@ -25,12 +25,16 @@ function Content() {
   );
   const { setRequestAcquireSsoAccessToken } = Route.useRouteContext();
 
-  useEffect(() => {
-    setStorageItem(sessionStorage, STORAGENAME_MASTERDATA_EDIT_MODE, editMode);
-  }, [editMode]);
-
   function toggleEditMode() {
-    setEditMode((prevMode) => !prevMode);
+    setEditMode((prevMode) => {
+      setStorageItem(
+        sessionStorage,
+        STORAGENAME_MASTERDATA_EDIT_MODE,
+        !prevMode,
+      );
+
+      return !prevMode;
+    });
   }
 
   if (!project.status) {

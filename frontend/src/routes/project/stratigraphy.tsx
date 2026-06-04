@@ -1,6 +1,6 @@
 import { Typography } from "@equinor/eds-core-react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 
 import { Loading, SmdaHealthCheckInfo } from "#components/common";
 import { Overview } from "#components/project/stratigraphy/Overview";
@@ -35,16 +35,16 @@ function Content() {
   const project = useProject();
   const { data: healthCheck } = useSmdaHealthCheck();
 
-  useEffect(() => {
-    setStorageItem(
-      sessionStorage,
-      STORAGENAME_STRATIGRAPHY_EDIT_MODE,
-      editMode,
-    );
-  }, [editMode]);
-
   function toggleEditMode() {
-    setEditMode((prevMode) => !prevMode);
+    setEditMode((prevMode) => {
+      setStorageItem(
+        sessionStorage,
+        STORAGENAME_STRATIGRAPHY_EDIT_MODE,
+        !prevMode,
+      );
+
+      return !prevMode;
+    });
   }
 
   if (!project.status) {
