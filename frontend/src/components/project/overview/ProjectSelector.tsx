@@ -99,7 +99,7 @@ function ProjectSelectorForm({
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
       });
-      void queryClient.invalidateQueries({
+      void queryClient.resetQueries({
         queryKey: projectGetChangelogQueryKey(),
       });
       void queryClient.invalidateQueries({
@@ -161,7 +161,7 @@ function ProjectSelectorForm({
               void queryClient.invalidateQueries({
                 queryKey: projectGetProjectQueryKey(),
               });
-              void queryClient.invalidateQueries({
+              void queryClient.resetQueries({
                 queryKey: projectGetChangelogQueryKey(),
               });
               closeProjectSelector({ formReset: formApi.reset });
@@ -359,7 +359,7 @@ function ConfirmInitProjectDialog({
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
       });
-      void queryClient.invalidateQueries({
+      void queryClient.resetQueries({
         queryKey: projectGetChangelogQueryKey(),
       });
       void queryClient.invalidateQueries({
