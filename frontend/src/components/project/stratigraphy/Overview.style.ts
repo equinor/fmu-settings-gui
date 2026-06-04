@@ -1,11 +1,41 @@
 import { tokens } from "@equinor/eds-tokens";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import type {
   HorizonLineStyle,
   ZonePlacementInfo,
 } from "../stratigraphicFramework/types";
 import type { ElementType } from "./types";
+
+function getColors(
+  isTargetSystem: boolean,
+  isUnmappable: boolean,
+  isMissingValue: boolean,
+) {
+  let backgroundColor = "inherit";
+  let color = "inherit";
+
+  if (isTargetSystem) {
+    if (isUnmappable) {
+      backgroundColor = tokens.colors.infographic.substitute__pink_salmon.hex;
+      color = tokens.colors.text.static_icons__default.hex;
+    } else if (isMissingValue) {
+      backgroundColor = "transparent";
+      color = tokens.colors.text.static_icons__tertiary.hex;
+    } else {
+      backgroundColor = tokens.colors.infographic.substitute__blue_overcast.hex;
+      color = tokens.colors.text.static_icons__primary_white.hex;
+    }
+  } else {
+    backgroundColor = tokens.colors.infographic.primary__mist_blue.hex;
+    color = tokens.colors.text.static_icons__default.hex;
+  }
+
+  return css`
+		background-color: ${backgroundColor};
+		color: ${color};
+	`;
+}
 
 export const HorizonItem = styled.div<{
   $rowStart: number;
@@ -69,26 +99,30 @@ export const ElementSystem = styled.div`
 `;
 
 export const ElementInfo = styled.div.attrs<{
-  $targetSystem?: boolean;
+  $isTargetSystem?: boolean;
 }>((props) => ({
-  $targetSystem: props.$targetSystem ?? false,
+  $isTargetSystem: props.$isTargetSystem ?? false,
 }))`
-	justify-self: ${({ $targetSystem }) => ($targetSystem ? "right" : undefined)};
+	justify-self: ${({ $isTargetSystem }) => ($isTargetSystem ? "right" : undefined)};
 
 	cursor: default;
 `;
 
 export const ElementSystemName = styled.div.attrs<{
   $elementType?: ElementType;
-}>((props) => ({ $elementType: props.$elementType }))`
+  $isMissingvalue?: boolean;
+}>((props) => ({
+  $elementType: props.$elementType,
+  $isMissingvalue: Boolean(props.$isMissingvalue),
+}))`
 	width: fit-content;
 	padding: 0 ${tokens.spacings.comfortable.small} 0 ${tokens.spacings.comfortable.small};
-	padding-top: ${(props) => (props.$elementType === "horizon" ? "1px" : undefined)};
-	border: ${(props) => (props.$elementType === "horizon" ? "solid 1px #cccccc" : undefined)};
-	border-bottom: none;
+	padding-top: ${({ $elementType }) => ($elementType === "horizon" ? "1px" : undefined)};
+	border: ${({ $elementType }) => ($elementType === "horizon" ? "solid 1px #cccccc" : undefined)};
+	border-bottom: ${({ $isMissingvalue }) => ($isMissingvalue ? undefined : "none")};
 	border-radius: ${tokens.shape.corners.borderRadius};
-	border-bottom-left-radius: 0%;
-	border-bottom-right-radius: 0%;
+	border-bottom-left-radius: ${({ $isMissingvalue }) => ($isMissingvalue ? undefined : "0%")};
+	border-bottom-right-radius: ${({ $isMissingvalue }) => ($isMissingvalue ? undefined : "0%")};
 	background: #ffffff;
 
 	color: black;
@@ -97,33 +131,35 @@ export const ElementSystemName = styled.div.attrs<{
 `;
 
 export const ElementName = styled.div.attrs<{
-  $targetSystem?: boolean;
-  $missingvalue?: boolean;
+  $isTargetSystem?: boolean;
+  $isUnmappable?: boolean;
+  $isMissingvalue?: boolean;
 }>((props) => ({
-  $targetSystem: props.$targetSystem ?? false,
-  $missingvalue: props.$missingvalue ?? false,
+  $isTargetSystem: Boolean(props.$isTargetSystem),
+  $isUnmappable: Boolean(props.$isUnmappable),
+  $isMissingvalue: Boolean(props.$isMissingvalue),
 }))`
 	width: fit-content;
 	padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
+	padding-left: ${({ $isMissingvalue }) => ($isMissingvalue ? "0" : undefined)};
 	border-radius: ${tokens.shape.corners.borderRadius};
 	border-top-left-radius: 0%;
-	background: ${(props) =>
-    props.$targetSystem
-      ? tokens.colors.infographic.substitute__blue_overcast.hex
-      : tokens.colors.infographic.primary__mist_blue.hex};
 
 	display: flex;
 	gap: ${tokens.spacings.comfortable.small};
 
-	color: ${(props) =>
-    props.$targetSystem
-      ? tokens.colors.text.static_icons__primary_white.hex
-      : tokens.colors.text.static_icons__default.hex};
 	font-size: ${tokens.typography.navigation.button.fontSize};
 	font-weight: ${tokens.typography.navigation.button.fontWeight};
-	font-style: ${(props) => (props.$missingvalue ? "italic" : "normal")};
+	font-style: ${({ $isUnmappable, $isMissingvalue }) => ($isUnmappable || $isMissingvalue ? "italic" : "normal")};
 	line-height: ${tokens.typography.navigation.button.lineHeight};
 	white-space: nowrap;
+
+	${({ $isTargetSystem, $isUnmappable, $isMissingvalue }) =>
+    getColors(
+      Boolean($isTargetSystem),
+      Boolean($isUnmappable),
+      Boolean($isMissingvalue),
+    )}
 
 	.aliases {
 		color: ${tokens.colors.infographic.substitute__purple_berry.hex}
