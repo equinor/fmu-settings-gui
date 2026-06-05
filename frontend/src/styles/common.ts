@@ -161,9 +161,4 @@ export const Banner = styled(EdsBanner).attrs<{
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   border-radius: ${tokens.shape.corners.borderRadius};
   box-shadow: none;
-  /* Adjust elements and ensure clean border corners */
-  [class*=Banner__Content],
-  [class*=Banner__NonMarginDivider] {
-    background: none;
-  }
 `;
