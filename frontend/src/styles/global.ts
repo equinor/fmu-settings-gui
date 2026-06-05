@@ -10,7 +10,7 @@ const GlobalStyle = createGlobalStyle`
 
   /* Adjust elements and ensure clean border corners */
   div[class^=Banner__Content-],
-  div[class^=Banner__NonMarginDivider-] {
+  hr[class*=Banner__NonMarginDivider-] {
     background: none;
   }
 
