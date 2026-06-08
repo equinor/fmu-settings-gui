@@ -24,6 +24,7 @@ import {
 import { type OptionProps, Select } from "#components/form/field";
 import { rmsMinimumVersion } from "#config";
 import {
+  ActionButtonsContainer,
   EditDialog,
   InfoBox,
   PageCode,
@@ -43,7 +44,6 @@ import {
   setStorageItem,
 } from "#utils/storage";
 import { isVersionLessThan } from "#utils/string";
-import { ActionButtonsContainer } from "./Overview.style";
 import { Stratigraphy } from "./Stratigraphy";
 
 const { useAppForm: useAppFormRmsEditor } = createFormHook({

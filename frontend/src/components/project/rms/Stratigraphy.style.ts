@@ -17,14 +17,6 @@ export const StratigraphyEditorContainer = styled.div`
   }
 `;
 
-export const ActionButtonsContainer = styled.div`
-  margin-bottom: ${tokens.spacings.comfortable.medium};
-
-  button + button {
-    margin-left: ${tokens.spacings.comfortable.small} !important;
-  }
-`;
-
 export const OrphanTypesContainer = styled(WarningBox)`
   margin-top: ${tokens.spacings.comfortable.medium};
 `;

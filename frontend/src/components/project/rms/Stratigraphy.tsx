@@ -28,6 +28,7 @@ import type {
   MutationCallbackProps,
 } from "#components/form/form.tsx";
 import {
+  ActionButtonsContainer,
   EditDialog,
   GenericDialog,
   PageCode,
@@ -48,7 +49,6 @@ import {
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework.tsx";
 import { Horizons, Zones } from "./StratigraphicFramework";
 import {
-  ActionButtonsContainer,
   OrphanTypesContainer,
   StratigraphyEditorContainer,
 } from "./Stratigraphy.style";

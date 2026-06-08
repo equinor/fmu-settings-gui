@@ -62,6 +62,14 @@ export const PageList = styled(List)`
   margin-bottom: ${tokens.spacings.comfortable.medium};
 `;
 
+export const ActionButtonsContainer = styled.div`
+  margin-bottom: ${tokens.spacings.comfortable.medium};
+
+  button + button {
+    margin-left: ${tokens.spacings.comfortable.small} !important;
+  }
+`;
+
 export const GenericBox = styled.div`
   margin-bottom: ${tokens.spacings.comfortable.medium};
   padding: ${tokens.spacings.comfortable.small};
