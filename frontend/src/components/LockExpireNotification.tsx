@@ -183,7 +183,7 @@ export function LockExpireNotification() {
           <>
             <GeneralButton label="Continue working" onClick={onLockRefresh} />
             <GeneralButton
-              label="Stop editing"
+              label="Set to read-only"
               variant="outlined"
               onClick={onLockRelease}
             />
