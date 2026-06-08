@@ -160,12 +160,12 @@ export function LockExpireNotification() {
         ) : (
           <>
             <PageText>
-              Your lock will expire and the project will become read-only in{" "}
-              <b>{timeUntilExpire}</b> seconds.
+              Your editing access will expire in <b>{timeUntilExpire}</b>{" "}
+              seconds, and the project will become read-only.
             </PageText>
 
             <PageText $marginBottom="0">
-              Do you want to extend the lock?
+              Do you want to continue working in this project?
             </PageText>
           </>
         )}
@@ -181,9 +181,9 @@ export function LockExpireNotification() {
           />
         ) : (
           <>
-            <GeneralButton label="Extend lock" onClick={onLockRefresh} />
+            <GeneralButton label="Continue working" onClick={onLockRefresh} />
             <GeneralButton
-              label="Release lock"
+              label="Stop editing"
               variant="outlined"
               onClick={onLockRelease}
             />
