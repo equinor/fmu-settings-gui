@@ -1,4 +1,4 @@
-import { Dialog, Icon } from "@equinor/eds-core-react";
+import { Dialog, Icon, Typography } from "@equinor/eds-core-react";
 import { edit, link } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import {
@@ -659,6 +659,23 @@ export function Overview({
         <PageText>
           The following are the mappings for horizons and zones, showing the
           names in RMS and SMDA.
+        </PageText>
+
+        <PageText>
+          SMDA (Subsurface Master Data) is a system that consolidates subsurface
+          data from Equinor internal and external sources, and provides the best
+          available subsurface data basis for stakeholder applications and
+          users. In FMU Settings, SMDA is used as the reference for mapping RMS
+          horizons and zones. Learn more at{" "}
+          <Typography
+            link
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://smda.equinor.com/"
+          >
+            smda.equinor.com
+          </Typography>
+          .
         </PageText>
       </PageSectionWidthConstrained>
 
