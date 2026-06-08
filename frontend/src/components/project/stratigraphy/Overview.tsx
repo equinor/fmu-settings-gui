@@ -662,11 +662,9 @@ export function Overview({
         </PageText>
 
         <PageText>
-          SMDA (Subsurface Master Data) is a system that consolidates subsurface
-          data from Equinor internal and external sources, and provides the best
-          available subsurface data basis for stakeholder applications and
-          users. In FMU Settings, SMDA is used as the reference for mapping RMS
-          horizons and zones. Learn more at{" "}
+          SMDA (Subsurface Master Data) is the storage system for masterdata in
+          Equinor. In FMU Settings, SMDA is used as the reference for mapping
+          RMS horizons and zones. Learn more at{" "}
           <Typography
             link
             target="_blank"
