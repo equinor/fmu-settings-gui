@@ -161,11 +161,11 @@ export function LockExpireNotification() {
           <>
             <PageText>
               Your editing access will expire in <b>{timeUntilExpire}</b>{" "}
-              seconds, and the project will become read-only.
+              seconds, and the project will then become read-only.
             </PageText>
 
             <PageText $marginBottom="0">
-              Do you want to continue working in this project?
+              Do you want to continue editing this project?
             </PageText>
           </>
         )}
@@ -181,7 +181,7 @@ export function LockExpireNotification() {
           />
         ) : (
           <>
-            <GeneralButton label="Continue working" onClick={onLockRefresh} />
+            <GeneralButton label="Continue editing" onClick={onLockRefresh} />
             <GeneralButton
               label="Set to read-only"
               variant="outlined"
