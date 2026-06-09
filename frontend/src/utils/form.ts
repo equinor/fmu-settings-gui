@@ -41,55 +41,39 @@ export function findOptionValueInNameUuidArray<T extends NameUuidType>(
   return result.length === 1 ? result[0] : undefined;
 }
 
-export function hasUnsavedFormChanges(formContext: AnyFormApi): boolean {
-  return !formContext.state.isDefaultValue;
-}
-
 export function useConfirmClose({
-  formContext,
-  isOpen,
-  closeDialog,
+  enableConfirmClose,
+  determineRequiresConfirmation,
   onCloseConfirmed,
-  isReadOnly = false,
 }: {
-  formContext: AnyFormApi;
-  isOpen: boolean;
-  closeDialog: () => void;
-  onCloseConfirmed?: () => void;
-  isReadOnly?: boolean;
+  enableConfirmClose: boolean;
+  determineRequiresConfirmation: () => boolean;
+  onCloseConfirmed: () => void;
 }) {
   const [confirmCloseDialogOpen, setConfirmCloseDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!enableConfirmClose) {
       setConfirmCloseDialogOpen(false);
     }
-  }, [isOpen]);
+  }, [enableConfirmClose]);
 
-  useEffect(() => {
-    if (isReadOnly) {
-      setConfirmCloseDialogOpen(false);
-    }
-  }, [isReadOnly]);
-
-  const closeAndResetDialog = () => {
-    formContext.reset();
-    onCloseConfirmed?.();
+  const closeDialogs = () => {
     setConfirmCloseDialogOpen(false);
-    closeDialog();
+    onCloseConfirmed();
   };
 
   const handleCloseRequest = () => {
-    if (!isReadOnly && hasUnsavedFormChanges(formContext)) {
+    if (determineRequiresConfirmation()) {
       setConfirmCloseDialogOpen(true);
     } else {
-      closeAndResetDialog();
+      closeDialogs();
     }
   };
 
-  const handleConfirmCloseDecision = (confirm: boolean) => {
+  const handleDecision = (confirm: boolean) => {
     if (confirm) {
-      closeAndResetDialog();
+      closeDialogs();
     } else {
       setConfirmCloseDialogOpen(false);
     }
@@ -98,7 +82,7 @@ export function useConfirmClose({
   return {
     confirmCloseDialogOpen,
     handleCloseRequest,
-    handleConfirmCloseDecision,
+    handleDecision,
   };
 }
 

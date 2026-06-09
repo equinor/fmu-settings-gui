@@ -375,28 +375,27 @@ function Edit({
     formReset();
   };
 
-  const {
-    confirmCloseDialogOpen,
-    handleCloseRequest,
-    handleConfirmCloseDecision,
-  } = useConfirmClose({
-    formContext: form,
-    isOpen: isDialogOpen,
-    closeDialog,
-    isReadOnly: projectReadOnly,
+  const confirmClose = useConfirmClose({
+    enableConfirmClose: isDialogOpen && !projectReadOnly,
+    determineRequiresConfirmation: () =>
+      !projectReadOnly && !form.state.isDefaultValue,
+    onCloseConfirmed: () => {
+      form.reset();
+      closeDialog();
+    },
   });
 
   return (
     <>
       <ConfirmCloseDialog
-        isOpen={confirmCloseDialogOpen}
-        handleConfirmCloseDecision={handleConfirmCloseDecision}
+        isOpen={confirmClose.confirmCloseDialogOpen}
+        handleConfirmCloseDecision={confirmClose.handleDecision}
       />
 
       <EditDialog
         open={isDialogOpen}
         isDismissable={true}
-        onClose={handleCloseRequest}
+        onClose={confirmClose.handleCloseRequest}
         $minWidth="60em"
         $maxWidth=""
       >
@@ -442,7 +441,7 @@ function Edit({
             <form.CancelButton
               onClick={(e) => {
                 e.preventDefault();
-                handleCloseRequest();
+                confirmClose.handleCloseRequest();
               }}
             />
           </Dialog.Actions>

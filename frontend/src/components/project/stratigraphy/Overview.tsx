@@ -171,15 +171,14 @@ function Edit({
     formReset();
   };
 
-  const {
-    confirmCloseDialogOpen,
-    handleCloseRequest,
-    handleConfirmCloseDecision,
-  } = useConfirmClose({
-    formContext: form,
-    isOpen,
-    closeDialog,
-    isReadOnly: projectReadOnly,
+  const confirmClose = useConfirmClose({
+    enableConfirmClose: isOpen && !projectReadOnly,
+    determineRequiresConfirmation: () =>
+      !projectReadOnly && !form.state.isDefaultValue,
+    onCloseConfirmed: () => {
+      form.reset();
+      closeDialog();
+    },
   });
 
   if (elementMapping === undefined) {
@@ -189,14 +188,14 @@ function Edit({
   return (
     <>
       <ConfirmCloseDialog
-        isOpen={confirmCloseDialogOpen}
-        handleConfirmCloseDecision={handleConfirmCloseDecision}
+        isOpen={confirmClose.confirmCloseDialogOpen}
+        handleConfirmCloseDecision={confirmClose.handleDecision}
       />
 
       <EditDialog
         open={isOpen}
         isDismissable={true}
-        onClose={handleCloseRequest}
+        onClose={confirmClose.handleCloseRequest}
       >
         <form
           onSubmit={(e) => {
@@ -287,7 +286,7 @@ function Edit({
                     <form.CancelButton
                       onClick={(e) => {
                         e.preventDefault();
-                        handleCloseRequest();
+                        confirmClose.handleCloseRequest();
                       }}
                     />
                   </>
