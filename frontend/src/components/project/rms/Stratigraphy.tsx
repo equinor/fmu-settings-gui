@@ -39,12 +39,8 @@ import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api.ts";
-import {
-  fieldContext,
-  formContext,
-  useConfirmClose,
-  useFormContext,
-} from "#utils/form";
+import { fieldContext, formContext, useFormContext } from "#utils/form";
+import { useConfirmClose } from "#utils/ui.ts";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework.tsx";
 import { Horizons, Zones } from "./StratigraphicFramework";
 import {

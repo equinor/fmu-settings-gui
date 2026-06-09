@@ -57,7 +57,6 @@ import {
   handleNameUuidListOperationOnForm,
   identifierUuidArrayToOptionsArray,
   type ListOperation,
-  useConfirmClose,
 } from "#utils/form";
 import {
   emptyIdentifierUuid,
@@ -65,6 +64,7 @@ import {
   getNameFromNameUuidValue,
 } from "#utils/model";
 import { stringCompare } from "#utils/string";
+import { useConfirmClose } from "#utils/ui";
 import {
   FieldsContainer,
   ItemsContainer,

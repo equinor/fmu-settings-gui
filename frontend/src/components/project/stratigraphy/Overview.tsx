@@ -51,7 +51,8 @@ import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api";
-import { fieldContext, formContext, useConfirmClose } from "#utils/form";
+import { fieldContext, formContext } from "#utils/form";
+import { useConfirmClose } from "#utils/ui";
 import {
   getHorizonLineStyle,
   useFrameworkData,
