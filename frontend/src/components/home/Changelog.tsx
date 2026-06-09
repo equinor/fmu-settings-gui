@@ -19,7 +19,10 @@ import { FILE_LABELS, formatEntryDescription, getTypeLabel } from "./utils";
 function Content() {
   const { data } = useSuspenseQuery({
     ...projectGetChangelogOptions(),
-    meta: { preventDefaultErrorHandling: [404] },
+    meta: {
+      preventDefaultErrorHandling: [404],
+      resetQueryOnErrorStatuses: [404],
+    },
     retry: (failureCount, queryError) =>
       !(isAxiosError(queryError) && queryError.response?.status === 404) &&
       failureCount < 3,
