@@ -42,21 +42,21 @@ export function findOptionValueInNameUuidArray<T extends NameUuidType>(
 }
 
 export function useConfirmClose({
-  enableConfirmClose,
+  enable,
   determineRequiresConfirmation,
   onCloseConfirmed,
 }: {
-  enableConfirmClose: boolean;
+  enable: boolean;
   determineRequiresConfirmation: () => boolean;
   onCloseConfirmed: () => void;
 }) {
   const [confirmCloseDialogOpen, setConfirmCloseDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (!enableConfirmClose) {
+    if (!enable) {
       setConfirmCloseDialogOpen(false);
     }
-  }, [enableConfirmClose]);
+  }, [enable]);
 
   const closeDialogs = () => {
     setConfirmCloseDialogOpen(false);

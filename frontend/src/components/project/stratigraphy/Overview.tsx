@@ -172,7 +172,7 @@ function Edit({
   };
 
   const confirmClose = useConfirmClose({
-    enableConfirmClose: isOpen && !projectReadOnly,
+    enable: isOpen && !projectReadOnly,
     determineRequiresConfirmation: () =>
       !projectReadOnly && !form.state.isDefaultValue,
     onCloseConfirmed: () => {
