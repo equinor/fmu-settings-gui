@@ -1,4 +1,4 @@
-import { Dialog, Icon } from "@equinor/eds-core-react";
+import { Dialog, Icon, Typography } from "@equinor/eds-core-react";
 import { edit, link } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import {
@@ -51,7 +51,8 @@ import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api";
-import { fieldContext, formContext, useConfirmClose } from "#utils/form";
+import { fieldContext, formContext } from "#utils/form";
+import { useConfirmClose } from "#utils/ui";
 import {
   getHorizonLineStyle,
   useFrameworkData,
@@ -171,15 +172,14 @@ function Edit({
     formReset();
   };
 
-  const {
-    confirmCloseDialogOpen,
-    handleCloseRequest,
-    handleConfirmCloseDecision,
-  } = useConfirmClose({
-    formContext: form,
-    isOpen,
-    closeDialog,
-    isReadOnly: projectReadOnly,
+  const confirmClose = useConfirmClose({
+    enable: isOpen && !projectReadOnly,
+    determineRequiresConfirmation: () =>
+      !projectReadOnly && !form.state.isDefaultValue,
+    onCloseConfirmed: () => {
+      form.reset();
+      closeDialog();
+    },
   });
 
   if (elementMapping === undefined) {
@@ -189,14 +189,14 @@ function Edit({
   return (
     <>
       <ConfirmCloseDialog
-        isOpen={confirmCloseDialogOpen}
-        handleConfirmCloseDecision={handleConfirmCloseDecision}
+        isOpen={confirmClose.confirmCloseDialogOpen}
+        handleConfirmCloseDecision={confirmClose.handleDecision}
       />
 
       <EditDialog
         open={isOpen}
         isDismissable={true}
-        onClose={handleCloseRequest}
+        onClose={confirmClose.handleCloseRequest}
       >
         <form
           onSubmit={(e) => {
@@ -287,7 +287,7 @@ function Edit({
                     <form.CancelButton
                       onClick={(e) => {
                         e.preventDefault();
-                        handleCloseRequest();
+                        confirmClose.handleCloseRequest();
                       }}
                     />
                   </>
@@ -659,6 +659,21 @@ export function Overview({
         <PageText>
           The following are the mappings for horizons and zones, showing the
           names in RMS and SMDA.
+        </PageText>
+
+        <PageText>
+          SMDA (Subsurface Master Data) is the storage system for masterdata in
+          Equinor. In FMU Settings, SMDA is used as the reference for mapping
+          RMS horizons and zones. Learn more at{" "}
+          <Typography
+            link
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://smda.equinor.com/"
+          >
+            smda.equinor.com
+          </Typography>
+          .
         </PageText>
       </PageSectionWidthConstrained>
 

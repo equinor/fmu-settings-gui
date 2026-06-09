@@ -40,12 +40,8 @@ import {
   HTTP_STATUS_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api.ts";
-import {
-  fieldContext,
-  formContext,
-  useConfirmClose,
-  useFormContext,
-} from "#utils/form";
+import { fieldContext, formContext, useFormContext } from "#utils/form";
+import { useConfirmClose } from "#utils/ui.ts";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework.tsx";
 import { Horizons, Zones } from "./StratigraphicFramework";
 import {
@@ -375,28 +371,27 @@ function Edit({
     formReset();
   };
 
-  const {
-    confirmCloseDialogOpen,
-    handleCloseRequest,
-    handleConfirmCloseDecision,
-  } = useConfirmClose({
-    formContext: form,
-    isOpen: isDialogOpen,
-    closeDialog,
-    isReadOnly: projectReadOnly,
+  const confirmClose = useConfirmClose({
+    enable: isDialogOpen && !projectReadOnly,
+    determineRequiresConfirmation: () =>
+      !projectReadOnly && !form.state.isDefaultValue,
+    onCloseConfirmed: () => {
+      form.reset();
+      closeDialog();
+    },
   });
 
   return (
     <>
       <ConfirmCloseDialog
-        isOpen={confirmCloseDialogOpen}
-        handleConfirmCloseDecision={handleConfirmCloseDecision}
+        isOpen={confirmClose.confirmCloseDialogOpen}
+        handleConfirmCloseDecision={confirmClose.handleDecision}
       />
 
       <EditDialog
         open={isDialogOpen}
         isDismissable={true}
-        onClose={handleCloseRequest}
+        onClose={confirmClose.handleCloseRequest}
         $minWidth="60em"
         $maxWidth=""
       >
@@ -442,7 +437,7 @@ function Edit({
             <form.CancelButton
               onClick={(e) => {
                 e.preventDefault();
-                handleCloseRequest();
+                confirmClose.handleCloseRequest();
               }}
             />
           </Dialog.Actions>

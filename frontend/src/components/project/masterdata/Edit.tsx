@@ -57,7 +57,6 @@ import {
   handleNameUuidListOperationOnForm,
   identifierUuidArrayToOptionsArray,
   type ListOperation,
-  useConfirmClose,
 } from "#utils/form";
 import {
   emptyIdentifierUuid,
@@ -65,6 +64,7 @@ import {
   getNameFromNameUuidValue,
 } from "#utils/model";
 import { stringCompare } from "#utils/string";
+import { useConfirmClose } from "#utils/ui";
 import {
   FieldsContainer,
   ItemsContainer,
@@ -396,18 +396,15 @@ export function Edit({
     },
   });
 
-  const {
-    confirmCloseDialogOpen,
-    handleCloseRequest,
-    handleConfirmCloseDecision,
-  } = useConfirmClose({
-    formContext: form,
-    isOpen,
-    closeDialog,
+  const confirmClose = useConfirmClose({
+    enable: isOpen && !projectReadOnly,
+    determineRequiresConfirmation: () =>
+      !projectReadOnly && !form.state.isDefaultValue,
     onCloseConfirmed: () => {
+      form.reset();
       resetEditData(setProjectData, setAvailableData, setOrphanData);
+      closeDialog();
     },
-    isReadOnly: projectReadOnly,
   });
 
   const handleItemsOperation = useCallback(() => {
@@ -607,14 +604,14 @@ export function Edit({
       />
 
       <ConfirmCloseDialog
-        isOpen={confirmCloseDialogOpen}
-        handleConfirmCloseDecision={handleConfirmCloseDecision}
+        isOpen={confirmClose.confirmCloseDialogOpen}
+        handleConfirmCloseDecision={confirmClose.handleDecision}
       />
 
       <EditDialog
         open={isOpen}
         isDismissable={!searchDialogOpen}
-        onClose={handleCloseRequest}
+        onClose={confirmClose.handleCloseRequest}
         $maxWidth="200em"
       >
         <form
@@ -865,7 +862,7 @@ export function Edit({
                     <form.CancelButton
                       onClick={(e) => {
                         e.preventDefault();
-                        handleCloseRequest();
+                        confirmClose.handleCloseRequest();
                       }}
                     />
                   </>
