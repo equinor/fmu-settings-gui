@@ -35,6 +35,7 @@ export interface CommonTextFieldProps
 export interface OptionProps {
   value: string;
   label: string;
+  displayLabel?: string;
 }
 
 const helperTextLoadingOptions = "Loading options...";
@@ -214,7 +215,7 @@ export function Select({
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
-            {option.label}
+            {option.displayLabel ?? option.label}
           </option>
         ))}
       </NativeSelect>

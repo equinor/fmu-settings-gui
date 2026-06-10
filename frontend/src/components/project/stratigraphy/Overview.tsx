@@ -59,6 +59,7 @@ import {
 } from "../stratigraphicFramework/functions";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework";
 import {
+  createHorizonOptions,
   createMutationValue,
   createStratigraphyMappingsLookup,
   createStratUnitOptions,
@@ -492,39 +493,35 @@ function Elements({
     }
   }, [stratigraphicUnits]);
 
-  useEffect(() => {
-    if (stratigraphicUnits !== undefined) {
-      const smdaUuids = Object.values(elementMappings)
-        .filter(
-          (mapping) =>
-            mapping.elementType === "zone" &&
-            !mapping.unmappable &&
-            mapping.smdaUuid !== "",
-        )
-        .map((mapping) => mapping.smdaUuid);
-
-      const horizonOptions: OptionProps[] =
-        stratigraphicUnits.stratigraphic_units
-          .filter(
-            (unit) =>
-              smdaUuids.includes(unit.uuid) &&
-              unit.top_uuid !== null &&
-              unit.base_uuid !== null,
-          )
-          .flatMap((unit) => [
-            { value: unit.top_uuid ?? "", label: unit.top },
-            { value: unit.base_uuid ?? "", label: unit.base },
-          ]);
-
-      setSmdaNameOptions((options) => ({
-        ...options,
-        horizon: [
-          ...createSpecialOptions("horizon", horizonOptions.length > 0),
-          ...horizonOptions,
-        ],
-      }));
+  const editSmdaNameOptions = useMemo(() => {
+    if (
+      activeElementMapping?.elementType !== "horizon" ||
+      stratigraphicUnits === undefined
+    ) {
+      return smdaNameOptions;
     }
-  }, [elementMappings, stratigraphicUnits]);
+
+    const horizon = createHorizonOptions(
+      activeElementMapping.rmsName,
+      frameworkData.zones,
+      elementMappings,
+      stratigraphicUnits.stratigraphic_units,
+    );
+
+    return {
+      ...smdaNameOptions,
+      horizon: [
+        ...createSpecialOptions("horizon", horizon.length > 0),
+        ...horizon,
+      ],
+    };
+  }, [
+    activeElementMapping,
+    elementMappings,
+    frameworkData.zones,
+    smdaNameOptions,
+    stratigraphicUnits,
+  ]);
 
   const editClick = (elementMapping: ElementMapping) => {
     setActiveElementMapping(elementMapping);
@@ -549,7 +546,7 @@ function Elements({
       updatedElementMappings(
         elementMappings,
         formValue,
-        smdaNameOptions,
+        editSmdaNameOptions,
         stratUnit,
       ),
     );
@@ -565,7 +562,7 @@ function Elements({
             updatedElementMappings(
               elementMappings,
               formValue,
-              smdaNameOptions,
+              editSmdaNameOptions,
               stratUnit,
             ),
           );
@@ -581,7 +578,7 @@ function Elements({
       {editDialogOpen && (
         <Edit
           elementMapping={activeElementMapping}
-          smdaNameOptions={smdaNameOptions}
+          smdaNameOptions={editSmdaNameOptions}
           projectReadOnly={projectReadOnly}
           mutationCallback={mutationCallback}
           optionsIsPending={stratigraphicUnitsPending}
@@ -709,8 +706,9 @@ export function Overview({
             <PageSectionWidthConstrained>
               {stratigraphicColumn ? (
                 <PageText>
-                  💡 Set SMDA names for zones first. Horizon options are derived
-                  from the top and base horizons of mapped zones.
+                  💡 Set SMDA names for zones first. When a zone directly above
+                  or below a horizon is mapped, its horizons are listed at the
+                  top of that horizon's options for easier selection.
                 </PageText>
               ) : (
                 <WarningBox>
