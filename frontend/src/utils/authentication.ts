@@ -22,7 +22,7 @@ import type {
 } from "#client";
 import { client } from "#client/client.gen";
 import { ssoScopes } from "#config";
-import { HTTP_STATUS_UNAUTHORIZED } from "./api";
+import { HTTP_STATUS_401_UNAUTHORIZED } from "./api";
 import {
   getStorageItem,
   removeStorageItem,
@@ -162,7 +162,7 @@ export const responseInterceptorRejected =
     acquireAndPatchSsoAccessToken: () => Promise<void>,
   ) =>
   async (error: AxiosError) => {
-    if (error.status === HTTP_STATUS_UNAUTHORIZED) {
+    if (error.status === HTTP_STATUS_401_UNAUTHORIZED) {
       if (isApiUrlSession(error.response?.config.url)) {
         if (isApiTokenNonEmpty(apiToken)) {
           setApiToken(() => "");

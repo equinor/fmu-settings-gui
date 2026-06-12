@@ -14,7 +14,7 @@ import type { CacheResource } from "#client/types.gen";
 import { CancelButton, GeneralButton } from "#components/form/button";
 import { useProject } from "#services/project";
 import { GenericDialog, PageText } from "#styles/common";
-import { HTTP_STATUS_UNPROCESSABLE_CONTENT } from "#utils/api";
+import { HTTP_STATUS_422_UNPROCESSABLE_CONTENT } from "#utils/api";
 
 const CACHE_RESOURCE_PROJECT_CONFIG: CacheResource = "config.json";
 
@@ -79,7 +79,7 @@ export function ProjectRecoveryNotification() {
       }
     }
 
-    if (project.errorStatus === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+    if (project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
       void checkSnapshots();
     } else {
       setLatestRevision(null);

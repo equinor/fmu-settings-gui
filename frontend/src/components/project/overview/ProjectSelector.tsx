@@ -32,8 +32,10 @@ import { TextField } from "#components/form/field";
 import { mappingsPaths } from "#services/project";
 import { EditDialog, PageSectionSpacer, PageText } from "#styles/common";
 import {
+  HTTP_STATUS_403_FORBIDDEN,
   HTTP_STATUS_404_NOT_FOUND,
-  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+  HTTP_STATUS_409_CONFLICT,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
 } from "#utils/api";
 import {
   fieldContext,
@@ -81,10 +83,10 @@ function ProjectSelectorForm({
   const [helperTextProjectPath, setHelperTextProjectPath] = useState("");
   const [valueSource, setValueSource] = useState<ValueSource>("");
   const codes = [
-    403,
+    HTTP_STATUS_403_FORBIDDEN,
     HTTP_STATUS_404_NOT_FOUND,
-    409,
-    HTTP_STATUS_UNPROCESSABLE_CONTENT,
+    HTTP_STATUS_409_CONFLICT,
+    HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   ];
 
   const closeProjectSelector = ({ formReset }: { formReset: () => void }) => {
@@ -164,7 +166,7 @@ function ProjectSelectorForm({
             const detail = (error.response?.data as { detail: string }).detail;
             const status = error.status;
 
-            if (status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+            if (status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
               void queryClient.invalidateQueries({
                 queryKey: projectGetProjectQueryKey(),
               });
