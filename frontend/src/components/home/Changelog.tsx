@@ -28,8 +28,7 @@ function Content() {
       !(
         isAxiosError(queryError) &&
         queryError.response?.status === HTTP_STATUS_404_NOT_FOUND
-      ) &&
-      failureCount < 3,
+      ) && failureCount < 3,
   });
 
   if (data.length === 0) {

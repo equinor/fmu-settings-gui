@@ -80,7 +80,12 @@ function ProjectSelectorForm({
   const [helperTextRecentProjects, sethelperTextRecentProjects] = useState("");
   const [helperTextProjectPath, setHelperTextProjectPath] = useState("");
   const [valueSource, setValueSource] = useState<ValueSource>("");
-  const codes = [403, HTTP_STATUS_404_NOT_FOUND, 409, HTTP_STATUS_UNPROCESSABLE_CONTENT];
+  const codes = [
+    403,
+    HTTP_STATUS_404_NOT_FOUND,
+    409,
+    HTTP_STATUS_UNPROCESSABLE_CONTENT,
+  ];
 
   const closeProjectSelector = ({ formReset }: { formReset: () => void }) => {
     sethelperTextRecentProjects("");
