@@ -31,7 +31,10 @@ import { CancelButton, SubmitButton } from "#components/form/button";
 import { TextField } from "#components/form/field";
 import { mappingsPaths } from "#services/project";
 import { EditDialog, PageSectionSpacer, PageText } from "#styles/common";
-import { HTTP_STATUS_UNPROCESSABLE_CONTENT } from "#utils/api";
+import {
+  HTTP_STATUS_404_NOT_FOUND,
+  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+} from "#utils/api";
 import {
   fieldContext,
   formContext,
@@ -77,7 +80,7 @@ function ProjectSelectorForm({
   const [helperTextRecentProjects, sethelperTextRecentProjects] = useState("");
   const [helperTextProjectPath, setHelperTextProjectPath] = useState("");
   const [valueSource, setValueSource] = useState<ValueSource>("");
-  const codes = [403, 404, 409, HTTP_STATUS_UNPROCESSABLE_CONTENT];
+  const codes = [403, HTTP_STATUS_404_NOT_FOUND, 409, HTTP_STATUS_UNPROCESSABLE_CONTENT];
 
   const closeProjectSelector = ({ formReset }: { formReset: () => void }) => {
     sethelperTextRecentProjects("");
@@ -171,7 +174,7 @@ function ProjectSelectorForm({
 
             if (status && codes.includes(status)) {
               if (
-                status === 404 &&
+                status === HTTP_STATUS_404_NOT_FOUND &&
                 detail === `No .fmu directory found at ${path}`
               ) {
                 setInitConfirmDialogOpen(true);
@@ -185,7 +188,10 @@ function ProjectSelectorForm({
                 setHelperTextProjectPath(detail);
               }
 
-              if (status === 404 && detail === `Path ${path} does not exist`) {
+              if (
+                status === HTTP_STATUS_404_NOT_FOUND &&
+                detail === `Path ${path} does not exist`
+              ) {
                 void queryClient.invalidateQueries({
                   queryKey: userGetUserQueryKey(),
                 });

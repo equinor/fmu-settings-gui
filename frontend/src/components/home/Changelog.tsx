@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
 import { Loading, QueryErrorBoundary } from "#components/common";
 import { PageHeader, PageText } from "#styles/common";
+import { HTTP_STATUS_404_NOT_FOUND } from "#utils/api";
 import { displayDateTime } from "#utils/datetime";
 import {
   ChangeDescription,
@@ -20,11 +21,14 @@ function Content() {
   const { data } = useSuspenseQuery({
     ...projectGetChangelogOptions(),
     meta: {
-      preventDefaultErrorHandling: [404],
-      resetQueryOnError: [404],
+      preventDefaultErrorHandling: [HTTP_STATUS_404_NOT_FOUND],
+      resetQueryOnError: [HTTP_STATUS_404_NOT_FOUND],
     },
     retry: (failureCount, queryError) =>
-      !(isAxiosError(queryError) && queryError.response?.status === 404) &&
+      !(
+        isAxiosError(queryError) &&
+        queryError.response?.status === HTTP_STATUS_404_NOT_FOUND
+      ) &&
       failureCount < 3,
   });
 
@@ -82,7 +86,7 @@ export function Changelog() {
 
       <QueryErrorBoundary
         statusCodeHandling={{
-          404: {
+          [HTTP_STATUS_404_NOT_FOUND]: {
             message: "No changelog found for this project.",
             enableRetry: false,
           },
