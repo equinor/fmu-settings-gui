@@ -397,12 +397,6 @@ function Elements({
   const [activeElementMapping, setActiveElementMapping] = useState<
     ElementMapping | undefined
   >();
-  const [smdaNameOptions, setSmdaNameOptions] = useState<
-    Record<ElementType, OptionProps[]>
-  >({
-    horizon: [...createSpecialOptions("horizon", false)],
-    zone: [...createSpecialOptions("zone", false)],
-  } as Record<ElementType, OptionProps[]>);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const frameworkData = useFrameworkData();
@@ -478,50 +472,48 @@ function Elements({
     setElementMappings(elementMappings);
   }, [frameworkData.horizons, frameworkData.zones, stratigraphyMappings]);
 
-  useEffect(() => {
-    if (stratigraphicUnits !== undefined) {
-      setSmdaNameOptions((options) => ({
-        ...options,
-        zone: [
-          ...createSpecialOptions(
-            "zone",
-            stratigraphicUnits.stratigraphic_units.length > 0,
-          ),
-          ...createStratUnitOptions(stratigraphicUnits.stratigraphic_units),
-        ],
-      }));
-    }
-  }, [stratigraphicUnits]);
-
-  const editSmdaNameOptions = useMemo(() => {
-    if (
-      activeElementMapping?.elementType !== "horizon" ||
-      stratigraphicUnits === undefined
-    ) {
-      return smdaNameOptions;
+  const horizonOptionsData = useMemo(() => {
+    if (stratigraphicUnits === undefined) {
+      return { options: [], horizonNamesByUuid: {} };
     }
 
-    const horizon = createHorizonOptions(
-      activeElementMapping.rmsName,
+    return createHorizonOptions(
+      activeElementMapping?.elementType === "horizon"
+        ? activeElementMapping.rmsName
+        : "",
       frameworkData.zones,
       elementMappings,
       stratigraphicUnits.stratigraphic_units,
     );
-
-    return {
-      ...smdaNameOptions,
-      horizon: [
-        ...createSpecialOptions("horizon", horizon.length > 0),
-        ...horizon,
-      ],
-    };
   }, [
     activeElementMapping,
     elementMappings,
     frameworkData.zones,
-    smdaNameOptions,
     stratigraphicUnits,
   ]);
+
+  const smdaNameOptions = useMemo(
+    () =>
+      ({
+        horizon: [
+          ...createSpecialOptions(
+            "horizon",
+            horizonOptionsData.options.length > 0,
+          ),
+          ...horizonOptionsData.options,
+        ],
+        zone: [
+          ...createSpecialOptions(
+            "zone",
+            (stratigraphicUnits?.stratigraphic_units.length ?? 0) > 0,
+          ),
+          ...createStratUnitOptions(
+            stratigraphicUnits?.stratigraphic_units ?? [],
+          ),
+        ],
+      }) as Record<ElementType, OptionProps[]>,
+    [horizonOptionsData.options, stratigraphicUnits],
+  );
 
   const editClick = (elementMapping: ElementMapping) => {
     setActiveElementMapping(elementMapping);
@@ -541,14 +533,13 @@ function Elements({
     const stratUnit = stratigraphicUnits?.stratigraphic_units.find(
       (unit) => unit.uuid === formValue.smdaUuid,
     );
+    const smdaName =
+      formValue.elementType === "horizon"
+        ? (horizonOptionsData.horizonNamesByUuid[formValue.smdaUuid] ?? "")
+        : (stratUnit?.identifier ?? "");
 
     const mutationValue = createMutationValue(
-      updatedElementMappings(
-        elementMappings,
-        formValue,
-        editSmdaNameOptions,
-        stratUnit,
-      ),
+      updatedElementMappings(elementMappings, formValue, smdaName),
     );
 
     mappingsMutation.mutate(
@@ -559,12 +550,7 @@ function Elements({
       {
         onSuccess: (data) => {
           setElementMappings((elementMappings) =>
-            updatedElementMappings(
-              elementMappings,
-              formValue,
-              editSmdaNameOptions,
-              stratUnit,
-            ),
+            updatedElementMappings(elementMappings, formValue, smdaName),
           );
           formSubmitCallback({ message: data.message, formReset });
           closeEditDialog();
@@ -578,7 +564,7 @@ function Elements({
       {editDialogOpen && (
         <Edit
           elementMapping={activeElementMapping}
-          smdaNameOptions={editSmdaNameOptions}
+          smdaNameOptions={smdaNameOptions}
           projectReadOnly={projectReadOnly}
           mutationCallback={mutationCallback}
           optionsIsPending={stratigraphicUnitsPending}

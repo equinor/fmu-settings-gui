@@ -12,7 +12,6 @@ import { findOptionValueInOptionsArray } from "#utils/form";
 import type {
   ElementMapping,
   ElementMappings,
-  ElementType,
   StratUnitRelation,
 } from "./types";
 import {
@@ -124,7 +123,7 @@ export function createHorizonOptions(
   zones: RmsStratigraphicZone[],
   elementMappings: ElementMappings,
   stratigraphicUnits: StratigraphicUnit[],
-): OptionProps[] {
+): { options: OptionProps[]; horizonNamesByUuid: Record<string, string> } {
   const zoneNamesByHorizon = new Map<string, Set<string>>();
   zones
     .filter(
@@ -159,6 +158,7 @@ export function createHorizonOptions(
 
   const adjacentHorizonOptions: OptionProps[] = [];
   const otherHorizonOptions: OptionProps[] = [];
+  const horizonNamesByUuid: Record<string, string> = {};
   const seenHorizonUuids = new Set<string>();
   stratigraphicUnits.forEach((unit) => {
     (
@@ -171,13 +171,13 @@ export function createHorizonOptions(
         return;
       }
       seenHorizonUuids.add(horizonUuid);
+      horizonNamesByUuid[horizonUuid] = horizonName;
 
       const zoneNames = zoneNamesByHorizon.get(horizonUuid);
       if (zoneNames) {
         adjacentHorizonOptions.push({
           value: horizonUuid,
-          label: horizonName,
-          displayLabel: `${horizonName} [${[...zoneNames].join(", ")}]`,
+          label: `${horizonName} [${[...zoneNames].join(", ")}]`,
         });
       } else {
         otherHorizonOptions.push({ value: horizonUuid, label: horizonName });
@@ -185,14 +185,16 @@ export function createHorizonOptions(
     });
   });
 
-  return [...adjacentHorizonOptions, ...otherHorizonOptions];
+  return {
+    options: [...adjacentHorizonOptions, ...otherHorizonOptions],
+    horizonNamesByUuid,
+  };
 }
 
 export function updatedElementMappings(
   elementMappings: ElementMappings,
   value: ElementMapping,
-  smdaNameOptions: Record<ElementType, OptionProps[]>,
-  stratUnit?: StratigraphicUnit,
+  smdaName: string,
 ) {
   if (value.smdaUuid === specialOptions.empty.value) {
     return {
@@ -223,14 +225,7 @@ export function updatedElementMappings(
       [value.rmsName]: {
         ...value,
         unmappable: false,
-        smdaName:
-          value.elementType === "horizon"
-            ? (
-                smdaNameOptions.horizon.find(
-                  (option) => option.value === value.smdaUuid,
-                ) ?? { value: "", label: "" }
-              ).label
-            : (stratUnit?.identifier ?? ""),
+        smdaName,
       },
     } as ElementMappings;
   }
