@@ -21,7 +21,7 @@ function Content() {
     ...projectGetChangelogOptions(),
     meta: {
       preventDefaultErrorHandling: [404],
-      resetQueryOnErrorStatuses: [404],
+      resetQueryOnError: [404],
     },
     retry: (failureCount, queryError) =>
       !(isAxiosError(queryError) && queryError.response?.status === 404) &&
