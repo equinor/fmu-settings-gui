@@ -267,15 +267,20 @@ function RmsProjectActions({
     onError: (error, variables) => {
       setIsRmsProjectOpen(false);
 
-      // If version was specified, retry without to use actual version
-      if (variables.body?.version) {
-        projectOpenMutation.mutate({});
-
-        return;
-      }
-
       if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
         const message = (error.response.data as { detail?: string }).detail;
+
+        // If version was specified, retry without to use actual version
+        if (
+          variables.body?.version &&
+          message?.includes("RMS version") &&
+          message.includes("is not supported")
+        ) {
+          projectOpenMutation.mutate({});
+
+          return;
+        }
+
         console.error(message);
         toast.error(message, { autoClose: false });
       }
