@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
 
-import { HTTP_STATUS_UNAUTHORIZED } from "./api";
+import { HTTP_STATUS_401_UNAUTHORIZED } from "./api";
 import { isApiUrlSession, isExternalApi } from "./authentication";
 
 export type QueryServiceBase<T> = {
@@ -34,7 +34,7 @@ export const defaultErrorHandling = (error: Error, errorPrefix: string) => {
 export const mutationRetry = (failureCount: number, error: Error) => {
   if (
     isAxiosError(error) &&
-    error.status === HTTP_STATUS_UNAUTHORIZED &&
+    error.status === HTTP_STATUS_401_UNAUTHORIZED &&
     !(
       isApiUrlSession(error.response?.config.url) ||
       isExternalApi(error.response?.headers)

@@ -48,7 +48,7 @@ import {
   WarningBox,
 } from "#styles/common";
 import {
-  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
@@ -59,6 +59,7 @@ import {
 } from "../stratigraphicFramework/functions";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework";
 import {
+  createHorizonOptions,
   createMutationValue,
   createStratigraphyMappingsLookup,
   createStratUnitOptions,
@@ -396,12 +397,6 @@ function Elements({
   const [activeElementMapping, setActiveElementMapping] = useState<
     ElementMapping | undefined
   >();
-  const [smdaNameOptions, setSmdaNameOptions] = useState<
-    Record<ElementType, OptionProps[]>
-  >({
-    horizon: [...createSpecialOptions("horizon", false)],
-    zone: [...createSpecialOptions("zone", false)],
-  } as Record<ElementType, OptionProps[]>);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const frameworkData = useFrameworkData();
@@ -438,7 +433,7 @@ function Elements({
       });
     },
     onError: (error) => {
-      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+      if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
         const message = httpValidationErrorToString(error);
         console.error(message);
         toast.error(message, { autoClose: false });
@@ -446,7 +441,7 @@ function Elements({
     },
     meta: {
       errorPrefix: "Error saving stratigraphy mapping",
-      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
+      preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
     },
   });
 
@@ -477,54 +472,48 @@ function Elements({
     setElementMappings(elementMappings);
   }, [frameworkData.horizons, frameworkData.zones, stratigraphyMappings]);
 
-  useEffect(() => {
-    if (stratigraphicUnits !== undefined) {
-      setSmdaNameOptions((options) => ({
-        ...options,
+  const horizonOptionsData = useMemo(() => {
+    if (stratigraphicUnits === undefined) {
+      return { options: [], horizonNamesByUuid: {} };
+    }
+
+    return createHorizonOptions(
+      activeElementMapping?.elementType === "horizon"
+        ? activeElementMapping.rmsName
+        : "",
+      frameworkData.zones,
+      elementMappings,
+      stratigraphicUnits.stratigraphic_units,
+    );
+  }, [
+    activeElementMapping,
+    elementMappings,
+    frameworkData.zones,
+    stratigraphicUnits,
+  ]);
+
+  const smdaNameOptions = useMemo(
+    () =>
+      ({
+        horizon: [
+          ...createSpecialOptions(
+            "horizon",
+            horizonOptionsData.options.length > 0,
+          ),
+          ...horizonOptionsData.options,
+        ],
         zone: [
           ...createSpecialOptions(
             "zone",
-            stratigraphicUnits.stratigraphic_units.length > 0,
+            (stratigraphicUnits?.stratigraphic_units.length ?? 0) > 0,
           ),
-          ...createStratUnitOptions(stratigraphicUnits.stratigraphic_units),
+          ...createStratUnitOptions(
+            stratigraphicUnits?.stratigraphic_units ?? [],
+          ),
         ],
-      }));
-    }
-  }, [stratigraphicUnits]);
-
-  useEffect(() => {
-    if (stratigraphicUnits !== undefined) {
-      const smdaUuids = Object.values(elementMappings)
-        .filter(
-          (mapping) =>
-            mapping.elementType === "zone" &&
-            !mapping.unmappable &&
-            mapping.smdaUuid !== "",
-        )
-        .map((mapping) => mapping.smdaUuid);
-
-      const horizonOptions: OptionProps[] =
-        stratigraphicUnits.stratigraphic_units
-          .filter(
-            (unit) =>
-              smdaUuids.includes(unit.uuid) &&
-              unit.top_uuid !== null &&
-              unit.base_uuid !== null,
-          )
-          .flatMap((unit) => [
-            { value: unit.top_uuid ?? "", label: unit.top },
-            { value: unit.base_uuid ?? "", label: unit.base },
-          ]);
-
-      setSmdaNameOptions((options) => ({
-        ...options,
-        horizon: [
-          ...createSpecialOptions("horizon", horizonOptions.length > 0),
-          ...horizonOptions,
-        ],
-      }));
-    }
-  }, [elementMappings, stratigraphicUnits]);
+      }) as Record<ElementType, OptionProps[]>,
+    [horizonOptionsData.options, stratigraphicUnits],
+  );
 
   const editClick = (elementMapping: ElementMapping) => {
     setActiveElementMapping(elementMapping);
@@ -544,14 +533,13 @@ function Elements({
     const stratUnit = stratigraphicUnits?.stratigraphic_units.find(
       (unit) => unit.uuid === formValue.smdaUuid,
     );
+    const smdaName =
+      formValue.elementType === "horizon"
+        ? (horizonOptionsData.horizonNamesByUuid[formValue.smdaUuid] ?? "")
+        : (stratUnit?.identifier ?? "");
 
     const mutationValue = createMutationValue(
-      updatedElementMappings(
-        elementMappings,
-        formValue,
-        smdaNameOptions,
-        stratUnit,
-      ),
+      updatedElementMappings(elementMappings, formValue, smdaName),
     );
 
     mappingsMutation.mutate(
@@ -562,12 +550,7 @@ function Elements({
       {
         onSuccess: (data) => {
           setElementMappings((elementMappings) =>
-            updatedElementMappings(
-              elementMappings,
-              formValue,
-              smdaNameOptions,
-              stratUnit,
-            ),
+            updatedElementMappings(elementMappings, formValue, smdaName),
           );
           formSubmitCallback({ message: data.message, formReset });
           closeEditDialog();
@@ -709,8 +692,9 @@ export function Overview({
             <PageSectionWidthConstrained>
               {stratigraphicColumn ? (
                 <PageText>
-                  💡 Set SMDA names for zones first. Horizon options are derived
-                  from the top and base horizons of mapped zones.
+                  💡 Set SMDA names for zones first. When a zone directly above
+                  or below a horizon is mapped, its horizons are listed at the
+                  top of that horizon's options for easier selection.
                 </PageText>
               ) : (
                 <WarningBox>

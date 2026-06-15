@@ -26,7 +26,7 @@ import {
   PageText,
 } from "#styles/common";
 import {
-  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
@@ -72,7 +72,7 @@ function ModelEditorForm({
       });
     },
     onError: (error) => {
-      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+      if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
         const message = httpValidationErrorToString(error);
         console.error(message);
         toast.error(message, { autoClose: false });
@@ -80,7 +80,7 @@ function ModelEditorForm({
     },
     meta: {
       errorPrefix: "Error saving model information",
-      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
+      preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
     },
   });
 

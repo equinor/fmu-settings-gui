@@ -4,6 +4,7 @@ import type {
   DataSystem,
   InternalStratigraphyMappingsOutput,
   MappingType,
+  RmsStratigraphicZone,
   StratigraphicUnit,
 } from "#client";
 import type { OptionProps } from "#components/form/field";
@@ -11,7 +12,6 @@ import { findOptionValueInOptionsArray } from "#utils/form";
 import type {
   ElementMapping,
   ElementMappings,
-  ElementType,
   StratUnitRelation,
 } from "./types";
 import {
@@ -118,11 +118,83 @@ export function createStratUnitOptions(stratUnits: StratigraphicUnit[]) {
   return getOptionPropsForChildren(relations, 1);
 }
 
+export function createHorizonOptions(
+  rmsHorizonName: string,
+  zones: RmsStratigraphicZone[],
+  elementMappings: ElementMappings,
+  stratigraphicUnits: StratigraphicUnit[],
+): { options: OptionProps[]; horizonNamesByUuid: Record<string, string> } {
+  const zoneNamesByHorizon = new Map<string, Set<string>>();
+  zones
+    .filter(
+      (zone) =>
+        zone.top_horizon_name === rmsHorizonName ||
+        zone.base_horizon_name === rmsHorizonName,
+    )
+    .forEach((zone) => {
+      const zoneMapping = elementMappings[zone.name];
+      if (zoneMapping.unmappable || zoneMapping.smdaUuid === "") {
+        return;
+      }
+
+      const mappedUnit = stratigraphicUnits.find(
+        (unit) => unit.uuid === zoneMapping.smdaUuid,
+      );
+      // The relevant suggestion is the zone boundary that coincides with the
+      // edited horizon: the base of a zone above, the top of a zone below.
+      const horizonUuid =
+        zone.base_horizon_name === rmsHorizonName
+          ? mappedUnit?.base_uuid
+          : mappedUnit?.top_uuid;
+      if (!mappedUnit || !horizonUuid) {
+        return;
+      }
+
+      const zoneNames =
+        zoneNamesByHorizon.get(horizonUuid) ?? new Set<string>();
+      zoneNames.add(mappedUnit.identifier);
+      zoneNamesByHorizon.set(horizonUuid, zoneNames);
+    });
+
+  const adjacentHorizonOptions: OptionProps[] = [];
+  const otherHorizonOptions: OptionProps[] = [];
+  const horizonNamesByUuid: Record<string, string> = {};
+  const seenHorizonUuids = new Set<string>();
+  stratigraphicUnits.forEach((unit) => {
+    (
+      [
+        [unit.top_uuid, unit.top],
+        [unit.base_uuid, unit.base],
+      ] as const
+    ).forEach(([horizonUuid, horizonName]) => {
+      if (!horizonUuid || seenHorizonUuids.has(horizonUuid)) {
+        return;
+      }
+      seenHorizonUuids.add(horizonUuid);
+      horizonNamesByUuid[horizonUuid] = horizonName;
+
+      const zoneNames = zoneNamesByHorizon.get(horizonUuid);
+      if (zoneNames) {
+        adjacentHorizonOptions.push({
+          value: horizonUuid,
+          label: `${horizonName} [${[...zoneNames].join(", ")}]`,
+        });
+      } else {
+        otherHorizonOptions.push({ value: horizonUuid, label: horizonName });
+      }
+    });
+  });
+
+  return {
+    options: [...adjacentHorizonOptions, ...otherHorizonOptions],
+    horizonNamesByUuid,
+  };
+}
+
 export function updatedElementMappings(
   elementMappings: ElementMappings,
   value: ElementMapping,
-  smdaNameOptions: Record<ElementType, OptionProps[]>,
-  stratUnit?: StratigraphicUnit,
+  smdaName: string,
 ) {
   if (value.smdaUuid === specialOptions.empty.value) {
     return {
@@ -153,14 +225,7 @@ export function updatedElementMappings(
       [value.rmsName]: {
         ...value,
         unmappable: false,
-        smdaName:
-          value.elementType === "horizon"
-            ? (
-                smdaNameOptions.horizon.find(
-                  (option) => option.value === value.smdaUuid,
-                ) ?? { value: "", label: "" }
-              ).label
-            : (stratUnit?.identifier ?? ""),
+        smdaName,
       },
     } as ElementMappings;
   }

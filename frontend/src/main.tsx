@@ -1,4 +1,5 @@
 import {
+  type AccountInfo,
   type AuthenticationResult,
   type EventMessage,
   EventType,
@@ -75,6 +76,7 @@ declare module "@tanstack/react-router" {
 interface QueryAndMutationMeta extends Record<string, unknown> {
   errorPrefix?: string;
   preventDefaultErrorHandling?: Array<number>;
+  resetQueryOnError?: Array<number>;
 }
 
 declare module "@tanstack/react-query" {
@@ -92,12 +94,25 @@ const queryClient = new QueryClient({
       const {
         errorPrefix = "Error getting data",
         preventDefaultErrorHandling = [],
+        resetQueryOnError = [],
       } = query.meta ?? {};
 
+      const responseStatus =
+        isAxiosError(error) && error.response
+          ? error.response.status
+          : undefined;
+
+      if (
+        responseStatus &&
+        resetQueryOnError.includes(responseStatus) &&
+        query.state.data !== undefined
+      ) {
+        query.reset();
+      }
+
       const preventDefault =
-        isAxiosError(error) &&
-        error.response?.status &&
-        preventDefaultErrorHandling.includes(error.response.status);
+        responseStatus !== undefined &&
+        preventDefaultErrorHandling.includes(responseStatus);
 
       if (!preventDefault) {
         defaultErrorHandling(error, errorPrefix);
@@ -200,12 +215,26 @@ export function App() {
 
   const acquireAndPatchSsoAccessToken = useCallback(async () => {
     acquireAndPatchSsoAccessTokenPromise.current ??= (async () => {
+      const account = msalInstance.getActiveAccount();
+      const accounts = msalInstance.getAllAccounts();
+
+      if (!account && accounts.length === 0) {
+        await msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
+
+        return;
+      }
+
       const result = await msalInstance
-        .acquireTokenSilent({ scopes: ssoScopes })
+        .acquireTokenSilent({
+          scopes: ssoScopes,
+          account: account ?? accounts[0],
+        })
         .catch((error: unknown) => {
           if (error instanceof InteractionRequiredAuthError) {
             return msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
           }
+
+          console.error("Error acquiring SSO token: ", error);
         });
 
       if (result) {
@@ -292,12 +321,11 @@ export function App() {
     const id = msalInstance.addEventCallback(
       (event: EventMessage) => {
         if (event.payload) {
-          const payload = event.payload as AuthenticationResult;
           if (event.eventType === EventType.LOGIN_SUCCESS) {
-            const account = payload.account;
+            const account = event.payload as AccountInfo;
             msalInstance.setActiveAccount(account);
-            void acquireAndPatchSsoAccessToken();
           } else if (event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
+            const payload = event.payload as AuthenticationResult;
             setAccessToken(payload.accessToken);
             if (event.interactionType === InteractionType.Redirect) {
               handleAddSsoAccessToken(
@@ -316,7 +344,7 @@ export function App() {
         msalInstance.removeEventCallback(id);
       }
     };
-  }, [acquireAndPatchSsoAccessToken, msalInstance, patchAccessTokenMutate]);
+  }, [msalInstance, patchAccessTokenMutate]);
 
   return (
     <RouterProvider

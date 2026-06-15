@@ -20,7 +20,7 @@ import {
 } from "#client/@tanstack/react-query.gen";
 import type { LockStatus, ProjectGetMappingsData } from "#client/types.gen";
 import { projectLockStatusRefetchInterval } from "#config";
-import { HTTP_STATUS_UNAUTHORIZED } from "#utils/api";
+import { HTTP_STATUS_401_UNAUTHORIZED } from "#utils/api";
 import type { QueryServiceBase } from "#utils/query";
 
 export type MappingsPathOptions = ProjectGetMappingsData["path"];
@@ -55,7 +55,7 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
           if (isAxiosError(error)) {
             errorStatus = error.status;
             // Use normal handling for unauthorized response
-            if (error.status === HTTP_STATUS_UNAUTHORIZED) {
+            if (error.status === HTTP_STATUS_401_UNAUTHORIZED) {
               return Promise.reject(error);
             }
             if (error.response?.data && "detail" in error.response.data) {

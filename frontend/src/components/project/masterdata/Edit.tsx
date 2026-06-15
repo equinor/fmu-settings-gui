@@ -46,7 +46,7 @@ import {
   PageText,
 } from "#styles/common";
 import {
-  HTTP_STATUS_UNPROCESSABLE_CONTENT,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api";
 import {
@@ -340,7 +340,7 @@ export function Edit({
       });
     },
     onError: (error) => {
-      if (error.response?.status === HTTP_STATUS_UNPROCESSABLE_CONTENT) {
+      if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
         const message = httpValidationErrorToString(error);
         console.error(message);
         toast.error(message, { autoClose: false });
@@ -348,7 +348,7 @@ export function Edit({
     },
     meta: {
       errorPrefix: "Error saving masterdata",
-      preventDefaultErrorHandling: [HTTP_STATUS_UNPROCESSABLE_CONTENT],
+      preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
     },
   });
 
