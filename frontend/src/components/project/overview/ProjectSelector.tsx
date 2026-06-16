@@ -24,6 +24,7 @@ import {
   projectGetRmsProjectsQueryKey,
   projectPostInitProjectMutation,
   projectPostProjectMutation,
+  sessionGetSessionQueryKey,
   userGetUserOptions,
   userGetUserQueryKey,
 } from "#client/@tanstack/react-query.gen";
@@ -48,10 +49,6 @@ import {
   queryKeyProjectGetCacheDiff,
   queryKeyProjectGetCacheRevision,
 } from "#utils/query";
-import {
-  removeStorageItem,
-  STORAGENAME_RMS_PROJECT_OPEN,
-} from "#utils/storage";
 
 const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
   fieldComponents: {
@@ -136,7 +133,9 @@ function ProjectSelectorForm({
       void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),
       });
-      removeStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN);
+      void queryClient.invalidateQueries({
+        queryKey: sessionGetSessionQueryKey(),
+      });
     },
     meta: {
       preventDefaultErrorHandling: codes,

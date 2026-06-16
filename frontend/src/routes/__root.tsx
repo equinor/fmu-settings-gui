@@ -14,6 +14,7 @@ import { Loading, QueryErrorBoundary } from "#components/common";
 import { Header } from "#components/Header";
 import { LockExpireNotification } from "#components/LockExpireNotification";
 import { ProjectRecoveryNotification } from "#components/ProjectRecoveryNotification";
+import { RmsExpireNotification } from "#components/RmsExpireNotification";
 import { Sidebar } from "#components/Sidebar";
 import type { RouterContext } from "#main";
 import { PageContainer } from "#styles/common";
@@ -117,6 +118,7 @@ function RootComponent() {
       <ToastContainer theme="colored" />
       <ProjectRecoveryNotification />
       <LockExpireNotification />
+      <RmsExpireNotification />
 
       <AppContainer>
         <div className="header">
