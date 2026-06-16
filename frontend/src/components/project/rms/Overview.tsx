@@ -1,7 +1,7 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 import type { RmsProject } from "#client";
@@ -15,6 +15,7 @@ import {
   rmsGetHorizonsQueryKey,
   rmsGetZonesQueryKey,
   rmsPostRmsProjectMutation,
+  sessionGetSessionQueryKey,
 } from "#client/@tanstack/react-query.gen";
 import {
   CancelButton,
@@ -38,11 +39,6 @@ import {
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
 import { getRmsProjectName } from "#utils/model";
-import {
-  getStorageItem,
-  STORAGENAME_RMS_PROJECT_OPEN,
-  setStorageItem,
-} from "#utils/storage";
 import { isVersionLessThan } from "#utils/string";
 import { Stratigraphy } from "./Stratigraphy";
 
@@ -237,12 +233,10 @@ function RmsInfo({ rmsData }: { rmsData: RmsProject }) {
 function RmsProjectActions({
   rmsData,
   projectReadOnly: projectIsReadOnly,
-  setIsRmsProjectOpen,
   isRmsProjectOpen,
 }: {
   rmsData: RmsProject | null | undefined;
   projectReadOnly: boolean | undefined;
-  setIsRmsProjectOpen: Dispatch<SetStateAction<boolean>>;
   isRmsProjectOpen: boolean;
 }) {
   const queryClient = useQueryClient();
@@ -256,7 +250,9 @@ function RmsProjectActions({
   const projectOpenMutation = useMutation({
     ...rmsPostRmsProjectMutation(),
     onSuccess: () => {
-      setIsRmsProjectOpen(true);
+      void queryClient.invalidateQueries({
+        queryKey: sessionGetSessionQueryKey(),
+      });
       void queryClient.invalidateQueries({
         queryKey: rmsGetHorizonsQueryKey(),
       });
@@ -265,8 +261,6 @@ function RmsProjectActions({
       });
     },
     onError: (error, variables) => {
-      setIsRmsProjectOpen(false);
-
       if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
         const message = (error.response.data as { detail?: string }).detail;
 
@@ -294,7 +288,9 @@ function RmsProjectActions({
   const projectCloseMutation = useMutation({
     ...rmsDeleteRmsProjectMutation(),
     onSuccess: () => {
-      setIsRmsProjectOpen(false);
+      void queryClient.invalidateQueries({
+        queryKey: sessionGetSessionQueryKey(),
+      });
     },
     meta: {
       errorPrefix: "Error closing the RMS project",
@@ -355,7 +351,7 @@ function RmsProjectActions({
 
             {isRmsProjectOpen && !projectOpenMutation.isPending && (
               <GeneralButton
-                label="Close RMS project for access"
+                label="Close RMS access"
                 variant="outlined"
                 isPending={projectCloseMutation.isPending}
                 onClick={() => {
@@ -379,22 +375,12 @@ function RmsProjectActions({
 export function Overview({
   rmsData,
   projectReadOnly,
+  isRmsProjectOpen,
 }: {
   rmsData: RmsProject | null | undefined;
   projectReadOnly: boolean;
+  isRmsProjectOpen: boolean;
 }) {
-  const [isRmsProjectOpen, setIsRmsProjectOpen] = useState(
-    getStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN, "boolean"),
-  );
-
-  useEffect(() => {
-    setStorageItem(
-      sessionStorage,
-      STORAGENAME_RMS_PROJECT_OPEN,
-      isRmsProjectOpen,
-    );
-  }, [isRmsProjectOpen]);
-
   return (
     <>
       <PageSectionWidthConstrained>
@@ -412,7 +398,6 @@ export function Overview({
         <RmsProjectActions
           rmsData={rmsData}
           projectReadOnly={projectReadOnly}
-          setIsRmsProjectOpen={setIsRmsProjectOpen}
           isRmsProjectOpen={isRmsProjectOpen}
         />
 

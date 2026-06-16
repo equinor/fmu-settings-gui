@@ -22,6 +22,7 @@ function Content() {
     <Overview
       rmsData={project.data.config.rms}
       projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+      isRmsProjectOpen={!!project.rmsExpiresAt}
     />
   ) : (
     <PageSectionWidthConstrained>

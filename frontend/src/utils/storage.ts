@@ -2,7 +2,6 @@ export const STORAGENAME_API_TOKEN = "apiToken";
 export const STORAGENAME_MASTERDATA_EDIT_MODE = "masterdataEditMode";
 export const STORAGENAME_PAGESECTION_NOTWIDTHCONSTRAINED_BASE =
   "pageSectionNotWidthConstrained";
-export const STORAGENAME_RMS_PROJECT_OPEN = "rmsProjectOpen";
 export const STORAGENAME_STRATIGRAPHY_EDIT_MODE = "stratigraphyEditMode";
 
 export function getStorageItem(storage: Storage, name: string): string | null;
