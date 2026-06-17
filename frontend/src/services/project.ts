@@ -20,7 +20,11 @@ import {
 } from "#client/@tanstack/react-query.gen";
 import type { LockStatus, ProjectGetMappingsData } from "#client/types.gen";
 import { projectLockStatusRefetchInterval } from "#config";
-import { HTTP_STATUS_401_UNAUTHORIZED } from "#utils/api";
+import {
+  HTTP_STATUS_401_UNAUTHORIZED,
+  HTTP_STATUS_404_NOT_FOUND,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+} from "#utils/api";
 import type { QueryServiceBase } from "#utils/query";
 
 export type MappingsPathOptions = ProjectGetMappingsData["path"];
@@ -50,25 +54,32 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
 
           return { status: true, data } as GetProject;
         } catch (error) {
-          let text = "";
-          let errorStatus: number | undefined;
           if (isAxiosError(error)) {
-            errorStatus = error.status;
+            const errorStatus = error.response?.status;
             // Use normal handling for unauthorized response
-            if (error.status === HTTP_STATUS_401_UNAUTHORIZED) {
-              return Promise.reject(error);
+            if (errorStatus === HTTP_STATUS_401_UNAUTHORIZED) {
+              throw error;
             }
-            if (error.response?.data && "detail" in error.response.data) {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-              text = String(error.response.data.detail);
+
+            if (
+              errorStatus === HTTP_STATUS_404_NOT_FOUND ||
+              errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT
+            ) {
+              let text = "";
+              if (error.response?.data && "detail" in error.response.data) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                text = String(error.response.data.detail);
+              }
+
+              return {
+                status: false,
+                text,
+                errorStatus,
+              } as GetProject;
             }
           }
 
-          return {
-            status: false,
-            text,
-            errorStatus,
-          } as GetProject;
+          throw error;
         }
       },
       queryKey: projectGetProjectQueryKey(options),

@@ -31,9 +31,11 @@ import ReactDOM from "react-dom/client";
 
 import type { Options, SessionPostSessionData, SessionResponse } from "#client";
 import {
+  projectGetProjectQueryKey,
   sessionPatchAccessTokenMutation,
   sessionPostSessionMutation,
   smdaGetHealthQueryKey,
+  userGetUserQueryKey,
 } from "#client/@tanstack/react-query.gen";
 import { client } from "#client/client.gen";
 import { msalConfig, ssoScopes } from "#config";
@@ -57,6 +59,8 @@ export interface RouterContext {
   selectProjectInvalidAttempt: number;
   setSelectProjectInvalidAttempt: Dispatch<SetStateAction<number>>;
   hasResponseInterceptor: boolean;
+  sessionReady: boolean;
+  sessionCreationFailed: boolean;
   accessToken: string;
   createSessionMutateAsync: UseMutateAsyncFunction<
     SessionResponse,
@@ -162,6 +166,8 @@ const router = createRouter({
       SetStateAction<number>
     >,
     hasResponseInterceptor: false,
+    sessionReady: false,
+    sessionCreationFailed: false,
     accessToken: undefined as unknown as string,
     createSessionMutateAsync: undefined as unknown as UseMutateAsyncFunction<
       SessionResponse,
@@ -187,9 +193,9 @@ export function App() {
   const [hasResponseInterceptor, setHasResponseInterceptor] = useState(false);
   const [accessToken, setAccessToken] = useState("");
   const [requestSessionCreation, setRequestSessionCreation] = useState(false);
-  const [sessionCreatedAt, setSessionCreatedAt] = useState<
-    number | undefined
-  >();
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionCreationFailed, setSessionCreationFailed] = useState(false);
   const [requestAcquireSsoAccessToken, setRequestAcquireSsoAccessToken] =
     useState(false);
   const acquireAndPatchSsoAccessTokenPromise = useRef<
@@ -279,30 +285,68 @@ export function App() {
   }, [acquireAndPatchSsoAccessToken, apiToken, apiTokenStatus.valid]);
 
   useEffect(() => {
+    if (!isApiTokenNonEmpty(apiToken)) {
+      setSessionReady(false);
+      setSessionCreationFailed(false);
+
+      return;
+    }
+
+    if (
+      hasResponseInterceptor &&
+      !sessionReady &&
+      !sessionCreationFailed &&
+      !isCreatingSession &&
+      !requestSessionCreation
+    ) {
+      setRequestSessionCreation(true);
+    }
+  }, [
+    apiToken,
+    hasResponseInterceptor,
+    isCreatingSession,
+    requestSessionCreation,
+    sessionCreationFailed,
+    sessionReady,
+  ]);
+
+  useEffect(() => {
     async function callCreateSessionAsync() {
       await createSessionAsync(createSessionMutateAsync, apiToken);
     }
 
-    if (requestSessionCreation) {
-      if (
-        sessionCreatedAt === undefined ||
-        Date.now() - sessionCreatedAt > 10_000
-      ) {
-        setSessionCreatedAt(Date.now());
-        void callCreateSessionAsync();
-        if (accessToken !== "") {
-          handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
-        }
-      }
+    if (requestSessionCreation && !isCreatingSession) {
+      setIsCreatingSession(true);
+      setSessionCreationFailed(false);
+      void callCreateSessionAsync()
+        .then(() => {
+          setSessionReady(true);
+          void queryClient.invalidateQueries({
+            queryKey: userGetUserQueryKey(),
+          });
+          void queryClient.invalidateQueries({
+            queryKey: projectGetProjectQueryKey(),
+          });
+          if (accessToken !== "") {
+            handleAddSsoAccessToken(patchAccessTokenMutate, accessToken);
+          }
+        })
+        .catch(() => {
+          setSessionReady(false);
+          setSessionCreationFailed(true);
+        })
+        .finally(() => {
+          setIsCreatingSession(false);
+        });
       setRequestSessionCreation(false);
     }
   }, [
     accessToken,
     apiToken,
     createSessionMutateAsync,
+    isCreatingSession,
     patchAccessTokenMutate,
     requestSessionCreation,
-    sessionCreatedAt,
   ]);
 
   useEffect(() => {
@@ -315,7 +359,13 @@ export function App() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: Invalidate router context when some of the content changes
   useEffect(() => {
     void router.invalidate();
-  }, [hasResponseInterceptor, accessToken, selectProjectInvalidAttempt]);
+  }, [
+    hasResponseInterceptor,
+    sessionReady,
+    sessionCreationFailed,
+    accessToken,
+    selectProjectInvalidAttempt,
+  ]);
 
   useEffect(() => {
     const id = msalInstance.addEventCallback(
@@ -357,6 +407,8 @@ export function App() {
         selectProjectInvalidAttempt,
         setSelectProjectInvalidAttempt,
         hasResponseInterceptor,
+        sessionReady,
+        sessionCreationFailed,
         accessToken,
         createSessionMutateAsync,
         setRequestAcquireSsoAccessToken,

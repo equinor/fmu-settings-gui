@@ -15,6 +15,7 @@ import {
   PageSectionSpacer,
   PageText,
 } from "#styles/common";
+import { HTTP_STATUS_422_UNPROCESSABLE_CONTENT } from "#utils/api";
 import { displayDateTime } from "#utils/datetime";
 
 export const Route = createFileRoute("/project/")({
@@ -67,9 +68,17 @@ function ProjectInfo({
   );
 }
 
-function ProjectNotFound({ text }: { text: string }) {
+function ProjectNotFound({
+  text,
+  isInvalidProjectConfig,
+}: {
+  text: string;
+  isInvalidProjectConfig: boolean;
+}) {
   const hasText = text !== "";
-  const lead = `No project selected${hasText ? ":" : "."}`;
+  const lead = isInvalidProjectConfig
+    ? `Project configuration is invalid${hasText ? ":" : "."}`
+    : `No project selected${hasText ? ":" : "."}`;
 
   return (
     <>
@@ -83,6 +92,8 @@ function ProjectNotFound({ text }: { text: string }) {
 function Content() {
   const project = useProject();
   const projectReadOnly = !(project.lockStatus?.is_lock_acquired ?? false);
+  const isInvalidProjectConfig =
+    project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT;
 
   return (
     <>
@@ -110,7 +121,10 @@ function Content() {
         </>
       ) : (
         <>
-          <ProjectNotFound text={project.text ?? ""} />
+          <ProjectNotFound
+            text={project.text ?? ""}
+            isInvalidProjectConfig={isInvalidProjectConfig}
+          />
 
           <ProjectSelector />
         </>

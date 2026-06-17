@@ -25,6 +25,7 @@ import { LockIcon } from "#components/LockStatus";
 import { useProject } from "#services/project";
 import { useTaskList } from "#services/tasks";
 import { GenericDialog, PageText } from "#styles/common";
+import { HTTP_STATUS_422_UNPROCESSABLE_CONTENT } from "#utils/api";
 import { AppMenu } from "./AppMenu";
 import {
   FmuLogo,
@@ -105,6 +106,8 @@ function ProjectInfo() {
             value={project.data.config.model?.revision}
           />
         </>
+      ) : project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT ? (
+        "Project configuration is invalid"
       ) : (
         "No project selected"
       )}

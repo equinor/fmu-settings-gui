@@ -11,6 +11,7 @@ import {
   PageSectionSpacer,
   PageText,
 } from "#styles/common";
+import { HTTP_STATUS_422_UNPROCESSABLE_CONTENT } from "#utils/api";
 import { displayDateTime } from "#utils/datetime";
 
 export const Route = createFileRoute("/")({
@@ -78,7 +79,11 @@ function RouteComponent() {
         </>
       ) : (
         <>
-          <PageText>No project selected.</PageText>
+          <PageText>
+            {project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT
+              ? "Project configuration is invalid."
+              : "No project selected."}
+          </PageText>
 
           <ProjectSelector />
         </>

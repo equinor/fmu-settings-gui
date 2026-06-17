@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
-import { QueryErrorBoundary } from "#components/common";
+import { Loading, QueryErrorBoundary } from "#components/common";
 import { Header } from "#components/Header";
 import { LockExpireNotification } from "#components/LockExpireNotification";
 import { ProjectRecoveryNotification } from "#components/ProjectRecoveryNotification";
@@ -36,7 +36,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     }
     context.setApiTokenStatus(apiTokenStatus);
 
-    if (context.hasResponseInterceptor) {
+    if (context.hasResponseInterceptor && context.sessionReady) {
       await context.queryClient
         .fetchQuery({
           ...userGetUserOptions(),
@@ -71,7 +71,8 @@ function StandardErrorComponent(error: Error) {
 }
 
 function RootComponent() {
-  const { apiTokenStatus } = Route.useRouteContext();
+  const { apiTokenStatus, sessionReady, sessionCreationFailed } =
+    Route.useRouteContext();
 
   if (!apiTokenStatus.present || !apiTokenStatus.valid) {
     return (
@@ -80,6 +81,30 @@ function RootComponent() {
           {!apiTokenStatus.present ? "Missing" : "Invalid"} token, please close
           browser tab and open URL again
         </div>
+        <TanStackRouterDevtools />
+        <ReactQueryDevtools />
+      </>
+    );
+  }
+
+  if (sessionCreationFailed) {
+    return (
+      <>
+        <GlobalStyle />
+        <ToastContainer theme="colored" />
+        <div>Unable to create a session.</div>
+        <TanStackRouterDevtools />
+        <ReactQueryDevtools />
+      </>
+    );
+  }
+
+  if (!sessionReady) {
+    return (
+      <>
+        <GlobalStyle />
+        <ToastContainer theme="colored" />
+        <Loading />
         <TanStackRouterDevtools />
         <ReactQueryDevtools />
       </>
