@@ -134,7 +134,7 @@ export const GenericDialog = styled(Dialog).attrs<{
   $minWidth?: string;
   $maxWidth?: string;
   $width?: string;
-}>(({ $minWidth = "10em", $maxWidth = undefined, $width = undefined }) => ({
+}>(({ $minWidth = "10em", $maxWidth, $width }) => ({
   style: {
     minWidth: $minWidth,
     maxWidth: $maxWidth,

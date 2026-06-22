@@ -1,4 +1,4 @@
-import type { AnyFieldMetaBase, Updater } from "@tanstack/react-form";
+import type { AnyFieldLikeMetaBase, Updater } from "@tanstack/react-form";
 import { use } from "react";
 
 import type {
@@ -69,7 +69,7 @@ export function createProjectMappingsLookup(
 export function handleErrorUnknownInitialValue(
   setFieldMeta: (
     field: keyof ElementMapping,
-    updater: Updater<AnyFieldMetaBase>,
+    updater: Updater<AnyFieldLikeMetaBase>,
   ) => void,
   field: keyof ElementMapping,
   array: OptionProps[],

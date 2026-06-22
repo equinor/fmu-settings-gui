@@ -96,7 +96,7 @@ function isApiUrlSmdaHealthcheck(url?: string): boolean {
 export function isExternalApi(
   headers: RawAxiosResponseHeaders | AxiosResponseHeaders | undefined,
 ) {
-  return headers && headers[UPSTREAMSOURCE_HEADER] === "SMDA";
+  return headers?.[UPSTREAMSOURCE_HEADER] === "SMDA";
 }
 
 export async function createSessionAsync(

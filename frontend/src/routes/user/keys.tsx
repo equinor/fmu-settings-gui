@@ -54,7 +54,7 @@ function KeysTextFieldForm({
     meta: { errorPrefix: "Error updating API key" },
   });
 
-  const name = String(apiKey);
+  const name = apiKey;
 
   const mutationCallback = ({
     formValue,

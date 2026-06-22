@@ -8,132 +8,56 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as ProjectIndexRouteImport } from "./routes/project/index";
+import { Route as UserRecoveryRouteImport } from "./routes/user/recovery";
+import { Route as UserKeysRouteImport } from "./routes/user/keys";
+import { Route as ProjectStratigraphyRouteImport } from "./routes/project/stratigraphy";
+import { Route as ProjectRmsRouteImport } from "./routes/project/rms";
+import { Route as ProjectMasterdataRouteImport } from "./routes/project/masterdata";
+import { Route as ProjectHistoryRouteImport } from "./routes/project/history";
 
-import { Route as rootRoute } from "./routes/__root";
-import { Route as IndexImport } from "./routes/index";
-import { Route as ProjectIndexImport } from "./routes/project/index";
-import { Route as UserRecoveryImport } from "./routes/user/recovery";
-import { Route as UserKeysImport } from "./routes/user/keys";
-import { Route as ProjectStratigraphyImport } from "./routes/project/stratigraphy";
-import { Route as ProjectRmsImport } from "./routes/project/rms";
-import { Route as ProjectMasterdataImport } from "./routes/project/masterdata";
-import { Route as ProjectHistoryImport } from "./routes/project/history";
-
-// Create/Update Routes
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-const ProjectIndexRoute = ProjectIndexImport.update({
+const ProjectIndexRoute = ProjectIndexRouteImport.update({
   id: "/project/",
   path: "/project/",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-const UserRecoveryRoute = UserRecoveryImport.update({
+const UserRecoveryRoute = UserRecoveryRouteImport.update({
   id: "/user/recovery",
   path: "/user/recovery",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-const UserKeysRoute = UserKeysImport.update({
+const UserKeysRoute = UserKeysRouteImport.update({
   id: "/user/keys",
   path: "/user/keys",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-const ProjectStratigraphyRoute = ProjectStratigraphyImport.update({
+const ProjectStratigraphyRoute = ProjectStratigraphyRouteImport.update({
   id: "/project/stratigraphy",
   path: "/project/stratigraphy",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-const ProjectRmsRoute = ProjectRmsImport.update({
+const ProjectRmsRoute = ProjectRmsRouteImport.update({
   id: "/project/rms",
   path: "/project/rms",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-const ProjectMasterdataRoute = ProjectMasterdataImport.update({
+const ProjectMasterdataRoute = ProjectMasterdataRouteImport.update({
   id: "/project/masterdata",
   path: "/project/masterdata",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-const ProjectHistoryRoute = ProjectHistoryImport.update({
+const ProjectHistoryRoute = ProjectHistoryRouteImport.update({
   id: "/project/history",
   path: "/project/history",
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any);
-
-// Populate the FileRoutesByPath interface
-
-declare module "@tanstack/react-router" {
-  interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/project/history": {
-      id: "/project/history";
-      path: "/project/history";
-      fullPath: "/project/history";
-      preLoaderRoute: typeof ProjectHistoryImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/project/masterdata": {
-      id: "/project/masterdata";
-      path: "/project/masterdata";
-      fullPath: "/project/masterdata";
-      preLoaderRoute: typeof ProjectMasterdataImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/project/rms": {
-      id: "/project/rms";
-      path: "/project/rms";
-      fullPath: "/project/rms";
-      preLoaderRoute: typeof ProjectRmsImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/project/stratigraphy": {
-      id: "/project/stratigraphy";
-      path: "/project/stratigraphy";
-      fullPath: "/project/stratigraphy";
-      preLoaderRoute: typeof ProjectStratigraphyImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/user/keys": {
-      id: "/user/keys";
-      path: "/user/keys";
-      fullPath: "/user/keys";
-      preLoaderRoute: typeof UserKeysImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/user/recovery": {
-      id: "/user/recovery";
-      path: "/user/recovery";
-      fullPath: "/user/recovery";
-      preLoaderRoute: typeof UserRecoveryImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/project/": {
-      id: "/project/";
-      path: "/project";
-      fullPath: "/project";
-      preLoaderRoute: typeof ProjectIndexImport;
-      parentRoute: typeof rootRoute;
-    };
-  }
-}
-
-// Create and export the route tree
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -143,9 +67,8 @@ export interface FileRoutesByFullPath {
   "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
-  "/project": typeof ProjectIndexRoute;
+  "/project/": typeof ProjectIndexRoute;
 }
-
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/project/history": typeof ProjectHistoryRoute;
@@ -156,9 +79,8 @@ export interface FileRoutesByTo {
   "/user/recovery": typeof UserRecoveryRoute;
   "/project": typeof ProjectIndexRoute;
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute;
+  __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
@@ -168,7 +90,6 @@ export interface FileRoutesById {
   "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
@@ -179,7 +100,7 @@ export interface FileRouteTypes {
     | "/project/stratigraphy"
     | "/user/keys"
     | "/user/recovery"
-    | "/project";
+    | "/project/";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
@@ -202,7 +123,6 @@ export interface FileRouteTypes {
     | "/project/";
   fileRoutesById: FileRoutesById;
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   ProjectHistoryRoute: typeof ProjectHistoryRoute;
@@ -212,6 +132,67 @@ export interface RootRouteChildren {
   UserKeysRoute: typeof UserKeysRoute;
   UserRecoveryRoute: typeof UserRecoveryRoute;
   ProjectIndexRoute: typeof ProjectIndexRoute;
+}
+
+declare module "@tanstack/react-router" {
+  interface FileRoutesByPath {
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/project/": {
+      id: "/project/";
+      path: "/project";
+      fullPath: "/project/";
+      preLoaderRoute: typeof ProjectIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/user/recovery": {
+      id: "/user/recovery";
+      path: "/user/recovery";
+      fullPath: "/user/recovery";
+      preLoaderRoute: typeof UserRecoveryRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/user/keys": {
+      id: "/user/keys";
+      path: "/user/keys";
+      fullPath: "/user/keys";
+      preLoaderRoute: typeof UserKeysRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/project/stratigraphy": {
+      id: "/project/stratigraphy";
+      path: "/project/stratigraphy";
+      fullPath: "/project/stratigraphy";
+      preLoaderRoute: typeof ProjectStratigraphyRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/project/rms": {
+      id: "/project/rms";
+      path: "/project/rms";
+      fullPath: "/project/rms";
+      preLoaderRoute: typeof ProjectRmsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/project/masterdata": {
+      id: "/project/masterdata";
+      path: "/project/masterdata";
+      fullPath: "/project/masterdata";
+      preLoaderRoute: typeof ProjectMasterdataRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/project/history": {
+      id: "/project/history";
+      path: "/project/history";
+      fullPath: "/project/history";
+      preLoaderRoute: typeof ProjectHistoryRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -224,51 +205,6 @@ const rootRouteChildren: RootRouteChildren = {
   UserRecoveryRoute: UserRecoveryRoute,
   ProjectIndexRoute: ProjectIndexRoute,
 };
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>();
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/project/history",
-        "/project/masterdata",
-        "/project/rms",
-        "/project/stratigraphy",
-        "/user/keys",
-        "/user/recovery",
-        "/project/"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/project/history": {
-      "filePath": "project/history.tsx"
-    },
-    "/project/masterdata": {
-      "filePath": "project/masterdata.tsx"
-    },
-    "/project/rms": {
-      "filePath": "project/rms.tsx"
-    },
-    "/project/stratigraphy": {
-      "filePath": "project/stratigraphy.tsx"
-    },
-    "/user/keys": {
-      "filePath": "user/keys.tsx"
-    },
-    "/user/recovery": {
-      "filePath": "user/recovery.tsx"
-    },
-    "/project/": {
-      "filePath": "project/index.tsx"
-    }
-  }
-}
-ROUTE_MANIFEST_END */

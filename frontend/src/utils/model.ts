@@ -43,11 +43,11 @@ export function emptyIdentifierUuid(): IdentifierUuidType {
 
 export function emptyMasterdata(): Smda {
   return {
-    coordinate_system: emptyIdentifierUuid() as CoordinateSystem,
+    coordinate_system: emptyIdentifierUuid(),
     country: [] as CountryItem[],
     discovery: [] as DiscoveryItem[],
     field: [] as FieldItem[],
-    stratigraphic_column: emptyIdentifierUuid() as StratigraphicColumn,
+    stratigraphic_column: emptyIdentifierUuid(),
   };
 }
 

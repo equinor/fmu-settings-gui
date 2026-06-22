@@ -18,7 +18,7 @@ import {
 } from "react";
 import { toast } from "react-toastify";
 
-import type { CoordinateSystem, Smda, StratigraphicColumn } from "#client";
+import type { Smda } from "#client";
 import {
   projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
@@ -722,7 +722,7 @@ export function Edit({
                           label="Coordinate system"
                           value={field.state.value.uuid}
                           options={identifierUuidArrayToOptionsArray([
-                            emptyIdentifierUuid() as CoordinateSystem,
+                            emptyIdentifierUuid(),
                             ...projectData.coordinateSystemsOptions,
                           ])}
                           loadingOptions={smdaMasterdata.isPending}
@@ -731,7 +731,7 @@ export function Edit({
                               findOptionValueInNameUuidArray(
                                 projectData.coordinateSystems,
                                 value,
-                              ) ?? (emptyIdentifierUuid() as CoordinateSystem),
+                              ) ?? emptyIdentifierUuid(),
                             );
                           }}
                         ></field.Select>
@@ -753,7 +753,7 @@ export function Edit({
                           label="Stratigraphic column"
                           value={field.state.value.uuid}
                           options={identifierUuidArrayToOptionsArray([
-                            emptyIdentifierUuid() as StratigraphicColumn,
+                            emptyIdentifierUuid(),
                             ...projectData.stratigraphicColumnsOptions,
                           ])}
                           loadingOptions={smdaMasterdata.isPending}
@@ -762,8 +762,7 @@ export function Edit({
                               findOptionValueInNameUuidArray(
                                 projectData.stratigraphicColumns,
                                 value,
-                              ) ??
-                                (emptyIdentifierUuid() as StratigraphicColumn),
+                              ) ?? emptyIdentifierUuid(),
                             );
                           }}
                         />

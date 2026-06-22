@@ -52,7 +52,7 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
             throwOnError: true,
           });
 
-          return { status: true, data } as GetProject;
+          return { status: true, data };
         } catch (error) {
           if (isAxiosError(error)) {
             const errorStatus = error.response?.status;
@@ -75,7 +75,7 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
                 status: false,
                 text,
                 errorStatus,
-              } as GetProject;
+              };
             }
           }
 
@@ -89,6 +89,7 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
   const queryClient = useQueryClient();
 
   const { data: lockStatus } = useQuery({
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     ...queryOptions({
       queryFn: async ({ queryKey, signal }) => {
         const previousLockStatus = queryClient.getQueryData<LockStatus>(

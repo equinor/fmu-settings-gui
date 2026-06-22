@@ -58,7 +58,6 @@ import {
   useMappingData,
 } from "../mapping/functions";
 import { MappingDataContext } from "../mapping/MappingData";
-import type { MappingData } from "../mapping/types";
 import {
   createSpecialOptions,
   getElementMappingSmdaName,
@@ -584,7 +583,7 @@ export function Overview({
         !projectReadOnly &&
         smdaHealthStatus &&
         stratigraphicColumn !== undefined,
-    } as MappingData;
+    };
   }, [
     elementMappings,
     projectReadOnly,

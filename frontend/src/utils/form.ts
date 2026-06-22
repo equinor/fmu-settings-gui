@@ -26,7 +26,7 @@ export function findOptionValueInOptionsArray(
   array: OptionProps[],
   value: string,
 ): OptionProps | undefined {
-  const result = array.filter((element) => String(element.value) === value);
+  const result = array.filter((element) => element.value === value);
 
   return result.length === 1 ? result[0] : undefined;
 }
@@ -35,7 +35,7 @@ export function findOptionValueInNameUuidArray<T extends NameUuidType>(
   array: T[],
   value: string,
 ): T | undefined {
-  const result = array.filter((element) => String(element.uuid) === value);
+  const result = array.filter((element) => element.uuid === value);
 
   return result.length === 1 ? result[0] : undefined;
 }

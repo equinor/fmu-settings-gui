@@ -1,5 +1,5 @@
 import type {
-  AnyFieldMetaBase,
+  AnyFieldLikeMetaBase,
   AnyFormApi,
   Updater,
 } from "@tanstack/react-form";
@@ -253,7 +253,10 @@ export function createItemLists(
 }
 
 export function handleErrorUnknownInitialValue(
-  setFieldMeta: (field: keyof Smda, updater: Updater<AnyFieldMetaBase>) => void,
+  setFieldMeta: (
+    field: keyof Smda,
+    updater: Updater<AnyFieldLikeMetaBase>,
+  ) => void,
   field: keyof Smda,
   array: IdentifierUuidType[],
   initialValue: IdentifierUuidType,
