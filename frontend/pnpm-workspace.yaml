@@ -4,6 +4,7 @@ allowBuilds:
 minimumReleaseAge: 10080 # age in minutes (7 days)
 
 overrides:
+  '@babel/core@<=7.29.0': '>=7.29.6 <8'
   ajv@<6.14.0: '>=6.14.0 <7'
   brace-expansion@<1.1.13: 1.1.13
   brace-expansion@>=2.0.0 <2.0.3: '>=2.0.3'
@@ -12,11 +13,13 @@ overrides:
   diff@>=6.0.0 <8.0.3: '>=8.0.3'
   flatted@<=3.4.1: '>=3.4.2'
   follow-redirects@<=1.15.11: '>=1.16.0'
+  form-data@>=4.0.0 <4.0.6: '>=4.0.6 <5'
   handlebars@<4.7.9: '>=4.7.9'
+  js-yaml@<=4.1.1: '>=4.2.0 <5'
   lodash@>=4.0.0 <=4.17.23: '>=4.18.0'
   minimatch@>=10.0.0 <10.2.3: '>=10.2.3'
   picomatch@<2.3.2: 2.3.2
   picomatch@>=4.0.0 <4.0.4: '>=4.0.4'
   postcss@<8.5.10: '>=8.5.10'
   rollup@>=4.0.0 <4.59.0: '>=4.59.0'
-  tar@<=7.5.10: '>=7.5.11'
+  tar@<=7.5.15: '>=7.5.16 <8'
