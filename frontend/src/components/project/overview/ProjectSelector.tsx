@@ -13,7 +13,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useRouteContext } from "@tanstack/react-router";
-import { type ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -79,7 +79,7 @@ function ProjectSelectorForm({
   isDialogOpen: boolean;
 }) {
   const [initConfirmDialogOpen, setInitConfirmDialogOpen] = useState(false);
-  const [helperTextRecentProjects, sethelperTextRecentProjects] = useState("");
+  const [helperTextRecentProjects, setHelperTextRecentProjects] = useState("");
   const [helperTextProjectPath, setHelperTextProjectPath] = useState("");
   const [valueSource, setValueSource] = useState<ValueSource>("");
   const codes = [
@@ -90,7 +90,7 @@ function ProjectSelectorForm({
   ];
 
   const closeProjectSelector = ({ formReset }: { formReset: () => void }) => {
-    sethelperTextRecentProjects("");
+    setHelperTextRecentProjects("");
     setHelperTextProjectPath("");
     setValueSource("");
     formReset();
@@ -190,7 +190,7 @@ function ProjectSelectorForm({
               }
 
               if (valueSource === "recentProjectPath") {
-                sethelperTextRecentProjects(detail);
+                setHelperTextRecentProjects(detail);
               } else if (valueSource === "projectPath") {
                 setHelperTextProjectPath(detail);
               }
@@ -214,11 +214,6 @@ function ProjectSelectorForm({
     },
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset project path helper text whenever projectPath changes
-  useEffect(() => {
-    setHelperTextProjectPath("");
-  }, [form.state.values.projectPath]);
-
   return (
     <EditDialog open={isDialogOpen} $minWidth="40em">
       <form
@@ -237,7 +232,7 @@ function ProjectSelectorForm({
             name="recentProjectPath"
             listeners={{
               onBlur: () => {
-                sethelperTextRecentProjects("");
+                setHelperTextRecentProjects("");
               },
               onChange: () => {
                 setValueSource("recentProjectPath");
@@ -263,6 +258,7 @@ function ProjectSelectorForm({
               },
               onChange: () => {
                 setValueSource("projectPath");
+                setHelperTextProjectPath("");
               },
             }}
           >

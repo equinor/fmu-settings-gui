@@ -313,13 +313,13 @@ export function Edit({
   const [confirmItemsOperationDialogOpen, setConfirmItemsOperationDialogOpen] =
     useState(false);
   const [smdaFields, setSmdaFields] = useState<Array<string>>([]);
-  const [projectData, setProjectData] = useState<FormMasterdataProject>(
+  const [projectData, setProjectData] = useState<FormMasterdataProject>(() =>
     emptyFormMasterdataProject(),
   );
-  const [availableData, setAvailableData] = useState<FormMasterdataBase>(
+  const [availableData, setAvailableData] = useState<FormMasterdataBase>(() =>
     emptyFormMasterdataBase(),
   );
-  const [orphanData, setOrphanData] = useState<FormMasterdataSub>(
+  const [orphanData, setOrphanData] = useState<FormMasterdataSub>(() =>
     emptyFormMasterdataSub({ withDummyGroup: true }),
   );
   const [isOngoingItemsOperation, setIsOngoingItemsOperation] = useState(false);
@@ -481,13 +481,15 @@ export function Edit({
 
   useEffect(() => {
     if (isOpen) {
-      setSmdaFields(
-        projectMasterdata.field
-          .map((field) => field.identifier)
-          .sort((a, b) => stringCompare(a, b)),
-      );
+      void Promise.resolve().then(() => {
+        setSmdaFields(
+          projectMasterdata.field
+            .map((field) => field.identifier)
+            .sort((a, b) => stringCompare(a, b)),
+        );
+      });
     }
-  }, [isOpen, projectMasterdata]);
+  }, [isOpen, projectMasterdata.field]);
 
   useEffect(() => {
     if (
@@ -519,7 +521,9 @@ export function Edit({
       smdaMasterdata.isSuccess &&
       Object.keys(smdaMasterdata.data).length
     ) {
-      startItemsOperation(selectedItems);
+      void Promise.resolve().then(() => {
+        startItemsOperation(selectedItems);
+      });
     }
   }, [
     isOngoingItemsOperation,
@@ -540,13 +544,16 @@ export function Edit({
   function addFields(fields: Array<string>) {
     setSmdaFields((smdaFields) =>
       fields
-        .reduce((acc, curr) => {
-          if (!acc.includes(curr)) {
-            acc.push(curr);
-          }
+        .reduce<Array<string>>(
+          (acc, curr) => {
+            if (!acc.includes(curr)) {
+              acc.push(curr);
+            }
 
-          return acc;
-        }, smdaFields)
+            return acc;
+          },
+          [...smdaFields],
+        )
         .sort((a, b) => stringCompare(a, b)),
     );
   }

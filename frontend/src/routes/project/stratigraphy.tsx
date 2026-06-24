@@ -23,7 +23,7 @@ export const Route = createFileRoute("/project/stratigraphy")({
 });
 
 function Content() {
-  const [editMode, setEditMode] = useState(
+  const [editMode, setEditMode] = useState(() =>
     getStorageItem(
       sessionStorage,
       STORAGENAME_STRATIGRAPHY_EDIT_MODE,

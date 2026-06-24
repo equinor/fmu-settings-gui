@@ -8,7 +8,14 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "react-toastify";
 
 import type { RmsProject, StratigraphicColumn } from "#client";
@@ -553,24 +560,47 @@ export function Overview({
   projectReadOnly: boolean;
   editMode: boolean;
 }) {
-  const [elementMappings, setElementMappings] = useState<ElementMappings>({});
-
   const { data: projectMappings } = useSuspenseQuery(
     projectGetMappingsOptions({
       path: mappingsPaths.stratigraphyRms,
     }),
   );
 
-  useEffect(() => {
+  const baseElementMappings = useMemo(() => {
     const lookup = createProjectMappingsLookup("stratigraphy", projectMappings);
 
-    const elementMappings: ElementMappings = {
+    return {
       ...createElementMappings("horizon", rmsProject.horizons ?? [], lookup),
       ...createElementMappings("zone", rmsProject.zones ?? [], lookup),
     };
-
-    setElementMappings(elementMappings);
   }, [projectMappings, rmsProject.horizons, rmsProject.zones]);
+
+  const [elementMappingsState, setElementMappingsState] = useState(() => ({
+    base: baseElementMappings,
+    mappings: baseElementMappings,
+  }));
+  const elementMappings =
+    elementMappingsState.base === baseElementMappings
+      ? elementMappingsState.mappings
+      : baseElementMappings;
+  const setElementMappings: Dispatch<SetStateAction<ElementMappings>> =
+    useCallback(
+      (value) => {
+        setElementMappingsState((current) => {
+          const currentMappings =
+            current.base === baseElementMappings
+              ? current.mappings
+              : baseElementMappings;
+
+          return {
+            base: baseElementMappings,
+            mappings:
+              typeof value === "function" ? value(currentMappings) : value,
+          };
+        });
+      },
+      [baseElementMappings],
+    );
 
   const mappingData = useMemo(() => {
     return {
@@ -590,6 +620,7 @@ export function Overview({
     editMode,
     smdaHealthStatus,
     stratigraphicColumn,
+    setElementMappings,
   ]);
 
   return (
