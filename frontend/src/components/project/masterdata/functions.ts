@@ -104,8 +104,8 @@ export function createOptions(
   const defaultCoordinateSystems = Object.entries(smdaMasterdataGrouped).reduce<
     Record<string, SmdaMasterdataCoordinateSystemFields>
   >((acc, fieldData) => {
-    const [field, masterdata] = fieldData;
-    if (projectFields.find((f) => f.identifier === field)) {
+    const [fieldUuid, masterdata] = fieldData;
+    if (projectFields.find((f) => f.uuid === fieldUuid)) {
       const csId = masterdata.field_coordinate_system.uuid;
       if (!(csId in acc)) {
         acc[csId] = {
@@ -143,14 +143,12 @@ export function createOptions(
     // The list of coordinate systems is the same for all SMDA fields
     coordinateSystems:
       fieldCount > 0
-        ? smdaMasterdataGrouped[projectFields[0].identifier].coordinate_systems
+        ? smdaMasterdataGrouped[projectFields[0].uuid].coordinate_systems
         : [],
     coordinateSystemsOptions:
       fieldCount > 0
         ? dcsOptions.concat(
-            smdaMasterdataGrouped[
-              projectFields[0].identifier
-            ].coordinate_systems
+            smdaMasterdataGrouped[projectFields[0].uuid].coordinate_systems
               .filter((cs) => !dcsOptions.some((dcs) => dcs.uuid === cs.uuid))
               .sort((a, b) => stringCompare(a.identifier, b.identifier)),
           )
@@ -158,8 +156,8 @@ export function createOptions(
     stratigraphicColumns: Object.entries(smdaMasterdataGrouped).reduce<
       Array<StratigraphicColumn>
     >((acc, fieldData) => {
-      const [field, masterdata] = fieldData;
-      if (projectFields.find((f) => f.identifier === field)) {
+      const [fieldUuid, masterdata] = fieldData;
+      if (projectFields.find((f) => f.uuid === fieldUuid)) {
         acc.push(...masterdata.stratigraphic_columns);
       }
 
@@ -167,13 +165,15 @@ export function createOptions(
     }, []),
     stratigraphicColumnsOptions: Object.entries(smdaMasterdataGrouped)
       .reduce<Array<StratigraphicColumn>>((acc, fieldData) => {
-        const [field, masterdata] = fieldData;
-        if (projectFields.find((f) => f.identifier === field)) {
+        const [fieldUuid, masterdata] = fieldData;
+        const field = projectFields.find((f) => f.uuid === fieldUuid);
+        if (field) {
           acc.push(
             ...masterdata.stratigraphic_columns.map((value) => ({
               ...value,
               identifier:
-                value.identifier + (fieldCount > 1 ? ` [${field}]` : ""),
+                value.identifier +
+                (fieldCount > 1 ? ` [${field.identifier}]` : ""),
             })),
           );
         }
@@ -191,7 +191,7 @@ export function createItemLists(
   projectDiscoveries: Array<DiscoveryItem>,
 ): [ItemLists, ItemLists, ItemLists] {
   const project = projectFields.reduce<ItemLists>((acc, curr) => {
-    acc.discovery[curr.identifier] = [];
+    acc.discovery[curr.uuid] = [];
 
     return acc;
   }, emptyItemLists());
