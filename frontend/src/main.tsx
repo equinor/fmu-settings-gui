@@ -273,21 +273,27 @@ export function App() {
           acquireAndPatchSsoAccessToken,
         ),
       );
-      setHasResponseInterceptor(true);
+      void Promise.resolve().then(() => {
+        setHasResponseInterceptor(true);
+      });
     }
 
     return () => {
       if (id !== undefined) {
         client.instance.interceptors.response.eject(id);
-        setHasResponseInterceptor(false);
+        void Promise.resolve().then(() => {
+          setHasResponseInterceptor(false);
+        });
       }
     };
   }, [acquireAndPatchSsoAccessToken, apiToken, apiTokenStatus.valid]);
 
   useEffect(() => {
     if (!isApiTokenNonEmpty(apiToken)) {
-      setSessionReady(false);
-      setSessionCreationFailed(false);
+      void Promise.resolve().then(() => {
+        setSessionReady(false);
+        setSessionCreationFailed(false);
+      });
 
       return;
     }
@@ -299,7 +305,9 @@ export function App() {
       !isCreatingSession &&
       !requestSessionCreation
     ) {
-      setRequestSessionCreation(true);
+      void Promise.resolve().then(() => {
+        setRequestSessionCreation(true);
+      });
     }
   }, [
     apiToken,
@@ -316,8 +324,10 @@ export function App() {
     }
 
     if (requestSessionCreation && !isCreatingSession) {
-      setIsCreatingSession(true);
-      setSessionCreationFailed(false);
+      void Promise.resolve().then(() => {
+        setIsCreatingSession(true);
+        setSessionCreationFailed(false);
+      });
       void callCreateSessionAsync()
         .then(() => {
           setSessionReady(true);
@@ -338,7 +348,9 @@ export function App() {
         .finally(() => {
           setIsCreatingSession(false);
         });
-      setRequestSessionCreation(false);
+      void Promise.resolve().then(() => {
+        setRequestSessionCreation(false);
+      });
     }
   }, [
     accessToken,
@@ -352,7 +364,9 @@ export function App() {
   useEffect(() => {
     if (requestAcquireSsoAccessToken) {
       void acquireAndPatchSsoAccessToken();
-      setRequestAcquireSsoAccessToken(false);
+      void Promise.resolve().then(() => {
+        setRequestAcquireSsoAccessToken(false);
+      });
     }
   }, [acquireAndPatchSsoAccessToken, requestAcquireSsoAccessToken]);
 

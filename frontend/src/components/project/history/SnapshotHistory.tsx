@@ -460,7 +460,9 @@ export function SnapshotHistory({
   );
 
   useEffect(() => {
-    setMaxRevisions(cacheMaxRevisions);
+    void Promise.resolve().then(() => {
+      setMaxRevisions(cacheMaxRevisions);
+    });
   }, [cacheMaxRevisions]);
 
   const cacheQueries = useQueries({
@@ -562,13 +564,17 @@ export function SnapshotHistory({
 
   useEffect(() => {
     if (allCaches.length === 0) {
-      setSelectedCacheId(null);
+      void Promise.resolve().then(() => {
+        setSelectedCacheId(null);
+      });
 
       return;
     }
 
     if (selectedCacheId === null || !allCaches.includes(selectedCacheId)) {
-      setSelectedCacheId(allCaches[0]);
+      void Promise.resolve().then(() => {
+        setSelectedCacheId(allCaches[0]);
+      });
     }
   }, [allCaches, selectedCacheId]);
 
@@ -698,16 +704,20 @@ export function SnapshotHistory({
 
   useEffect(() => {
     if (!hasProject) {
-      setIsDiffDialogOpen(false);
-      setIsRestoreDialogOpen(false);
-      setIsMaxRevisionsDialogOpen(false);
-      setSelectedCacheId(null);
+      void Promise.resolve().then(() => {
+        setIsDiffDialogOpen(false);
+        setIsRestoreDialogOpen(false);
+        setIsMaxRevisionsDialogOpen(false);
+        setSelectedCacheId(null);
+      });
     }
   }, [hasProject]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset pre-restore state when resource changes.
   useEffect(() => {
-    setLastRestoredCacheId(null);
+    void Promise.resolve().then(() => {
+      setLastRestoredCacheId(null);
+    });
   }, [resource]);
 
   return (
