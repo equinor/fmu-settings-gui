@@ -174,7 +174,7 @@ export const ChangeInfoSchema = {
 
 export const ChangeTypeSchema = {
     type: 'string',
-    enum: ['update', 'remove', 'add', 'reset', 'merge', 'copy', 'init'],
+    enum: ['init', 'update', 'remove', 'add', 'reset', 'restore', 'merge', 'copy'],
     title: 'ChangeType',
     description: 'The types of change that can be made on a file.'
 } as const;
@@ -625,7 +625,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.33.0'
+            default: '0.33.1.dev7+g6feb87797.d20260624'
         }
     },
     type: 'object',

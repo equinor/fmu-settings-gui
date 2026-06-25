@@ -53,6 +53,7 @@ const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   merge: "Merged",
   remove: "Removed",
   reset: "Reset",
+  restore: "Restored",
   update: "Updated",
 };
 

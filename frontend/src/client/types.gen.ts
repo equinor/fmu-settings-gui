@@ -101,7 +101,7 @@ export type ChangeInfo = {
 /**
  * The types of change that can be made on a file.
  */
-export type ChangeType = 'update' | 'remove' | 'add' | 'reset' | 'merge' | 'copy' | 'init';
+export type ChangeType = 'init' | 'update' | 'remove' | 'add' | 'reset' | 'restore' | 'merge' | 'copy';
 
 /**
  * The security classification for a given data object.
