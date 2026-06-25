@@ -5,7 +5,10 @@ import { Suspense } from "react";
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
 import { Loading, QueryErrorBoundary } from "#components/common";
 import { PageHeader, PageText } from "#styles/common";
-import { HTTP_STATUS_404_NOT_FOUND } from "#utils/api";
+import {
+  HTTP_STATUS_404_NOT_FOUND,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+} from "#utils/api";
 import { displayDateTime } from "#utils/datetime";
 import {
   ChangeDescription,
@@ -21,13 +24,22 @@ function Content() {
   const { data } = useSuspenseQuery({
     ...projectGetChangelogOptions(),
     meta: {
-      preventDefaultErrorHandling: [HTTP_STATUS_404_NOT_FOUND],
-      resetQueryOnError: [HTTP_STATUS_404_NOT_FOUND],
+      preventDefaultErrorHandling: [
+        HTTP_STATUS_404_NOT_FOUND,
+        HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+      ],
+      resetQueryOnError: [
+        HTTP_STATUS_404_NOT_FOUND,
+        HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+      ],
     },
     retry: (failureCount, queryError) =>
       !(
         isAxiosError(queryError) &&
-        queryError.response?.status === HTTP_STATUS_404_NOT_FOUND
+        [
+          HTTP_STATUS_404_NOT_FOUND,
+          HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+        ].includes(queryError.response?.status ?? 0)
       ) && failureCount < 3,
   });
 
@@ -56,9 +68,14 @@ function Content() {
             >
               <ChangeItemHeader>
                 <ChangeDescription>
-                  {formatEntryDescription(entry)}{" "}
-                  <span style={{ fontWeight: "normal" }}>in</span>{" "}
-                  {FILE_LABELS[entry.file] ?? entry.file}
+                  {formatEntryDescription(entry)}
+                  {entry.change_type !== "init" && (
+                    <>
+                      {" "}
+                      <span style={{ fontWeight: "normal" }}>in</span>{" "}
+                      {FILE_LABELS[entry.file] ?? entry.file}
+                    </>
+                  )}
                 </ChangeDescription>
                 <ChangeTypeChip $changeType={entry.change_type}>
                   {getTypeLabel(entry.change_type)}
@@ -87,6 +104,10 @@ export function Changelog() {
         statusCodeHandling={{
           [HTTP_STATUS_404_NOT_FOUND]: {
             message: "No changelog found for this project.",
+            enableRetry: false,
+          },
+          [HTTP_STATUS_422_UNPROCESSABLE_CONTENT]: {
+            message: "The changelog contains invalid data and cannot be shown.",
             enableRetry: false,
           },
         }}

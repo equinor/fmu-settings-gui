@@ -101,7 +101,7 @@ export type ChangeInfo = {
 /**
  * The types of change that can be made on a file.
  */
-export type ChangeType = 'update' | 'remove' | 'add' | 'reset' | 'merge' | 'copy';
+export type ChangeType = 'init' | 'update' | 'remove' | 'add' | 'reset' | 'restore' | 'merge' | 'copy';
 
 /**
  * The security classification for a given data object.
@@ -178,6 +178,11 @@ export type FieldItem = {
 };
 
 /**
+ * The supported types to filter on.
+ */
+export type FilterType = 'date' | 'number' | 'text';
+
+/**
  * A relative path to a global config file, relative to the project root.
  */
 export type GlobalConfigPath = {
@@ -195,7 +200,8 @@ export type HttpValidationError = {
  * Represents the .fmu/mappings.json storage schema.
  */
 export type InternalMappings = {
-    stratigraphy?: InternalStratigraphyMappingsOutput;
+    schema_version?: 1;
+    stratigraphy?: InternalStratigraphyMappings;
     wellbore?: InternalWellboreMappings;
 };
 
@@ -228,16 +234,7 @@ export type InternalStratigraphyIdentifierMapping = {
  * relation. Converting to fmu-datamodels drops unmappable entries and expands
  * same-system aliases onto matching cross-system primary mappings.
  */
-export type InternalStratigraphyMappingsInput = Array<InternalStratigraphyIdentifierMapping>;
-
-/**
- * Collection of stratigraphy mappings stored in .fmu/mappings.json.
- *
- * This internal model can keep same-system alias information and unmappable
- * relation. Converting to fmu-datamodels drops unmappable entries and expands
- * same-system aliases onto matching cross-system primary mappings.
- */
-export type InternalStratigraphyMappingsOutput = Array<InternalStratigraphyIdentifierMapping>;
+export type InternalStratigraphyMappings = Array<InternalStratigraphyIdentifierMapping>;
 
 /**
  * Wellbore identifier mapping stored in .fmu/mappings.json.
@@ -361,6 +358,72 @@ export type Masterdata = {
 };
 
 /**
+ * A target candidate for a source name.
+ */
+export type MatchCandidate = {
+    /**
+     * The candidate target name.
+     */
+    target: string;
+    /**
+     * Similarity score for the normalized source and target names (0-100).
+     */
+    score: number;
+    /**
+     * Confidence level based on score.
+     *
+     * 'high' (>80), 'medium' (50-80), 'low' (<50).
+     */
+    confidence: 'high' | 'medium' | 'low';
+};
+
+/**
+ * A normalized token sequence replacement to apply before matching.
+ */
+export type MatchReplacementRule = {
+    /**
+     * The normalized token sequence to replace.
+     */
+    original: string;
+    /**
+     * The replacement token sequence.
+     */
+    replacement: string;
+};
+
+/**
+ * A request to match source names against target names.
+ */
+export type MatchRequest = {
+    /**
+     * Names to match from.
+     */
+    sources: Array<string>;
+    /**
+     * Names to match against.
+     */
+    targets: Array<string>;
+    /**
+     * Optional normalized token sequence replacements to apply before matching.
+     */
+    replacements?: Array<MatchReplacementRule>;
+};
+
+/**
+ * The target candidates for a source name.
+ */
+export type MatchResult = {
+    /**
+     * The source name.
+     */
+    source: string;
+    /**
+     * The best target candidates for the source name.
+     */
+    matches: Array<MatchCandidate>;
+};
+
+/**
  * A generic message to return to the GUI.
  */
 export type Message = {
@@ -395,6 +458,7 @@ export type Ok = {
  * Stored as config.json.
  */
 export type ProjectConfig = {
+    schema_version?: 1;
     version: string;
     created_at: string;
     created_by: string;
@@ -422,30 +486,6 @@ export type RestorableFilesResponse = {
  */
 export type RmsCoordinateSystem = {
     name: string;
-};
-
-/**
- * A matched coordinate system.
- */
-export type RmsCoordinateSystemMatch = {
-    /**
-     * The source coordinate system to be matched.
-     */
-    rms_crs_sys: RmsCoordinateSystem;
-    /**
-     * The matched target coordinate system.
-     */
-    smda_crs_sys: CoordinateSystem;
-    /**
-     * Similarity score for the coordinate systems (0-100).
-     */
-    score: number;
-    /**
-     * Confidence level based on score.
-     *
-     * 'high' (>80), 'medium' (50-80), 'low' (<50).
-     */
-    confidence: 'high' | 'medium' | 'low';
 };
 
 /**
@@ -510,30 +550,6 @@ export type RmsStratigraphicZone = {
     top_horizon_name: string;
     base_horizon_name: string;
     stratigraphic_column_name?: Array<string> | null;
-};
-
-/**
- * A matched pair of RMS zone and SMDA stratigraphic unit.
- */
-export type RmsStratigraphyMatch = {
-    /**
-     * The RMS stratigraphic zone.
-     */
-    rms_zone: RmsStratigraphicZone;
-    /**
-     * The matched SMDA stratigraphic unit.
-     */
-    smda_unit: StratigraphicUnit;
-    /**
-     * Similarity score for the zone/unit names (0-100).
-     */
-    score: number;
-    /**
-     * Confidence level based on score.
-     *
-     * 'high' (>80), 'medium' (50-80), 'low' (<50).
-     */
-    confidence: 'high' | 'medium' | 'low';
 };
 
 /**
@@ -825,6 +841,7 @@ export type UserApiKeys = {
  * Stored as config.json.
  */
 export type UserConfig = {
+    schema_version?: 1;
     version: string;
     created_at: string;
     last_modified_at?: string | null;
@@ -2078,7 +2095,7 @@ export type ProjectGetMappingsResponses = {
 export type ProjectGetMappingsResponse = ProjectGetMappingsResponses[keyof ProjectGetMappingsResponses];
 
 export type ProjectPutMappingsData = {
-    body: InternalStratigraphyMappingsInput;
+    body: InternalStratigraphyMappings | InternalWellboreMappings;
     path: {
         mapping_type: MappingType;
         source_system: DataSystem;
@@ -2135,7 +2152,14 @@ export type ProjectPutMappingsResponse = ProjectPutMappingsResponses[keyof Proje
 export type ProjectGetChangelogData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        change_type?: ChangeType | null;
+        max_entries?: number | null;
+        field_name?: string | null;
+        filter_value?: string | null;
+        filter_type?: FilterType | null;
+        operator?: ('>' | '>=' | '<' | '<=' | '==' | '!=') | null;
+    };
     url: '/api/v1/project/changelog';
 };
 
@@ -2153,7 +2177,7 @@ export type ProjectGetChangelogErrors = {
      */
     404: unknown;
     /**
-     * Invalid changelog data
+     * Invalid changelog data or query parameters
      */
     422: unknown;
     /**
@@ -2515,7 +2539,7 @@ export type RmsPostRmsProjectErrors = {
      */
     401: unknown;
     /**
-     * RMS project does not exist at the configured path.
+     * RMS project was not found or its version could not be determined.
      */
     404: unknown;
     /**
@@ -2873,92 +2897,28 @@ export type SmdaPostStratUnitsResponses = {
 
 export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
 
-export type MatchGetStratigraphyData = {
-    body?: never;
+export type MatchPostMatchData = {
+    body: MatchRequest;
     path?: never;
     query?: never;
-    url: '/api/v1/match/stratigraphy';
+    url: '/api/v1/match';
 };
 
-export type MatchGetStratigraphyErrors = {
+export type MatchPostMatchErrors = {
     /**
-     *
-     * Required configuration is missing from the project config,
-     * or invalid parameters are provided.
-     *
-     */
-    400: unknown;
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     *
-     * SMDA returns valid data but no results are found,
-     * or configuration exists but contains no matchable data.
-     *
+     * The request body is missing required match input or contains invalid data.
      */
     422: unknown;
-    /**
-     *
-     * SMDA returns a malformed response that doesn't match
-     * the expected structure.
-     *
-     */
-    500: unknown;
-    /**
-     *
-     * An API call to SMDA times out or the service is unavailable.
-     *
-     */
-    503: unknown;
 };
 
-export type MatchGetStratigraphyResponses = {
+export type MatchPostMatchResponses = {
     /**
      * Successful Response
      */
-    200: Array<RmsStratigraphyMatch>;
+    200: Array<MatchResult>;
 };
 
-export type MatchGetStratigraphyResponse = MatchGetStratigraphyResponses[keyof MatchGetStratigraphyResponses];
-
-export type MatchGetCoordinateSystemData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/match/coordinate_system';
-};
-
-export type MatchGetCoordinateSystemErrors = {
-    /**
-     * Required configuration is missing from the project config.
-     */
-    400: unknown;
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-    /**
-     * Something unexpected has happened
-     */
-    500: unknown;
-};
-
-export type MatchGetCoordinateSystemError = MatchGetCoordinateSystemErrors[keyof MatchGetCoordinateSystemErrors];
-
-export type MatchGetCoordinateSystemResponses = {
-    /**
-     * Successful Response
-     */
-    200: RmsCoordinateSystemMatch;
-};
-
-export type MatchGetCoordinateSystemResponse = MatchGetCoordinateSystemResponses[keyof MatchGetCoordinateSystemResponses];
+export type MatchPostMatchResponse = MatchPostMatchResponses[keyof MatchPostMatchResponses];
 
 export type HealthV1HealthCheckData = {
     body?: never;

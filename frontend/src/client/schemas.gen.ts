@@ -174,7 +174,7 @@ export const ChangeInfoSchema = {
 
 export const ChangeTypeSchema = {
     type: 'string',
-    enum: ['update', 'remove', 'add', 'reset', 'merge', 'copy'],
+    enum: ['init', 'update', 'remove', 'add', 'reset', 'restore', 'merge', 'copy'],
     title: 'ChangeType',
     description: 'The types of change that can be made on a file.'
 } as const;
@@ -319,6 +319,13 @@ export const FieldItemSchema = {
 known to SMDA.`
 } as const;
 
+export const FilterTypeSchema = {
+    type: 'string',
+    enum: ['date', 'number', 'text'],
+    title: 'FilterType',
+    description: 'The supported types to filter on.'
+} as const;
+
 export const GlobalConfigPathSchema = {
     properties: {
         relative_path: {
@@ -351,8 +358,14 @@ export const HTTPValidationErrorSchema = {
 
 export const InternalMappingsSchema = {
     properties: {
+        schema_version: {
+            type: 'integer',
+            const: 1,
+            title: 'Schema Version',
+            default: 1
+        },
         stratigraphy: {
-            '$ref': '#/components/schemas/InternalStratigraphyMappings-Output'
+            '$ref': '#/components/schemas/InternalStratigraphyMappings'
         },
         wellbore: {
             '$ref': '#/components/schemas/InternalWellboreMappings'
@@ -436,20 +449,7 @@ Use \`\`to_stratigraphy_mappings()\`\` on the collection model when consumers
 need the fmu-datamodels mapping schema.`
 } as const;
 
-export const InternalStratigraphyMappings_InputSchema = {
-    items: {
-        '$ref': '#/components/schemas/InternalStratigraphyIdentifierMapping'
-    },
-    type: 'array',
-    title: 'InternalStratigraphyMappings',
-    description: `Collection of stratigraphy mappings stored in .fmu/mappings.json.
-
-This internal model can keep same-system alias information and unmappable
-relation. Converting to fmu-datamodels drops unmappable entries and expands
-same-system aliases onto matching cross-system primary mappings.`
-} as const;
-
-export const InternalStratigraphyMappings_OutputSchema = {
+export const InternalStratigraphyMappingsSchema = {
     items: {
         '$ref': '#/components/schemas/InternalStratigraphyIdentifierMapping'
     },
@@ -625,7 +625,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.30.1.dev1+ged3db8e84'
+            default: '0.33.1.dev7+g6feb87797.d20260624'
         }
     },
     type: 'object',
@@ -755,6 +755,109 @@ export const MasterdataSchema = {
 Currently, SMDA holds the masterdata.`
 } as const;
 
+export const MatchCandidateSchema = {
+    properties: {
+        target: {
+            type: 'string',
+            title: 'Target',
+            description: 'The candidate target name.'
+        },
+        score: {
+            type: 'number',
+            maximum: 100,
+            minimum: 0,
+            title: 'Score',
+            description: 'Similarity score for the normalized source and target names (0-100).'
+        },
+        confidence: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            title: 'Confidence',
+            description: `Confidence level based on score.
+
+'high' (>80), 'medium' (50-80), 'low' (<50).`
+        }
+    },
+    type: 'object',
+    required: ['target', 'score', 'confidence'],
+    title: 'MatchCandidate',
+    description: 'A target candidate for a source name.'
+} as const;
+
+export const MatchReplacementRuleSchema = {
+    properties: {
+        original: {
+            type: 'string',
+            title: 'Original',
+            description: 'The normalized token sequence to replace.'
+        },
+        replacement: {
+            type: 'string',
+            title: 'Replacement',
+            description: 'The replacement token sequence.'
+        }
+    },
+    type: 'object',
+    required: ['original', 'replacement'],
+    title: 'MatchReplacementRule',
+    description: 'A normalized token sequence replacement to apply before matching.'
+} as const;
+
+export const MatchRequestSchema = {
+    properties: {
+        sources: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Sources',
+            description: 'Names to match from.'
+        },
+        targets: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Targets',
+            description: 'Names to match against.'
+        },
+        replacements: {
+            items: {
+                '$ref': '#/components/schemas/MatchReplacementRule'
+            },
+            type: 'array',
+            title: 'Replacements',
+            description: 'Optional normalized token sequence replacements to apply before matching.'
+        }
+    },
+    type: 'object',
+    required: ['sources', 'targets'],
+    title: 'MatchRequest',
+    description: 'A request to match source names against target names.'
+} as const;
+
+export const MatchResultSchema = {
+    properties: {
+        source: {
+            type: 'string',
+            title: 'Source',
+            description: 'The source name.'
+        },
+        matches: {
+            items: {
+                '$ref': '#/components/schemas/MatchCandidate'
+            },
+            type: 'array',
+            title: 'Matches',
+            description: 'The best target candidates for the source name.'
+        }
+    },
+    type: 'object',
+    required: ['source', 'matches'],
+    title: 'MatchResult',
+    description: 'The target candidates for a source name.'
+} as const;
+
 export const MessageSchema = {
     properties: {
         message: {
@@ -823,6 +926,12 @@ export const OkSchema = {
 
 export const ProjectConfigSchema = {
     properties: {
+        schema_version: {
+            type: 'integer',
+            const: 1,
+            title: 'Schema Version',
+            default: 1
+        },
         version: {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
@@ -944,38 +1053,6 @@ export const RmsCoordinateSystemSchema = {
     required: ['name'],
     title: 'RmsCoordinateSystem',
     description: 'The project coordinate system of an RMS project.'
-} as const;
-
-export const RmsCoordinateSystemMatchSchema = {
-    properties: {
-        rms_crs_sys: {
-            '$ref': '#/components/schemas/RmsCoordinateSystem',
-            description: 'The source coordinate system to be matched.'
-        },
-        smda_crs_sys: {
-            '$ref': '#/components/schemas/CoordinateSystem',
-            description: 'The matched target coordinate system.'
-        },
-        score: {
-            type: 'number',
-            maximum: 100,
-            minimum: 0,
-            title: 'Score',
-            description: 'Similarity score for the coordinate systems (0-100).'
-        },
-        confidence: {
-            type: 'string',
-            enum: ['high', 'medium', 'low'],
-            title: 'Confidence',
-            description: `Confidence level based on score.
-
-'high' (>80), 'medium' (50-80), 'low' (<50).`
-        }
-    },
-    type: 'object',
-    required: ['rms_crs_sys', 'smda_crs_sys', 'score', 'confidence'],
-    title: 'RmsCoordinateSystemMatch',
-    description: 'A matched coordinate system.'
 } as const;
 
 export const RmsHorizonSchema = {
@@ -1157,38 +1234,6 @@ export const RmsStratigraphicZoneSchema = {
     required: ['name', 'top_horizon_name', 'base_horizon_name'],
     title: 'RmsStratigraphicZone',
     description: 'A stratigraphic zone from an RMS project.'
-} as const;
-
-export const RmsStratigraphyMatchSchema = {
-    properties: {
-        rms_zone: {
-            '$ref': '#/components/schemas/RmsStratigraphicZone',
-            description: 'The RMS stratigraphic zone.'
-        },
-        smda_unit: {
-            '$ref': '#/components/schemas/StratigraphicUnit',
-            description: 'The matched SMDA stratigraphic unit.'
-        },
-        score: {
-            type: 'number',
-            maximum: 100,
-            minimum: 0,
-            title: 'Score',
-            description: 'Similarity score for the zone/unit names (0-100).'
-        },
-        confidence: {
-            type: 'string',
-            enum: ['high', 'medium', 'low'],
-            title: 'Confidence',
-            description: `Confidence level based on score.
-
-'high' (>80), 'medium' (50-80), 'low' (<50).`
-        }
-    },
-    type: 'object',
-    required: ['rms_zone', 'smda_unit', 'score', 'confidence'],
-    title: 'RmsStratigraphyMatch',
-    description: 'A matched pair of RMS zone and SMDA stratigraphic unit.'
 } as const;
 
 export const RmsVersionSchema = {
@@ -1729,6 +1774,12 @@ export const UserAPIKeysSchema = {
 
 export const UserConfigSchema = {
     properties: {
+        schema_version: {
+            type: 'integer',
+            const: 1,
+            title: 'Schema Version',
+            default: 1
+        },
         version: {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
