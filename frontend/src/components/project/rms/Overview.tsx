@@ -383,7 +383,7 @@ export function Overview({
   rmsData: RmsProject | null | undefined;
   projectReadOnly: boolean;
 }) {
-  const [isRmsProjectOpen, setIsRmsProjectOpen] = useState(
+  const [isRmsProjectOpen, setIsRmsProjectOpen] = useState(() =>
     getStorageItem(sessionStorage, STORAGENAME_RMS_PROJECT_OPEN, "boolean"),
   );
 

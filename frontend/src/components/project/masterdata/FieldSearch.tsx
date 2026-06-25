@@ -29,7 +29,9 @@ function FieldResults({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Changed data needs to reset row selection state
   useEffect(() => {
-    setSelectedRows({});
+    void Promise.resolve().then(() => {
+      setSelectedRows({});
+    });
   }, [data]);
 
   useEffect(() => {
