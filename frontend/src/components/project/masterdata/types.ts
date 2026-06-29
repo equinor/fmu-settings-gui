@@ -3,12 +3,15 @@ import type {
   CountryItem,
   DiscoveryItem,
   FieldItem,
+  SmdaFieldUuid,
   SmdaMasterdataResult,
   StratigraphicColumn,
 } from "#client";
 import type { ListOperation } from "#utils/form";
 
 export type SmdaMasterdataResultGrouped = Record<string, SmdaMasterdataResult>;
+
+export type SmdaFieldReference = Pick<SmdaFieldUuid, "identifier" | "uuid">;
 
 export type SmdaMasterdataCoordinateSystemFields = {
   coordinateSystem: CoordinateSystem;
