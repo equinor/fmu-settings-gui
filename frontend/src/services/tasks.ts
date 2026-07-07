@@ -53,7 +53,7 @@ export function useTaskList(): Task[] {
       id: "rms",
       label: "Set RMS project and stratigraphy",
       done: !!config.rms?.path && (zones.length > 0 || horizons.length > 0),
-      to: "/project/rms",
+      to: "/project/rms/overview",
     },
     {
       id: "mappings",
@@ -61,7 +61,7 @@ export function useTaskList(): Task[] {
       done:
         (zones.length > 0 || horizons.length > 0) &&
         [...zones, ...horizons].every((item) => mappedRmsIds.has(item.name)),
-      to: "/project/stratigraphy",
+      to: "/project/mappings/stratigraphy",
     },
   ];
 }

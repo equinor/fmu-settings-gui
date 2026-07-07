@@ -40,7 +40,6 @@ import {
 import { fieldContext, formContext } from "#utils/form";
 import { getRmsProjectName } from "#utils/model";
 import { isVersionLessThan } from "#utils/string";
-import { Stratigraphy } from "./Stratigraphy";
 
 const { useAppForm: useAppFormRmsEditor } = createFormHook({
   fieldComponents: {
@@ -382,33 +381,25 @@ export function Overview({
   isRmsProjectOpen: boolean;
 }) {
   return (
-    <>
-      <PageSectionWidthConstrained>
-        <PageText>
-          The following is the main RMS project located in the <i>rms/model</i>{" "}
-          directory. The version is detected automatically:
-        </PageText>
+    <PageSectionWidthConstrained>
+      <PageText>
+        The following is the main RMS project located in the <i>rms/model</i>{" "}
+        directory. The version is detected automatically:
+      </PageText>
 
-        {rmsData ? (
-          <RmsInfo rmsData={rmsData} />
-        ) : (
-          <PageCode>No RMS project information found in the project.</PageCode>
-        )}
+      {rmsData ? (
+        <RmsInfo rmsData={rmsData} />
+      ) : (
+        <PageCode>No RMS project information found in the project.</PageCode>
+      )}
 
-        <RmsProjectActions
-          rmsData={rmsData}
-          projectReadOnly={projectReadOnly}
-          isRmsProjectOpen={isRmsProjectOpen}
-        />
-
-        <PageSectionSpacer />
-      </PageSectionWidthConstrained>
-
-      <Stratigraphy
+      <RmsProjectActions
         rmsData={rmsData}
         projectReadOnly={projectReadOnly}
         isRmsProjectOpen={isRmsProjectOpen}
       />
-    </>
+
+      <PageSectionSpacer />
+    </PageSectionWidthConstrained>
   );
 }
