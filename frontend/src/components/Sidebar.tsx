@@ -1,13 +1,18 @@
 import { SideBar as EdsSideBar } from "@equinor/eds-core-react";
+import type { IconData } from "@equinor/eds-icons";
 import { account_circle, dashboard, folder } from "@equinor/eds-icons";
 import { Link, useLocation } from "@tanstack/react-router";
 
 import { useProject } from "#services/project";
-import {
-  SidebarGroup,
-  SidebarGroupItems,
-  SidebarGroupLabel,
-} from "./Sidebar.style";
+import { NestedAccordion } from "./Sidebar.style";
+
+const blankIcon: IconData = {
+  name: "blank",
+  prefix: "eds",
+  height: "24",
+  width: "24",
+  svgPathData: "",
+};
 
 type AccordionSubItem = {
   label: string;
@@ -24,11 +29,12 @@ function SidebarItem({
 }) {
   if (item.children) {
     return (
-      <SidebarGroup>
-        <SidebarGroupLabel $active={currentPath.startsWith(item.to)}>
-          {item.label}
-        </SidebarGroupLabel>
-        <SidebarGroupItems>
+      <NestedAccordion>
+        <EdsSideBar.Accordion
+          label={item.label}
+          icon={blankIcon}
+          isExpanded={currentPath.startsWith(item.to)}
+        >
           {item.children.map((child) => (
             <SidebarItem
               key={child.to}
@@ -36,8 +42,8 @@ function SidebarItem({
               currentPath={currentPath}
             />
           ))}
-        </SidebarGroupItems>
-      </SidebarGroup>
+        </EdsSideBar.Accordion>
+      </NestedAccordion>
     );
   }
 
