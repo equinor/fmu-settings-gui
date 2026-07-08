@@ -5,7 +5,6 @@ import { Loading } from "#components/common";
 import { Overview } from "#components/project/rms/Overview";
 import { useProject } from "#services/project";
 import {
-  PageContainerNotWidthConstrained,
   PageHeader,
   PageSectionWidthConstrained,
   PageText,
@@ -33,7 +32,7 @@ function Content() {
 
 function RouteComponent() {
   return (
-    <PageContainerNotWidthConstrained>
+    <>
       <PageSectionWidthConstrained>
         <PageHeader>Overview</PageHeader>
       </PageSectionWidthConstrained>
@@ -41,6 +40,6 @@ function RouteComponent() {
       <Suspense fallback={<Loading />}>
         <Content />
       </Suspense>
-    </PageContainerNotWidthConstrained>
+    </>
   );
 }

@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { useProject } from "#services/project";
 import {
-  PageContainerNotWidthConstrained,
   PageHeader,
   PageSectionWidthConstrained,
   PageText,
@@ -16,15 +15,13 @@ function RouteComponent() {
   const project = useProject();
 
   return (
-    <PageContainerNotWidthConstrained>
-      <PageSectionWidthConstrained>
-        <PageHeader>Wellbores</PageHeader>
-        <PageText>
-          {project.status
-            ? "Wellbore content is coming soon."
-            : "Project not set."}
-        </PageText>
-      </PageSectionWidthConstrained>
-    </PageContainerNotWidthConstrained>
+    <PageSectionWidthConstrained>
+      <PageHeader>Wellbores</PageHeader>
+      <PageText>
+        {project.status
+          ? "Wellbore content is coming soon."
+          : "Project not set."}
+      </PageText>
+    </PageSectionWidthConstrained>
   );
 }

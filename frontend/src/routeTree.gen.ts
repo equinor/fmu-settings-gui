@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as ProjectIndexRouteImport } from "./routes/project/index";
 import { Route as UserRecoveryRouteImport } from "./routes/user/recovery";
 import { Route as UserKeysRouteImport } from "./routes/user/keys";
-import { Route as ProjectStratigraphyRouteImport } from "./routes/project/stratigraphy";
 import { Route as ProjectRmsRouteImport } from "./routes/project/rms";
 import { Route as ProjectMasterdataRouteImport } from "./routes/project/masterdata";
 import { Route as ProjectMappingsRouteImport } from "./routes/project/mappings";
@@ -45,11 +44,6 @@ const UserRecoveryRoute = UserRecoveryRouteImport.update({
 const UserKeysRoute = UserKeysRouteImport.update({
   id: "/user/keys",
   path: "/user/keys",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ProjectStratigraphyRoute = ProjectStratigraphyRouteImport.update({
-  id: "/project/stratigraphy",
-  path: "/project/stratigraphy",
   getParentRoute: () => rootRouteImport,
 } as any);
 const ProjectRmsRoute = ProjectRmsRouteImport.update({
@@ -121,7 +115,6 @@ export interface FileRoutesByFullPath {
   "/project/mappings": typeof ProjectMappingsRouteWithChildren;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRouteWithChildren;
-  "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
@@ -138,7 +131,6 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project": typeof ProjectIndexRoute;
@@ -158,7 +150,6 @@ export interface FileRoutesById {
   "/project/mappings": typeof ProjectMappingsRouteWithChildren;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/project/rms": typeof ProjectRmsRouteWithChildren;
-  "/project/stratigraphy": typeof ProjectStratigraphyRoute;
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
@@ -179,7 +170,6 @@ export interface FileRouteTypes {
     | "/project/mappings"
     | "/project/masterdata"
     | "/project/rms"
-    | "/project/stratigraphy"
     | "/user/keys"
     | "/user/recovery"
     | "/project/"
@@ -196,7 +186,6 @@ export interface FileRouteTypes {
     | "/"
     | "/project/history"
     | "/project/masterdata"
-    | "/project/stratigraphy"
     | "/user/keys"
     | "/user/recovery"
     | "/project"
@@ -215,7 +204,6 @@ export interface FileRouteTypes {
     | "/project/mappings"
     | "/project/masterdata"
     | "/project/rms"
-    | "/project/stratigraphy"
     | "/user/keys"
     | "/user/recovery"
     | "/project/"
@@ -235,7 +223,6 @@ export interface RootRouteChildren {
   ProjectMappingsRoute: typeof ProjectMappingsRouteWithChildren;
   ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
   ProjectRmsRoute: typeof ProjectRmsRouteWithChildren;
-  ProjectStratigraphyRoute: typeof ProjectStratigraphyRoute;
   UserKeysRoute: typeof UserKeysRoute;
   UserRecoveryRoute: typeof UserRecoveryRoute;
   ProjectIndexRoute: typeof ProjectIndexRoute;
@@ -269,13 +256,6 @@ declare module "@tanstack/react-router" {
       path: "/user/keys";
       fullPath: "/user/keys";
       preLoaderRoute: typeof UserKeysRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/project/stratigraphy": {
-      id: "/project/stratigraphy";
-      path: "/project/stratigraphy";
-      fullPath: "/project/stratigraphy";
-      preLoaderRoute: typeof ProjectStratigraphyRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/project/rms": {
@@ -407,7 +387,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectMappingsRoute: ProjectMappingsRouteWithChildren,
   ProjectMasterdataRoute: ProjectMasterdataRoute,
   ProjectRmsRoute: ProjectRmsRouteWithChildren,
-  ProjectStratigraphyRoute: ProjectStratigraphyRoute,
   UserKeysRoute: UserKeysRoute,
   UserRecoveryRoute: UserRecoveryRoute,
   ProjectIndexRoute: ProjectIndexRoute,
