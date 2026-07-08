@@ -18,10 +18,10 @@ function RouteComponent() {
   return (
     <PageContainerNotWidthConstrained>
       <PageSectionWidthConstrained>
-        <PageHeader>Mappings overview</PageHeader>
+        <PageHeader>Overview</PageHeader>
         <PageText>
           {project.status
-            ? "No mappings overview content available yet."
+            ? "Mappings overview is coming soon."
             : "Project not set."}
         </PageText>
       </PageSectionWidthConstrained>

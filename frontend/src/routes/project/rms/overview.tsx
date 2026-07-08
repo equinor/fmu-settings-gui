@@ -35,7 +35,7 @@ function RouteComponent() {
   return (
     <PageContainerNotWidthConstrained>
       <PageSectionWidthConstrained>
-        <PageHeader>RMS overview</PageHeader>
+        <PageHeader>Overview</PageHeader>
       </PageSectionWidthConstrained>
 
       <Suspense fallback={<Loading />}>

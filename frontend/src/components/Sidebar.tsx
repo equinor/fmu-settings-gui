@@ -6,6 +6,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useProject } from "#services/project";
 import { NestedAccordion } from "./Sidebar.style";
 
+// EDS requires an icon for accordion headers; a blank icon keeps nested labels aligned.
 const blankIcon: IconData = {
   name: "blank",
   prefix: "eds",

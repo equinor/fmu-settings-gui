@@ -35,7 +35,7 @@ function RouteComponent() {
   return (
     <PageContainerNotWidthConstrained>
       <PageSectionWidthConstrained>
-        <PageHeader>RMS stratigraphy</PageHeader>
+        <PageHeader>Stratigraphy</PageHeader>
       </PageSectionWidthConstrained>
 
       <Suspense fallback={<Loading />}>

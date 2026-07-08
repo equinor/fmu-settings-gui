@@ -18,10 +18,10 @@ function RouteComponent() {
   return (
     <PageContainerNotWidthConstrained>
       <PageSectionWidthConstrained>
-        <PageHeader>RMS wellbores</PageHeader>
+        <PageHeader>Wellbores</PageHeader>
         <PageText>
           {project.status
-            ? "No wellbore content available yet."
+            ? "Wellbore content is coming soon."
             : "Project not set."}
         </PageText>
       </PageSectionWidthConstrained>
