@@ -1,13 +1,62 @@
 import { SideBar as EdsSideBar } from "@equinor/eds-core-react";
+import type { IconData } from "@equinor/eds-icons";
 import { account_circle, dashboard, folder } from "@equinor/eds-icons";
 import { Link, useLocation } from "@tanstack/react-router";
 
 import { useProject } from "#services/project";
+import { NestedAccordion } from "./Sidebar.style";
 
-type AccordianSubItem = {
+// EDS requires an icon for accordion headers; a blank icon keeps nested labels aligned.
+const blankIcon: IconData = {
+  name: "blank",
+  prefix: "eds",
+  height: "24",
+  width: "24",
+  svgPathData: "",
+};
+
+type AccordionSubItem = {
   label: string;
   to: string;
+  children?: AccordionSubItem[];
 };
+
+function SidebarItem({
+  item,
+  currentPath,
+}: {
+  item: AccordionSubItem;
+  currentPath: string;
+}) {
+  if (item.children) {
+    return (
+      <NestedAccordion>
+        <EdsSideBar.Accordion
+          label={item.label}
+          icon={blankIcon}
+          isExpanded={currentPath.startsWith(item.to)}
+        >
+          {item.children.map((child) => (
+            <SidebarItem
+              key={child.to}
+              item={child}
+              currentPath={currentPath}
+            />
+          ))}
+        </EdsSideBar.Accordion>
+      </NestedAccordion>
+    );
+  }
+
+  return (
+    <EdsSideBar.AccordionItem
+      label={item.label}
+      as={Link}
+      to={item.to}
+      active={currentPath === item.to}
+    />
+  );
+}
 
 export function Sidebar() {
   const project = useProject();
@@ -18,12 +67,28 @@ export function Sidebar() {
   const projectExpanded = currentPath.startsWith("/project");
   const userExpanded = currentPath.startsWith("/user");
 
-  const ProjectSubItems: AccordianSubItem[] = [];
+  const ProjectSubItems: AccordionSubItem[] = [];
   if (project.status) {
-    ProjectSubItems.push({ label: "Masterdata", to: "/masterdata" });
-    ProjectSubItems.push({ label: "RMS", to: "/rms" });
-    ProjectSubItems.push({ label: "Stratigraphy", to: "/stratigraphy" });
-    ProjectSubItems.push({ label: "History", to: "/history" });
+    ProjectSubItems.push({ label: "Masterdata", to: "/project/masterdata" });
+    ProjectSubItems.push({
+      label: "RMS",
+      to: "/project/rms",
+      children: [
+        { label: "Overview", to: "/project/rms/overview" },
+        { label: "Stratigraphy", to: "/project/rms/stratigraphy" },
+        { label: "Wellbores", to: "/project/rms/wellbores" },
+      ],
+    });
+    ProjectSubItems.push({
+      label: "Mappings",
+      to: "/project/mappings",
+      children: [
+        { label: "Overview", to: "/project/mappings/overview" },
+        { label: "Stratigraphy", to: "/project/mappings/stratigraphy" },
+        { label: "Wellbores", to: "/project/mappings/wellbores" },
+      ],
+    });
+    ProjectSubItems.push({ label: "History", to: "/project/history" });
   }
 
   return (
@@ -49,19 +114,9 @@ export function Sidebar() {
             active={currentPath === "/project"}
           />
 
-          {ProjectSubItems.map((item) => {
-            const to = `/project${item.to}`;
-
-            return (
-              <EdsSideBar.AccordionItem
-                key={to}
-                label={item.label}
-                as={Link}
-                to={to}
-                active={currentPath === to}
-              />
-            );
-          })}
+          {ProjectSubItems.map((item) => (
+            <SidebarItem key={item.to} item={item} currentPath={currentPath} />
+          ))}
         </EdsSideBar.Accordion>
 
         <EdsSideBar.Accordion
