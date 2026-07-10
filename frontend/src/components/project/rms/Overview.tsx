@@ -13,6 +13,7 @@ import {
   projectPatchRmsMutation,
   rmsDeleteRmsProjectMutation,
   rmsGetHorizonsQueryKey,
+  rmsGetWellsQueryKey,
   rmsGetZonesQueryKey,
   rmsPostRmsProjectMutation,
   sessionGetSessionQueryKey,
@@ -257,6 +258,9 @@ function RmsProjectActions({
       });
       void queryClient.invalidateQueries({
         queryKey: rmsGetZonesQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: rmsGetWellsQueryKey(),
       });
     },
     onError: (error, variables) => {
