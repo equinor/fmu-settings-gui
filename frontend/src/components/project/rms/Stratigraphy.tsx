@@ -1,4 +1,4 @@
-import { Dialog, List } from "@equinor/eds-core-react";
+import { Dialog } from "@equinor/eds-core-react";
 import { type AnyFormApi, createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
@@ -17,7 +17,7 @@ import {
   rmsGetHorizonsOptions,
   rmsGetZonesOptions,
 } from "#client/@tanstack/react-query.gen";
-import { ConfirmCloseDialog } from "#components/common";
+import { ConfirmCloseDialog, OrphanWarningBox } from "#components/common";
 import {
   CancelButton,
   GeneralButton,
@@ -44,10 +44,7 @@ import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui.ts";
 import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework.tsx";
 import { Horizons, Zones } from "./StratigraphicFramework";
-import {
-  OrphanTypesContainer,
-  StratigraphyEditorContainer,
-} from "./Stratigraphy.style";
+import { StratigraphyEditorContainer } from "./Stratigraphy.style";
 import { namesNotInReference, useItemHandlers } from "./utils.ts";
 
 type ConfirmAction = "add" | "remove" | "";
@@ -97,33 +94,6 @@ function ConfirmActionDialog({
         <CancelButton onClick={resetConfirmAction} />
       </Dialog.Actions>
     </GenericDialog>
-  );
-}
-
-function OrphanWarningBox({
-  orphanZoneNames,
-  orphanHorizonNames,
-}: {
-  orphanZoneNames: string[];
-  orphanHorizonNames: string[];
-}) {
-  return (
-    <OrphanTypesContainer>
-      <PageText>
-        There are horizons or zones in the project stratigraphy that are no
-        longer available in RMS. They need to be removed before data can be
-        saved.
-      </PageText>
-
-      <List>
-        {orphanHorizonNames.length > 0 && (
-          <List.Item>{orphanHorizonNames.join(", ")}</List.Item>
-        )}
-        {orphanZoneNames.length > 0 && (
-          <List.Item>{orphanZoneNames.join(", ")}</List.Item>
-        )}
-      </List>
-    </OrphanTypesContainer>
   );
 }
 
@@ -185,6 +155,28 @@ function StratigraphyEditor({
   );
   const hasOrphans =
     orphanHorizonNames.length > 0 || orphanZoneNames.length > 0;
+  const orphanCount = orphanHorizonNames.length + orphanZoneNames.length;
+  const orphanTypeCounts = [
+    orphanHorizonNames.length > 0
+      ? `${orphanHorizonNames.length} ${
+          orphanHorizonNames.length === 1 ? "horizon" : "horizons"
+        }`
+      : "",
+    orphanZoneNames.length > 0
+      ? `${orphanZoneNames.length} ${
+          orphanZoneNames.length === 1 ? "zone" : "zones"
+        }`
+      : "",
+  ].filter(Boolean);
+  const orphanListItems = [
+    ...orphanHorizonNames.map((name) => `Horizon: ${name}`),
+    ...orphanZoneNames.map((name) => `Zone: ${name}`),
+  ];
+
+  const removeOrphans = () => {
+    removeItems("horizons", orphanHorizonNames);
+    removeItems("zones", orphanZoneNames);
+  };
 
   useEffect(() => {
     form.setErrorMap({
@@ -216,8 +208,19 @@ function StratigraphyEditor({
 
         {hasOrphans && (
           <OrphanWarningBox
-            orphanZoneNames={orphanZoneNames}
-            orphanHorizonNames={orphanHorizonNames}
+            message={`${orphanTypeCounts.join(" and ")} stored in the project ${
+              orphanCount === 1 ? "is" : "are"
+            } no longer available in RMS. Remove ${
+              orphanCount === 1 ? "it" : "them"
+            } before saving.`}
+            listItems={orphanListItems}
+            buttonLabel={`Remove outdated ${[
+              orphanHorizonNames.length > 0 ? "horizons" : "",
+              orphanZoneNames.length > 0 ? "zones" : "",
+            ]
+              .filter(Boolean)
+              .join(" and ")}`}
+            onRemove={removeOrphans}
           />
         )}
 
