@@ -625,7 +625,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '0.33.1.dev7+g6feb87797.d20260624'
+            default: '1.0.0'
         }
     },
     type: 'object',
@@ -1014,6 +1014,9 @@ export const ProjectConfigSchema = {
                     type: 'null'
                 }
             ]
+        },
+        validation: {
+            '$ref': '#/components/schemas/ProjectValidation'
         }
     },
     type: 'object',
@@ -1022,6 +1025,34 @@ export const ProjectConfigSchema = {
     description: `The configuration file in a .fmu directory.
 
 Stored as config.json.`
+} as const;
+
+export const ProjectValidationSchema = {
+    properties: {
+        masterdata_smda: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ValidationRecord'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        },
+        rms_project: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/ValidationRecord'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    title: 'ProjectValidation',
+    description: 'Validation metadata for project configuration data.'
 } as const;
 
 export const RestorableFilesResponseSchema = {
@@ -1174,6 +1205,22 @@ export const RmsProjectPathsResultSchema = {
     required: ['results'],
     title: 'RmsProjectPathsResult',
     description: 'List of RMS project paths within the FMU project.'
+} as const;
+
+export const RmsSimulatorMappingFilePathSchema = {
+    properties: {
+        relative_path: {
+            type: 'string',
+            format: 'path',
+            title: 'Relative Path',
+            description: 'Relative path in the project to an RMS-to-simulator mapping file.',
+            examples: ['rms/input/well_modelling/well_info/rms_eclipse.csv']
+        }
+    },
+    type: 'object',
+    required: ['relative_path'],
+    title: 'RmsSimulatorMappingFilePath',
+    description: 'A path to an RMS-to-simulator mapping import or export file.'
 } as const;
 
 export const RmsStratigraphicFrameworkSchema = {
@@ -1557,6 +1604,237 @@ export const SmdaStratigraphicUnitsResultSchema = {
     description: 'Result containing a list of stratigraphic units.'
 } as const;
 
+export const SmdaWellHeaderSchema = {
+    properties: {
+        unique_well_identifier: {
+            type: 'string',
+            title: 'Unique Well Identifier',
+            description: 'Unique SMDA identifier for the well.'
+        },
+        unique_wellbore_identifier: {
+            type: 'string',
+            title: 'Unique Wellbore Identifier',
+            description: 'Unique SMDA identifier for the wellbore.'
+        },
+        official_wellbore_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Official Wellbore Name',
+            description: `Official wellbore name used by the Authorities.
+
+For Norway and UK, it will be the unique_wellbore_identifier without
+country iso code, but for Brazil it can really differs from the Equinor
+wellbore name.`
+        },
+        country_identifier: {
+            type: 'string',
+            title: 'Country Identifier',
+            description: 'Country identifier for the wellbore.'
+        },
+        parent_wellbore: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Parent Wellbore',
+            description: `The unique wellbore identifier this wellbore is kicked off from.
+
+Ref. kick off depth. This is used for sidetracks. A wellbore starting at
+the well origin has no parent.`
+        },
+        wellbore_type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Wellbore Type',
+            description: `Type of wellbore, values like exploration, development, other.
+
+This attribute is automatically maintained in SMDA based on the wellbore
+purpose. If the purpose is like wildcat or appraisal, type will be set to
+exploration, if the purpose is like production, injection then the type is
+set to development.`
+        },
+        wellbore_purpose: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Wellbore Purpose',
+            description: `Purpose of wellbore.
+
+Values like wildcat, appraisal, … for exploration wellbores; production,
+injection, observation, disposal, … for development wellbores; shallow gas,
+pilot hole for other purpose.`
+        },
+        wellbore_status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Wellbore Status',
+            description: `Status of the wellbore.
+
+Value like plugged and abandoned, drilling, plugged, producing ... This
+attribute is automatically maintained in SMDA if no good source is found
+for it. SMDA will use the wellbore type (exploration or development), the
+drill dates information, current_track, etc ... in order to set a plausible
+status. If wellbore type=exploration and completed_date < current_date,
+then status=plugged and abandoned while development wellbore would be set
+to completed.`
+        },
+        wellbore_purpose_planned: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Wellbore Purpose Planned',
+            description: `Pre-drill purpose of the wellbore.
+
+Legal values for exploration wellbores: wildcat, appraisal. Example of
+legal values for development wellbores: observation, production, injection.`
+        },
+        drill_year: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Drill Year',
+            description: 'The year when the drilling has started.'
+        },
+        completion_date: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Completion Date',
+            description: `Date when the wellbore is considered completed.
+
+For exploration wellbores from moveable facilities, this may be the anchor
+handling or jacking-down start date. For fixed facilities and development
+wellbores, it is when the wellbore reaches total depth and the last casing,
+liner, or screen is set. If immediately plugged, it is the date the last
+plug is set.`
+        },
+        discovery_internal_identifier: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Discovery Internal Identifier',
+            description: 'Internal name of the discovery.'
+        },
+        multilateral: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    enum: [0, 1]
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Multilateral',
+            description: 'Whether the wellbore is multilateral. 0 = no, 1 = yes.'
+        },
+        projected_coordinate_unit: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Projected Coordinate Unit',
+            description: 'Projected coordinate unit.'
+        },
+        projected_coordinate_system: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Projected Coordinate System',
+            description: 'Coordinate reference system for the easting/northing values.'
+        },
+        well_uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Well Uuid',
+            description: 'SMDA UUID for the well.'
+        },
+        wellbore_uuid: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Wellbore Uuid',
+            description: 'SMDA UUID for the wellbore.'
+        }
+    },
+    type: 'object',
+    required: ['unique_well_identifier', 'unique_wellbore_identifier', 'official_wellbore_name', 'country_identifier', 'parent_wellbore', 'wellbore_type', 'wellbore_purpose', 'wellbore_status', 'wellbore_purpose_planned', 'drill_year', 'completion_date', 'discovery_internal_identifier', 'multilateral', 'projected_coordinate_unit', 'projected_coordinate_system', 'well_uuid', 'wellbore_uuid'],
+    title: 'SmdaWellHeader',
+    description: 'Well header data from SMDA.'
+} as const;
+
+export const SmdaWellHeadersResultSchema = {
+    properties: {
+        well_headers: {
+            items: {
+                '$ref': '#/components/schemas/SmdaWellHeader'
+            },
+            type: 'array',
+            title: 'Well Headers',
+            description: 'List of well headers from SMDA.'
+        }
+    },
+    type: 'object',
+    required: ['well_headers'],
+    title: 'SmdaWellHeadersResult',
+    description: 'Result containing a list of well headers.'
+} as const;
+
 export const StratigraphicColumnSchema = {
     properties: {
         identifier: {
@@ -1852,9 +2130,34 @@ export const ValidationErrorSchema = {
         type: {
             type: 'string',
             title: 'Error Type'
+        },
+        input: {
+            title: 'Input'
+        },
+        ctx: {
+            type: 'object',
+            title: 'Context'
         }
     },
     type: 'object',
     required: ['loc', 'msg', 'type'],
     title: 'ValidationError'
+} as const;
+
+export const ValidationRecordSchema = {
+    properties: {
+        last_validated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Last Validated At'
+        },
+        last_validated_by: {
+            type: 'string',
+            title: 'Last Validated By'
+        }
+    },
+    type: 'object',
+    required: ['last_validated_at', 'last_validated_by'],
+    title: 'ValidationRecord',
+    description: 'Metadata for a successful validation of project configuration data.'
 } as const;

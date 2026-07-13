@@ -469,6 +469,15 @@ export type ProjectConfig = {
     access?: Access | null;
     cache_max_revisions?: number;
     rms?: RmsProject | null;
+    validation?: ProjectValidation;
+};
+
+/**
+ * Validation metadata for project configuration data.
+ */
+export type ProjectValidation = {
+    masterdata_smda?: ValidationRecord | null;
+    rms_project?: ValidationRecord | null;
 };
 
 /**
@@ -526,6 +535,16 @@ export type RmsProjectPathsResult = {
      * List of absolute paths to RMS projects within the FMU project.
      */
     results: Array<RmsProjectPath>;
+};
+
+/**
+ * A path to an RMS-to-simulator mapping import or export file.
+ */
+export type RmsSimulatorMappingFilePath = {
+    /**
+     * Relative path in the project to an RMS-to-simulator mapping file.
+     */
+    relative_path: string;
 };
 
 /**
@@ -732,6 +751,123 @@ export type SmdaStratigraphicUnitsResult = {
 };
 
 /**
+ * Well header data from SMDA.
+ */
+export type SmdaWellHeader = {
+    /**
+     * Unique SMDA identifier for the well.
+     */
+    unique_well_identifier: string;
+    /**
+     * Unique SMDA identifier for the wellbore.
+     */
+    unique_wellbore_identifier: string;
+    /**
+     * Official wellbore name used by the Authorities.
+     *
+     * For Norway and UK, it will be the unique_wellbore_identifier without
+     * country iso code, but for Brazil it can really differs from the Equinor
+     * wellbore name.
+     */
+    official_wellbore_name: string | null;
+    /**
+     * Country identifier for the wellbore.
+     */
+    country_identifier: string;
+    /**
+     * The unique wellbore identifier this wellbore is kicked off from.
+     *
+     * Ref. kick off depth. This is used for sidetracks. A wellbore starting at
+     * the well origin has no parent.
+     */
+    parent_wellbore: string | null;
+    /**
+     * Type of wellbore, values like exploration, development, other.
+     *
+     * This attribute is automatically maintained in SMDA based on the wellbore
+     * purpose. If the purpose is like wildcat or appraisal, type will be set to
+     * exploration, if the purpose is like production, injection then the type is
+     * set to development.
+     */
+    wellbore_type: string | null;
+    /**
+     * Purpose of wellbore.
+     *
+     * Values like wildcat, appraisal, … for exploration wellbores; production,
+     * injection, observation, disposal, … for development wellbores; shallow gas,
+     * pilot hole for other purpose.
+     */
+    wellbore_purpose: string | null;
+    /**
+     * Status of the wellbore.
+     *
+     * Value like plugged and abandoned, drilling, plugged, producing ... This
+     * attribute is automatically maintained in SMDA if no good source is found
+     * for it. SMDA will use the wellbore type (exploration or development), the
+     * drill dates information, current_track, etc ... in order to set a plausible
+     * status. If wellbore type=exploration and completed_date < current_date,
+     * then status=plugged and abandoned while development wellbore would be set
+     * to completed.
+     */
+    wellbore_status: string | null;
+    /**
+     * Pre-drill purpose of the wellbore.
+     *
+     * Legal values for exploration wellbores: wildcat, appraisal. Example of
+     * legal values for development wellbores: observation, production, injection.
+     */
+    wellbore_purpose_planned: string | null;
+    /**
+     * The year when the drilling has started.
+     */
+    drill_year: number | null;
+    /**
+     * Date when the wellbore is considered completed.
+     *
+     * For exploration wellbores from moveable facilities, this may be the anchor
+     * handling or jacking-down start date. For fixed facilities and development
+     * wellbores, it is when the wellbore reaches total depth and the last casing,
+     * liner, or screen is set. If immediately plugged, it is the date the last
+     * plug is set.
+     */
+    completion_date: string | null;
+    /**
+     * Internal name of the discovery.
+     */
+    discovery_internal_identifier: string | null;
+    /**
+     * Whether the wellbore is multilateral. 0 = no, 1 = yes.
+     */
+    multilateral: (0 | 1) | null;
+    /**
+     * Projected coordinate unit.
+     */
+    projected_coordinate_unit: string | null;
+    /**
+     * Coordinate reference system for the easting/northing values.
+     */
+    projected_coordinate_system: string | null;
+    /**
+     * SMDA UUID for the well.
+     */
+    well_uuid: string;
+    /**
+     * SMDA UUID for the wellbore.
+     */
+    wellbore_uuid: string;
+};
+
+/**
+ * Result containing a list of well headers.
+ */
+export type SmdaWellHeadersResult = {
+    /**
+     * List of well headers from SMDA.
+     */
+    well_headers: Array<SmdaWellHeader>;
+};
+
+/**
  * The ``masterdata.smda.stratigraphic_column`` block contains the
  * stratigraphic column known to SMDA.
  */
@@ -854,6 +990,18 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Metadata for a successful validation of project configuration data.
+ */
+export type ValidationRecord = {
+    last_validated_at: string;
+    last_validated_by: string;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -1360,6 +1508,59 @@ export type ProjectPatchMasterdataResponses = {
 };
 
 export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
+
+export type ProjectPostValidateMasterdataSmdaData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/validate/masterdata/smda';
+};
+
+export type ProjectPostValidateMasterdataSmdaErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Project masterdata is missing or does not match SMDA
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * SMDA returns a malformed response
+     */
+    500: unknown;
+    /**
+     * An API call to SMDA times out or fails
+     */
+    503: unknown;
+};
+
+export type ProjectPostValidateMasterdataSmdaResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostValidateMasterdataSmdaResponse = ProjectPostValidateMasterdataSmdaResponses[keyof ProjectPostValidateMasterdataSmdaResponses];
 
 export type ProjectPatchModelData = {
     body: Model;
@@ -2149,6 +2350,97 @@ export type ProjectPutMappingsResponses = {
 
 export type ProjectPutMappingsResponse = ProjectPutMappingsResponses[keyof ProjectPutMappingsResponses];
 
+export type ProjectPostMappingsImportRmsEclipseCsvData = {
+    body?: RmsSimulatorMappingFilePath | null;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/mappings/import/rms_eclipse_csv';
+};
+
+export type ProjectPostMappingsImportRmsEclipseCsvErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be read or written
+     */
+    403: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be found
+     */
+    404: unknown;
+    /**
+     *
+     * The RMS-to-simulator wellbore mapping file contains invalid content,
+     * or no mappings can be exported.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostMappingsImportRmsEclipseCsvResponses = {
+    /**
+     * Successful Response
+     */
+    200: InternalMappings;
+};
+
+export type ProjectPostMappingsImportRmsEclipseCsvResponse = ProjectPostMappingsImportRmsEclipseCsvResponses[keyof ProjectPostMappingsImportRmsEclipseCsvResponses];
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableData = {
+    body?: RmsSimulatorMappingFilePath | null;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/mappings/export/rms_simulator_renaming_table';
+};
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be read or written
+     */
+    403: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be found
+     */
+    404: unknown;
+    /**
+     *
+     * The RMS-to-simulator wellbore mapping file contains invalid content,
+     * or no mappings can be exported.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableResponse = ProjectPostMappingsExportRmsSimulatorRenamingTableResponses[keyof ProjectPostMappingsExportRmsSimulatorRenamingTableResponses];
+
 export type ProjectGetChangelogData = {
     body?: never;
     path?: never;
@@ -2896,6 +3188,57 @@ export type SmdaPostStratUnitsResponses = {
 };
 
 export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
+
+export type SmdaPostWellHeadersData = {
+    body: SmdaField;
+    path?: never;
+    query?: never;
+    url: '/api/v1/smda/well_headers';
+};
+
+export type SmdaPostWellHeadersErrors = {
+    /**
+     * Invalid parameters are provided to SMDA API
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * A requested resource is not found in SMDA
+     */
+    404: unknown;
+    /**
+     *
+     * SMDA returns valid data but it doesn't meet expected criteria,
+     * or no results are found for a valid query.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * SMDA returns a malformed response that doesn't match
+     * the expected structure.
+     *
+     */
+    500: unknown;
+    /**
+     *
+     * An API call to SMDA times out or the service is unavailable.
+     *
+     */
+    503: unknown;
+};
+
+export type SmdaPostWellHeadersResponses = {
+    /**
+     * Successful Response
+     */
+    200: SmdaWellHeadersResult;
+};
+
+export type SmdaPostWellHeadersResponse = SmdaPostWellHeadersResponses[keyof SmdaPostWellHeadersResponses];
 
 export type MatchPostMatchData = {
     body: MatchRequest;
