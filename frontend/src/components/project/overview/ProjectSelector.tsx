@@ -403,6 +403,12 @@ function ConfirmInitProjectDialog({
     );
   };
 
+  const handleInitializeProject = () => {
+    if (typeof projectPath === "string") {
+      initializeProject(projectPath);
+    }
+  };
+
   return (
     <EditDialog open={isOpen}>
       <Dialog.Header>
@@ -417,13 +423,7 @@ function ConfirmInitProjectDialog({
         </PageText>
       </Dialog.CustomContent>
       <Dialog.Actions>
-        <Button
-          onClick={() => {
-            initializeProject(projectPath);
-          }}
-        >
-          OK
-        </Button>
+        <Button onClick={handleInitializeProject}>OK</Button>
         <CancelButton onClick={closeDialog} />
       </Dialog.Actions>
     </EditDialog>

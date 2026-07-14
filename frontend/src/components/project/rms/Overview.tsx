@@ -197,7 +197,7 @@ function RmsEditorForm({
             {([isDefaultValue, canSubmit]) => (
               <form.SubmitButton
                 label="Save"
-                disabled={isDefaultValue || !canSubmit}
+                disabled={isDefaultValue ? true : !canSubmit}
                 isPending={isPending}
                 helperTextDisabled="Value can be saved when it has been changed and is valid"
               />
@@ -347,9 +347,9 @@ function RmsProjectActions({
               disabled={projectCloseMutation.isPending}
               variant={isRmsProjectOpen ? "outlined" : "contained"}
               onClick={() => {
-                projectOpenMutation.mutate({
-                  body: useRmsVersion ? { version: useRmsVersion } : undefined,
-                });
+                projectOpenMutation.mutate(
+                  useRmsVersion ? { body: { version: useRmsVersion } } : {},
+                );
               }}
             />
 

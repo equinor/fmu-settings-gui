@@ -223,8 +223,9 @@ export function App() {
     acquireAndPatchSsoAccessTokenPromise.current ??= (async () => {
       const account = msalInstance.getActiveAccount();
       const accounts = msalInstance.getAllAccounts();
+      const tokenAccount = account ?? accounts.at(0);
 
-      if (!account && accounts.length === 0) {
+      if (tokenAccount === undefined) {
         await msalInstance.acquireTokenRedirect({ scopes: ssoScopes });
 
         return;
@@ -233,7 +234,7 @@ export function App() {
       const result = await msalInstance
         .acquireTokenSilent({
           scopes: ssoScopes,
-          account: account ?? accounts[0],
+          account: tokenAccount,
         })
         .catch((error: unknown) => {
           if (error instanceof InteractionRequiredAuthError) {

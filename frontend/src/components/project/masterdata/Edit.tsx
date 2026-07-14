@@ -133,10 +133,10 @@ function ConfirmItemsOperationDialog({
     textItemName = getNameFromMultipleNameUuidValues(
       selectedItems.items.country,
     );
-  } else if (selectedItems.items.discovery[DUMMYGROUP_NAME].length) {
+  } else if ((selectedItems.items.discovery[DUMMYGROUP_NAME] ?? []).length) {
     textItemType = "discovery";
     textItemName = getNameFromMultipleNameUuidValues(
-      selectedItems.items.discovery[DUMMYGROUP_NAME],
+      selectedItems.items.discovery[DUMMYGROUP_NAME] ?? [],
     );
   }
 
@@ -192,10 +192,10 @@ function ConfirmItemsOperationDialog({
                     .join(", ")}
                 </List.Item>
               )}
-              {affectedItems.discovery[DUMMYGROUP_NAME].length > 0 && (
+              {(affectedItems.discovery[DUMMYGROUP_NAME] ?? []).length > 0 && (
                 <List.Item>
                   Discovery:{" "}
-                  {affectedItems.discovery[DUMMYGROUP_NAME]
+                  {(affectedItems.discovery[DUMMYGROUP_NAME] ?? [])
                     .map((d) => d.short_identifier)
                     .sort((a, b) => stringCompare(a, b))
                     .join(", ")}
@@ -254,8 +254,9 @@ function Items({
         <div key={group}>
           {groups.length > 1 && <PageHeader $variant="h6">{group}</PageHeader>}
           <ChipsContainer>
-            {group in itemListGrouped && itemListGrouped[group].length > 0 ? (
-              itemListGrouped[group]
+            {group in itemListGrouped &&
+            (itemListGrouped[group] ?? []).length > 0 ? (
+              (itemListGrouped[group] ?? [])
                 .sort((a, b) =>
                   stringCompare(
                     getNameFromNameUuidValue(a),
@@ -360,8 +361,7 @@ export function Edit({
       data: results.reduce<SmdaMasterdataResultGrouped>((acc, curr, idx) => {
         if (curr.data !== undefined) {
           const field =
-            (curr.data.field.length && curr.data.field[0].identifier) ||
-            `index-${String(idx)}`;
+            curr.data.field.at(0)?.identifier ?? `index-${String(idx)}`;
           acc[field] = curr.data;
         }
 
@@ -434,9 +434,9 @@ export function Edit({
       );
     }
 
-    const discoveries = selectedItems.items.discovery[DUMMYGROUP_NAME].concat(
-      affectedItems?.discovery[DUMMYGROUP_NAME] ?? [],
-    );
+    const discoveries = (
+      selectedItems.items.discovery[DUMMYGROUP_NAME] ?? []
+    ).concat(affectedItems?.discovery[DUMMYGROUP_NAME] ?? []);
     if (discoveries.length) {
       handleNameUuidListOperationOnForm(
         form,
@@ -783,11 +783,13 @@ export function Edit({
                     mode="array"
                     listeners={{
                       onSubmit: ({ fieldApi }) => {
-                        if (orphanData.discovery[DUMMYGROUP_NAME].length) {
+                        if (
+                          (orphanData.discovery[DUMMYGROUP_NAME] ?? []).length
+                        ) {
                           handleNameUuidListOperation(
                             fieldApi,
                             "removal",
-                            orphanData.discovery[DUMMYGROUP_NAME],
+                            orphanData.discovery[DUMMYGROUP_NAME] ?? [],
                           );
                         }
                       },
@@ -807,7 +809,8 @@ export function Edit({
                             />
                           </ItemsContainer>
 
-                          {orphanData.discovery[DUMMYGROUP_NAME].length > 0 && (
+                          {(orphanData.discovery[DUMMYGROUP_NAME] ?? [])
+                            .length > 0 && (
                             <OrphanTypesContainer>
                               <PageText>
                                 The following discoveries are currently present
@@ -816,9 +819,9 @@ export function Edit({
                                 removed when the project masterdata is saved.
                               </PageText>
                               <PageList>
-                                {orphanData.discovery[
-                                  DUMMYGROUP_NAME
-                                ].map<React.ReactNode>((discovery) => (
+                                {(
+                                  orphanData.discovery[DUMMYGROUP_NAME] ?? []
+                                ).map<React.ReactNode>((discovery) => (
                                   <List.Item key={discovery.uuid}>
                                     {discovery.short_identifier}
                                   </List.Item>

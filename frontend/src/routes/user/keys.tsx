@@ -62,7 +62,7 @@ function KeysTextFieldForm({
     formReset,
   }: MutationCallbackProps<StringObject>) => {
     mutate(
-      { body: { id: name, key: formValue[name] } },
+      { body: { id: name, key: formValue[name] ?? "" } },
       {
         onSuccess: (data) => {
           formSubmitCallback({

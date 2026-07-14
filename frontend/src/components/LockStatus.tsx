@@ -14,7 +14,11 @@ import type { LockInfo, LockStatus } from "#client/types.gen";
 import { Banner } from "#styles/common";
 import { displayTimestamp } from "#utils/datetime";
 
-function EnableEditingButton({ lockStatus }: { lockStatus?: LockStatus }) {
+function EnableEditingButton({
+  lockStatus,
+}: {
+  lockStatus?: LockStatus | undefined;
+}) {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     ...projectPostLockAcquireMutation(),
@@ -130,7 +134,11 @@ export function LockIcon({ isReadOnly }: { isReadOnly: boolean }) {
   );
 }
 
-export function LockStatusBanner({ lockStatus }: { lockStatus?: LockStatus }) {
+export function LockStatusBanner({
+  lockStatus,
+}: {
+  lockStatus?: LockStatus | undefined;
+}) {
   const isReadOnly = !(lockStatus?.is_lock_acquired ?? false);
 
   return (

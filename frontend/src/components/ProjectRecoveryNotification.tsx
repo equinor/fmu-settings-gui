@@ -67,11 +67,7 @@ export function ProjectRecoveryNotification() {
         throwOnError: true,
       })
         .then(({ data }) => {
-          setLatestRevision(
-            data.revisions.length > 0
-              ? data.revisions[data.revisions.length - 1]
-              : null,
-          );
+          setLatestRevision(data.revisions.at(-1) ?? null);
           setIsOpen(true);
         })
         .catch(() => {

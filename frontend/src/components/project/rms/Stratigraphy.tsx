@@ -424,7 +424,9 @@ function Edit({
               {([isDefaultValue, canSubmit]) => (
                 <form.SubmitButton
                   label="Save"
-                  disabled={isDefaultValue || !canSubmit || projectReadOnly}
+                  disabled={
+                    projectReadOnly ? true : isDefaultValue ? true : !canSubmit
+                  }
                   isPending={rmsStratigraphyMutation.isPending}
                   helperTextDisabled={
                     projectReadOnly

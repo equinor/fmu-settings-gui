@@ -22,7 +22,7 @@ function FieldResults({
   data,
   setSelectedFields,
 }: {
-  data?: SmdaFieldSearchResult;
+  data?: SmdaFieldSearchResult | undefined;
   setSelectedFields: Dispatch<SetStateAction<Array<string>>>;
 }) {
   const [selectedRows, setSelectedRows] = useState<RowSelectionState>({});

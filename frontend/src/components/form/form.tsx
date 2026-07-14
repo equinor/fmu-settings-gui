@@ -127,7 +127,7 @@ export function EditableTextFieldForm({
                 {([isDefaultValue, canSubmit]) => (
                   <form.SubmitButton
                     label="Save"
-                    disabled={isDefaultValue || !canSubmit}
+                    disabled={isDefaultValue ? true : !canSubmit}
                     isPending={mutationIsPending}
                     helperTextDisabled="Value can be submitted when it has been changed and is valid"
                   />
@@ -173,7 +173,7 @@ export function SearchFieldForm({
       [name]: value,
     },
     onSubmit: ({ formApi, value }) => {
-      setStateCallback(value[name]);
+      setStateCallback(value[name] ?? "");
       formApi.reset();
     },
   });

@@ -94,14 +94,14 @@ function ModelEditorForm({
     },
 
     onSubmit: ({ value, formApi }) => {
+      const description = value.modelDescription.trim();
+
       mutate(
         {
           body: {
             name: value.modelName.trim(),
             revision: value.modelRevision.trim(),
-            description: value.modelDescription
-              ? [value.modelDescription.trim()]
-              : undefined,
+            ...(description && { description: [description] }),
           },
         },
         {
@@ -164,7 +164,9 @@ function ModelEditorForm({
             {([isDefaultValue, canSubmit]) => (
               <form.SubmitButton
                 label="Save"
-                disabled={isDefaultValue || !canSubmit || projectReadOnly}
+                disabled={
+                  projectReadOnly ? true : isDefaultValue ? true : !canSubmit
+                }
                 isPending={isPending}
                 helperTextDisabled={
                   projectReadOnly ? "Project is read-only" : undefined

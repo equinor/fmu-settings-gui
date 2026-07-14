@@ -5,7 +5,7 @@ import { GenericBox, GenericInnerBox } from "#styles/common";
 import type { HorizonLineStyle } from "./types";
 
 export const StratigraphicFrameworkContainer = styled(GenericBox)<{
-  $maxHeight?: string;
+  $maxHeight?: string | undefined;
   $disablePointerEvents: boolean;
 }>`
   max-height: ${({ $maxHeight }) => $maxHeight};
