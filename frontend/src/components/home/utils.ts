@@ -49,9 +49,11 @@ const SORTED_PATH_LABEL_KEYS: Record<string, string[] | undefined> = {
 const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   add: "Added",
   copy: "Copied",
+  init: "Initialized",
   merge: "Merged",
   remove: "Removed",
   reset: "Reset",
+  restore: "Restored",
   update: "Updated",
 };
 
@@ -100,6 +102,10 @@ function formatBriefDescription(change: string) {
 }
 
 export function formatEntryDescription(entry: ChangeInfo): string {
+  if (entry.change_type === "init") {
+    return "Initialized FMU settings project";
+  }
+
   const label = getFieldLabel(entry.file, entry.key);
   if (label !== undefined) {
     const verb = CHANGE_TYPE_VERBS[entry.change_type];

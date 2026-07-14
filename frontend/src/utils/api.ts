@@ -7,6 +7,7 @@ export const HTTP_STATUS_403_FORBIDDEN = 403;
 export const HTTP_STATUS_404_NOT_FOUND = 404;
 export const HTTP_STATUS_409_CONFLICT = 409;
 export const HTTP_STATUS_422_UNPROCESSABLE_CONTENT = 422;
+export const HTTP_STATUS_503_SERVICE_UNAVAILABLE = 503;
 
 export function httpValidationErrorToString(
   error: AxiosError,

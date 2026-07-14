@@ -101,7 +101,7 @@ export type ChangeInfo = {
 /**
  * The types of change that can be made on a file.
  */
-export type ChangeType = 'update' | 'remove' | 'add' | 'reset' | 'merge' | 'copy';
+export type ChangeType = 'init' | 'update' | 'remove' | 'add' | 'reset' | 'restore' | 'merge' | 'copy';
 
 /**
  * The security classification for a given data object.
@@ -178,6 +178,11 @@ export type FieldItem = {
 };
 
 /**
+ * The supported types to filter on.
+ */
+export type FilterType = 'date' | 'number' | 'text';
+
+/**
  * A relative path to a global config file, relative to the project root.
  */
 export type GlobalConfigPath = {
@@ -195,7 +200,8 @@ export type HttpValidationError = {
  * Represents the .fmu/mappings.json storage schema.
  */
 export type InternalMappings = {
-    stratigraphy?: InternalStratigraphyMappingsOutput;
+    schema_version?: 1;
+    stratigraphy?: InternalStratigraphyMappings;
     wellbore?: InternalWellboreMappings;
 };
 
@@ -228,16 +234,7 @@ export type InternalStratigraphyIdentifierMapping = {
  * relation. Converting to fmu-datamodels drops unmappable entries and expands
  * same-system aliases onto matching cross-system primary mappings.
  */
-export type InternalStratigraphyMappingsInput = Array<InternalStratigraphyIdentifierMapping>;
-
-/**
- * Collection of stratigraphy mappings stored in .fmu/mappings.json.
- *
- * This internal model can keep same-system alias information and unmappable
- * relation. Converting to fmu-datamodels drops unmappable entries and expands
- * same-system aliases onto matching cross-system primary mappings.
- */
-export type InternalStratigraphyMappingsOutput = Array<InternalStratigraphyIdentifierMapping>;
+export type InternalStratigraphyMappings = Array<InternalStratigraphyIdentifierMapping>;
 
 /**
  * Wellbore identifier mapping stored in .fmu/mappings.json.
@@ -361,6 +358,72 @@ export type Masterdata = {
 };
 
 /**
+ * A target candidate for a source name.
+ */
+export type MatchCandidate = {
+    /**
+     * The candidate target name.
+     */
+    target: string;
+    /**
+     * Similarity score for the normalized source and target names (0-100).
+     */
+    score: number;
+    /**
+     * Confidence level based on score.
+     *
+     * 'high' (>80), 'medium' (50-80), 'low' (<50).
+     */
+    confidence: 'high' | 'medium' | 'low';
+};
+
+/**
+ * A normalized token sequence replacement to apply before matching.
+ */
+export type MatchReplacementRule = {
+    /**
+     * The normalized token sequence to replace.
+     */
+    original: string;
+    /**
+     * The replacement token sequence.
+     */
+    replacement: string;
+};
+
+/**
+ * A request to match source names against target names.
+ */
+export type MatchRequest = {
+    /**
+     * Names to match from.
+     */
+    sources: Array<string>;
+    /**
+     * Names to match against.
+     */
+    targets: Array<string>;
+    /**
+     * Optional normalized token sequence replacements to apply before matching.
+     */
+    replacements?: Array<MatchReplacementRule>;
+};
+
+/**
+ * The target candidates for a source name.
+ */
+export type MatchResult = {
+    /**
+     * The source name.
+     */
+    source: string;
+    /**
+     * The best target candidates for the source name.
+     */
+    matches: Array<MatchCandidate>;
+};
+
+/**
  * A generic message to return to the GUI.
  */
 export type Message = {
@@ -395,6 +458,7 @@ export type Ok = {
  * Stored as config.json.
  */
 export type ProjectConfig = {
+    schema_version?: 1;
     version: string;
     created_at: string;
     created_by: string;
@@ -405,6 +469,15 @@ export type ProjectConfig = {
     access?: Access | null;
     cache_max_revisions?: number;
     rms?: RmsProject | null;
+    validation?: ProjectValidation;
+};
+
+/**
+ * Validation metadata for project configuration data.
+ */
+export type ProjectValidation = {
+    masterdata_smda?: ValidationRecord | null;
+    rms_project?: ValidationRecord | null;
 };
 
 /**
@@ -422,30 +495,6 @@ export type RestorableFilesResponse = {
  */
 export type RmsCoordinateSystem = {
     name: string;
-};
-
-/**
- * A matched coordinate system.
- */
-export type RmsCoordinateSystemMatch = {
-    /**
-     * The source coordinate system to be matched.
-     */
-    rms_crs_sys: RmsCoordinateSystem;
-    /**
-     * The matched target coordinate system.
-     */
-    smda_crs_sys: CoordinateSystem;
-    /**
-     * Similarity score for the coordinate systems (0-100).
-     */
-    score: number;
-    /**
-     * Confidence level based on score.
-     *
-     * 'high' (>80), 'medium' (50-80), 'low' (<50).
-     */
-    confidence: 'high' | 'medium' | 'low';
 };
 
 /**
@@ -489,6 +538,16 @@ export type RmsProjectPathsResult = {
 };
 
 /**
+ * A path to an RMS-to-simulator mapping import or export file.
+ */
+export type RmsSimulatorMappingFilePath = {
+    /**
+     * Relative path in the project to an RMS-to-simulator mapping file.
+     */
+    relative_path: string;
+};
+
+/**
  * RMS stratigraphic framework consisting of zones and horizons.
  */
 export type RmsStratigraphicFramework = {
@@ -510,30 +569,6 @@ export type RmsStratigraphicZone = {
     top_horizon_name: string;
     base_horizon_name: string;
     stratigraphic_column_name?: Array<string> | null;
-};
-
-/**
- * A matched pair of RMS zone and SMDA stratigraphic unit.
- */
-export type RmsStratigraphyMatch = {
-    /**
-     * The RMS stratigraphic zone.
-     */
-    rms_zone: RmsStratigraphicZone;
-    /**
-     * The matched SMDA stratigraphic unit.
-     */
-    smda_unit: StratigraphicUnit;
-    /**
-     * Similarity score for the zone/unit names (0-100).
-     */
-    score: number;
-    /**
-     * Confidence level based on score.
-     *
-     * 'high' (>80), 'medium' (50-80), 'low' (<50).
-     */
-    confidence: 'high' | 'medium' | 'low';
 };
 
 /**
@@ -716,6 +751,123 @@ export type SmdaStratigraphicUnitsResult = {
 };
 
 /**
+ * Well header data from SMDA.
+ */
+export type SmdaWellHeader = {
+    /**
+     * Unique SMDA identifier for the well.
+     */
+    unique_well_identifier: string;
+    /**
+     * Unique SMDA identifier for the wellbore.
+     */
+    unique_wellbore_identifier: string;
+    /**
+     * Official wellbore name used by the Authorities.
+     *
+     * For Norway and UK, it will be the unique_wellbore_identifier without
+     * country iso code, but for Brazil it can really differs from the Equinor
+     * wellbore name.
+     */
+    official_wellbore_name: string | null;
+    /**
+     * Country identifier for the wellbore.
+     */
+    country_identifier: string;
+    /**
+     * The unique wellbore identifier this wellbore is kicked off from.
+     *
+     * Ref. kick off depth. This is used for sidetracks. A wellbore starting at
+     * the well origin has no parent.
+     */
+    parent_wellbore: string | null;
+    /**
+     * Type of wellbore, values like exploration, development, other.
+     *
+     * This attribute is automatically maintained in SMDA based on the wellbore
+     * purpose. If the purpose is like wildcat or appraisal, type will be set to
+     * exploration, if the purpose is like production, injection then the type is
+     * set to development.
+     */
+    wellbore_type: string | null;
+    /**
+     * Purpose of wellbore.
+     *
+     * Values like wildcat, appraisal, … for exploration wellbores; production,
+     * injection, observation, disposal, … for development wellbores; shallow gas,
+     * pilot hole for other purpose.
+     */
+    wellbore_purpose: string | null;
+    /**
+     * Status of the wellbore.
+     *
+     * Value like plugged and abandoned, drilling, plugged, producing ... This
+     * attribute is automatically maintained in SMDA if no good source is found
+     * for it. SMDA will use the wellbore type (exploration or development), the
+     * drill dates information, current_track, etc ... in order to set a plausible
+     * status. If wellbore type=exploration and completed_date < current_date,
+     * then status=plugged and abandoned while development wellbore would be set
+     * to completed.
+     */
+    wellbore_status: string | null;
+    /**
+     * Pre-drill purpose of the wellbore.
+     *
+     * Legal values for exploration wellbores: wildcat, appraisal. Example of
+     * legal values for development wellbores: observation, production, injection.
+     */
+    wellbore_purpose_planned: string | null;
+    /**
+     * The year when the drilling has started.
+     */
+    drill_year: number | null;
+    /**
+     * Date when the wellbore is considered completed.
+     *
+     * For exploration wellbores from moveable facilities, this may be the anchor
+     * handling or jacking-down start date. For fixed facilities and development
+     * wellbores, it is when the wellbore reaches total depth and the last casing,
+     * liner, or screen is set. If immediately plugged, it is the date the last
+     * plug is set.
+     */
+    completion_date: string | null;
+    /**
+     * Internal name of the discovery.
+     */
+    discovery_internal_identifier: string | null;
+    /**
+     * Whether the wellbore is multilateral. 0 = no, 1 = yes.
+     */
+    multilateral: (0 | 1) | null;
+    /**
+     * Projected coordinate unit.
+     */
+    projected_coordinate_unit: string | null;
+    /**
+     * Coordinate reference system for the easting/northing values.
+     */
+    projected_coordinate_system: string | null;
+    /**
+     * SMDA UUID for the well.
+     */
+    well_uuid: string;
+    /**
+     * SMDA UUID for the wellbore.
+     */
+    wellbore_uuid: string;
+};
+
+/**
+ * Result containing a list of well headers.
+ */
+export type SmdaWellHeadersResult = {
+    /**
+     * List of well headers from SMDA.
+     */
+    well_headers: Array<SmdaWellHeader>;
+};
+
+/**
  * The ``masterdata.smda.stratigraphic_column`` block contains the
  * stratigraphic column known to SMDA.
  */
@@ -825,6 +977,7 @@ export type UserApiKeys = {
  * Stored as config.json.
  */
 export type UserConfig = {
+    schema_version?: 1;
     version: string;
     created_at: string;
     last_modified_at?: string | null;
@@ -837,6 +990,18 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Metadata for a successful validation of project configuration data.
+ */
+export type ValidationRecord = {
+    last_validated_at: string;
+    last_validated_by: string;
 };
 
 export type ProjectDeleteProjectSessionData = {
@@ -1343,6 +1508,59 @@ export type ProjectPatchMasterdataResponses = {
 };
 
 export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
+
+export type ProjectPostValidateMasterdataSmdaData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/validate/masterdata/smda';
+};
+
+export type ProjectPostValidateMasterdataSmdaErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Project masterdata is missing or does not match SMDA
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * SMDA returns a malformed response
+     */
+    500: unknown;
+    /**
+     * An API call to SMDA times out or fails
+     */
+    503: unknown;
+};
+
+export type ProjectPostValidateMasterdataSmdaResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostValidateMasterdataSmdaResponse = ProjectPostValidateMasterdataSmdaResponses[keyof ProjectPostValidateMasterdataSmdaResponses];
 
 export type ProjectPatchModelData = {
     body: Model;
@@ -2078,7 +2296,7 @@ export type ProjectGetMappingsResponses = {
 export type ProjectGetMappingsResponse = ProjectGetMappingsResponses[keyof ProjectGetMappingsResponses];
 
 export type ProjectPutMappingsData = {
-    body: InternalStratigraphyMappingsInput;
+    body: InternalStratigraphyMappings | InternalWellboreMappings;
     path: {
         mapping_type: MappingType;
         source_system: DataSystem;
@@ -2132,10 +2350,108 @@ export type ProjectPutMappingsResponses = {
 
 export type ProjectPutMappingsResponse = ProjectPutMappingsResponses[keyof ProjectPutMappingsResponses];
 
+export type ProjectPostMappingsImportRmsEclipseCsvData = {
+    body?: RmsSimulatorMappingFilePath | null;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/mappings/import/rms_eclipse_csv';
+};
+
+export type ProjectPostMappingsImportRmsEclipseCsvErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be read or written
+     */
+    403: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be found
+     */
+    404: unknown;
+    /**
+     *
+     * The RMS-to-simulator wellbore mapping file contains invalid content,
+     * or no mappings can be exported.
+     *
+     */
+    422: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostMappingsImportRmsEclipseCsvResponses = {
+    /**
+     * Successful Response
+     */
+    200: InternalMappings;
+};
+
+export type ProjectPostMappingsImportRmsEclipseCsvResponse = ProjectPostMappingsImportRmsEclipseCsvResponses[keyof ProjectPostMappingsImportRmsEclipseCsvResponses];
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableData = {
+    body?: RmsSimulatorMappingFilePath | null;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/mappings/export/rms_simulator_renaming_table';
+};
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be read or written
+     */
+    403: unknown;
+    /**
+     * The RMS-to-simulator wellbore mapping file could not be found
+     */
+    404: unknown;
+    /**
+     *
+     * The RMS-to-simulator wellbore mapping file contains invalid content,
+     * or no mappings can be exported.
+     *
+     */
+    422: unknown;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostMappingsExportRmsSimulatorRenamingTableResponse = ProjectPostMappingsExportRmsSimulatorRenamingTableResponses[keyof ProjectPostMappingsExportRmsSimulatorRenamingTableResponses];
+
 export type ProjectGetChangelogData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        change_type?: ChangeType | null;
+        max_entries?: number | null;
+        field_name?: string | null;
+        filter_value?: string | null;
+        filter_type?: FilterType | null;
+        operator?: ('>' | '>=' | '<' | '<=' | '==' | '!=') | null;
+    };
     url: '/api/v1/project/changelog';
 };
 
@@ -2153,7 +2469,7 @@ export type ProjectGetChangelogErrors = {
      */
     404: unknown;
     /**
-     * Invalid changelog data
+     * Invalid changelog data or query parameters
      */
     422: unknown;
     /**
@@ -2515,7 +2831,7 @@ export type RmsPostRmsProjectErrors = {
      */
     401: unknown;
     /**
-     * RMS project does not exist at the configured path.
+     * RMS project was not found or its version could not be determined.
      */
     404: unknown;
     /**
@@ -2873,19 +3189,16 @@ export type SmdaPostStratUnitsResponses = {
 
 export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
 
-export type MatchGetStratigraphyData = {
-    body?: never;
+export type SmdaPostWellHeadersData = {
+    body: SmdaField;
     path?: never;
     query?: never;
-    url: '/api/v1/match/stratigraphy';
+    url: '/api/v1/smda/well_headers';
 };
 
-export type MatchGetStratigraphyErrors = {
+export type SmdaPostWellHeadersErrors = {
     /**
-     *
-     * Required configuration is missing from the project config,
-     * or invalid parameters are provided.
-     *
+     * Invalid parameters are provided to SMDA API
      */
     400: unknown;
     /**
@@ -2893,9 +3206,13 @@ export type MatchGetStratigraphyErrors = {
      */
     401: unknown;
     /**
+     * A requested resource is not found in SMDA
+     */
+    404: unknown;
+    /**
      *
-     * SMDA returns valid data but no results are found,
-     * or configuration exists but contains no matchable data.
+     * SMDA returns valid data but it doesn't meet expected criteria,
+     * or no results are found for a valid query.
      *
      */
     422: unknown;
@@ -2914,51 +3231,37 @@ export type MatchGetStratigraphyErrors = {
     503: unknown;
 };
 
-export type MatchGetStratigraphyResponses = {
+export type SmdaPostWellHeadersResponses = {
     /**
      * Successful Response
      */
-    200: Array<RmsStratigraphyMatch>;
+    200: SmdaWellHeadersResult;
 };
 
-export type MatchGetStratigraphyResponse = MatchGetStratigraphyResponses[keyof MatchGetStratigraphyResponses];
+export type SmdaPostWellHeadersResponse = SmdaPostWellHeadersResponses[keyof SmdaPostWellHeadersResponses];
 
-export type MatchGetCoordinateSystemData = {
-    body?: never;
+export type MatchPostMatchData = {
+    body: MatchRequest;
     path?: never;
     query?: never;
-    url: '/api/v1/match/coordinate_system';
+    url: '/api/v1/match';
 };
 
-export type MatchGetCoordinateSystemErrors = {
+export type MatchPostMatchErrors = {
     /**
-     * Required configuration is missing from the project config.
+     * The request body is missing required match input or contains invalid data.
      */
-    400: unknown;
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-    /**
-     * Something unexpected has happened
-     */
-    500: unknown;
+    422: unknown;
 };
 
-export type MatchGetCoordinateSystemError = MatchGetCoordinateSystemErrors[keyof MatchGetCoordinateSystemErrors];
-
-export type MatchGetCoordinateSystemResponses = {
+export type MatchPostMatchResponses = {
     /**
      * Successful Response
      */
-    200: RmsCoordinateSystemMatch;
+    200: Array<MatchResult>;
 };
 
-export type MatchGetCoordinateSystemResponse = MatchGetCoordinateSystemResponses[keyof MatchGetCoordinateSystemResponses];
+export type MatchPostMatchResponse = MatchPostMatchResponses[keyof MatchPostMatchResponses];
 
 export type HealthV1HealthCheckData = {
     body?: never;

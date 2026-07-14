@@ -17,6 +17,7 @@ import {
 import {
   projectGetLockStatusQueryKey,
   projectGetProjectQueryKey,
+  sessionGetSessionOptions,
 } from "#client/@tanstack/react-query.gen";
 import type { LockStatus, ProjectGetMappingsData } from "#client/types.gen";
 import { projectLockStatusRefetchInterval } from "#config";
@@ -29,7 +30,10 @@ import type { QueryServiceBase } from "#utils/query";
 
 export type MappingsPathOptions = ProjectGetMappingsData["path"];
 
-type GetProject = QueryServiceBase<FmuProject> & { lockStatus?: LockStatus };
+type GetProject = QueryServiceBase<FmuProject> & {
+  lockStatus?: LockStatus;
+  rmsExpiresAt?: string | null;
+};
 
 type MappingsPathsKeys = "stratigraphyRms";
 
@@ -125,8 +129,16 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
     enabled: project.status && project.data !== undefined,
   });
 
+  const { data: sessionData } = useQuery({
+    ...sessionGetSessionOptions(),
+    enabled: project.status && project.data !== undefined,
+  });
+
+  const rmsExpiresAt = sessionData?.rms_expires_at;
+
   return {
     ...project,
     lockStatus,
+    rmsExpiresAt,
   } as GetProject;
 }

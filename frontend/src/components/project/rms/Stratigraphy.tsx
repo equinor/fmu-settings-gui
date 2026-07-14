@@ -473,8 +473,6 @@ export function Stratigraphy({
   return (
     <>
       <PageSectionWidthConstrained>
-        <PageHeader $variant="h3">Stratigraphy</PageHeader>
-
         <PageText>
           The following is the model stratigraphy stored in the project, this
           can be a subset or the full RMS stratigraphy. It is only the stored

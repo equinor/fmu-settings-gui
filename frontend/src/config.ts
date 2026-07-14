@@ -13,6 +13,8 @@ export const ssoScopes = [
   "691a29c5-8199-4e87-80a2-16bd71e831cd/user_impersonation", // SMDA
 ];
 
+export const sessionRmsExpireNotificationThreshold = 120; // 2 minutes
+
 export const projectLockStatusRefetchInterval = 60; // 1 minute
 
 export const projectLockExpireNotificationThreshold = 120; // 2 minutes

@@ -9,6 +9,7 @@ import {
 import { arrow_back, arrow_forward } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import {
   type Dispatch,
   type SetStateAction,
@@ -47,6 +48,7 @@ import {
 } from "#styles/common";
 import {
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+  HTTP_STATUS_503_SERVICE_UNAVAILABLE,
   httpValidationErrorToString,
 } from "#utils/api";
 import {
@@ -86,6 +88,7 @@ import type {
   ItemLists,
   MasterdataItemType,
   SelectedItems,
+  SmdaFieldReference,
   SmdaMasterdataResultGrouped,
 } from "./types";
 import {
@@ -236,7 +239,7 @@ function Items({
   operation,
   setSelectedItems,
 }: {
-  fields: Array<string>;
+  fields: Array<SmdaFieldReference>;
   itemType: FieldItemType;
   itemListGrouped: ItemListGrouped<MasterdataItemType>;
   operation: ListOperation;
@@ -246,13 +249,22 @@ function Items({
     Object.keys(itemListGrouped).length === 1 &&
     DUMMYGROUP_NAME in itemListGrouped;
   const groups =
-    !isDummyGroup && fields.length ? fields.sort() : [DUMMYGROUP_NAME];
+    !isDummyGroup && fields.length
+      ? fields
+          .toSorted((a, b) => stringCompare(a.identifier, b.identifier))
+          .map((field) => field.uuid)
+      : [DUMMYGROUP_NAME];
 
   return (
     <>
       {groups.map((group) => (
         <div key={group}>
-          {groups.length > 1 && <PageHeader $variant="h6">{group}</PageHeader>}
+          {groups.length > 1 && (
+            <PageHeader $variant="h6">
+              {fields.find((field) => field.uuid === group)?.identifier ??
+                group}
+            </PageHeader>
+          )}
           <ChipsContainer>
             {group in itemListGrouped &&
             (itemListGrouped[group] ?? []).length > 0 ? (
@@ -313,7 +325,7 @@ export function Edit({
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [confirmItemsOperationDialogOpen, setConfirmItemsOperationDialogOpen] =
     useState(false);
-  const [smdaFields, setSmdaFields] = useState<Array<string>>([]);
+  const [smdaFields, setSmdaFields] = useState<Array<SmdaFieldReference>>([]);
   const [projectData, setProjectData] = useState<FormMasterdataProject>(() =>
     emptyFormMasterdataProject(),
   );
@@ -354,14 +366,21 @@ export function Edit({
   });
 
   const smdaMasterdata = useQueries({
-    queries: smdaFields.map((field) =>
-      smdaPostMasterdataOptions({ body: [{ identifier: field }] }),
-    ),
+    queries: smdaFields.map((field) => ({
+      ...smdaPostMasterdataOptions({ body: [field] }),
+      retry: (failureCount: number, queryError: Error) =>
+        isAxiosError(queryError) &&
+        (queryError.response === undefined ||
+          queryError.response.status === HTTP_STATUS_503_SERVICE_UNAVAILABLE) &&
+        failureCount < 3,
+    })),
     combine: (results) => ({
       data: results.reduce<SmdaMasterdataResultGrouped>((acc, curr, idx) => {
         if (curr.data !== undefined) {
           const field =
-            curr.data.field.at(0)?.identifier ?? `index-${String(idx)}`;
+            smdaFields.at(idx)?.uuid ??
+            curr.data.field.at(0)?.uuid ??
+            `index-${String(idx)}`;
           acc[field] = curr.data;
         }
 
@@ -369,6 +388,17 @@ export function Edit({
       }, {}),
       isPending: results.some((result) => result.isPending),
       isSuccess: results.every((result) => result.isSuccess),
+      failedSearchFieldUuids: results.flatMap((result, idx) => {
+        const smdaField = smdaFields.at(idx);
+
+        return result.isLoadingError &&
+          smdaField !== undefined &&
+          !projectMasterdata.field.some(
+            (field) => field.uuid === smdaField.uuid,
+          )
+          ? [smdaField.uuid]
+          : [];
+      }),
     }),
   });
 
@@ -406,6 +436,18 @@ export function Edit({
       closeDialog();
     },
   });
+
+  useEffect(() => {
+    if (!smdaMasterdata.failedSearchFieldUuids.length) {
+      return;
+    }
+
+    setSmdaFields((fields) =>
+      fields.filter(
+        (field) => !smdaMasterdata.failedSearchFieldUuids.includes(field.uuid),
+      ),
+    );
+  }, [smdaMasterdata.failedSearchFieldUuids]);
 
   const handleItemsOperation = useCallback(() => {
     if (selectedItems === undefined || itemsCount(selectedItems.items) === 0) {
@@ -484,8 +526,11 @@ export function Edit({
       void Promise.resolve().then(() => {
         setSmdaFields(
           projectMasterdata.field
-            .map((field) => field.identifier)
-            .sort((a, b) => stringCompare(a, b)),
+            .map((field) => ({
+              identifier: field.identifier,
+              uuid: field.uuid,
+            }))
+            .sort((a, b) => stringCompare(a.identifier, b.identifier)),
         );
       });
     }
@@ -541,12 +586,12 @@ export function Edit({
     setSearchDialogOpen(false);
   }
 
-  function addFields(fields: Array<string>) {
+  function addFields(fields: Array<SmdaFieldReference>) {
     setSmdaFields((smdaFields) =>
       fields
-        .reduce<Array<string>>(
+        .reduce<Array<SmdaFieldReference>>(
           (acc, curr) => {
-            if (!acc.includes(curr)) {
+            if (!acc.some((field) => field.uuid === curr.uuid)) {
               acc.push(curr);
             }
 
@@ -554,7 +599,7 @@ export function Edit({
           },
           [...smdaFields],
         )
-        .sort((a, b) => stringCompare(a, b)),
+        .sort((a, b) => stringCompare(a.identifier, b.identifier)),
     );
   }
 
@@ -644,9 +689,7 @@ export function Edit({
                           <Label label="Field" htmlFor={field.name} />
                           <ItemsContainer>
                             <Items
-                              fields={field.state.value.map(
-                                (f) => f.identifier,
-                              )}
+                              fields={field.state.value}
                               itemType="field"
                               itemListGrouped={{
                                 [DUMMYGROUP_NAME]: projectData.field,
@@ -688,7 +731,7 @@ export function Edit({
                           <Label label="Country" htmlFor={field.name} />
                           <ItemsContainer>
                             <Items
-                              fields={fieldList.map((f) => f.identifier)}
+                              fields={fieldList}
                               itemListGrouped={{
                                 [DUMMYGROUP_NAME]: projectData.country,
                               }}
@@ -801,7 +844,7 @@ export function Edit({
                           <Label label="Discoveries" htmlFor={field.name} />
                           <ItemsContainer>
                             <Items
-                              fields={fieldList.map((f) => f.identifier)}
+                              fields={fieldList}
                               itemType="discovery"
                               itemListGrouped={projectData.discovery}
                               operation="removal"

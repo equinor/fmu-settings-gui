@@ -17,13 +17,14 @@ import {
   SearchFormContainer,
   SearchResultsContainer,
 } from "./FieldSearch.style";
+import type { SmdaFieldReference } from "./types";
 
 function FieldResults({
   data,
   setSelectedFields,
 }: {
   data?: SmdaFieldSearchResult | undefined;
-  setSelectedFields: Dispatch<SetStateAction<Array<string>>>;
+  setSelectedFields: Dispatch<SetStateAction<Array<SmdaFieldReference>>>;
 }) {
   const [selectedRows, setSelectedRows] = useState<RowSelectionState>({});
 
@@ -35,18 +36,17 @@ function FieldResults({
   }, [data]);
 
   useEffect(() => {
-    const fieldNames = Object.entries(selectedRows).reduce<Array<string>>(
-      (acc, [uuid]) => {
-        const field = data?.results.find((f) => f.uuid === uuid);
-        if (field && !acc.includes(field.identifier)) {
-          acc.push(field.identifier);
-        }
+    const fields = Object.entries(selectedRows).reduce<
+      Array<SmdaFieldReference>
+    >((acc, [uuid]) => {
+      const field = data?.results.find((f) => f.uuid === uuid);
+      if (field) {
+        acc.push({ identifier: field.identifier, uuid: field.uuid });
+      }
 
-        return acc;
-      },
-      [],
-    );
-    setSelectedFields(fieldNames);
+      return acc;
+    }, []);
+    setSelectedFields(fields);
   }, [selectedRows, data?.results, setSelectedFields]);
 
   const columns: ColumnDef<SmdaFieldUuid>[] = [
@@ -109,11 +109,13 @@ export function FieldSearch({
   closeDialog,
 }: {
   isOpen: boolean;
-  addFields: (fields: Array<string>) => void;
+  addFields: (fields: Array<SmdaFieldReference>) => void;
   closeDialog: () => void;
 }) {
   const [searchValue, setSearchValue] = useState("");
-  const [selectedFields, setSelectedFields] = useState<Array<string>>([]);
+  const [selectedFields, setSelectedFields] = useState<
+    Array<SmdaFieldReference>
+  >([]);
 
   const { data } = useQuery({
     ...smdaPostFieldOptions({ body: { identifier: searchValue } }),

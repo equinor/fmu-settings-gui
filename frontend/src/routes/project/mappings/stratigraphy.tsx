@@ -18,7 +18,7 @@ import {
   setStorageItem,
 } from "#utils/storage";
 
-export const Route = createFileRoute("/project/stratigraphy")({
+export const Route = createFileRoute("/project/mappings/stratigraphy")({
   component: RouteComponent,
 });
 

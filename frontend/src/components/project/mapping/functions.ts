@@ -4,7 +4,7 @@ import { use } from "react";
 import type {
   DataSystem,
   InternalMappings,
-  InternalStratigraphyMappingsOutput,
+  InternalStratigraphyMappings,
   MappingType,
   RmsHorizon,
   RmsStratigraphicZone,
@@ -30,7 +30,7 @@ export function useMappingData() {
 }
 
 export function createProjectMappingsLookup(
-  mappingType: keyof InternalMappings,
+  mappingType: MappingType,
   projectMappings: InternalMappings,
 ) {
   const sourceSystem: DataSystem = "rms";
@@ -143,7 +143,7 @@ export function createMutationValue(elementMappings: ElementMappings) {
   const mappingType: MappingType = "stratigraphy";
   const sourceSystem: DataSystem = "rms";
   const targetSystem: DataSystem = "smda";
-  const result: InternalStratigraphyMappingsOutput = [];
+  const result: InternalStratigraphyMappings = [];
 
   Object.values(elementMappings).forEach((mapping) => {
     if (
