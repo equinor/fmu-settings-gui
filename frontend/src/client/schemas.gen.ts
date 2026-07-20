@@ -5,16 +5,12 @@ export const APIKeySchema = {
         id: {
             type: 'string',
             title: 'Id'
-        },
-        key: {
-            type: 'string',
-            format: 'password',
-            title: 'Key',
-            writeOnly: true
         }
     },
     type: 'object',
-    required: ['id', 'key'],
+    required: [
+        'id'
+    ],
     title: 'APIKey',
     description: 'A key-value pair for a known and supported API.'
 } as const;
@@ -22,12 +18,12 @@ export const APIKeySchema = {
 export const AccessSchema = {
     properties: {
         asset: {
-            '$ref': '#/components/schemas/Asset'
+            $ref: '#/components/schemas/Asset'
         },
         classification: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/Classification'
+                    $ref: '#/components/schemas/Classification'
                 },
                 {
                     type: 'null'
@@ -36,10 +32,11 @@ export const AccessSchema = {
         }
     },
     type: 'object',
-    required: ['asset'],
+    required: [
+        'asset'
+    ],
     title: 'Access',
-    description: `The \`\`access\`\` block contains information related to access control for
-this data object.`
+    description: 'The ``access`` block contains information related to access control for\nthis data object.'
 } as const;
 
 export const AccessTokenSchema = {
@@ -47,16 +44,12 @@ export const AccessTokenSchema = {
         id: {
             type: 'string',
             title: 'Id'
-        },
-        key: {
-            type: 'string',
-            format: 'password',
-            title: 'Key',
-            writeOnly: true
         }
     },
     type: 'object',
-    required: ['id', 'key'],
+    required: [
+        'id'
+    ],
     title: 'AccessToken',
     description: 'A key-value pair for a known and supported access scope.'
 } as const;
@@ -66,14 +59,17 @@ export const AssetSchema = {
         name: {
             type: 'string',
             title: 'Name',
-            examples: ['Drogon']
+            examples: [
+                'Drogon'
+            ]
         }
     },
     type: 'object',
-    required: ['name'],
+    required: [
+        'name'
+    ],
     title: 'Asset',
-    description: `The \`\`access.asset\`\` block contains information about the owner asset of
-these data.`
+    description: 'The ``access.asset`` block contains information about the owner asset of\nthese data.'
 } as const;
 
 export const CacheContentSchema = {
@@ -86,7 +82,9 @@ export const CacheContentSchema = {
         }
     },
     type: 'object',
-    required: ['data'],
+    required: [
+        'data'
+    ],
     title: 'CacheContent',
     description: 'Content of a cache revision.'
 } as const;
@@ -103,14 +101,19 @@ export const CacheListSchema = {
         }
     },
     type: 'object',
-    required: ['revisions'],
+    required: [
+        'revisions'
+    ],
     title: 'CacheList',
     description: 'List of cache revision filenames.'
 } as const;
 
 export const CacheResourceSchema = {
     type: 'string',
-    enum: ['config.json', 'mappings.json'],
+    enum: [
+        'config.json',
+        'mappings.json'
+    ],
     title: 'CacheResource',
     description: 'Resources that can be cached and restored.'
 } as const;
@@ -138,7 +141,7 @@ export const ChangeInfoSchema = {
             title: 'Timestamp'
         },
         change_type: {
-            '$ref': '#/components/schemas/ChangeType'
+            $ref: '#/components/schemas/ChangeType'
         },
         user: {
             type: 'string',
@@ -167,21 +170,42 @@ export const ChangeInfoSchema = {
         }
     },
     type: 'object',
-    required: ['change_type', 'user', 'path', 'change', 'hostname', 'file', 'key'],
+    required: [
+        'change_type',
+        'user',
+        'path',
+        'change',
+        'hostname',
+        'file',
+        'key'
+    ],
     title: 'ChangeInfo',
     description: 'Represents a change in the changelog file.'
 } as const;
 
 export const ChangeTypeSchema = {
     type: 'string',
-    enum: ['init', 'update', 'remove', 'add', 'reset', 'restore', 'merge', 'copy'],
+    enum: [
+        'init',
+        'update',
+        'remove',
+        'add',
+        'reset',
+        'restore',
+        'merge',
+        'copy'
+    ],
     title: 'ChangeType',
     description: 'The types of change that can be made on a file.'
 } as const;
 
 export const ClassificationSchema = {
     type: 'string',
-    enum: ['asset', 'internal', 'restricted'],
+    enum: [
+        'asset',
+        'internal',
+        'restricted'
+    ],
     title: 'Classification',
     description: 'The security classification for a given data object.'
 } as const;
@@ -191,20 +215,26 @@ export const CoordinateSystemSchema = {
         identifier: {
             type: 'string',
             title: 'Identifier',
-            examples: ['ST_WGS84_UTM37N_P32637']
+            examples: [
+                'ST_WGS84_UTM37N_P32637'
+            ]
         },
         uuid: {
             type: 'string',
             format: 'uuid',
             title: 'Uuid',
-            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+            examples: [
+                '15ce3b84-766f-4c93-9050-b154861f9100'
+            ]
         }
     },
     type: 'object',
-    required: ['identifier', 'uuid'],
+    required: [
+        'identifier',
+        'uuid'
+    ],
     title: 'CoordinateSystem',
-    description: `The \`\`masterdata.smda.coordinate_system\`\` block contains the coordinate
-system known to SMDA.`
+    description: 'The ``masterdata.smda.coordinate_system`` block contains the coordinate\nsystem known to SMDA.'
 } as const;
 
 export const CountryItemSchema = {
@@ -212,25 +242,36 @@ export const CountryItemSchema = {
         identifier: {
             type: 'string',
             title: 'Identifier',
-            examples: ['Norway']
+            examples: [
+                'Norway'
+            ]
         },
         uuid: {
             type: 'string',
             format: 'uuid',
             title: 'Uuid',
-            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+            examples: [
+                '15ce3b84-766f-4c93-9050-b154861f9100'
+            ]
         }
     },
     type: 'object',
-    required: ['identifier', 'uuid'],
+    required: [
+        'identifier',
+        'uuid'
+    ],
     title: 'CountryItem',
-    description: `A single country in the \`\`smda.masterdata.country\`\` list of countries
-known to SMDA.`
+    description: 'A single country in the ``smda.masterdata.country`` list of countries\nknown to SMDA.'
 } as const;
 
 export const DataSystemSchema = {
     type: 'string',
-    enum: ['rms', 'smda', 'simulator', 'pdm'],
+    enum: [
+        'rms',
+        'smda',
+        'simulator',
+        'pdm'
+    ],
     title: 'DataSystem',
     description: 'The system or application data is being mapping to or from.'
 } as const;
@@ -240,20 +281,26 @@ export const DiscoveryItemSchema = {
         short_identifier: {
             type: 'string',
             title: 'Short Identifier',
-            examples: ['SomeDiscovery']
+            examples: [
+                'SomeDiscovery'
+            ]
         },
         uuid: {
             type: 'string',
             format: 'uuid',
             title: 'Uuid',
-            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+            examples: [
+                '15ce3b84-766f-4c93-9050-b154861f9100'
+            ]
         }
     },
     type: 'object',
-    required: ['short_identifier', 'uuid'],
+    required: [
+        'short_identifier',
+        'uuid'
+    ],
     title: 'DiscoveryItem',
-    description: `A single discovery in the \`\`masterdata.smda.discovery\`\` list of discoveries
-known to SMDA.`
+    description: 'A single discovery in the ``masterdata.smda.discovery`` list of discoveries\nknown to SMDA.'
 } as const;
 
 export const FMUDirPathSchema = {
@@ -263,11 +310,15 @@ export const FMUDirPathSchema = {
             format: 'path',
             title: 'Path',
             description: 'Absolute path to the directory which maybe contains a .fmu directory.',
-            examples: ['/path/to/project.2038.02.02']
+            examples: [
+                '/path/to/project.2038.02.02'
+            ]
         }
     },
     type: 'object',
-    required: ['path'],
+    required: [
+        'path'
+    ],
     title: 'FMUDirPath',
     description: 'Path where a .fmu directory may exist.'
 } as const;
@@ -279,23 +330,31 @@ export const FMUProjectSchema = {
             format: 'path',
             title: 'Path',
             description: 'Absolute path to the directory which maybe contains a .fmu directory.',
-            examples: ['/path/to/project.2038.02.02']
+            examples: [
+                '/path/to/project.2038.02.02'
+            ]
         },
         project_dir_name: {
             type: 'string',
             title: 'Project Dir Name',
             description: 'The directory name, not the path, that contains the .fmu directory.',
-            examples: ['project.2038.02.02']
+            examples: [
+                'project.2038.02.02'
+            ]
         },
         config: {
-            '$ref': '#/components/schemas/ProjectConfig',
-            description: "The configuration of an FMU project's .fmu directory."
+            $ref: '#/components/schemas/ProjectConfig',
+            description: 'The configuration of an FMU project\'s .fmu directory.'
         }
     },
     type: 'object',
-    required: ['path', 'project_dir_name', 'config'],
+    required: [
+        'path',
+        'project_dir_name',
+        'config'
+    ],
     title: 'FMUProject',
-    description: "Information returned when 'opening' an FMU Directory."
+    description: 'Information returned when \'opening\' an FMU Directory.'
 } as const;
 
 export const FieldItemSchema = {
@@ -303,25 +362,35 @@ export const FieldItemSchema = {
         identifier: {
             type: 'string',
             title: 'Identifier',
-            examples: ['OseFax']
+            examples: [
+                'OseFax'
+            ]
         },
         uuid: {
             type: 'string',
             format: 'uuid',
             title: 'Uuid',
-            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+            examples: [
+                '15ce3b84-766f-4c93-9050-b154861f9100'
+            ]
         }
     },
     type: 'object',
-    required: ['identifier', 'uuid'],
+    required: [
+        'identifier',
+        'uuid'
+    ],
     title: 'FieldItem',
-    description: `A single field in the \`\`masterdata.smda.field\`\` list of fields
-known to SMDA.`
+    description: 'A single field in the ``masterdata.smda.field`` list of fields\nknown to SMDA.'
 } as const;
 
 export const FilterTypeSchema = {
     type: 'string',
-    enum: ['date', 'number', 'text'],
+    enum: [
+        'date',
+        'number',
+        'text'
+    ],
     title: 'FilterType',
     description: 'The supported types to filter on.'
 } as const;
@@ -333,11 +402,15 @@ export const GlobalConfigPathSchema = {
             format: 'path',
             title: 'Relative Path',
             description: 'Relative path in the project to a global config file.',
-            examples: ['relative_path/to/global_config_file']
+            examples: [
+                'relative_path/to/global_config_file'
+            ]
         }
     },
     type: 'object',
-    required: ['relative_path'],
+    required: [
+        'relative_path'
+    ],
     title: 'GlobalConfigPath',
     description: 'A relative path to a global config file, relative to the project root.'
 } as const;
@@ -346,7 +419,7 @@ export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
             items: {
-                '$ref': '#/components/schemas/ValidationError'
+                $ref: '#/components/schemas/ValidationError'
             },
             type: 'array',
             title: 'Detail'
@@ -365,10 +438,10 @@ export const InternalMappingsSchema = {
             default: 1
         },
         stratigraphy: {
-            '$ref': '#/components/schemas/InternalStratigraphyMappings'
+            $ref: '#/components/schemas/InternalStratigraphyMappings'
         },
         wellbore: {
-            '$ref': '#/components/schemas/InternalWellboreMappings'
+            $ref: '#/components/schemas/InternalWellboreMappings'
         }
     },
     type: 'object',
@@ -378,7 +451,11 @@ export const InternalMappingsSchema = {
 
 export const InternalRelationTypeSchema = {
     type: 'string',
-    enum: ['primary', 'alias', 'unmappable'],
+    enum: [
+        'primary',
+        'alias',
+        'unmappable'
+    ],
     title: 'InternalRelationType',
     description: 'The kind of relation this internal .fmu mapping represents.'
 } as const;
@@ -386,10 +463,10 @@ export const InternalRelationTypeSchema = {
 export const InternalStratigraphyIdentifierMappingSchema = {
     properties: {
         source_system: {
-            '$ref': '#/components/schemas/DataSystem'
+            $ref: '#/components/schemas/DataSystem'
         },
         target_system: {
-            '$ref': '#/components/schemas/DataSystem'
+            $ref: '#/components/schemas/DataSystem'
         },
         mapping_type: {
             type: 'string',
@@ -398,7 +475,7 @@ export const InternalStratigraphyIdentifierMappingSchema = {
             default: 'stratigraphy'
         },
         relation_type: {
-            '$ref': '#/components/schemas/InternalRelationType'
+            $ref: '#/components/schemas/InternalRelationType'
         },
         source_id: {
             type: 'string',
@@ -441,34 +518,32 @@ export const InternalStratigraphyIdentifierMappingSchema = {
         }
     },
     type: 'object',
-    required: ['source_system', 'target_system', 'relation_type', 'source_id'],
+    required: [
+        'source_system',
+        'target_system',
+        'relation_type',
+        'source_id'
+    ],
     title: 'InternalStratigraphyIdentifierMapping',
-    description: `Stratigraphy identifier mapping stored in .fmu/mappings.json.
-
-Use \`\`to_stratigraphy_mappings()\`\` on the collection model when consumers
-need the fmu-datamodels mapping schema.`
+    description: 'Stratigraphy identifier mapping stored in .fmu/mappings.json.\n\nUse ``to_stratigraphy_mappings()`` on the collection model when consumers\nneed the fmu-datamodels mapping schema.'
 } as const;
 
 export const InternalStratigraphyMappingsSchema = {
     items: {
-        '$ref': '#/components/schemas/InternalStratigraphyIdentifierMapping'
+        $ref: '#/components/schemas/InternalStratigraphyIdentifierMapping'
     },
     type: 'array',
     title: 'InternalStratigraphyMappings',
-    description: `Collection of stratigraphy mappings stored in .fmu/mappings.json.
-
-This internal model can keep same-system alias information and unmappable
-relation. Converting to fmu-datamodels drops unmappable entries and expands
-same-system aliases onto matching cross-system primary mappings.`
+    description: 'Collection of stratigraphy mappings stored in .fmu/mappings.json.\n\nThis internal model can keep same-system alias information and unmappable\nrelation. Converting to fmu-datamodels drops unmappable entries and expands\nsame-system aliases onto matching cross-system primary mappings.'
 } as const;
 
 export const InternalWellboreIdentifierMappingSchema = {
     properties: {
         source_system: {
-            '$ref': '#/components/schemas/DataSystem'
+            $ref: '#/components/schemas/DataSystem'
         },
         target_system: {
-            '$ref': '#/components/schemas/DataSystem'
+            $ref: '#/components/schemas/DataSystem'
         },
         mapping_type: {
             type: 'string',
@@ -477,7 +552,7 @@ export const InternalWellboreIdentifierMappingSchema = {
             default: 'wellbore'
         },
         relation_type: {
-            '$ref': '#/components/schemas/InternalRelationType'
+            $ref: '#/components/schemas/InternalRelationType'
         },
         source_id: {
             type: 'string',
@@ -520,25 +595,23 @@ export const InternalWellboreIdentifierMappingSchema = {
         }
     },
     type: 'object',
-    required: ['source_system', 'target_system', 'relation_type', 'source_id'],
+    required: [
+        'source_system',
+        'target_system',
+        'relation_type',
+        'source_id'
+    ],
     title: 'InternalWellboreIdentifierMapping',
-    description: `Wellbore identifier mapping stored in .fmu/mappings.json.
-
-Use \`\`to_wellbore_mappings()\`\` on the collection model when consumers need
-the fmu-datamodels mapping schema.`
+    description: 'Wellbore identifier mapping stored in .fmu/mappings.json.\n\nUse ``to_wellbore_mappings()`` on the collection model when consumers need\nthe fmu-datamodels mapping schema.'
 } as const;
 
 export const InternalWellboreMappingsSchema = {
     items: {
-        '$ref': '#/components/schemas/InternalWellboreIdentifierMapping'
+        $ref: '#/components/schemas/InternalWellboreIdentifierMapping'
     },
     type: 'array',
     title: 'InternalWellboreMappings',
-    description: `Collection of wellbore mappings stored in .fmu/mappings.json.
-
-This internal model can keep same-system alias information and unmappable
-relation. Converting to fmu-datamodels drops unmappable entries and expands
-same-system aliases onto matching cross-system primary mappings.`
+    description: 'Collection of wellbore mappings stored in .fmu/mappings.json.\n\nThis internal model can keep same-system alias information and unmappable\nrelation. Converting to fmu-datamodels drops unmappable entries and expands\nsame-system aliases onto matching cross-system primary mappings.'
 } as const;
 
 export const ListFieldDiffSchema = {
@@ -565,14 +638,19 @@ export const ListFieldDiffSchema = {
         },
         updated: {
             items: {
-                '$ref': '#/components/schemas/ListUpdatedEntry'
+                $ref: '#/components/schemas/ListUpdatedEntry'
             },
             type: 'array',
             title: 'Updated'
         }
     },
     type: 'object',
-    required: ['field_path', 'added', 'removed', 'updated'],
+    required: [
+        'field_path',
+        'added',
+        'removed',
+        'updated'
+    ],
     title: 'ListFieldDiff',
     description: 'Diff entry for list fields with per-item changes.'
 } as const;
@@ -594,7 +672,11 @@ export const ListUpdatedEntrySchema = {
         }
     },
     type: 'object',
-    required: ['key', 'before', 'after'],
+    required: [
+        'key',
+        'before',
+        'after'
+    ],
     title: 'ListUpdatedEntry',
     description: 'Before and after values for an updated list item.'
 } as const;
@@ -625,11 +707,17 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.0.0'
+            default: '0.33.1.dev7+g6feb87797.d20260624'
         }
     },
     type: 'object',
-    required: ['pid', 'hostname', 'user', 'acquired_at', 'expires_at'],
+    required: [
+        'pid',
+        'hostname',
+        'user',
+        'acquired_at',
+        'expires_at'
+    ],
     title: 'LockInfo',
     description: 'Represents a .fmu directory lock file.'
 } as const;
@@ -649,7 +737,7 @@ export const LockStatusSchema = {
         lock_info: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/LockInfo'
+                    $ref: '#/components/schemas/LockInfo'
                 },
                 {
                     type: 'null'
@@ -719,14 +807,17 @@ export const LockStatusSchema = {
         }
     },
     type: 'object',
-    required: ['is_lock_acquired', 'lock_file_exists'],
+    required: [
+        'is_lock_acquired',
+        'lock_file_exists'
+    ],
     title: 'LockStatus',
     description: 'Information about the project lock status.'
 } as const;
 
 export const Log_ChangeInfo_Schema = {
     items: {
-        '$ref': '#/components/schemas/ChangeInfo'
+        $ref: '#/components/schemas/ChangeInfo'
     },
     type: 'array',
     title: 'Log[ChangeInfo]'
@@ -734,25 +825,26 @@ export const Log_ChangeInfo_Schema = {
 
 export const MappingTypeSchema = {
     type: 'string',
-    enum: ['stratigraphy', 'wellbore'],
+    enum: [
+        'stratigraphy',
+        'wellbore'
+    ],
     title: 'MappingType',
-    description: `The discriminator used between mapping types.
-
-Each of these types should have their own mapping class derived from a base
-mapping type, e.g. IdentifierMapping.`
+    description: 'The discriminator used between mapping types.\n\nEach of these types should have their own mapping class derived from a base\nmapping type, e.g. IdentifierMapping.'
 } as const;
 
 export const MasterdataSchema = {
     properties: {
         smda: {
-            '$ref': '#/components/schemas/Smda'
+            $ref: '#/components/schemas/Smda'
         }
     },
     type: 'object',
-    required: ['smda'],
+    required: [
+        'smda'
+    ],
     title: 'Masterdata',
-    description: `The \`\`masterdata\`\` block contains information related to masterdata.
-Currently, SMDA holds the masterdata.`
+    description: 'The ``masterdata`` block contains information related to masterdata.\nCurrently, SMDA holds the masterdata.'
 } as const;
 
 export const MatchCandidateSchema = {
@@ -771,15 +863,21 @@ export const MatchCandidateSchema = {
         },
         confidence: {
             type: 'string',
-            enum: ['high', 'medium', 'low'],
+            enum: [
+                'high',
+                'medium',
+                'low'
+            ],
             title: 'Confidence',
-            description: `Confidence level based on score.
-
-'high' (>80), 'medium' (50-80), 'low' (<50).`
+            description: 'Confidence level based on score.\n\n\'high\' (>80), \'medium\' (50-80), \'low\' (<50).'
         }
     },
     type: 'object',
-    required: ['target', 'score', 'confidence'],
+    required: [
+        'target',
+        'score',
+        'confidence'
+    ],
     title: 'MatchCandidate',
     description: 'A target candidate for a source name.'
 } as const;
@@ -798,7 +896,10 @@ export const MatchReplacementRuleSchema = {
         }
     },
     type: 'object',
-    required: ['original', 'replacement'],
+    required: [
+        'original',
+        'replacement'
+    ],
     title: 'MatchReplacementRule',
     description: 'A normalized token sequence replacement to apply before matching.'
 } as const;
@@ -823,7 +924,7 @@ export const MatchRequestSchema = {
         },
         replacements: {
             items: {
-                '$ref': '#/components/schemas/MatchReplacementRule'
+                $ref: '#/components/schemas/MatchReplacementRule'
             },
             type: 'array',
             title: 'Replacements',
@@ -831,7 +932,10 @@ export const MatchRequestSchema = {
         }
     },
     type: 'object',
-    required: ['sources', 'targets'],
+    required: [
+        'sources',
+        'targets'
+    ],
     title: 'MatchRequest',
     description: 'A request to match source names against target names.'
 } as const;
@@ -845,7 +949,7 @@ export const MatchResultSchema = {
         },
         matches: {
             items: {
-                '$ref': '#/components/schemas/MatchCandidate'
+                $ref: '#/components/schemas/MatchCandidate'
             },
             type: 'array',
             title: 'Matches',
@@ -853,7 +957,10 @@ export const MatchResultSchema = {
         }
     },
     type: 'object',
-    required: ['source', 'matches'],
+    required: [
+        'source',
+        'matches'
+    ],
     title: 'MatchResult',
     description: 'The target candidates for a source name.'
 } as const;
@@ -866,7 +973,9 @@ export const MessageSchema = {
         }
     },
     type: 'object',
-    required: ['message'],
+    required: [
+        'message'
+    ],
     title: 'Message',
     description: 'A generic message to return to the GUI.'
 } as const;
@@ -890,24 +999,25 @@ export const ModelSchema = {
         name: {
             type: 'string',
             title: 'Name',
-            examples: ['Drogon']
+            examples: [
+                'Drogon'
+            ]
         },
         revision: {
             type: 'string',
             title: 'Revision',
-            examples: ['21.0.0.dev']
+            examples: [
+                '21.0.0.dev'
+            ]
         }
     },
     type: 'object',
-    required: ['name', 'revision'],
+    required: [
+        'name',
+        'revision'
+    ],
     title: 'Model',
-    description: `The \`\`fmu.model\`\` block contains information about the model used.
-
-.. note::
-   Synonyms for "model" in this context are "template", "setup", etc. The term
-   "model" is ultra-generic but was chosen before e.g. "template" as the latter
-   deviates from daily communications and is, if possible, even more generic
-   than "model".`
+    description: 'The ``fmu.model`` block contains information about the model used.\n\n.. note::\n   Synonyms for "model" in this context are "template", "setup", etc. The term\n   "model" is ultra-generic but was chosen before e.g. "template" as the latter\n   deviates from daily communications and is, if possible, even more generic\n   than "model".'
 } as const;
 
 export const OkSchema = {
@@ -972,7 +1082,7 @@ export const ProjectConfigSchema = {
         masterdata: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/Masterdata'
+                    $ref: '#/components/schemas/Masterdata'
                 },
                 {
                     type: 'null'
@@ -982,7 +1092,7 @@ export const ProjectConfigSchema = {
         model: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/Model'
+                    $ref: '#/components/schemas/Model'
                 },
                 {
                     type: 'null'
@@ -992,7 +1102,7 @@ export const ProjectConfigSchema = {
         access: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/Access'
+                    $ref: '#/components/schemas/Access'
                 },
                 {
                     type: 'null'
@@ -1008,51 +1118,22 @@ export const ProjectConfigSchema = {
         rms: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/RmsProject'
+                    $ref: '#/components/schemas/RmsProject'
                 },
                 {
                     type: 'null'
                 }
             ]
-        },
-        validation: {
-            '$ref': '#/components/schemas/ProjectValidation'
         }
     },
     type: 'object',
-    required: ['version', 'created_at', 'created_by'],
+    required: [
+        'version',
+        'created_at',
+        'created_by'
+    ],
     title: 'ProjectConfig',
-    description: `The configuration file in a .fmu directory.
-
-Stored as config.json.`
-} as const;
-
-export const ProjectValidationSchema = {
-    properties: {
-        masterdata_smda: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/ValidationRecord'
-                },
-                {
-                    type: 'null'
-                }
-            ]
-        },
-        rms_project: {
-            anyOf: [
-                {
-                    '$ref': '#/components/schemas/ValidationRecord'
-                },
-                {
-                    type: 'null'
-                }
-            ]
-        }
-    },
-    type: 'object',
-    title: 'ProjectValidation',
-    description: 'Validation metadata for project configuration data.'
+    description: 'The configuration file in a .fmu directory.\n\nStored as config.json.'
 } as const;
 
 export const RestorableFilesResponseSchema = {
@@ -1068,7 +1149,9 @@ export const RestorableFilesResponseSchema = {
         }
     },
     type: 'object',
-    required: ['files'],
+    required: [
+        'files'
+    ],
     title: 'RestorableFilesResponse',
     description: 'A list of missing .fmu files that can be restored or were restored.'
 } as const;
@@ -1081,7 +1164,9 @@ export const RmsCoordinateSystemSchema = {
         }
     },
     type: 'object',
-    required: ['name'],
+    required: [
+        'name'
+    ],
     title: 'RmsCoordinateSystem',
     description: 'The project coordinate system of an RMS project.'
 } as const;
@@ -1094,12 +1179,21 @@ export const RmsHorizonSchema = {
         },
         type: {
             type: 'string',
-            enum: ['calculated', 'calculated_unconformity', 'interpreted', 'interpreted_unconformity', 'interpreted_intrusion'],
+            enum: [
+                'calculated',
+                'calculated_unconformity',
+                'interpreted',
+                'interpreted_unconformity',
+                'interpreted_intrusion'
+            ],
             title: 'Type'
         }
     },
     type: 'object',
-    required: ['name', 'type'],
+    required: [
+        'name',
+        'type'
+    ],
     title: 'RmsHorizon',
     description: 'A horizon from an RMS project.'
 } as const;
@@ -1118,7 +1212,7 @@ export const RmsProjectSchema = {
         coordinate_system: {
             anyOf: [
                 {
-                    '$ref': '#/components/schemas/RmsCoordinateSystem'
+                    $ref: '#/components/schemas/RmsCoordinateSystem'
                 },
                 {
                     type: 'null'
@@ -1129,7 +1223,7 @@ export const RmsProjectSchema = {
             anyOf: [
                 {
                     items: {
-                        '$ref': '#/components/schemas/RmsStratigraphicZone'
+                        $ref: '#/components/schemas/RmsStratigraphicZone'
                     },
                     type: 'array'
                 },
@@ -1143,7 +1237,7 @@ export const RmsProjectSchema = {
             anyOf: [
                 {
                     items: {
-                        '$ref': '#/components/schemas/RmsHorizon'
+                        $ref: '#/components/schemas/RmsHorizon'
                     },
                     type: 'array'
                 },
@@ -1157,7 +1251,7 @@ export const RmsProjectSchema = {
             anyOf: [
                 {
                     items: {
-                        '$ref': '#/components/schemas/RmsWell'
+                        $ref: '#/components/schemas/RmsWell'
                     },
                     type: 'array'
                 },
@@ -1169,7 +1263,10 @@ export const RmsProjectSchema = {
         }
     },
     type: 'object',
-    required: ['path', 'version'],
+    required: [
+        'path',
+        'version'
+    ],
     title: 'RmsProject',
     description: 'RMS project configuration.'
 } as const;
@@ -1181,11 +1278,15 @@ export const RmsProjectPathSchema = {
             format: 'path',
             title: 'Path',
             description: 'Absolute path to the RMS project within the FMU project.',
-            examples: ['/path/to/some.project.rms.14.2.2']
+            examples: [
+                '/path/to/some.project.rms.14.2.2'
+            ]
         }
     },
     type: 'object',
-    required: ['path'],
+    required: [
+        'path'
+    ],
     title: 'RmsProjectPath',
     description: 'Path to an RMS project within the FMU project.'
 } as const;
@@ -1194,7 +1295,7 @@ export const RmsProjectPathsResultSchema = {
     properties: {
         results: {
             items: {
-                '$ref': '#/components/schemas/RmsProjectPath'
+                $ref: '#/components/schemas/RmsProjectPath'
             },
             type: 'array',
             title: 'Results',
@@ -1202,32 +1303,18 @@ export const RmsProjectPathsResultSchema = {
         }
     },
     type: 'object',
-    required: ['results'],
+    required: [
+        'results'
+    ],
     title: 'RmsProjectPathsResult',
     description: 'List of RMS project paths within the FMU project.'
-} as const;
-
-export const RmsSimulatorMappingFilePathSchema = {
-    properties: {
-        relative_path: {
-            type: 'string',
-            format: 'path',
-            title: 'Relative Path',
-            description: 'Relative path in the project to an RMS-to-simulator mapping file.',
-            examples: ['rms/input/well_modelling/well_info/rms_eclipse.csv']
-        }
-    },
-    type: 'object',
-    required: ['relative_path'],
-    title: 'RmsSimulatorMappingFilePath',
-    description: 'A path to an RMS-to-simulator mapping import or export file.'
 } as const;
 
 export const RmsStratigraphicFrameworkSchema = {
     properties: {
         zones: {
             items: {
-                '$ref': '#/components/schemas/RmsStratigraphicZone'
+                $ref: '#/components/schemas/RmsStratigraphicZone'
             },
             type: 'array',
             title: 'Zones',
@@ -1235,7 +1322,7 @@ export const RmsStratigraphicFrameworkSchema = {
         },
         horizons: {
             items: {
-                '$ref': '#/components/schemas/RmsHorizon'
+                $ref: '#/components/schemas/RmsHorizon'
             },
             type: 'array',
             title: 'Horizons',
@@ -1243,7 +1330,10 @@ export const RmsStratigraphicFrameworkSchema = {
         }
     },
     type: 'object',
-    required: ['zones', 'horizons'],
+    required: [
+        'zones',
+        'horizons'
+    ],
     title: 'RmsStratigraphicFramework',
     description: 'RMS stratigraphic framework consisting of zones and horizons.'
 } as const;
@@ -1278,7 +1368,11 @@ export const RmsStratigraphicZoneSchema = {
         }
     },
     type: 'object',
-    required: ['name', 'top_horizon_name', 'base_horizon_name'],
+    required: [
+        'name',
+        'top_horizon_name',
+        'base_horizon_name'
+    ],
     title: 'RmsStratigraphicZone',
     description: 'A stratigraphic zone from an RMS project.'
 } as const;
@@ -1289,11 +1383,16 @@ export const RmsVersionSchema = {
             type: 'string',
             title: 'Version',
             description: 'A version of RMS.',
-            examples: ['14.2.2', '15.0.1.0']
+            examples: [
+                '14.2.2',
+                '15.0.1.0'
+            ]
         }
     },
     type: 'object',
-    required: ['version'],
+    required: [
+        'version'
+    ],
     title: 'RmsVersion',
     description: 'RMS version.'
 } as const;
@@ -1311,7 +1410,9 @@ export const RmsWellSchema = {
         }
     },
     type: 'object',
-    required: ['name'],
+    required: [
+        'name'
+    ],
     title: 'RmsWell',
     description: 'A well from an RMS project with added metadata.'
 } as const;
@@ -1330,7 +1431,11 @@ export const ScalarFieldDiffSchema = {
         }
     },
     type: 'object',
-    required: ['field_path', 'before', 'after'],
+    required: [
+        'field_path',
+        'before',
+        'after'
+    ],
     title: 'ScalarFieldDiff',
     description: 'Diff entry for non-list fields.'
 } as const;
@@ -1375,7 +1480,13 @@ export const SessionResponseSchema = {
         }
     },
     type: 'object',
-    required: ['id', 'created_at', 'expires_at', 'rms_expires_at', 'last_accessed'],
+    required: [
+        'id',
+        'created_at',
+        'expires_at',
+        'rms_expires_at',
+        'last_accessed'
+    ],
     title: 'SessionResponse',
     description: 'Serializable representation of the current session.'
 } as const;
@@ -1383,11 +1494,11 @@ export const SessionResponseSchema = {
 export const SmdaSchema = {
     properties: {
         coordinate_system: {
-            '$ref': '#/components/schemas/CoordinateSystem'
+            $ref: '#/components/schemas/CoordinateSystem'
         },
         country: {
             items: {
-                '$ref': '#/components/schemas/CountryItem'
+                $ref: '#/components/schemas/CountryItem'
             },
             type: 'array',
             minItems: 1,
@@ -1395,25 +1506,31 @@ export const SmdaSchema = {
         },
         discovery: {
             items: {
-                '$ref': '#/components/schemas/DiscoveryItem'
+                $ref: '#/components/schemas/DiscoveryItem'
             },
             type: 'array',
             title: 'Discovery'
         },
         field: {
             items: {
-                '$ref': '#/components/schemas/FieldItem'
+                $ref: '#/components/schemas/FieldItem'
             },
             type: 'array',
             minItems: 1,
             title: 'Field'
         },
         stratigraphic_column: {
-            '$ref': '#/components/schemas/StratigraphicColumn'
+            $ref: '#/components/schemas/StratigraphicColumn'
         }
     },
     type: 'object',
-    required: ['coordinate_system', 'country', 'discovery', 'field', 'stratigraphic_column'],
+    required: [
+        'coordinate_system',
+        'country',
+        'discovery',
+        'field',
+        'stratigraphic_column'
+    ],
     title: 'Smda',
     description: 'The ``masterdata.smda`` block contains SMDA-related attributes.'
 } as const;
@@ -1424,11 +1541,15 @@ export const SmdaFieldSchema = {
             type: 'string',
             title: 'Identifier',
             description: 'A field identifier (name).',
-            examples: ['TROLL']
+            examples: [
+                'TROLL'
+            ]
         }
     },
     type: 'object',
-    required: ['identifier'],
+    required: [
+        'identifier'
+    ],
     title: 'SmdaField',
     description: 'An identifier for a field to be searched for.'
 } as const;
@@ -1447,7 +1568,7 @@ export const SmdaFieldSearchResultSchema = {
         },
         results: {
             items: {
-                '$ref': '#/components/schemas/SmdaFieldUUID'
+                $ref: '#/components/schemas/SmdaFieldUUID'
             },
             type: 'array',
             title: 'Results',
@@ -1455,7 +1576,11 @@ export const SmdaFieldSearchResultSchema = {
         }
     },
     type: 'object',
-    required: ['hits', 'pages', 'results'],
+    required: [
+        'hits',
+        'pages',
+        'results'
+    ],
     title: 'SmdaFieldSearchResult',
     description: 'The search result of a field identifier result.'
 } as const;
@@ -1466,7 +1591,9 @@ export const SmdaFieldUUIDSchema = {
             type: 'string',
             title: 'Identifier',
             description: 'A field identifier (name).',
-            examples: ['TROLL']
+            examples: [
+                'TROLL'
+            ]
         },
         uuid: {
             type: 'string',
@@ -1481,7 +1608,11 @@ export const SmdaFieldUUIDSchema = {
         }
     },
     type: 'object',
-    required: ['identifier', 'uuid', 'country'],
+    required: [
+        'identifier',
+        'uuid',
+        'country'
+    ],
     title: 'SmdaFieldUUID',
     description: 'Name-UUID identifier for a field as known by SMDA.'
 } as const;
@@ -1490,7 +1621,7 @@ export const SmdaMasterdataResultSchema = {
     properties: {
         field: {
             items: {
-                '$ref': '#/components/schemas/FieldItem'
+                $ref: '#/components/schemas/FieldItem'
             },
             type: 'array',
             title: 'Field',
@@ -1498,7 +1629,7 @@ export const SmdaMasterdataResultSchema = {
         },
         country: {
             items: {
-                '$ref': '#/components/schemas/CountryItem'
+                $ref: '#/components/schemas/CountryItem'
             },
             type: 'array',
             title: 'Country',
@@ -1506,7 +1637,7 @@ export const SmdaMasterdataResultSchema = {
         },
         discovery: {
             items: {
-                '$ref': '#/components/schemas/DiscoveryItem'
+                $ref: '#/components/schemas/DiscoveryItem'
             },
             type: 'array',
             title: 'Discovery',
@@ -1514,32 +1645,34 @@ export const SmdaMasterdataResultSchema = {
         },
         stratigraphic_columns: {
             items: {
-                '$ref': '#/components/schemas/StratigraphicColumn'
+                $ref: '#/components/schemas/StratigraphicColumn'
             },
             type: 'array',
             title: 'Stratigraphic Columns',
             description: 'Reference to stratigraphic column known to SMDA.'
         },
         field_coordinate_system: {
-            '$ref': '#/components/schemas/CoordinateSystem',
-            description: `The primary field's coordinate system.
-
-This coordinate system may not be the coordinate system users use in their model.`
+            $ref: '#/components/schemas/CoordinateSystem',
+            description: 'The primary field\'s coordinate system.\n\nThis coordinate system may not be the coordinate system users use in their model.'
         },
         coordinate_systems: {
             items: {
-                '$ref': '#/components/schemas/CoordinateSystem'
+                $ref: '#/components/schemas/CoordinateSystem'
             },
             type: 'array',
             title: 'Coordinate Systems',
-            description: `A list of all coordinate systems known to SMDA.
-
-These are provided when the user needs to select a different coordinate system that
-applies to the model they are working on.`
+            description: 'A list of all coordinate systems known to SMDA.\n\nThese are provided when the user needs to select a different coordinate system that\napplies to the model they are working on.'
         }
     },
     type: 'object',
-    required: ['field', 'country', 'discovery', 'stratigraphic_columns', 'field_coordinate_system', 'coordinate_systems'],
+    required: [
+        'field',
+        'country',
+        'discovery',
+        'stratigraphic_columns',
+        'field_coordinate_system',
+        'coordinate_systems'
+    ],
     title: 'SmdaMasterdataResult',
     description: 'Contains SMDA-related attributes.'
 } as const;
@@ -1550,7 +1683,9 @@ export const SmdaSelectedFieldSchema = {
             type: 'string',
             title: 'Identifier',
             description: 'A field identifier (name).',
-            examples: ['TROLL']
+            examples: [
+                'TROLL'
+            ]
         },
         uuid: {
             anyOf: [
@@ -1567,7 +1702,9 @@ export const SmdaSelectedFieldSchema = {
         }
     },
     type: 'object',
-    required: ['identifier'],
+    required: [
+        'identifier'
+    ],
     title: 'SmdaSelectedField',
     description: 'A selected field for masterdata lookup.'
 } as const;
@@ -1578,11 +1715,15 @@ export const SmdaStratColumnSchema = {
             type: 'string',
             title: 'Strat Column Identifier',
             description: 'A stratigraphic column identifier.',
-            examples: ['LITHO_TROLL']
+            examples: [
+                'LITHO_TROLL'
+            ]
         }
     },
     type: 'object',
-    required: ['strat_column_identifier'],
+    required: [
+        'strat_column_identifier'
+    ],
     title: 'SmdaStratColumn',
     description: 'An identifier for a stratigraphic column.'
 } as const;
@@ -1591,7 +1732,7 @@ export const SmdaStratigraphicUnitsResultSchema = {
     properties: {
         stratigraphic_units: {
             items: {
-                '$ref': '#/components/schemas/StratigraphicUnit'
+                $ref: '#/components/schemas/StratigraphicUnit'
             },
             type: 'array',
             title: 'Stratigraphic Units',
@@ -1599,240 +1740,11 @@ export const SmdaStratigraphicUnitsResultSchema = {
         }
     },
     type: 'object',
-    required: ['stratigraphic_units'],
+    required: [
+        'stratigraphic_units'
+    ],
     title: 'SmdaStratigraphicUnitsResult',
     description: 'Result containing a list of stratigraphic units.'
-} as const;
-
-export const SmdaWellHeaderSchema = {
-    properties: {
-        unique_well_identifier: {
-            type: 'string',
-            title: 'Unique Well Identifier',
-            description: 'Unique SMDA identifier for the well.'
-        },
-        unique_wellbore_identifier: {
-            type: 'string',
-            title: 'Unique Wellbore Identifier',
-            description: 'Unique SMDA identifier for the wellbore.'
-        },
-        official_wellbore_name: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Official Wellbore Name',
-            description: `Official wellbore name used by the Authorities.
-
-For Norway and UK, it will be the unique_wellbore_identifier without
-country iso code, but for Brazil it can really differs from the Equinor
-wellbore name.`
-        },
-        country_identifier: {
-            type: 'string',
-            title: 'Country Identifier',
-            description: 'Country identifier for the wellbore.'
-        },
-        parent_wellbore: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Parent Wellbore',
-            description: `The unique wellbore identifier this wellbore is kicked off from.
-
-Ref. kick off depth. This is used for sidetracks. A wellbore starting at
-the well origin has no parent.`
-        },
-        wellbore_type: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Wellbore Type',
-            description: `Type of wellbore, values like exploration, development, other.
-
-This attribute is automatically maintained in SMDA based on the wellbore
-purpose. If the purpose is like wildcat or appraisal, type will be set to
-exploration, if the purpose is like production, injection then the type is
-set to development.`
-        },
-        wellbore_purpose: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Wellbore Purpose',
-            description: `Purpose of wellbore.
-
-Values like wildcat, appraisal, … for exploration wellbores; production,
-injection, observation, disposal, … for development wellbores; shallow gas,
-pilot hole for other purpose.`
-        },
-        wellbore_status: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Wellbore Status',
-            description: `Status of the wellbore.
-
-Value like plugged and abandoned, drilling, plugged, producing ... This
-attribute is automatically maintained in SMDA if no good source is found
-for it. SMDA will use the wellbore type (exploration or development), the
-drill dates information, current_track, etc ... in order to set a plausible
-status. If wellbore type=exploration and completed_date < current_date,
-then status=plugged and abandoned while development wellbore would be set
-to completed.`
-        },
-        wellbore_purpose_planned: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Wellbore Purpose Planned',
-            description: `Pre-drill purpose of the wellbore.
-
-Legal values for exploration wellbores: wildcat, appraisal. Example of
-legal values for development wellbores: observation, production, injection.`
-        },
-        drill_year: {
-            anyOf: [
-                {
-                    type: 'integer'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Drill Year',
-            description: 'The year when the drilling has started.'
-        },
-        completion_date: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Completion Date',
-            description: `Date when the wellbore is considered completed.
-
-For exploration wellbores from moveable facilities, this may be the anchor
-handling or jacking-down start date. For fixed facilities and development
-wellbores, it is when the wellbore reaches total depth and the last casing,
-liner, or screen is set. If immediately plugged, it is the date the last
-plug is set.`
-        },
-        discovery_internal_identifier: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Discovery Internal Identifier',
-            description: 'Internal name of the discovery.'
-        },
-        multilateral: {
-            anyOf: [
-                {
-                    type: 'integer',
-                    enum: [0, 1]
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Multilateral',
-            description: 'Whether the wellbore is multilateral. 0 = no, 1 = yes.'
-        },
-        projected_coordinate_unit: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Projected Coordinate Unit',
-            description: 'Projected coordinate unit.'
-        },
-        projected_coordinate_system: {
-            anyOf: [
-                {
-                    type: 'string'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Projected Coordinate System',
-            description: 'Coordinate reference system for the easting/northing values.'
-        },
-        well_uuid: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Well Uuid',
-            description: 'SMDA UUID for the well.'
-        },
-        wellbore_uuid: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Wellbore Uuid',
-            description: 'SMDA UUID for the wellbore.'
-        }
-    },
-    type: 'object',
-    required: ['unique_well_identifier', 'unique_wellbore_identifier', 'official_wellbore_name', 'country_identifier', 'parent_wellbore', 'wellbore_type', 'wellbore_purpose', 'wellbore_status', 'wellbore_purpose_planned', 'drill_year', 'completion_date', 'discovery_internal_identifier', 'multilateral', 'projected_coordinate_unit', 'projected_coordinate_system', 'well_uuid', 'wellbore_uuid'],
-    title: 'SmdaWellHeader',
-    description: 'Well header data from SMDA.'
-} as const;
-
-export const SmdaWellHeadersResultSchema = {
-    properties: {
-        well_headers: {
-            items: {
-                '$ref': '#/components/schemas/SmdaWellHeader'
-            },
-            type: 'array',
-            title: 'Well Headers',
-            description: 'List of well headers from SMDA.'
-        }
-    },
-    type: 'object',
-    required: ['well_headers'],
-    title: 'SmdaWellHeadersResult',
-    description: 'Result containing a list of well headers.'
 } as const;
 
 export const StratigraphicColumnSchema = {
@@ -1840,20 +1752,26 @@ export const StratigraphicColumnSchema = {
         identifier: {
             type: 'string',
             title: 'Identifier',
-            examples: ['DROGON_2020']
+            examples: [
+                'DROGON_2020'
+            ]
         },
         uuid: {
             type: 'string',
             format: 'uuid',
             title: 'Uuid',
-            examples: ['15ce3b84-766f-4c93-9050-b154861f9100']
+            examples: [
+                '15ce3b84-766f-4c93-9050-b154861f9100'
+            ]
         }
     },
     type: 'object',
-    required: ['identifier', 'uuid'],
+    required: [
+        'identifier',
+        'uuid'
+    ],
     title: 'StratigraphicColumn',
-    description: `The \`\`masterdata.smda.stratigraphic_column\`\` block contains the
-stratigraphic column known to SMDA.`
+    description: 'The ``masterdata.smda.stratigraphic_column`` block contains the\nstratigraphic column known to SMDA.'
 } as const;
 
 export const StratigraphicUnitSchema = {
@@ -1862,7 +1780,9 @@ export const StratigraphicUnitSchema = {
             type: 'string',
             title: 'Identifier',
             description: 'The stratigraphic unit identifier (name).',
-            examples: ['VIKING GP.']
+            examples: [
+                'VIKING GP.'
+            ]
         },
         uuid: {
             type: 'string',
@@ -1874,7 +1794,10 @@ export const StratigraphicUnitSchema = {
             type: 'string',
             title: 'Strat Unit Type',
             description: 'The type of stratigraphic unit.',
-            examples: ['formation', 'group']
+            examples: [
+                'formation',
+                'group'
+            ]
         },
         strat_unit_level: {
             type: 'integer',
@@ -1887,7 +1810,9 @@ export const StratigraphicUnitSchema = {
             type: 'string',
             title: 'Top',
             description: 'The identifier (name) of the stratigraphic unit top pick (horizon).',
-            examples: ['VIKING GP. Top']
+            examples: [
+                'VIKING GP. Top'
+            ]
         },
         top_uuid: {
             anyOf: [
@@ -1906,7 +1831,9 @@ export const StratigraphicUnitSchema = {
             type: 'string',
             title: 'Base',
             description: 'The identifier (name) of the stratigraphic unit base pick (horizon).',
-            examples: ['VIKING GP. Base']
+            examples: [
+                'VIKING GP. Base'
+            ]
         },
         base_uuid: {
             anyOf: [
@@ -1947,7 +1874,12 @@ export const StratigraphicUnitSchema = {
         },
         strat_column_type: {
             type: 'string',
-            enum: ['lithostratigraphy', 'sequence stratigraphy', 'chronostratigraphy', 'biostratigraphy'],
+            enum: [
+                'lithostratigraphy',
+                'sequence stratigraphy',
+                'chronostratigraphy',
+                'biostratigraphy'
+            ],
             title: 'Strat Column Type',
             description: 'The type of stratigraphic column this unit belongs to.'
         },
@@ -2002,7 +1934,23 @@ export const StratigraphicUnitSchema = {
         }
     },
     type: 'object',
-    required: ['identifier', 'uuid', 'strat_unit_type', 'strat_unit_level', 'top', 'top_uuid', 'base', 'base_uuid', 'top_age', 'base_age', 'strat_unit_parent', 'strat_column_type', 'color_r', 'color_g', 'color_b'],
+    required: [
+        'identifier',
+        'uuid',
+        'strat_unit_type',
+        'strat_unit_level',
+        'top',
+        'top_uuid',
+        'base',
+        'base_uuid',
+        'top_age',
+        'base_age',
+        'strat_unit_parent',
+        'strat_column_type',
+        'color_r',
+        'color_g',
+        'color_b'
+    ],
     title: 'StratigraphicUnit',
     description: 'Stratigraphic unit item.'
 } as const;
@@ -2026,7 +1974,11 @@ export const SumoAssetSchema = {
         }
     },
     type: 'object',
-    required: ['name', 'code', 'roleprefix'],
+    required: [
+        'name',
+        'code',
+        'roleprefix'
+    ],
     title: 'SumoAsset',
     description: 'A valid asset in Sumo.'
 } as const;
@@ -2087,7 +2039,7 @@ export const UserConfigSchema = {
             default: 5
         },
         user_api_keys: {
-            '$ref': '#/components/schemas/UserAPIKeys'
+            $ref: '#/components/schemas/UserAPIKeys'
         },
         recent_project_directories: {
             items: {
@@ -2100,11 +2052,14 @@ export const UserConfigSchema = {
         }
     },
     type: 'object',
-    required: ['version', 'created_at', 'user_api_keys', 'recent_project_directories'],
+    required: [
+        'version',
+        'created_at',
+        'user_api_keys',
+        'recent_project_directories'
+    ],
     title: 'UserConfig',
-    description: `The configuration file in a $HOME/.fmu directory.
-
-Stored as config.json.`
+    description: 'The configuration file in a $HOME/.fmu directory.\n\nStored as config.json.'
 } as const;
 
 export const ValidationErrorSchema = {
@@ -2130,34 +2085,57 @@ export const ValidationErrorSchema = {
         type: {
             type: 'string',
             title: 'Error Type'
-        },
-        input: {
-            title: 'Input'
-        },
-        ctx: {
-            type: 'object',
-            title: 'Context'
         }
     },
     type: 'object',
-    required: ['loc', 'msg', 'type'],
+    required: [
+        'loc',
+        'msg',
+        'type'
+    ],
     title: 'ValidationError'
 } as const;
 
-export const ValidationRecordSchema = {
+export const APIKeyWritableSchema = {
     properties: {
-        last_validated_at: {
+        id: {
             type: 'string',
-            format: 'date-time',
-            title: 'Last Validated At'
+            title: 'Id'
         },
-        last_validated_by: {
+        key: {
             type: 'string',
-            title: 'Last Validated By'
+            format: 'password',
+            title: 'Key',
+            writeOnly: true
         }
     },
     type: 'object',
-    required: ['last_validated_at', 'last_validated_by'],
-    title: 'ValidationRecord',
-    description: 'Metadata for a successful validation of project configuration data.'
+    required: [
+        'id',
+        'key'
+    ],
+    title: 'APIKey',
+    description: 'A key-value pair for a known and supported API.'
+} as const;
+
+export const AccessTokenWritableSchema = {
+    properties: {
+        id: {
+            type: 'string',
+            title: 'Id'
+        },
+        key: {
+            type: 'string',
+            format: 'password',
+            title: 'Key',
+            writeOnly: true
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'key'
+    ],
+    title: 'AccessToken',
+    description: 'A key-value pair for a known and supported access scope.'
 } as const;
