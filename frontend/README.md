@@ -105,6 +105,8 @@ This command will get the API's `openapi.json` specification file, and create Ty
 code for the various endpoints as well as the models. The code is placed in the
 `frontend/src/client` directory, and is part of the repo. Any changes will thus be
 tracked and needs to be commited.
+The OpenAPI specification used for generation is also stored in
+`frontend/src/client/source/openapi.json`, making API changes visible in reviews.
 
 ### Path aliases
 
