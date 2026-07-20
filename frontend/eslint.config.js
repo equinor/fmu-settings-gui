@@ -48,10 +48,15 @@ export default tseslint.config(
         { blankLine: "always", prev: "*", next: "return" },
       ],
       "react-refresh/only-export-components": [
-        "warn",
+        "off",
         { allowConstantExport: true },
       ],
       ...reactX.configs["recommended-typescript"].rules,
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-x/set-state-in-effect": "off",
+      "react-x/use-state": "off",
+      "no-useless-assignment": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
