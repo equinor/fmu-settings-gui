@@ -26,6 +26,7 @@ import {
   ActionButtonsContainer,
   EditDialog,
   PageCode,
+  PageList,
   PageSectionWidthConstrained,
   PageText,
 } from "#styles/common";
@@ -78,7 +79,7 @@ const storedWellColumns: ColumnDef<RmsWell>[] = [
     id: "planned",
     header: "Planned",
     accessorFn: (row) => (row.planned ? "Yes" : "No"),
-    size: 100,
+    size: 200,
   },
 ];
 
@@ -227,7 +228,7 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
         <EdsDataGrid
           stickyHeader
           enableVirtual
-          height={gridHeight(availableWells.length, 400)}
+          height={gridHeight(availableWells.length, 391)}
           rows={availableWells}
           columns={columns}
           getRowId={(row) => row.name}
@@ -258,7 +259,7 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
       </ActionButtonsContainer>
 
       <PageText $marginBottom="0">💡 Tips</PageText>
-      <List>
+      <PageList>
         <List.Item>
           When no wells are stored, all available RMS wells are selected when
           you open the editor.
@@ -271,7 +272,7 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
           Mark a well as planned to store it without making it available for
           wellbore mapping.
         </List.Item>
-      </List>
+      </PageList>
     </>
   );
 }
@@ -545,7 +546,7 @@ export function Wellbores({
               <EdsDataGrid
                 stickyHeader
                 enableVirtual
-                height={gridHeight(projectWells.length, 600)}
+                height={gridHeight(projectWells.length, 576)}
                 rows={projectWells}
                 columns={storedWellColumns}
                 getRowId={(row) => row.name}
