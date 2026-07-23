@@ -6,8 +6,9 @@ minimumReleaseAge: 10080 # age in minutes (7 days)
 overrides:
   '@babel/core@<=7.29.0': '>=7.29.6 <8'
   ajv@<6.14.0: '>=6.14.0 <7'
-  brace-expansion@<1.1.13: 1.1.13
+  brace-expansion@<1.1.16: '>=1.1.16 <2'
   brace-expansion@>=2.0.0 <2.0.3: '>=2.0.3'
+  brace-expansion@>=3.0.0 <5.0.7: '>=5.0.7 <6'
   defu@<=6.1.4: '>=6.1.5'
   devalue@<=5.6.2: '>=5.6.3'
   diff@>=6.0.0 <8.0.3: '>=8.0.3'
@@ -15,7 +16,7 @@ overrides:
   follow-redirects@<=1.15.11: '>=1.16.0'
   form-data@>=4.0.0 <4.0.6: '>=4.0.6 <5'
   handlebars@<4.7.9: '>=4.7.9'
-  js-yaml@<=4.1.1: '>=4.2.0 <5'
+  js-yaml@>=4.0.0 <4.3.0: '>=4.3.0 <5'
   lodash@>=4.0.0 <=4.17.23: '>=4.18.0'
   minimatch@>=10.0.0 <10.2.3: '>=10.2.3'
   picomatch@<2.3.2: 2.3.2
