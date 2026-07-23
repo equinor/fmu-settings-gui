@@ -92,6 +92,11 @@ complete URL for the frontend application, including the authorization token. Th
 be opened in the web browser, and as the URL contains the token the API access will be
 authorized and communication will work as expected.
 
+In development, the generated client uses `http://localhost:8001` for API requests. In a
+production build, it uses the browser origin. The `fmu settings` command serves the built
+frontend and the API from that one origin, so production use does not need a separate
+Vite or GUI server.
+
 ### Updating API endpoints and models
 
 Whenever there are been updates to the API endpoints and models, a tool can be used to
