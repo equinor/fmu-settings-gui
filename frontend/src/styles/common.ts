@@ -114,6 +114,20 @@ export const WarningBox = styled(GenericBox)`
   background: ${tokens.colors.ui.background__warning.hex};
 `;
 
+export const OrphanWarningContainer = styled(WarningBox)`
+  > *:last-child {
+    margin-top: ${tokens.spacings.comfortable.medium};
+    margin-bottom: 0;
+  }
+`;
+
+export const OrphanWarningList = styled(List)`
+  max-height: 4.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: ${tokens.spacings.comfortable.small};
+`;
+
 export const ChipsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -155,6 +169,10 @@ export const GenericDialog = styled(Dialog).attrs<{
 
 export const EditDialog = styled(GenericDialog)`
   #eds-dialog-customcontent {
+    max-height: calc(100vh - 12rem);
+    box-sizing: border-box;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding-bottom: ${tokens.spacings.comfortable.x_large};
   }
 `;

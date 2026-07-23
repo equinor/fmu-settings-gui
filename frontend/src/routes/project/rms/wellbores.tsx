@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 
+import { Loading } from "#components/common";
+import { Wellbores } from "#components/project/rms/Wellbores";
 import { useProject } from "#services/project";
 import {
   PageHeader,
@@ -11,17 +14,32 @@ export const Route = createFileRoute("/project/rms/wellbores")({
   component: RouteComponent,
 });
 
-function RouteComponent() {
+function Content() {
   const project = useProject();
 
-  return (
+  return project.status && project.data ? (
+    <Wellbores
+      rmsData={project.data.config.rms}
+      projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+      isRmsProjectOpen={!!project.rmsExpiresAt}
+    />
+  ) : (
     <PageSectionWidthConstrained>
-      <PageHeader>Wellbores</PageHeader>
-      <PageText>
-        {project.status
-          ? "Wellbore content is coming soon."
-          : "Project not set."}
-      </PageText>
+      <PageText>Project not set.</PageText>
     </PageSectionWidthConstrained>
+  );
+}
+
+function RouteComponent() {
+  return (
+    <>
+      <PageSectionWidthConstrained>
+        <PageHeader>Wellbores</PageHeader>
+      </PageSectionWidthConstrained>
+
+      <Suspense fallback={<Loading />}>
+        <Content />
+      </Suspense>
+    </>
   );
 }
