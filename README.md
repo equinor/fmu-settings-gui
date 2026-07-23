@@ -3,25 +3,29 @@
 [![ci](https://github.com/equinor/fmu-settings-gui/actions/workflows/ci.yml/badge.svg)](https://github.com/equinor/fmu-settings-gui/actions/workflows/ci.yml)
 
 This frontend application is part of the FMU Settings applications: The CLI application
-is used for starting the API server as well as the GUI (frontend) server, while the API
-application is the one used by the frontend. There is also an `fmu-settings` package
-which contains the business logic and models and which is used by the API. Finally, the
-`fmu-datamodels` package contains some additional models used by FMU Settings.
+starts the API server, which serves both the API and the built GUI. There is also an
+`fmu-settings` package which contains the business logic and models and which is used by
+the API. Finally, the `fmu-datamodels` package contains some additional models used by
+FMU Settings.
 
 There are two parts to this repo:
 
 - The code for the React application, located in the `frontend` directory. This is the
   main application, containing the web frontend
-- The code for the Python application, located in the root and in the `src` directory.
-  This serves the built and deployed React application
+- The code for the Python package, located in the root and in the `src` directory.
+  This builds and packages the static React files for `fmu-settings-api`
 
 
-## Python application
+## Python package
 
 Doing a local pip install will attempt to build the React application behind
 the scenes. This requires a few dependencies (Node, pnpm, ..) that are not
 installable via pip. View the [frontend README](/frontend/README.md) for
 instructions.
+
+The package does not start a web server. It provides
+`fmu_settings_gui.get_static_directory()`, which returns the packaged asset directory.
+The API uses this directory when `fmu settings` starts the complete application.
 
 Be sure to include a verbose flag or two (`pip install . -vv`) if you need to
 observe the frontend installation output.

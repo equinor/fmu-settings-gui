@@ -32,20 +32,14 @@ classifiers = [
     "Natural Language :: English",
 ]
 dynamic = ["version"]
-dependencies = [
-    "fastapi",
-    "uvicorn",
-]
 
 [project.optional-dependencies]
 dev = [
     "mypy",
     "pytest",
     "pytest-cov",
-    "pytest-mock",
     "pytest-xdist",
     "ruff",
-    "types-setuptools",
 ]
 
 [project.urls]
