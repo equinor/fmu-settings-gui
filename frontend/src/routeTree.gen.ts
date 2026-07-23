@@ -17,6 +17,7 @@ import { Route as ProjectRmsRouteImport } from "./routes/project/rms";
 import { Route as ProjectMasterdataRouteImport } from "./routes/project/masterdata";
 import { Route as ProjectMappingsRouteImport } from "./routes/project/mappings";
 import { Route as ProjectHistoryRouteImport } from "./routes/project/history";
+import { Route as ProjectChangelogRouteImport } from "./routes/project/changelog";
 import { Route as ProjectRmsIndexRouteImport } from "./routes/project/rms/index";
 import { Route as ProjectMappingsIndexRouteImport } from "./routes/project/mappings/index";
 import { Route as ProjectRmsWellboresRouteImport } from "./routes/project/rms/wellbores";
@@ -66,6 +67,11 @@ const ProjectHistoryRoute = ProjectHistoryRouteImport.update({
   path: "/project/history",
   getParentRoute: () => rootRouteImport,
 } as any);
+const ProjectChangelogRoute = ProjectChangelogRouteImport.update({
+  id: "/project/changelog",
+  path: "/project/changelog",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const ProjectRmsIndexRoute = ProjectRmsIndexRouteImport.update({
   id: "/",
   path: "/",
@@ -111,6 +117,7 @@ const ProjectMappingsOverviewRoute = ProjectMappingsOverviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/project/changelog": typeof ProjectChangelogRoute;
   "/project/history": typeof ProjectHistoryRoute;
   "/project/mappings": typeof ProjectMappingsRouteWithChildren;
   "/project/masterdata": typeof ProjectMasterdataRoute;
@@ -129,6 +136,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/project/changelog": typeof ProjectChangelogRoute;
   "/project/history": typeof ProjectHistoryRoute;
   "/project/masterdata": typeof ProjectMasterdataRoute;
   "/user/keys": typeof UserKeysRoute;
@@ -146,6 +154,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
+  "/project/changelog": typeof ProjectChangelogRoute;
   "/project/history": typeof ProjectHistoryRoute;
   "/project/mappings": typeof ProjectMappingsRouteWithChildren;
   "/project/masterdata": typeof ProjectMasterdataRoute;
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/project/changelog"
     | "/project/history"
     | "/project/mappings"
     | "/project/masterdata"
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/project/changelog"
     | "/project/history"
     | "/project/masterdata"
     | "/user/keys"
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
   id:
     | "__root__"
     | "/"
+    | "/project/changelog"
     | "/project/history"
     | "/project/mappings"
     | "/project/masterdata"
@@ -219,6 +231,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  ProjectChangelogRoute: typeof ProjectChangelogRoute;
   ProjectHistoryRoute: typeof ProjectHistoryRoute;
   ProjectMappingsRoute: typeof ProjectMappingsRouteWithChildren;
   ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
@@ -284,6 +297,13 @@ declare module "@tanstack/react-router" {
       path: "/project/history";
       fullPath: "/project/history";
       preLoaderRoute: typeof ProjectHistoryRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/project/changelog": {
+      id: "/project/changelog";
+      path: "/project/changelog";
+      fullPath: "/project/changelog";
+      preLoaderRoute: typeof ProjectChangelogRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/project/rms/": {
@@ -383,6 +403,7 @@ const ProjectRmsRouteWithChildren = ProjectRmsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProjectChangelogRoute: ProjectChangelogRoute,
   ProjectHistoryRoute: ProjectHistoryRoute,
   ProjectMappingsRoute: ProjectMappingsRouteWithChildren,
   ProjectMasterdataRoute: ProjectMasterdataRoute,

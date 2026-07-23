@@ -89,6 +89,7 @@ export function Sidebar() {
       ],
     });
     ProjectSubItems.push({ label: "History", to: "/project/history" });
+    ProjectSubItems.push({ label: "Changelog", to: "/project/changelog" });
   }
 
   return (
