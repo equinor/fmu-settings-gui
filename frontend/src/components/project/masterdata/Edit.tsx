@@ -442,11 +442,14 @@ export function Edit({
       return;
     }
 
-    setSmdaFields((fields) =>
-      fields.filter(
-        (field) => !smdaMasterdata.failedSearchFieldUuids.includes(field.uuid),
-      ),
-    );
+    void Promise.resolve().then(() => {
+      setSmdaFields((fields) =>
+        fields.filter(
+          (field) =>
+            !smdaMasterdata.failedSearchFieldUuids.includes(field.uuid),
+        ),
+      );
+    });
   }, [smdaMasterdata.failedSearchFieldUuids]);
 
   const handleItemsOperation = useCallback(() => {
