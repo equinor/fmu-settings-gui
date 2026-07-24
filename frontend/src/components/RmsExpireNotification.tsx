@@ -22,12 +22,24 @@ function getSecondsUntilRmsExpiry(rmsExpiresAt?: string | null) {
 export function RmsExpireNotification() {
   const project = useProject();
 
+  return (
+    <RmsExpireNotificationContent
+      key={project.rmsExpiresAt ?? "expired"}
+      rmsExpiresAt={project.rmsExpiresAt}
+    />
+  );
+}
+
+function RmsExpireNotificationContent({
+  rmsExpiresAt,
+}: {
+  rmsExpiresAt: string | null | undefined;
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const isCheckingThreshold = useRef(false);
-  const [timeUntilExpire, setTimeUntilExpire] = useState<number>(
-    Number.POSITIVE_INFINITY,
+  const [timeUntilExpire, setTimeUntilExpire] = useState<number>(() =>
+    getSecondsUntilRmsExpiry(rmsExpiresAt),
   );
-  const rmsExpiresAt = project.rmsExpiresAt;
   const isExpired = !rmsExpiresAt;
 
   const queryClient = useQueryClient();
@@ -65,10 +77,7 @@ export function RmsExpireNotification() {
   });
 
   useEffect(() => {
-    const initialTimeLeft = getSecondsUntilRmsExpiry(rmsExpiresAt);
-    setTimeUntilExpire(initialTimeLeft);
-
-    if (!Number.isFinite(initialTimeLeft) || initialTimeLeft <= 0) {
+    if (getSecondsUntilRmsExpiry(rmsExpiresAt) <= 0) {
       return;
     }
 

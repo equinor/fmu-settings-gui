@@ -6,7 +6,7 @@ import type { ElementMappings } from "../stratigraphy/types";
 export type MappingData = {
   elementMappings: ElementMappings;
   setElementMappings: Dispatch<SetStateAction<ElementMappings>>;
-  stratigraphicColumn?: StratigraphicColumn;
+  stratigraphicColumn?: StratigraphicColumn | undefined;
   projectReadOnly: boolean;
   canEdit: boolean;
 };

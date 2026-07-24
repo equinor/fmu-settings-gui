@@ -109,7 +109,7 @@ export const ElementInfo = styled.div.attrs<{
 `;
 
 export const ElementSystemName = styled.div.attrs<{
-  $elementType?: ElementType;
+  $elementType?: ElementType | undefined;
   $isMissingvalue?: boolean;
 }>((props) => ({
   $elementType: props.$elementType,

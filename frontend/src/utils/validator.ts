@@ -1,9 +1,9 @@
 import z, { type ZodString } from "zod";
 
 export interface ValidatorProps {
-  length?: number;
-  minLength?: number;
-  initialValue?: string;
+  length?: number | undefined;
+  minLength?: number | undefined;
+  initialValue?: string | undefined;
 }
 
 export function handleValidator({

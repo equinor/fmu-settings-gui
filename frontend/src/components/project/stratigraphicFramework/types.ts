@@ -17,8 +17,12 @@ export type FrameworkData = {
   unselectedHorizonNamesSet: Set<string>;
   unselectedZoneNamesSet: Set<string>;
   horizonsUsedByZones: Set<string>;
-  onHorizonClick?: (horizon: RmsHorizon, isUnselected: boolean) => void;
-  onZoneClick?: (zone: RmsStratigraphicZone, isUnselected: boolean) => void;
+  onHorizonClick?:
+    | ((horizon: RmsHorizon, isUnselected: boolean) => void)
+    | undefined;
+  onZoneClick?:
+    | ((zone: RmsStratigraphicZone, isUnselected: boolean) => void)
+    | undefined;
   zoneGridPlacement: Map<string, ZonePlacementInfo>;
   numStratColumns: number;
 };

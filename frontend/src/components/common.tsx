@@ -26,13 +26,13 @@ import {
 import { handleSsoLogin } from "#utils/authentication";
 
 type StatusCodeHandlingProps = {
-  message?: string;
-  enableRetry?: boolean;
+  message?: string | undefined;
+  enableRetry?: boolean | undefined;
 };
 
 type ErrorFallbackProps = {
-  header?: string;
-  statusCodeHandling?: Record<number, StatusCodeHandlingProps>;
+  header?: string | undefined;
+  statusCodeHandling?: Record<number, StatusCodeHandlingProps> | undefined;
 };
 
 export function Loading() {
@@ -55,10 +55,10 @@ function ErrorFallback({
     error.response.status in statusCodeHandling
   ) {
     const handling = statusCodeHandling[error.response.status];
-    if (handling.message !== undefined) {
+    if (handling?.message !== undefined) {
       message = handling.message;
     }
-    if (handling.enableRetry !== undefined) {
+    if (handling?.enableRetry !== undefined) {
       enableRetry = handling.enableRetry;
     }
   }

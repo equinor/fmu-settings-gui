@@ -48,17 +48,21 @@ export function createProjectMappingsLookup(
         rmsName: rmsName,
       };
     }
+    const lookupEntry = lookup[rmsName];
+    if (lookupEntry === undefined) {
+      return;
+    }
 
     if (mapping.target_system === targetSystem) {
       if (mapping.relation_type === "primary") {
-        lookup[rmsName].smdaName = mapping.target_id ?? "";
-        lookup[rmsName].smdaUuid = mapping.target_uuid ?? "";
+        lookupEntry.smdaName = mapping.target_id ?? "";
+        lookupEntry.smdaUuid = mapping.target_uuid ?? "";
       } else if (mapping.relation_type === "unmappable") {
-        lookup[rmsName].unmappable = true;
+        lookupEntry.unmappable = true;
       }
     } else if (mapping.target_system === sourceSystem) {
       if (mapping.relation_type === "alias") {
-        lookup[rmsName].aliases.push(mapping.source_id);
+        lookupEntry.aliases.push(mapping.source_id);
       }
     }
   });

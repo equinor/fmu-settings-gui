@@ -8,7 +8,14 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "react-toastify";
 
 import type { RmsProject, StratigraphicColumn } from "#client";
@@ -251,9 +258,11 @@ function Edit({
                     <form.SubmitButton
                       label="Save"
                       disabled={
-                        isDefaultValue ||
-                        !canSubmit ||
                         mappingData.projectReadOnly
+                          ? true
+                          : isDefaultValue
+                            ? true
+                            : !canSubmit
                       }
                       isPending={mutationIsPending}
                       helperTextDisabled={
@@ -503,7 +512,8 @@ function Elements({ elementType }: { elementType: ElementType }) {
 
       {elementType === "horizon"
         ? frameworkData.horizons.map((horizon, idx) => {
-            if (!(horizon.name in mappingData.elementMappings)) {
+            const elementMapping = mappingData.elementMappings[horizon.name];
+            if (elementMapping === undefined) {
               return null;
             }
 
@@ -514,7 +524,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
                 $lineStyle={getHorizonLineStyle(horizon)}
               >
                 <Element
-                  elementMapping={mappingData.elementMappings[horizon.name]}
+                  elementMapping={elementMapping}
                   editClick={editClick}
                 />
               </HorizonItem>
@@ -522,15 +532,16 @@ function Elements({ elementType }: { elementType: ElementType }) {
           })
         : frameworkData.zones.map((zone) => {
             const grid = frameworkData.zoneGridPlacement.get(zone.name);
+            const elementMapping = mappingData.elementMappings[zone.name];
 
-            if (!(grid && zone.name in mappingData.elementMappings)) {
+            if (!grid || elementMapping === undefined) {
               return null;
             }
 
             return (
               <ZoneItem key={zone.name} $zoneGrid={grid}>
                 <Element
-                  elementMapping={mappingData.elementMappings[zone.name]}
+                  elementMapping={elementMapping}
                   editClick={editClick}
                 />
               </ZoneItem>
@@ -548,29 +559,52 @@ export function Overview({
   editMode,
 }: {
   rmsProject: RmsProject;
-  stratigraphicColumn?: StratigraphicColumn;
+  stratigraphicColumn?: StratigraphicColumn | undefined;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   editMode: boolean;
 }) {
-  const [elementMappings, setElementMappings] = useState<ElementMappings>({});
-
   const { data: projectMappings } = useSuspenseQuery(
     projectGetMappingsOptions({
       path: mappingsPaths.stratigraphyRms,
     }),
   );
 
-  useEffect(() => {
+  const baseElementMappings = useMemo(() => {
     const lookup = createProjectMappingsLookup("stratigraphy", projectMappings);
 
-    const elementMappings: ElementMappings = {
+    return {
       ...createElementMappings("horizon", rmsProject.horizons ?? [], lookup),
       ...createElementMappings("zone", rmsProject.zones ?? [], lookup),
     };
-
-    setElementMappings(elementMappings);
   }, [projectMappings, rmsProject.horizons, rmsProject.zones]);
+
+  const [elementMappingsState, setElementMappingsState] = useState(() => ({
+    base: baseElementMappings,
+    mappings: baseElementMappings,
+  }));
+  const elementMappings =
+    elementMappingsState.base === baseElementMappings
+      ? elementMappingsState.mappings
+      : baseElementMappings;
+  const setElementMappings: Dispatch<SetStateAction<ElementMappings>> =
+    useCallback(
+      (value) => {
+        setElementMappingsState((current) => {
+          const currentMappings =
+            current.base === baseElementMappings
+              ? current.mappings
+              : baseElementMappings;
+
+          return {
+            base: baseElementMappings,
+            mappings:
+              typeof value === "function" ? value(currentMappings) : value,
+          };
+        });
+      },
+      [baseElementMappings],
+    );
 
   const mappingData = useMemo(() => {
     return {
@@ -590,6 +624,7 @@ export function Overview({
     editMode,
     smdaHealthStatus,
     stratigraphicColumn,
+    setElementMappings,
   ]);
 
   return (

@@ -3,7 +3,7 @@ import type { StratigraphicUnit } from "#client";
 export type ElementType = "horizon" | "zone";
 
 export type ElementMapping = {
-  elementType?: ElementType;
+  elementType?: ElementType | undefined;
   rmsName: string;
   unmappable: boolean;
   smdaName: string;

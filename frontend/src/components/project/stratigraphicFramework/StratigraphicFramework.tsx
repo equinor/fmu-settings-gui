@@ -57,7 +57,8 @@ export function StratigraphicFramework({
   ].join("-");
 
   const [notWidthConstrained, setNotWidthConstrained] = useState(
-    enableWidthExpansion &&
+    () =>
+      enableWidthExpansion &&
       getStorageItem(sessionStorage, storageKeyWidthConstraint, "boolean"),
   );
 

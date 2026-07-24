@@ -107,13 +107,15 @@ export function createOptions(
     const [fieldUuid, masterdata] = fieldData;
     if (projectFields.find((f) => f.uuid === fieldUuid)) {
       const csId = masterdata.field_coordinate_system.uuid;
-      if (!(csId in acc)) {
-        acc[csId] = {
+      let coordinateSystemFields = acc[csId];
+      if (coordinateSystemFields === undefined) {
+        coordinateSystemFields = {
           coordinateSystem: masterdata.field_coordinate_system,
           fields: [],
         };
+        acc[csId] = coordinateSystemFields;
       }
-      acc[csId].fields = acc[csId].fields
+      coordinateSystemFields.fields = coordinateSystemFields.fields
         .concat(masterdata.field)
         .sort((a, b) => stringCompare(a.identifier, b.identifier));
     }
@@ -121,10 +123,14 @@ export function createOptions(
     return acc;
   }, {});
   const dcsCount = Object.keys(defaultCoordinateSystems).length;
+  const firstProjectFieldUuid = projectFields.at(0)?.uuid;
 
   const dcsOptions = Object.values(defaultCoordinateSystems)
     .sort((a, b) =>
-      stringCompare(a.fields[0].identifier, b.fields[0].identifier),
+      stringCompare(
+        a.fields.at(0)?.identifier ?? "",
+        b.fields.at(0)?.identifier ?? "",
+      ),
     )
     .map<CoordinateSystem>((cs) => {
       const defaultText =
@@ -142,15 +148,16 @@ export function createOptions(
   return {
     // The list of coordinate systems is the same for all SMDA fields
     coordinateSystems:
-      fieldCount > 0
-        ? smdaMasterdataGrouped[projectFields[0].uuid].coordinate_systems
+      firstProjectFieldUuid !== undefined
+        ? (smdaMasterdataGrouped[firstProjectFieldUuid]?.coordinate_systems ??
+          [])
         : [],
     coordinateSystemsOptions:
-      fieldCount > 0
+      firstProjectFieldUuid !== undefined
         ? dcsOptions.concat(
-            smdaMasterdataGrouped[projectFields[0].uuid].coordinate_systems
+            smdaMasterdataGrouped[firstProjectFieldUuid]?.coordinate_systems
               .filter((cs) => !dcsOptions.some((dcs) => dcs.uuid === cs.uuid))
-              .sort((a, b) => stringCompare(a.identifier, b.identifier)),
+              .sort((a, b) => stringCompare(a.identifier, b.identifier)) ?? [],
           )
         : [],
     stratigraphicColumns: Object.entries(smdaMasterdataGrouped).reduce<
@@ -232,18 +239,18 @@ export function createItemLists(
     if (fieldGroup in project.discovery) {
       masterdata.discovery.forEach((discovery) => {
         if (projectDiscoveries.find((d) => d.uuid === discovery.uuid)) {
-          project.discovery[fieldGroup].push(discovery);
+          project.discovery[fieldGroup]?.push(discovery);
           seen.discovery.push(discovery.uuid);
         } else {
-          available.discovery[fieldGroup].push(discovery);
+          available.discovery[fieldGroup]?.push(discovery);
         }
       });
     } else {
-      available.discovery[fieldGroup].push(...masterdata.discovery);
+      available.discovery[fieldGroup]?.push(...masterdata.discovery);
     }
   });
 
-  orphan.discovery[DUMMYGROUP_NAME].push(
+  orphan.discovery[DUMMYGROUP_NAME]?.push(
     ...projectDiscoveries.filter(
       (discovery) => !seen.discovery.includes(discovery.uuid),
     ),
@@ -315,7 +322,7 @@ export function checkForAffectedItems(
         }
       });
     });
-    checkItems.discovery[DUMMYGROUP_NAME].forEach((discovery) => {
+    checkItems.discovery[DUMMYGROUP_NAME]?.forEach((discovery) => {
       // Find masterdata for this Discovery
       Object.values(smdaMasterdataGrouped).forEach((masterdata) => {
         if (masterdata.discovery.find((d) => d.uuid === discovery.uuid)) {
@@ -339,11 +346,11 @@ export function checkForAffectedItems(
           const affected = masterdata.discovery.filter(
             (discovery) =>
               projectDiscoveries.find((d) => d.uuid === discovery.uuid) &&
-              !affectedItems.discovery[DUMMYGROUP_NAME].find(
+              !(affectedItems.discovery[DUMMYGROUP_NAME] ?? []).find(
                 (d) => d.uuid === discovery.uuid,
               ),
           );
-          affectedItems.discovery[DUMMYGROUP_NAME].push(...affected);
+          affectedItems.discovery[DUMMYGROUP_NAME]?.push(...affected);
         }
       });
     });
@@ -391,8 +398,8 @@ export function handleAffectedItems(
 
     checkedItems.field.push(...checkItems.field);
     checkedItems.country.push(...checkItems.country);
-    checkedItems.discovery[DUMMYGROUP_NAME].push(
-      ...checkItems.discovery[DUMMYGROUP_NAME],
+    checkedItems.discovery[DUMMYGROUP_NAME]?.push(
+      ...(checkItems.discovery[DUMMYGROUP_NAME] ?? []),
     );
     checkItems = emptyItemLists({ withDummyGroup: true });
 
@@ -412,20 +419,20 @@ export function handleAffectedItems(
         checkItems.country.push(country);
       }
     });
-    affected.discovery[DUMMYGROUP_NAME].forEach((discovery) => {
+    (affected.discovery[DUMMYGROUP_NAME] ?? []).forEach((discovery) => {
       if (
-        !affectedItems.discovery[DUMMYGROUP_NAME].find(
+        !(affectedItems.discovery[DUMMYGROUP_NAME] ?? []).find(
           (d) => d.uuid === discovery.uuid,
         )
       ) {
-        affectedItems.discovery[DUMMYGROUP_NAME].push(discovery);
+        affectedItems.discovery[DUMMYGROUP_NAME]?.push(discovery);
       }
       if (
-        !checkedItems.discovery[DUMMYGROUP_NAME].find(
+        !(checkedItems.discovery[DUMMYGROUP_NAME] ?? []).find(
           (d) => d.uuid === discovery.uuid,
         )
       ) {
-        checkItems.discovery[DUMMYGROUP_NAME].push(discovery);
+        checkItems.discovery[DUMMYGROUP_NAME]?.push(discovery);
       }
     });
 

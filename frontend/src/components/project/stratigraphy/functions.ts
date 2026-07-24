@@ -35,10 +35,16 @@ export function createStratUnitOptions(stratUnits: StratigraphicUnit[]) {
   const relations: StratUnitRelation[] = [];
   for (const stratUnit of stratUnits) {
     const unit = lookup[stratUnit.identifier];
+    if (unit === undefined) {
+      continue;
+    }
     if (stratUnit.strat_unit_parent === null) {
       relations.push(unit);
     } else {
       const parent = lookup[stratUnit.strat_unit_parent];
+      if (parent === undefined) {
+        continue;
+      }
       parent.children.push(unit);
     }
   }
@@ -61,6 +67,9 @@ export function createHorizonOptions(
     )
     .forEach((zone) => {
       const zoneMapping = elementMappings[zone.name];
+      if (zoneMapping === undefined) {
+        return;
+      }
       if (zoneMapping.unmappable || zoneMapping.smdaUuid === "") {
         return;
       }

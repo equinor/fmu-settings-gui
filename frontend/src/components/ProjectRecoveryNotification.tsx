@@ -61,29 +61,24 @@ export function ProjectRecoveryNotification() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: selectProjectInvalidAttempt intentionally retriggers this effect
   useEffect(() => {
-    async function checkSnapshots() {
-      try {
-        const { data } = await projectGetCache({
-          query: { resource: CACHE_RESOURCE_PROJECT_CONFIG },
-          throwOnError: true,
-        });
-        setLatestRevision(
-          data.revisions.length > 0
-            ? data.revisions[data.revisions.length - 1]
-            : null,
-        );
-        setIsOpen(true);
-      } catch {
-        setLatestRevision(null);
-        setIsOpen(true);
-      }
-    }
-
     if (project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
-      void checkSnapshots();
+      void projectGetCache({
+        query: { resource: CACHE_RESOURCE_PROJECT_CONFIG },
+        throwOnError: true,
+      })
+        .then(({ data }) => {
+          setLatestRevision(data.revisions.at(-1) ?? null);
+          setIsOpen(true);
+        })
+        .catch(() => {
+          setLatestRevision(null);
+          setIsOpen(true);
+        });
     } else {
-      setLatestRevision(null);
-      setIsOpen(false);
+      void Promise.resolve().then(() => {
+        setLatestRevision(null);
+        setIsOpen(false);
+      });
     }
   }, [project.errorStatus, selectProjectInvalidAttempt]);
 
