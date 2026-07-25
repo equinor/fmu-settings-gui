@@ -52,8 +52,8 @@ export function OrphanWarningBox({
 }: {
   message: string;
   listItems: string[];
-  buttonLabel: string;
-  onRemove: () => void;
+  buttonLabel?: string;
+  onRemove?: () => void;
 }) {
   const visibleListItems = listItems.slice(0, ORPHAN_LIST_PREVIEW_LIMIT);
   const hiddenItemCount = listItems.length - visibleListItems.length;
@@ -73,13 +73,15 @@ export function OrphanWarningBox({
         )}
       </OrphanWarningList>
 
-      <ActionButtonsContainer>
-        <GeneralButton
-          label={buttonLabel}
-          variant="outlined"
-          onClick={onRemove}
-        />
-      </ActionButtonsContainer>
+      {buttonLabel && onRemove && (
+        <ActionButtonsContainer>
+          <GeneralButton
+            label={buttonLabel}
+            variant="outlined"
+            onClick={onRemove}
+          />
+        </ActionButtonsContainer>
+      )}
     </OrphanWarningContainer>
   );
 }
