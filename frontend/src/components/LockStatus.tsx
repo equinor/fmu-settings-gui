@@ -2,7 +2,7 @@ import { Button, Icon, Popover, Table } from "@equinor/eds-core-react";
 import { lock, lock_open } from "@equinor/eds-icons";
 import { tokens } from "@equinor/eds-tokens";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -58,7 +58,7 @@ function EnableEditingButton({
 
 function LockInformation({ lock_info }: { lock_info: LockInfo }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const anchorRef = useRef<HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const openPopover = () => {
     setIsOpen(true);
   };
@@ -71,7 +71,7 @@ function LockInformation({ lock_info }: { lock_info: LockInfo }) {
       <Button
         variant="outlined"
         color="primary"
-        ref={anchorRef}
+        ref={setAnchorEl}
         onClick={openPopover}
         aria-haspopup
         aria-expanded={isOpen}
@@ -80,7 +80,7 @@ function LockInformation({ lock_info }: { lock_info: LockInfo }) {
       </Button>
 
       <Popover
-        anchorEl={anchorRef.current}
+        anchorEl={anchorEl}
         open={isOpen}
         onClose={closePopover}
         placement="top"

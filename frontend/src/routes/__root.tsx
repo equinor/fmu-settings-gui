@@ -24,7 +24,7 @@ import { AppContainer } from "./index.style";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context }) => {
-    let apiTokenStatus = context.apiTokenStatus;
+    let apiTokenStatus: typeof context.apiTokenStatus;
 
     const apiToken = context.apiToken || getApiToken();
     if (isApiTokenNonEmpty(apiToken)) {

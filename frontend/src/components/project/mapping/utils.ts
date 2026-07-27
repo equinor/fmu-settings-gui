@@ -65,7 +65,7 @@ export function getElementMappingSmdaName(elementMapping: ElementMapping) {
 export function getElementMappingSmdaNameOptionsInitialValue(
   elementMapping: ElementMapping | undefined,
 ) {
-  let value = "";
+  let value: string;
 
   if (elementMapping?.unmappable) {
     value =

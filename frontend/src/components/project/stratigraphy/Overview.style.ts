@@ -12,8 +12,8 @@ function getColors(
   isUnmappable: boolean,
   isMissingValue: boolean,
 ) {
-  let backgroundColor = "inherit";
-  let color = "inherit";
+  let backgroundColor: string;
+  let color: string;
 
   if (isTargetSystem) {
     if (isUnmappable) {
