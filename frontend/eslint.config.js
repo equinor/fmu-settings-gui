@@ -51,8 +51,6 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       ...reactX.configs["recommended-typescript"].rules,
-      "react-hooks/set-state-in-effect": "off",
-      "react-x/set-state-in-effect": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
