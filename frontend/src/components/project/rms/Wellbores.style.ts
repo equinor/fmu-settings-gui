@@ -1,3 +1,4 @@
+import { Search } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
@@ -24,8 +25,18 @@ export const WellsContainer = styled.div`
       width: auto !important;
     }
 
-    thead th.persistent-filter [class*="FilterVisibility"] {
-      opacity: 1 !important;
+    tbody tr.planned-row td {
+      background: ${tokens.colors.ui.background__info.hex};
     }
   }
+`;
+
+export const WellFilterContainer = styled.div`
+  width: 20rem;
+  max-width: 100%;
+  margin-bottom: ${tokens.spacings.comfortable.medium};
+`;
+
+export const WellSearch = styled(Search)`
+  margin-bottom: ${tokens.spacings.comfortable.medium};
 `;

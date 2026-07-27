@@ -36,7 +36,11 @@ import {
 } from "#utils/api.ts";
 import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui.ts";
-import { WellsContainer } from "./Wellbores.style";
+import {
+  WellFilterContainer,
+  WellSearch,
+  WellsContainer,
+} from "./Wellbores.style";
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -66,7 +70,9 @@ const GRID_ROW_HEIGHT = 48;
 // Keep short grids only as tall as their header and rows. Cap long grids at
 // maxHeight so they scroll and virtualize instead of expanding the page.
 function gridHeight(rowCount: number, maxHeight: number): number {
-  return Math.min((rowCount + 1) * GRID_ROW_HEIGHT, maxHeight);
+  const bodyRowCount = Math.max(rowCount, 1);
+
+  return Math.min((bodyRowCount + 1) * GRID_ROW_HEIGHT, maxHeight);
 }
 
 const storedWellColumns: ColumnDef<RmsWell>[] = [
@@ -86,6 +92,7 @@ const storedWellColumns: ColumnDef<RmsWell>[] = [
 function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
   const form: AnyFormApi = useFormContext();
   const projectWells = form.getFieldValue("wells") as RmsWell[];
+  const [wellFilter, setWellFilter] = useState("");
 
   const availableNames = useMemo(
     () => new Set(availableWells.map((well) => well.name)),
@@ -103,6 +110,16 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
   const includedCount = projectWells.filter((well) =>
     availableNames.has(well.name),
   ).length;
+  const normalizedWellFilter = wellFilter.trim().toLocaleLowerCase();
+  const visibleWells = useMemo(
+    () =>
+      normalizedWellFilter
+        ? availableWells.filter((well) =>
+            well.name.toLocaleLowerCase().includes(normalizedWellFilter),
+          )
+        : availableWells,
+    [availableWells, normalizedWellFilter],
+  );
 
   useEffect(() => {
     form.setErrorMap({
@@ -224,34 +241,51 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
         {includedCount === 1 ? "is" : "are"} included.
       </PageText>
 
+      <WellFilterContainer>
+        <WellSearch
+          placeholder="Filter wells"
+          value={wellFilter}
+          onChange={(event) => {
+            setWellFilter(event.target.value);
+          }}
+        />
+        {normalizedWellFilter && (
+          <PageText $marginBottom="0">
+            Showing <span className="emphasis">{visibleWells.length}</span> of{" "}
+            {availableWells.length} wells.
+          </PageText>
+        )}
+      </WellFilterContainer>
+
       <WellsContainer>
         <EdsDataGrid
           stickyHeader
           enableVirtual
-          height={gridHeight(availableWells.length, 391)}
-          rows={availableWells}
+          height={gridHeight(visibleWells.length, 391)}
+          rows={visibleWells}
           columns={columns}
           getRowId={(row) => row.name}
-          // Keep the Well column filter visible because the hint points users
-          // to it. Other filter icons appear on hover or focus as usual.
-          headerClass={(column) =>
-            column.id === "name" ? "persistent-filter" : ""
+          rowClass={(row) =>
+            plannedByName.get(row.original.name) ? "planned-row" : ""
           }
           enableSorting
-          enableColumnFiltering
-          emptyMessage="No RMS wells available."
+          emptyMessage={
+            normalizedWellFilter
+              ? "No wells match the filter."
+              : "No RMS wells available."
+          }
         />
       </WellsContainer>
 
       <ActionButtonsContainer>
         <GeneralButton
-          label="Select all"
+          label="Select all wells"
           variant="outlined"
           disabled={allSelected}
           onClick={selectAll}
         />
         <GeneralButton
-          label="Deselect all"
+          label="Deselect all wells"
           variant="outlined"
           disabled={!projectWells.length}
           onClick={deselectAll}
@@ -265,8 +299,8 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
           you open the editor.
         </List.Item>
         <List.Item>
-          Use the filter in the Well column to find wells, then clear their
-          checkbox to exclude them from the project.
+          Filter the table by well name, then clear checkboxes in the Include
+          column to exclude wells from the project.
         </List.Item>
         <List.Item>
           Mark a well as planned to store it without making it available for
@@ -550,6 +584,7 @@ export function Wellbores({
                 rows={projectWells}
                 columns={storedWellColumns}
                 getRowId={(row) => row.name}
+                rowClass={(row) => (row.original.planned ? "planned-row" : "")}
                 enableSorting
                 enableColumnFiltering
               />
