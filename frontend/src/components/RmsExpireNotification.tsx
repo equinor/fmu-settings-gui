@@ -77,7 +77,9 @@ function RmsExpireNotificationContent({
   });
 
   useEffect(() => {
-    if (getSecondsUntilRmsExpiry(rmsExpiresAt) <= 0) {
+    const initialTimeLeft = getSecondsUntilRmsExpiry(rmsExpiresAt);
+
+    if (!Number.isFinite(initialTimeLeft) || initialTimeLeft <= 0) {
       return;
     }
 
