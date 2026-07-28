@@ -17,7 +17,6 @@ import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { GeneralButton } from "#components/form/button";
 import type { HealthCheck } from "#services/smda";
 import {
-  ActionButtonsContainer,
   GenericDialog,
   OrphanWarningContainer,
   OrphanWarningList,
@@ -47,13 +46,9 @@ const ORPHAN_LIST_PREVIEW_LIMIT = 20;
 export function OrphanWarningBox({
   message,
   listItems,
-  buttonLabel,
-  onRemove,
 }: {
   message: string;
   listItems: string[];
-  buttonLabel?: string;
-  onRemove?: () => void;
 }) {
   const visibleListItems = listItems.slice(0, ORPHAN_LIST_PREVIEW_LIMIT);
   const hiddenItemCount = listItems.length - visibleListItems.length;
@@ -72,16 +67,6 @@ export function OrphanWarningBox({
           </List.Item>
         )}
       </OrphanWarningList>
-
-      {buttonLabel && onRemove && (
-        <ActionButtonsContainer>
-          <GeneralButton
-            label={buttonLabel}
-            variant="outlined"
-            onClick={onRemove}
-          />
-        </ActionButtonsContainer>
-      )}
     </OrphanWarningContainer>
   );
 }
