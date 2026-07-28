@@ -1,5 +1,7 @@
+import { applicationLocale } from "#config";
+
 export function stringCompare(a: string, b: string) {
-  return a.localeCompare(b, "no");
+  return a.localeCompare(b, applicationLocale);
 }
 
 export function isVersionLessThan(version: string, minimum: string) {

@@ -4,11 +4,7 @@ import { Suspense } from "react";
 import { Loading } from "#components/common";
 import { Wellbores } from "#components/project/rms/Wellbores";
 import { useProject } from "#services/project";
-import {
-  PageHeader,
-  PageSectionWidthConstrained,
-  PageText,
-} from "#styles/common";
+import { PageHeader, PageText } from "#styles/common";
 
 export const Route = createFileRoute("/project/rms/wellbores")({
   component: RouteComponent,
@@ -24,18 +20,14 @@ function Content() {
       isRmsProjectOpen={!!project.rmsExpiresAt}
     />
   ) : (
-    <PageSectionWidthConstrained>
-      <PageText>Project not set.</PageText>
-    </PageSectionWidthConstrained>
+    <PageText>Project not set.</PageText>
   );
 }
 
 function RouteComponent() {
   return (
     <>
-      <PageSectionWidthConstrained>
-        <PageHeader>Wellbores</PageHeader>
-      </PageSectionWidthConstrained>
+      <PageHeader>Wellbores</PageHeader>
 
       <Suspense fallback={<Loading />}>
         <Content />
