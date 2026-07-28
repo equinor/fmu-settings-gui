@@ -16,7 +16,6 @@ export function TaskList() {
   const completedCount = tasks.filter((t) => t.done).length;
   const allDone = completedCount === tasks.length;
   const [open, setOpen] = useState(!allDone);
-  const isExpanded = open && !allDone;
 
   if (tasks.length === 0) {
     return null;
@@ -24,7 +23,7 @@ export function TaskList() {
 
   return (
     <Accordion>
-      <Accordion.Item isExpanded={isExpanded} onExpandedChange={setOpen}>
+      <Accordion.Item isExpanded={open} onExpandedChange={setOpen}>
         <Accordion.Header>
           Project setup checklist
           <TasksProgressLabel $allDone={allDone}>
