@@ -37,9 +37,9 @@ import {
 import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui.ts";
 import {
-  WellFilterContainer,
-  WellSearch,
-  WellsContainer,
+  WellboreFilterContainer,
+  WellboreSearch,
+  WellboresContainer,
 } from "./Wellbores.style";
 
 const { useAppForm } = createFormHook({
@@ -49,16 +49,18 @@ const { useAppForm } = createFormHook({
   formComponents: { WellboresEditor, CancelButton, SubmitButton },
 });
 
-function sortByAvailableOrder(
-  wells: RmsWell[],
-  availableWells: RmsWell[],
+function sortWellboresByAvailableOrder(
+  wellbores: RmsWell[],
+  availableWellbores: RmsWell[],
 ): RmsWell[] {
-  const order = new Map(availableWells.map((well, idx) => [well.name, idx]));
+  const order = new Map(
+    availableWellbores.map((wellbore, idx) => [wellbore.name, idx]),
+  );
 
-  return [...wells].sort(
-    (a, b) =>
-      (order.get(a.name) ?? Number.MAX_SAFE_INTEGER) -
-      (order.get(b.name) ?? Number.MAX_SAFE_INTEGER),
+  return [...wellbores].sort(
+    (wellboreA, wellboreB) =>
+      (order.get(wellboreA.name) ?? Number.MAX_SAFE_INTEGER) -
+      (order.get(wellboreB.name) ?? Number.MAX_SAFE_INTEGER),
   );
 }
 
@@ -75,7 +77,7 @@ function gridHeight(rowCount: number, maxHeight: number): number {
   return Math.min((bodyRowCount + 1) * GRID_ROW_HEIGHT, maxHeight);
 }
 
-const storedWellColumns: ColumnDef<RmsWell>[] = [
+const storedWellboreColumns: ColumnDef<RmsWell>[] = [
   {
     accessorKey: "name",
     header: "Wellbore",
@@ -89,95 +91,120 @@ const storedWellColumns: ColumnDef<RmsWell>[] = [
   },
 ];
 
-function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
+function WellboresEditor({
+  availableWellbores,
+}: {
+  availableWellbores: RmsWell[];
+}) {
   const form: AnyFormApi = useFormContext();
-  const projectWells = form.getFieldValue("wells") as RmsWell[];
-  const [wellFilter, setWellFilter] = useState("");
+  const projectWellbores = form.getFieldValue("wells") as RmsWell[];
+  const [wellboreFilter, setWellboreFilter] = useState("");
 
-  const availableNames = useMemo(
-    () => new Set(availableWells.map((well) => well.name)),
-    [availableWells],
+  const availableWellboreNames = useMemo(
+    () => new Set(availableWellbores.map((wellbore) => wellbore.name)),
+    [availableWellbores],
   );
-  const selectedNames = new Set(projectWells.map((well) => well.name));
-  const plannedByName = useRef(
-    new Map(projectWells.map((well) => [well.name, well.planned ?? false])),
+  const selectedWellboreNames = new Set(
+    projectWellbores.map((wellbore) => wellbore.name),
+  );
+  const plannedByWellboreName = useRef(
+    new Map(
+      projectWellbores.map((wellbore) => [
+        wellbore.name,
+        wellbore.planned ?? false,
+      ]),
+    ),
   );
 
-  const orphanWellNames = projectWells
-    .filter((well) => !availableNames.has(well.name))
-    .map((well) => well.name);
-  const hasOrphans = orphanWellNames.length > 0;
-  const includedCount = projectWells.filter((well) =>
-    availableNames.has(well.name),
+  const orphanWellboreNames = projectWellbores
+    .filter((wellbore) => !availableWellboreNames.has(wellbore.name))
+    .map((wellbore) => wellbore.name);
+  const hasOrphans = orphanWellboreNames.length > 0;
+  const includedWellboreCount = projectWellbores.filter((wellbore) =>
+    availableWellboreNames.has(wellbore.name),
   ).length;
-  const normalizedWellFilter = wellFilter
+  const normalizedWellboreFilter = wellboreFilter
     .trim()
     .toLocaleLowerCase(applicationLocale);
-  const visibleWells = useMemo(
+  const visibleWellbores = useMemo(
     () =>
-      normalizedWellFilter
-        ? availableWells.filter((well) =>
-            well.name
+      normalizedWellboreFilter
+        ? availableWellbores.filter((wellbore) =>
+            wellbore.name
               .toLocaleLowerCase(applicationLocale)
-              .includes(normalizedWellFilter),
+              .includes(normalizedWellboreFilter),
           )
-        : availableWells,
-    [availableWells, normalizedWellFilter],
+        : availableWellbores,
+    [availableWellbores, normalizedWellboreFilter],
   );
-  const visibleNames = useMemo(
-    () => new Set(visibleWells.map((well) => well.name)),
-    [visibleWells],
+  const visibleWellboreNames = useMemo(
+    () => new Set(visibleWellbores.map((wellbore) => wellbore.name)),
+    [visibleWellbores],
   );
 
-  const setWells = (wells: RmsWell[]) => {
-    form.setFieldValue("wells", sortByAvailableOrder(wells, availableWells));
+  const setWellbores = (wellbores: RmsWell[]) => {
+    form.setFieldValue(
+      "wells",
+      sortWellboresByAvailableOrder(wellbores, availableWellbores),
+    );
   };
 
-  const toggleSelected = (name: string) => {
-    if (selectedNames.has(name)) {
-      setWells(projectWells.filter((well) => well.name !== name));
+  const toggleWellboreSelected = (wellboreName: string) => {
+    if (selectedWellboreNames.has(wellboreName)) {
+      setWellbores(
+        projectWellbores.filter((wellbore) => wellbore.name !== wellboreName),
+      );
     } else {
-      setWells([
-        ...projectWells,
-        { name, planned: plannedByName.current.get(name) ?? false },
+      setWellbores([
+        ...projectWellbores,
+        {
+          name: wellboreName,
+          planned: plannedByWellboreName.current.get(wellboreName) ?? false,
+        },
       ]);
     }
   };
 
-  const togglePlanned = (name: string) => {
-    const planned = !(plannedByName.current.get(name) ?? false);
-    plannedByName.current.set(name, planned);
-    setWells(
-      projectWells.map((well) =>
-        well.name === name ? { ...well, planned } : well,
+  const toggleWellborePlanned = (wellboreName: string) => {
+    const planned = !(plannedByWellboreName.current.get(wellboreName) ?? false);
+    plannedByWellboreName.current.set(wellboreName, planned);
+    setWellbores(
+      projectWellbores.map((wellbore) =>
+        wellbore.name === wellboreName ? { ...wellbore, planned } : wellbore,
       ),
     );
   };
 
-  const selectVisible = () => {
-    setWells([
-      ...projectWells,
-      ...visibleWells
-        .filter((well) => !selectedNames.has(well.name))
-        .map((well) => ({
-          name: well.name,
-          planned: plannedByName.current.get(well.name) ?? false,
+  const selectVisibleWellbores = () => {
+    setWellbores([
+      ...projectWellbores,
+      ...visibleWellbores
+        .filter((wellbore) => !selectedWellboreNames.has(wellbore.name))
+        .map((wellbore) => ({
+          name: wellbore.name,
+          planned: plannedByWellboreName.current.get(wellbore.name) ?? false,
         })),
     ]);
   };
 
-  const deselectVisible = () => {
-    setWells(projectWells.filter((well) => !visibleNames.has(well.name)));
+  const deselectVisibleWellbores = () => {
+    setWellbores(
+      projectWellbores.filter(
+        (wellbore) => !visibleWellboreNames.has(wellbore.name),
+      ),
+    );
   };
 
-  const allVisibleSelected =
-    visibleWells.length > 0 &&
-    visibleWells.every((well) => selectedNames.has(well.name));
-  const someVisibleSelected = visibleWells.some((well) =>
-    selectedNames.has(well.name),
+  const allVisibleWellboresSelected =
+    visibleWellbores.length > 0 &&
+    visibleWellbores.every((wellbore) =>
+      selectedWellboreNames.has(wellbore.name),
+    );
+  const someVisibleWellboresSelected = visibleWellbores.some((wellbore) =>
+    selectedWellboreNames.has(wellbore.name),
   );
 
-  const columns: ColumnDef<RmsWell>[] = [
+  const wellboreColumns: ColumnDef<RmsWell>[] = [
     {
       id: "include",
       header: "Include",
@@ -185,13 +212,13 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
       enableSorting: false,
       size: 90,
       cell: ({ row }) => {
-        const name = row.original.name;
+        const wellboreName = row.original.name;
 
         return (
           <Checkbox
-            checked={selectedNames.has(name)}
+            checked={selectedWellboreNames.has(wellboreName)}
             onChange={() => {
-              toggleSelected(name);
+              toggleWellboreSelected(wellboreName);
             }}
           />
         );
@@ -209,15 +236,15 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
       enableSorting: false,
       size: 90,
       cell: ({ row }) => {
-        const name = row.original.name;
-        const isSelected = selectedNames.has(name);
+        const wellboreName = row.original.name;
+        const isSelected = selectedWellboreNames.has(wellboreName);
 
         return (
           <Checkbox
-            checked={plannedByName.current.get(name) ?? false}
+            checked={plannedByWellboreName.current.get(wellboreName) ?? false}
             disabled={!isSelected}
             onChange={() => {
-              togglePlanned(name);
+              toggleWellborePlanned(wellboreName);
             }}
           />
         );
@@ -227,87 +254,89 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
 
   return (
     <>
-      {hasOrphans && (
-        <OrphanWarningBox
-          message={`${orphanWellNames.length} ${
-            orphanWellNames.length === 1
-              ? "wellbore stored"
-              : "wellbores stored"
-          } in the project ${
-            orphanWellNames.length === 1 ? "is" : "are"
-          } currently not available in RMS. ${
-            orphanWellNames.length === 1 ? "It" : "They"
-          } will be removed when you save.`}
-          listItems={orphanWellNames}
-        />
-      )}
-
       <PageText>
-        <span className="emphasis">{includedCount}</span> of{" "}
-        {availableWells.length} RMS{" "}
-        {availableWells.length === 1 ? "wellbore" : "wellbores"}{" "}
-        {includedCount === 1 ? "is" : "are"} included.
+        <span className="emphasis">{includedWellboreCount}</span> of{" "}
+        {availableWellbores.length} RMS{" "}
+        {availableWellbores.length === 1 ? "wellbore" : "wellbores"}{" "}
+        {includedWellboreCount === 1 ? "is" : "are"} included.
       </PageText>
 
-      <WellFilterContainer>
-        <WellSearch
+      <WellboreFilterContainer>
+        <WellboreSearch
           placeholder="Filter wellbores"
-          value={wellFilter}
+          value={wellboreFilter}
           onChange={(event) => {
-            setWellFilter(event.target.value);
+            setWellboreFilter(event.target.value);
           }}
         />
-        {normalizedWellFilter && (
+        {normalizedWellboreFilter && (
           <PageText $marginBottom="0">
             Filter is showing{" "}
-            <span className="emphasis">{visibleWells.length}</span> of{" "}
-            {availableWells.length} wellbores.
+            <span className="emphasis">{visibleWellbores.length}</span> of{" "}
+            {availableWellbores.length} wellbores.
           </PageText>
         )}
-      </WellFilterContainer>
+      </WellboreFilterContainer>
 
-      <WellsContainer>
+      <WellboresContainer>
         <EdsDataGrid
           stickyHeader
           enableVirtual
-          height={gridHeight(visibleWells.length, 391)}
-          rows={visibleWells}
-          columns={columns}
+          height={gridHeight(visibleWellbores.length, 391)}
+          rows={visibleWellbores}
+          columns={wellboreColumns}
           getRowId={(row) => row.name}
           rowClass={(row) =>
-            plannedByName.current.get(row.original.name) ? "planned-row" : ""
+            plannedByWellboreName.current.get(row.original.name)
+              ? "planned-row"
+              : ""
           }
           enableSorting
           emptyMessage={
-            normalizedWellFilter
+            normalizedWellboreFilter
               ? "No wellbores match the filter."
               : "No RMS wellbores available."
           }
         />
-      </WellsContainer>
+      </WellboresContainer>
 
       <ActionButtonsContainer>
         <GeneralButton
           label={
-            normalizedWellFilter
+            normalizedWellboreFilter
               ? "Select all filtered wellbores"
               : "Select all wellbores"
           }
           variant="outlined"
-          disabled={!visibleWells.length || allVisibleSelected}
-          onClick={selectVisible}
+          disabled={!visibleWellbores.length || allVisibleWellboresSelected}
+          onClick={selectVisibleWellbores}
         />
         <GeneralButton
           label={
-            normalizedWellFilter
+            normalizedWellboreFilter
               ? "Deselect all filtered wellbores"
               : "Deselect all wellbores"
           }
           variant="outlined"
-          disabled={!someVisibleSelected}
-          onClick={deselectVisible}
+          disabled={!someVisibleWellboresSelected}
+          onClick={deselectVisibleWellbores}
         />
       </ActionButtonsContainer>
+
+      {hasOrphans && (
+        <OrphanWarningBox
+          message={`${orphanWellboreNames.length} ${
+            orphanWellboreNames.length === 1
+              ? "wellbore stored"
+              : "wellbores stored"
+          } in the project ${
+            orphanWellboreNames.length === 1 ? "is" : "are"
+          } currently not available in RMS. ${
+            orphanWellboreNames.length === 1 ? "It" : "They"
+          } will be removed when you save.`}
+          listItems={orphanWellboreNames}
+        />
+      )}
 
       <PageText $marginBottom="0">💡 Tips</PageText>
       <PageList>
@@ -332,28 +361,28 @@ function WellboresEditor({ availableWells }: { availableWells: RmsWell[] }) {
 }
 
 function Edit({
-  projectWells,
+  projectWellbores,
   projectReadOnly,
   isDialogOpen,
   closeDialog,
   isRmsProjectOpen,
 }: {
-  projectWells: RmsWell[];
+  projectWellbores: RmsWell[];
   projectReadOnly: boolean;
   isDialogOpen: boolean;
   closeDialog: () => void;
   isRmsProjectOpen: boolean;
 }) {
-  const availableWellsQuery = useQuery({
+  const availableWellboresQuery = useQuery({
     ...rmsGetWellsOptions(),
     enabled: isRmsProjectOpen,
   });
   const isInitialized = useRef(false);
-  const availableWellsLoaded = availableWellsQuery.isSuccess;
+  const availableWellboresLoaded = availableWellboresQuery.isSuccess;
 
   const queryClient = useQueryClient();
 
-  const rmsWellsMutation = useMutation({
+  const rmsWellboresMutation = useMutation({
     ...projectPatchRmsWellsMutation(),
     onSuccess: () => {
       void queryClient.refetchQueries({
@@ -378,7 +407,7 @@ function Edit({
 
   const form = useAppForm({
     defaultValues: {
-      wells: projectWells,
+      wells: projectWellbores,
     },
     onSubmit: ({ value, formApi }) => {
       if (!projectReadOnly) {
@@ -396,14 +425,14 @@ function Edit({
     formSubmitCallback,
     formReset,
   }: MutationCallbackProps<{ wells: RmsWell[] }>) => {
-    const availableWellNames = new Set(
-      availableWellsQuery.data?.map((well) => well.name),
+    const availableWellboreNames = new Set(
+      availableWellboresQuery.data?.map((wellbore) => wellbore.name),
     );
 
-    rmsWellsMutation.mutate(
+    rmsWellboresMutation.mutate(
       {
-        body: formValue.wells.filter((well) =>
-          availableWellNames.has(well.name),
+        body: formValue.wells.filter((wellbore) =>
+          availableWellboreNames.has(wellbore.name),
         ),
       },
       {
@@ -423,8 +452,8 @@ function Edit({
     formReset();
   };
 
-  // Auto-select all available wells when opening the dialog with no stored
-  // wells. The user must still save the selection explicitly.
+  // Auto-select all available wellbores when opening the dialog with no stored
+  // wellbores. The user must still save the selection explicitly.
   useEffect(() => {
     if (!isDialogOpen) {
       isInitialized.current = false;
@@ -432,15 +461,15 @@ function Edit({
       return;
     }
 
-    if (isInitialized.current || !availableWellsQuery.isSuccess) {
+    if (isInitialized.current || !availableWellboresQuery.isSuccess) {
       return;
     }
 
-    if (projectWells.length === 0) {
+    if (projectWellbores.length === 0) {
       form.setFieldValue(
         "wells",
-        availableWellsQuery.data.map((well) => ({
-          name: well.name,
+        availableWellboresQuery.data.map((wellbore) => ({
+          name: wellbore.name,
           planned: false,
         })),
       );
@@ -449,9 +478,9 @@ function Edit({
     isInitialized.current = true;
   }, [
     isDialogOpen,
-    availableWellsQuery.data,
-    availableWellsQuery.isSuccess,
-    projectWells.length,
+    availableWellboresQuery.data,
+    availableWellboresQuery.isSuccess,
+    projectWellbores.length,
     form,
   ]);
 
@@ -481,30 +510,30 @@ function Edit({
         <Dialog.Header>Set project wellbores</Dialog.Header>
 
         <Dialog.CustomContent>
-          {availableWellsQuery.isPending ? (
+          {availableWellboresQuery.isPending ? (
             <PageText>Loading RMS wellbores...</PageText>
-          ) : availableWellsQuery.isError ? (
+          ) : availableWellboresQuery.isError ? (
             <PageText>
               Could not load wellbores from RMS. Reload the RMS project and try
               again.
             </PageText>
           ) : (
             <>
-              {availableWellsQuery.data.length === 0 && (
+              {availableWellboresQuery.data.length === 0 && (
                 <PageText>
                   No wellbores are available in RMS. Add wellbores to the RMS
                   project, then reload the RMS project.
                 </PageText>
               )}
 
-              {(availableWellsQuery.data.length > 0 ||
-                projectWells.length > 0) && (
+              {(availableWellboresQuery.data.length > 0 ||
+                projectWellbores.length > 0) && (
                 <form.AppForm>
                   <form.Subscribe selector={(state) => state.values}>
                     {() => (
                       <form.WellboresEditor
                         key={isDialogOpen ? "open" : "closed"}
-                        availableWells={availableWellsQuery.data}
+                        availableWellbores={availableWellboresQuery.data}
                       />
                     )}
                   </form.Subscribe>
@@ -537,12 +566,14 @@ function Edit({
                 ] as const
               }
             >
-              {([isDefaultValue, canSubmit, wells]) => {
-                const availableWellNames = new Set(
-                  availableWellsQuery.data?.map((well) => well.name),
+              {([isDefaultValue, canSubmit, wellbores]) => {
+                const availableWellboreNames = new Set(
+                  availableWellboresQuery.data?.map(
+                    (wellbore) => wellbore.name,
+                  ),
                 );
-                const hasOrphans = wells.some(
-                  (well) => !availableWellNames.has(well.name),
+                const hasOrphans = wellbores.some(
+                  (wellbore) => !availableWellboreNames.has(wellbore.name),
                 );
 
                 return (
@@ -552,14 +583,14 @@ function Edit({
                       (isDefaultValue && !hasOrphans) ||
                       !canSubmit ||
                       projectReadOnly ||
-                      !availableWellsLoaded ||
-                      rmsWellsMutation.isPending
+                      !availableWellboresLoaded ||
+                      rmsWellboresMutation.isPending
                     }
-                    isPending={rmsWellsMutation.isPending}
+                    isPending={rmsWellboresMutation.isPending}
                     helperTextDisabled={
                       projectReadOnly
                         ? "Project is read-only"
-                        : !availableWellsLoaded
+                        : !availableWellboresLoaded
                           ? "RMS wellbores must be loaded before saving"
                           : "Form can be saved when the values have changed"
                     }
@@ -591,7 +622,7 @@ export function Wellbores({
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const projectWells = rmsData?.wells ?? [];
+  const projectWellbores = rmsData?.wells ?? [];
 
   const closeDialog = () => {
     setIsDialogOpen(false);
@@ -608,34 +639,34 @@ export function Wellbores({
         for mapping.
       </PageText>
 
-      {projectWells.length ? (
+      {projectWellbores.length ? (
         <>
           <PageText>
-            <span className="emphasis">{projectWells.length}</span>{" "}
-            {projectWells.length === 1 ? "wellbore is" : "wellbores are"}{" "}
+            <span className="emphasis">{projectWellbores.length}</span>{" "}
+            {projectWellbores.length === 1 ? "wellbore is" : "wellbores are"}{" "}
             included in the project.
           </PageText>
 
-          <WellsContainer>
+          <WellboresContainer>
             <EdsDataGrid
               stickyHeader
               enableVirtual
-              height={gridHeight(projectWells.length, 576)}
-              rows={projectWells}
-              columns={storedWellColumns}
+              height={gridHeight(projectWellbores.length, 576)}
+              rows={projectWellbores}
+              columns={storedWellboreColumns}
               getRowId={(row) => row.name}
               rowClass={(row) => (row.original.planned ? "planned-row" : "")}
               enableSorting
               enableColumnFiltering
             />
-          </WellsContainer>
+          </WellboresContainer>
         </>
       ) : (
         <PageCode>No wellbores are currently stored in the project.</PageCode>
       )}
 
       <GeneralButton
-        label={projectWells.length ? "Edit" : "Add"}
+        label={projectWellbores.length ? "Edit" : "Add"}
         disabled={projectReadOnly || !isRmsProjectOpen}
         tooltipText={
           projectReadOnly
@@ -648,7 +679,7 @@ export function Wellbores({
       />
 
       <Edit
-        projectWells={projectWells}
+        projectWellbores={projectWellbores}
         projectReadOnly={projectReadOnly}
         isDialogOpen={isDialogOpen}
         closeDialog={closeDialog}

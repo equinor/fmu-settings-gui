@@ -2,7 +2,7 @@ import { Search } from "@equinor/eds-core-react";
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-export const WellsContainer = styled.div`
+export const WellboresContainer = styled.div`
   width: fit-content;
   max-width: 100%;
   margin-bottom: ${tokens.spacings.comfortable.medium};
@@ -31,12 +31,12 @@ export const WellsContainer = styled.div`
   }
 `;
 
-export const WellFilterContainer = styled.div`
+export const WellboreFilterContainer = styled.div`
   width: 20rem;
   max-width: 100%;
   margin-bottom: ${tokens.spacings.comfortable.medium};
 `;
 
-export const WellSearch = styled(Search)`
+export const WellboreSearch = styled(Search)`
   margin-bottom: ${tokens.spacings.comfortable.medium};
 `;

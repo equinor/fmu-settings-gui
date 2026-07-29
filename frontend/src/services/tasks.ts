@@ -23,7 +23,7 @@ export function useTaskList(): Task[] {
   }
 
   const config = project.data.config;
-  const wells = config.rms?.wells ?? [];
+  const wellbores = config.rms?.wells ?? [];
   const zones = config.rms?.zones ?? [];
   const horizons = config.rms?.horizons ?? [];
   const mappedRmsIds = new Set(
@@ -65,7 +65,7 @@ export function useTaskList(): Task[] {
     {
       id: "rms-wellbores",
       label: "Set RMS wellbores",
-      done: wells.length > 0,
+      done: wellbores.length > 0,
       to: "/project/rms/wellbores",
     },
     {
