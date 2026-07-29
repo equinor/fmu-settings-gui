@@ -338,22 +338,23 @@ function WellboresEditor({
         />
       )}
 
-      <PageText $marginBottom="0">💡 Tips</PageText>
-      <PageList>
+      <PageText $marginBottom="0">💡 Tips:</PageText>
+      <PageList $marginBottom="0">
         <List.Item>
-          When no wellbores are stored, all available RMS wellbores are selected
-          when you open the editor.
+          When there are no wellbores stored in the project, all available RMS
+          wellbores in the list are initially selected
         </List.Item>
         <List.Item>
-          Filter the table by wellbore name, then select or deselect all
-          wellbores shown by the filter.
+          The list can be filtered by wellbore name, and <i>Select</i> and{" "}
+          <i>Deselect</i> buttons will then operate on the filtered list
         </List.Item>
         <List.Item>
-          Use Include checkboxes to select or deselect individual wellbores.
+          Use the <i>Include</i> checkboxes to select individual wellbores for
+          storing to the project
         </List.Item>
         <List.Item>
-          Mark a wellbore as planned to store it without making it available for
-          wellbore mapping.
+          Mark a wellbore as planned to store it in the project without making
+          it available for wellbore mapping
         </List.Item>
       </PageList>
     </>
@@ -549,14 +550,14 @@ function Edit({
           native buttons/inputs without an explicit type, so having them inside
           a form would cause accidental submits when sorting or filtering.
         */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            void form.handleSubmit();
-          }}
-        >
-          <Dialog.Actions>
+        <Dialog.Actions>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              void form.handleSubmit();
+            }}
+          >
             <form.Subscribe
               selector={(state) =>
                 [
@@ -604,8 +605,8 @@ function Edit({
                 confirmClose.handleCloseRequest();
               }}
             />
-          </Dialog.Actions>
-        </form>
+          </form>
+        </Dialog.Actions>
       </EditDialog>
     </>
   );

@@ -58,8 +58,12 @@ export const PageSectionSpacer = styled.div`
   height: ${tokens.spacings.comfortable.x_large}
 `;
 
-export const PageList = styled(List)`
-  margin-bottom: ${tokens.spacings.comfortable.medium};
+export const PageList = styled(List).attrs<{
+  $marginBottom?: string;
+}>((props) => ({
+  $marginBottom: props.$marginBottom ?? tokens.spacings.comfortable.medium,
+}))`
+  margin-bottom: ${({ $marginBottom }) => $marginBottom};
 `;
 
 export const ActionButtonsContainer = styled.div`
