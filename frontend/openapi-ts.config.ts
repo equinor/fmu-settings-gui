@@ -1,7 +1,7 @@
 import { defaultPlugins, defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
-  input: "http://localhost:8001/api/v1/openapi.json",
+  input: "http://localhost:8000/api/v1/openapi.json",
   output: {
     path: "src/client",
     // The bundled client runtime does not support exactOptionalPropertyTypes.
