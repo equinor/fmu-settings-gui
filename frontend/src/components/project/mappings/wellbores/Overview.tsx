@@ -8,6 +8,7 @@ import { PageText, WarningBox } from "#styles/common";
 import { createWellboreElementMappings } from "./functions";
 import { MappingActions } from "./Overview.style";
 import { SimulatorMappings } from "./SimulatorMappings";
+import { SmdaMappings } from "./SmdaMappings";
 import { WellboreMappingsTable } from "./WellboreMappingsTable";
 
 export function Overview({
@@ -59,6 +60,16 @@ export function Overview({
         <MappingActions>
           <SimulatorMappings
             elementMappings={elementMappings}
+            projectReadOnly={projectReadOnly}
+            isSaving={isSaving}
+            saveMappings={saveMappings}
+          />
+
+          <SmdaMappings
+            elementMappings={elementMappings}
+            nonPlannedRmsWellboreNames={nonPlannedRmsWellboreNames}
+            wellHeaders={wellHeaders}
+            smdaHealthStatus={smdaHealthStatus}
             projectReadOnly={projectReadOnly}
             isSaving={isSaving}
             saveMappings={saveMappings}

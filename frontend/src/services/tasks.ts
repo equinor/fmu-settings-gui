@@ -1,8 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
 
+import type {
+  InternalStratigraphyIdentifierMapping,
+  InternalWellboreIdentifierMapping,
+} from "#client";
 import { projectGetMappingsOptions } from "#client/@tanstack/react-query.gen";
 import { mappingsPaths, useProject } from "#services/project";
 import type { FileRouteTypes } from "../routeTree.gen";
+
+function getCompletedRmsMappingSourceIds(
+  mappings: (
+    | InternalStratigraphyIdentifierMapping
+    | InternalWellboreIdentifierMapping
+  )[],
+): Set<string> {
+  return new Set(
+    mappings
+      .filter(
+        (mapping) =>
+          mapping.source_system === "rms" &&
+          mapping.target_system === "smda" &&
+          (mapping.relation_type === "primary" ||
+            mapping.relation_type === "unmappable"),
+      )
+      .map((mapping) => mapping.source_id),
+  );
+}
 
 export type Task = {
   id: string;
@@ -13,9 +36,17 @@ export type Task = {
 
 export function useTaskList(): Task[] {
   const project = useProject();
-  const { data: mappings } = useQuery({
+  const rmsWellbores = project.data?.config.rms?.wells ?? [];
+  const nonPlannedRmsWellboreNames = rmsWellbores
+    .filter((wellbore) => !wellbore.planned)
+    .map((wellbore) => wellbore.name);
+  const { data: stratigraphyMappings } = useQuery({
     ...projectGetMappingsOptions({ path: mappingsPaths.stratigraphyRms }),
     enabled: project.status,
+  });
+  const { data: wellboreMappings } = useQuery({
+    ...projectGetMappingsOptions({ path: mappingsPaths.wellboreRms }),
+    enabled: project.status && nonPlannedRmsWellboreNames.length > 0,
   });
 
   if (!project.status || !project.data) {
@@ -23,18 +54,13 @@ export function useTaskList(): Task[] {
   }
 
   const config = project.data.config;
-  const wellbores = config.rms?.wells ?? [];
   const zones = config.rms?.zones ?? [];
   const horizons = config.rms?.horizons ?? [];
-  const mappedRmsIds = new Set(
-    (mappings?.stratigraphy ?? [])
-      .filter(
-        (m) =>
-          m.source_system === "rms" &&
-          m.target_system === "smda" &&
-          (m.relation_type === "primary" || m.relation_type === "unmappable"),
-      )
-      .map((m) => m.source_id),
+  const completedRmsStratigraphyNames = getCompletedRmsMappingSourceIds(
+    stratigraphyMappings?.stratigraphy ?? [],
+  );
+  const completedRmsWellboreNames = getCompletedRmsMappingSourceIds(
+    wellboreMappings?.wellbore ?? [],
   );
 
   return [
@@ -65,16 +91,28 @@ export function useTaskList(): Task[] {
     {
       id: "rms-wellbores",
       label: "Set RMS wellbores",
-      done: wellbores.length > 0,
+      done: rmsWellbores.length > 0,
       to: "/project/rms/wellbores",
     },
     {
       id: "mappings",
-      label: "Set stratigraphy mappings",
+      label: "Set RMS stratigraphy to SMDA mappings",
       done:
         (zones.length > 0 || horizons.length > 0) &&
-        [...zones, ...horizons].every((item) => mappedRmsIds.has(item.name)),
+        [...zones, ...horizons].every((item) =>
+          completedRmsStratigraphyNames.has(item.name),
+        ),
       to: "/project/mappings/stratigraphy",
+    },
+    {
+      id: "wellbore-mappings",
+      label: "Set RMS wellbore to SMDA mappings",
+      done:
+        rmsWellbores.length > 0 &&
+        nonPlannedRmsWellboreNames.every((name) =>
+          completedRmsWellboreNames.has(name),
+        ),
+      to: "/project/mappings/wellbores",
     },
   ];
 }
