@@ -4,7 +4,7 @@ import styled from "styled-components";
 import type {
   HorizonLineStyle,
   ZonePlacementInfo,
-} from "../stratigraphicFramework/types";
+} from "../../common/stratigraphicFramework/types";
 
 export const HorizonItem = styled.div<{
   $rowStart: number;

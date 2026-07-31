@@ -3,7 +3,7 @@ import type {
   ElementMapping,
   ElementType,
   SpecialOptionId,
-} from "../stratigraphy/types";
+} from "../../mappings/stratigraphy/types";
 
 export const emptyName = "(not set)";
 export const noHorizonName = "No horizon";

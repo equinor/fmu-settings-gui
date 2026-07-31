@@ -6,8 +6,8 @@ import type {
   RmsStratigraphicZone,
 } from "#client";
 import { useFormContext } from "#utils/form";
-import type { ItemType } from "../stratigraphicFramework/types";
-import { findIndexByName } from "../stratigraphicFramework/utils";
+import type { ItemType } from "../../common/stratigraphicFramework/types";
+import { findIndexByName } from "../../common/stratigraphicFramework/utils";
 
 export function sortByOrderInReferenceList<T extends ItemType>(
   items: T[],

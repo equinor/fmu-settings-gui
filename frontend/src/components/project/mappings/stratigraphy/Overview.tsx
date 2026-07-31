@@ -63,19 +63,19 @@ import {
   handleErrorUnknownInitialValue,
   updatedElementMapping,
   useMappingData,
-} from "../mapping/functions";
-import { MappingDataContext } from "../mapping/MappingData";
+} from "../../common/mapping/functions";
+import { MappingDataContext } from "../../common/mapping/MappingData";
 import {
   createSpecialOptions,
   getElementMappingSmdaName,
   getElementMappingSmdaNameOptionsInitialValue,
   specialOptions,
-} from "../mapping/utils";
+} from "../../common/mapping/utils";
 import {
   getHorizonLineStyle,
   useFrameworkData,
-} from "../stratigraphicFramework/functions";
-import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework";
+} from "../../common/stratigraphicFramework/functions";
+import { StratigraphicFramework } from "../../common/stratigraphicFramework/StratigraphicFramework";
 import { createHorizonOptions, createStratUnitOptions } from "./functions";
 import {
   ElementActions,

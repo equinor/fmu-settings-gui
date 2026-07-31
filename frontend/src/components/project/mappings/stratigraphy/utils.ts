@@ -1,4 +1,4 @@
-import { specialOptions } from "../mapping/utils";
+import { specialOptions } from "../../common/mapping/utils";
 
 export function getLabelForStratUnitOption(name: string, level: number) {
   const indent = "\xA0\xA0 ".repeat(level > 1 ? level - 1 : 0);

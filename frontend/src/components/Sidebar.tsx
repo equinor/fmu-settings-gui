@@ -74,7 +74,7 @@ export function Sidebar() {
       label: "RMS",
       to: "/project/rms",
       children: [
-        { label: "Overview", to: "/project/rms/overview" },
+        { label: "Overview", to: "/project/rms" },
         { label: "Stratigraphy", to: "/project/rms/stratigraphy" },
         { label: "Wellbores", to: "/project/rms/wellbores" },
       ],
@@ -83,7 +83,6 @@ export function Sidebar() {
       label: "Mappings",
       to: "/project/mappings",
       children: [
-        { label: "Overview", to: "/project/mappings/overview" },
         { label: "Stratigraphy", to: "/project/mappings/stratigraphy" },
         { label: "Wellbores", to: "/project/mappings/wellbores" },
       ],

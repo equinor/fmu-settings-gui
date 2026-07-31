@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { Loading } from "#components/common";
-import { Wellbores } from "#components/project/rms/Wellbores";
+import { Wellbores } from "#components/project/rms/wellbores/Wellbores";
 import { useProject } from "#services/project";
 import { PageHeader, PageText } from "#styles/common";
 

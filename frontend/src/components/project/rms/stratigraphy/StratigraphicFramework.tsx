@@ -4,7 +4,7 @@ import type { RmsHorizon, RmsStratigraphicZone } from "#client";
 import {
   getHorizonLineStyle,
   useFrameworkData,
-} from "../stratigraphicFramework/functions.ts";
+} from "../../common/stratigraphicFramework/functions.ts";
 import { HorizonItem, ZoneItem } from "./StratigraphicFramework.style";
 
 function HorizonTooltipContent(

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 
 import { Loading, SmdaHealthCheckInfo } from "#components/common";
-import { Overview } from "#components/project/stratigraphy/Overview";
+import { Overview } from "#components/project/mappings/stratigraphy/Overview";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import {

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { Loading } from "#components/common";
-import { Stratigraphy } from "#components/project/rms/Stratigraphy";
+import { Stratigraphy } from "#components/project/rms/stratigraphy/Stratigraphy";
 import { useProject } from "#services/project";
 import {
   PageContainerNotWidthConstrained,

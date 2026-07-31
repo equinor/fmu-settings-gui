@@ -42,7 +42,7 @@ import {
 } from "#utils/api.ts";
 import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui.ts";
-import { StratigraphicFramework } from "../stratigraphicFramework/StratigraphicFramework.tsx";
+import { StratigraphicFramework } from "../../common/stratigraphicFramework/StratigraphicFramework.tsx";
 import { Horizons, Zones } from "./StratigraphicFramework";
 import { StratigraphyEditorContainer } from "./Stratigraphy.style";
 import { namesNotInReference, useItemHandlers } from "./utils.ts";

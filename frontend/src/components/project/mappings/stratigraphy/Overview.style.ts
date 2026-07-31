@@ -4,7 +4,7 @@ import styled, { css } from "styled-components";
 import type {
   HorizonLineStyle,
   ZonePlacementInfo,
-} from "../stratigraphicFramework/types";
+} from "../../common/stratigraphicFramework/types";
 import type { ElementType } from "./types";
 
 function getColors(

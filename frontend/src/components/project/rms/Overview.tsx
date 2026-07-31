@@ -31,7 +31,6 @@ import {
   InfoBox,
   PageCode,
   PageSectionSpacer,
-  PageSectionWidthConstrained,
   PageText,
 } from "#styles/common";
 import {
@@ -385,7 +384,7 @@ export function Overview({
   isRmsProjectOpen: boolean;
 }) {
   return (
-    <PageSectionWidthConstrained>
+    <>
       <PageText>
         The following is the main RMS project located in the <i>rms/model</i>{" "}
         directory. The version is detected automatically:
@@ -404,6 +403,6 @@ export function Overview({
       />
 
       <PageSectionSpacer />
-    </PageSectionWidthConstrained>
+    </>
   );
 }

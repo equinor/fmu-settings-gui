@@ -15,7 +15,7 @@ import type {
   ElementMapping,
   ElementMappings,
   ElementType,
-} from "../stratigraphy/types";
+} from "../../mappings/stratigraphy/types";
 import { MappingDataContext } from "./MappingData";
 import { emptyElementMapping, specialOptions } from "./utils";
 

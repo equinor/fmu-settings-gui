@@ -13,18 +13,13 @@ import { Route as IndexRouteImport } from "./routes/index";
 import { Route as ProjectIndexRouteImport } from "./routes/project/index";
 import { Route as UserRecoveryRouteImport } from "./routes/user/recovery";
 import { Route as UserKeysRouteImport } from "./routes/user/keys";
-import { Route as ProjectRmsRouteImport } from "./routes/project/rms";
 import { Route as ProjectMasterdataRouteImport } from "./routes/project/masterdata";
-import { Route as ProjectMappingsRouteImport } from "./routes/project/mappings";
 import { Route as ProjectHistoryRouteImport } from "./routes/project/history";
 import { Route as ProjectRmsIndexRouteImport } from "./routes/project/rms/index";
-import { Route as ProjectMappingsIndexRouteImport } from "./routes/project/mappings/index";
 import { Route as ProjectRmsWellboresRouteImport } from "./routes/project/rms/wellbores";
 import { Route as ProjectRmsStratigraphyRouteImport } from "./routes/project/rms/stratigraphy";
-import { Route as ProjectRmsOverviewRouteImport } from "./routes/project/rms/overview";
 import { Route as ProjectMappingsWellboresRouteImport } from "./routes/project/mappings/wellbores";
 import { Route as ProjectMappingsStratigraphyRouteImport } from "./routes/project/mappings/stratigraphy";
-import { Route as ProjectMappingsOverviewRouteImport } from "./routes/project/mappings/overview";
 
 const IndexRoute = IndexRouteImport.update({
   id: "/",
@@ -46,19 +41,9 @@ const UserKeysRoute = UserKeysRouteImport.update({
   path: "/user/keys",
   getParentRoute: () => rootRouteImport,
 } as any);
-const ProjectRmsRoute = ProjectRmsRouteImport.update({
-  id: "/project/rms",
-  path: "/project/rms",
-  getParentRoute: () => rootRouteImport,
-} as any);
 const ProjectMasterdataRoute = ProjectMasterdataRouteImport.update({
   id: "/project/masterdata",
   path: "/project/masterdata",
-  getParentRoute: () => rootRouteImport,
-} as any);
-const ProjectMappingsRoute = ProjectMappingsRouteImport.update({
-  id: "/project/mappings",
-  path: "/project/mappings",
   getParentRoute: () => rootRouteImport,
 } as any);
 const ProjectHistoryRoute = ProjectHistoryRouteImport.update({
@@ -67,64 +52,44 @@ const ProjectHistoryRoute = ProjectHistoryRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any);
 const ProjectRmsIndexRoute = ProjectRmsIndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => ProjectRmsRoute,
-} as any);
-const ProjectMappingsIndexRoute = ProjectMappingsIndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => ProjectMappingsRoute,
+  id: "/project/rms/",
+  path: "/project/rms/",
+  getParentRoute: () => rootRouteImport,
 } as any);
 const ProjectRmsWellboresRoute = ProjectRmsWellboresRouteImport.update({
-  id: "/wellbores",
-  path: "/wellbores",
-  getParentRoute: () => ProjectRmsRoute,
+  id: "/project/rms/wellbores",
+  path: "/project/rms/wellbores",
+  getParentRoute: () => rootRouteImport,
 } as any);
 const ProjectRmsStratigraphyRoute = ProjectRmsStratigraphyRouteImport.update({
-  id: "/stratigraphy",
-  path: "/stratigraphy",
-  getParentRoute: () => ProjectRmsRoute,
-} as any);
-const ProjectRmsOverviewRoute = ProjectRmsOverviewRouteImport.update({
-  id: "/overview",
-  path: "/overview",
-  getParentRoute: () => ProjectRmsRoute,
+  id: "/project/rms/stratigraphy",
+  path: "/project/rms/stratigraphy",
+  getParentRoute: () => rootRouteImport,
 } as any);
 const ProjectMappingsWellboresRoute =
   ProjectMappingsWellboresRouteImport.update({
-    id: "/wellbores",
-    path: "/wellbores",
-    getParentRoute: () => ProjectMappingsRoute,
+    id: "/project/mappings/wellbores",
+    path: "/project/mappings/wellbores",
+    getParentRoute: () => rootRouteImport,
   } as any);
 const ProjectMappingsStratigraphyRoute =
   ProjectMappingsStratigraphyRouteImport.update({
-    id: "/stratigraphy",
-    path: "/stratigraphy",
-    getParentRoute: () => ProjectMappingsRoute,
+    id: "/project/mappings/stratigraphy",
+    path: "/project/mappings/stratigraphy",
+    getParentRoute: () => rootRouteImport,
   } as any);
-const ProjectMappingsOverviewRoute = ProjectMappingsOverviewRouteImport.update({
-  id: "/overview",
-  path: "/overview",
-  getParentRoute: () => ProjectMappingsRoute,
-} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/project/history": typeof ProjectHistoryRoute;
-  "/project/mappings": typeof ProjectMappingsRouteWithChildren;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/project/rms": typeof ProjectRmsRouteWithChildren;
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
-  "/project/mappings/overview": typeof ProjectMappingsOverviewRoute;
   "/project/mappings/stratigraphy": typeof ProjectMappingsStratigraphyRoute;
   "/project/mappings/wellbores": typeof ProjectMappingsWellboresRoute;
-  "/project/rms/overview": typeof ProjectRmsOverviewRoute;
   "/project/rms/stratigraphy": typeof ProjectRmsStratigraphyRoute;
   "/project/rms/wellbores": typeof ProjectRmsWellboresRoute;
-  "/project/mappings/": typeof ProjectMappingsIndexRoute;
   "/project/rms/": typeof ProjectRmsIndexRoute;
 }
 export interface FileRoutesByTo {
@@ -134,32 +99,24 @@ export interface FileRoutesByTo {
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project": typeof ProjectIndexRoute;
-  "/project/mappings/overview": typeof ProjectMappingsOverviewRoute;
   "/project/mappings/stratigraphy": typeof ProjectMappingsStratigraphyRoute;
   "/project/mappings/wellbores": typeof ProjectMappingsWellboresRoute;
-  "/project/rms/overview": typeof ProjectRmsOverviewRoute;
   "/project/rms/stratigraphy": typeof ProjectRmsStratigraphyRoute;
   "/project/rms/wellbores": typeof ProjectRmsWellboresRoute;
-  "/project/mappings": typeof ProjectMappingsIndexRoute;
   "/project/rms": typeof ProjectRmsIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/project/history": typeof ProjectHistoryRoute;
-  "/project/mappings": typeof ProjectMappingsRouteWithChildren;
   "/project/masterdata": typeof ProjectMasterdataRoute;
-  "/project/rms": typeof ProjectRmsRouteWithChildren;
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
-  "/project/mappings/overview": typeof ProjectMappingsOverviewRoute;
   "/project/mappings/stratigraphy": typeof ProjectMappingsStratigraphyRoute;
   "/project/mappings/wellbores": typeof ProjectMappingsWellboresRoute;
-  "/project/rms/overview": typeof ProjectRmsOverviewRoute;
   "/project/rms/stratigraphy": typeof ProjectRmsStratigraphyRoute;
   "/project/rms/wellbores": typeof ProjectRmsWellboresRoute;
-  "/project/mappings/": typeof ProjectMappingsIndexRoute;
   "/project/rms/": typeof ProjectRmsIndexRoute;
 }
 export interface FileRouteTypes {
@@ -167,19 +124,14 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/project/history"
-    | "/project/mappings"
     | "/project/masterdata"
-    | "/project/rms"
     | "/user/keys"
     | "/user/recovery"
     | "/project/"
-    | "/project/mappings/overview"
     | "/project/mappings/stratigraphy"
     | "/project/mappings/wellbores"
-    | "/project/rms/overview"
     | "/project/rms/stratigraphy"
     | "/project/rms/wellbores"
-    | "/project/mappings/"
     | "/project/rms/";
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -189,43 +141,38 @@ export interface FileRouteTypes {
     | "/user/keys"
     | "/user/recovery"
     | "/project"
-    | "/project/mappings/overview"
     | "/project/mappings/stratigraphy"
     | "/project/mappings/wellbores"
-    | "/project/rms/overview"
     | "/project/rms/stratigraphy"
     | "/project/rms/wellbores"
-    | "/project/mappings"
     | "/project/rms";
   id:
     | "__root__"
     | "/"
     | "/project/history"
-    | "/project/mappings"
     | "/project/masterdata"
-    | "/project/rms"
     | "/user/keys"
     | "/user/recovery"
     | "/project/"
-    | "/project/mappings/overview"
     | "/project/mappings/stratigraphy"
     | "/project/mappings/wellbores"
-    | "/project/rms/overview"
     | "/project/rms/stratigraphy"
     | "/project/rms/wellbores"
-    | "/project/mappings/"
     | "/project/rms/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   ProjectHistoryRoute: typeof ProjectHistoryRoute;
-  ProjectMappingsRoute: typeof ProjectMappingsRouteWithChildren;
   ProjectMasterdataRoute: typeof ProjectMasterdataRoute;
-  ProjectRmsRoute: typeof ProjectRmsRouteWithChildren;
   UserKeysRoute: typeof UserKeysRoute;
   UserRecoveryRoute: typeof UserRecoveryRoute;
   ProjectIndexRoute: typeof ProjectIndexRoute;
+  ProjectMappingsStratigraphyRoute: typeof ProjectMappingsStratigraphyRoute;
+  ProjectMappingsWellboresRoute: typeof ProjectMappingsWellboresRoute;
+  ProjectRmsStratigraphyRoute: typeof ProjectRmsStratigraphyRoute;
+  ProjectRmsWellboresRoute: typeof ProjectRmsWellboresRoute;
+  ProjectRmsIndexRoute: typeof ProjectRmsIndexRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -258,25 +205,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UserKeysRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/project/rms": {
-      id: "/project/rms";
-      path: "/project/rms";
-      fullPath: "/project/rms";
-      preLoaderRoute: typeof ProjectRmsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
     "/project/masterdata": {
       id: "/project/masterdata";
       path: "/project/masterdata";
       fullPath: "/project/masterdata";
       preLoaderRoute: typeof ProjectMasterdataRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/project/mappings": {
-      id: "/project/mappings";
-      path: "/project/mappings";
-      fullPath: "/project/mappings";
-      preLoaderRoute: typeof ProjectMappingsRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/project/history": {
@@ -288,108 +221,54 @@ declare module "@tanstack/react-router" {
     };
     "/project/rms/": {
       id: "/project/rms/";
-      path: "/";
+      path: "/project/rms";
       fullPath: "/project/rms/";
       preLoaderRoute: typeof ProjectRmsIndexRouteImport;
-      parentRoute: typeof ProjectRmsRoute;
-    };
-    "/project/mappings/": {
-      id: "/project/mappings/";
-      path: "/";
-      fullPath: "/project/mappings/";
-      preLoaderRoute: typeof ProjectMappingsIndexRouteImport;
-      parentRoute: typeof ProjectMappingsRoute;
+      parentRoute: typeof rootRouteImport;
     };
     "/project/rms/wellbores": {
       id: "/project/rms/wellbores";
-      path: "/wellbores";
+      path: "/project/rms/wellbores";
       fullPath: "/project/rms/wellbores";
       preLoaderRoute: typeof ProjectRmsWellboresRouteImport;
-      parentRoute: typeof ProjectRmsRoute;
+      parentRoute: typeof rootRouteImport;
     };
     "/project/rms/stratigraphy": {
       id: "/project/rms/stratigraphy";
-      path: "/stratigraphy";
+      path: "/project/rms/stratigraphy";
       fullPath: "/project/rms/stratigraphy";
       preLoaderRoute: typeof ProjectRmsStratigraphyRouteImport;
-      parentRoute: typeof ProjectRmsRoute;
-    };
-    "/project/rms/overview": {
-      id: "/project/rms/overview";
-      path: "/overview";
-      fullPath: "/project/rms/overview";
-      preLoaderRoute: typeof ProjectRmsOverviewRouteImport;
-      parentRoute: typeof ProjectRmsRoute;
+      parentRoute: typeof rootRouteImport;
     };
     "/project/mappings/wellbores": {
       id: "/project/mappings/wellbores";
-      path: "/wellbores";
+      path: "/project/mappings/wellbores";
       fullPath: "/project/mappings/wellbores";
       preLoaderRoute: typeof ProjectMappingsWellboresRouteImport;
-      parentRoute: typeof ProjectMappingsRoute;
+      parentRoute: typeof rootRouteImport;
     };
     "/project/mappings/stratigraphy": {
       id: "/project/mappings/stratigraphy";
-      path: "/stratigraphy";
+      path: "/project/mappings/stratigraphy";
       fullPath: "/project/mappings/stratigraphy";
       preLoaderRoute: typeof ProjectMappingsStratigraphyRouteImport;
-      parentRoute: typeof ProjectMappingsRoute;
-    };
-    "/project/mappings/overview": {
-      id: "/project/mappings/overview";
-      path: "/overview";
-      fullPath: "/project/mappings/overview";
-      preLoaderRoute: typeof ProjectMappingsOverviewRouteImport;
-      parentRoute: typeof ProjectMappingsRoute;
+      parentRoute: typeof rootRouteImport;
     };
   }
 }
 
-interface ProjectMappingsRouteChildren {
-  ProjectMappingsOverviewRoute: typeof ProjectMappingsOverviewRoute;
-  ProjectMappingsStratigraphyRoute: typeof ProjectMappingsStratigraphyRoute;
-  ProjectMappingsWellboresRoute: typeof ProjectMappingsWellboresRoute;
-  ProjectMappingsIndexRoute: typeof ProjectMappingsIndexRoute;
-}
-
-const ProjectMappingsRouteChildren: ProjectMappingsRouteChildren = {
-  ProjectMappingsOverviewRoute: ProjectMappingsOverviewRoute,
-  ProjectMappingsStratigraphyRoute: ProjectMappingsStratigraphyRoute,
-  ProjectMappingsWellboresRoute: ProjectMappingsWellboresRoute,
-  ProjectMappingsIndexRoute: ProjectMappingsIndexRoute,
-};
-
-const ProjectMappingsRouteWithChildren = ProjectMappingsRoute._addFileChildren(
-  ProjectMappingsRouteChildren,
-);
-
-interface ProjectRmsRouteChildren {
-  ProjectRmsOverviewRoute: typeof ProjectRmsOverviewRoute;
-  ProjectRmsStratigraphyRoute: typeof ProjectRmsStratigraphyRoute;
-  ProjectRmsWellboresRoute: typeof ProjectRmsWellboresRoute;
-  ProjectRmsIndexRoute: typeof ProjectRmsIndexRoute;
-}
-
-const ProjectRmsRouteChildren: ProjectRmsRouteChildren = {
-  ProjectRmsOverviewRoute: ProjectRmsOverviewRoute,
-  ProjectRmsStratigraphyRoute: ProjectRmsStratigraphyRoute,
-  ProjectRmsWellboresRoute: ProjectRmsWellboresRoute,
-  ProjectRmsIndexRoute: ProjectRmsIndexRoute,
-};
-
-const ProjectRmsRouteWithChildren = ProjectRmsRoute._addFileChildren(
-  ProjectRmsRouteChildren,
-);
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProjectHistoryRoute: ProjectHistoryRoute,
-  ProjectMappingsRoute: ProjectMappingsRouteWithChildren,
   ProjectMasterdataRoute: ProjectMasterdataRoute,
-  ProjectRmsRoute: ProjectRmsRouteWithChildren,
   UserKeysRoute: UserKeysRoute,
   UserRecoveryRoute: UserRecoveryRoute,
   ProjectIndexRoute: ProjectIndexRoute,
+  ProjectMappingsStratigraphyRoute: ProjectMappingsStratigraphyRoute,
+  ProjectMappingsWellboresRoute: ProjectMappingsWellboresRoute,
+  ProjectRmsStratigraphyRoute: ProjectRmsStratigraphyRoute,
+  ProjectRmsWellboresRoute: ProjectRmsWellboresRoute,
+  ProjectRmsIndexRoute: ProjectRmsIndexRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

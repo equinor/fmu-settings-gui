@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import type { StratigraphicColumn } from "#client";
-import type { ElementMappings } from "../stratigraphy/types";
+import type { ElementMappings } from "../../mappings/stratigraphy/types";
 
 export type MappingData = {
   elementMappings: ElementMappings;
