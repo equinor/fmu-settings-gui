@@ -1268,8 +1268,11 @@ export const smdaPostWellHeadersQueryKey = (options: Options<SmdaPostWellHeaders
  *
  * A route to gather well header data from SMDA for a specified field.
  *
- * This route receives a valid field identifier and returns the well header
- * fields needed to identify and map SMDA wellbores against model well names.
+ * This route receives a selected SMDA field and returns the well header
+ * attributes needed to identify and map SMDA wellbores against model well
+ * names. When provided, the field UUID is used to find well headers for the
+ * selected SMDA field. If no field UUID is provided, the field identifier is
+ * used instead.
  */
 export const smdaPostWellHeadersOptions = (options: Options<SmdaPostWellHeadersData>) => queryOptions<SmdaPostWellHeadersResponse, AxiosError<DefaultError>, SmdaPostWellHeadersResponse, ReturnType<typeof smdaPostWellHeadersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -1289,8 +1292,11 @@ export const smdaPostWellHeadersOptions = (options: Options<SmdaPostWellHeadersD
  *
  * A route to gather well header data from SMDA for a specified field.
  *
- * This route receives a valid field identifier and returns the well header
- * fields needed to identify and map SMDA wellbores against model well names.
+ * This route receives a selected SMDA field and returns the well header
+ * attributes needed to identify and map SMDA wellbores against model well
+ * names. When provided, the field UUID is used to find well headers for the
+ * selected SMDA field. If no field UUID is provided, the field identifier is
+ * used instead.
  */
 export const smdaPostWellHeadersMutation = (options?: Partial<Options<SmdaPostWellHeadersData>>): UseMutationOptions<SmdaPostWellHeadersResponse, AxiosError<DefaultError>, Options<SmdaPostWellHeadersData>> => {
     const mutationOptions: UseMutationOptions<SmdaPostWellHeadersResponse, AxiosError<DefaultError>, Options<SmdaPostWellHeadersData>> = {

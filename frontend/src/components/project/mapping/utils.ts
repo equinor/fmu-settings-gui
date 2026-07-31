@@ -7,7 +7,24 @@ import type {
 
 export const emptyName = "(not set)";
 export const noHorizonName = "No horizon";
+export const noWellboreName = "No wellbore";
 export const noZoneName = "No zone";
+
+export type SourceTargetPair = {
+  sourceId: string;
+  targetUuid: string;
+};
+
+export function getOtherSourceUsingTargetUuid(
+  pairs: SourceTargetPair[],
+  targetUuid: string,
+  currentSourceId: string,
+) {
+  return pairs.find(
+    (pair) =>
+      pair.targetUuid === targetUuid && pair.sourceId !== currentSourceId,
+  )?.sourceId;
+}
 
 export function emptyElementMapping(): ElementMapping {
   return {
