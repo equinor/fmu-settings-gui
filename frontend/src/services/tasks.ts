@@ -54,7 +54,7 @@ export function useTaskList(): Task[] {
       id: "rms",
       label: "Set RMS project",
       done: !!config.rms?.path,
-      to: "/project/rms/overview",
+      to: "/project/rms",
     },
     {
       id: "rms-stratigraphy",
