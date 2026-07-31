@@ -5,6 +5,8 @@ import type { FieldItem, RmsProject } from "#client";
 import { useWellboreMappings } from "#services/mappings";
 import { useSmdaWellHeaders } from "#services/smda";
 import { PageText, WarningBox } from "#styles/common";
+import { MappingActions } from "./Overview.style";
+import { SimulatorMappings } from "./SimulatorMappings";
 import { WellboreMappingsTable } from "./WellboreMappingsTable";
 
 export function Overview({
@@ -23,6 +25,10 @@ export function Overview({
   const rmsWellbores = useMemo(
     () => rmsProject.wells ?? [],
     [rmsProject.wells],
+  );
+  const savedRmsWellboreNames = useMemo(
+    () => rmsWellbores.map((wellbore) => wellbore.name),
+    [rmsWellbores],
   );
   const nonPlannedRmsWellboreNames = useMemo(
     () =>
@@ -48,6 +54,18 @@ export function Overview({
         The following mappings show wellbore names in RMS, simulator files, and
         SMDA. Blue rows are planned wellbores.
       </PageText>
+
+      {editMode && rmsWellbores.length > 0 && (
+        <MappingActions>
+          <SimulatorMappings
+            mappings={mappings}
+            savedRmsWellboreNames={savedRmsWellboreNames}
+            projectReadOnly={projectReadOnly}
+            isSaving={isSaving}
+            saveMappings={saveMappings}
+          />
+        </MappingActions>
+      )}
 
       {editMode &&
         !wellHeaders.hasFields &&
