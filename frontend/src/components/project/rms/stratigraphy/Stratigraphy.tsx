@@ -12,6 +12,7 @@ import type {
 } from "#client";
 import {
   projectGetChangelogQueryKey,
+  projectGetMappingsOptions,
   projectGetProjectQueryKey,
   projectPatchRmsStratigraphicFrameworkMutation,
   rmsGetHorizonsOptions,
@@ -27,6 +28,11 @@ import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form.tsx";
+import {
+  pruneStratigraphyMappings,
+  useMappingsMutation,
+} from "#services/mappings";
+import { mappingsPaths } from "#services/project";
 import {
   ActionButtonsContainer,
   EditDialog,
@@ -197,11 +203,12 @@ function StratigraphyEditor({
 
         {hasOrphans && (
           <OrphanWarningBox
-            message={`${orphanTypeCounts.join(" and ")} stored in the project ${
-              orphanCount === 1 ? "is" : "are"
-            } currently not available in RMS. ${
-              orphanCount === 1 ? "It" : "They"
-            } will be removed when you save.`}
+            message={
+              `${orphanTypeCounts.join(" and ")} stored in the project ${
+                orphanCount === 1 ? "is" : "are"
+              } currently not available in RMS. ` +
+              "Saving will remove the unavailable stratigraphy and its mappings."
+            }
             listItems={orphanListItems}
           />
         )}
@@ -291,6 +298,10 @@ function Edit({
     ...rmsGetZonesOptions(),
     enabled: isRmsProjectOpen,
   });
+  const stratigraphyMappingsQuery = useQuery({
+    ...projectGetMappingsOptions({ path: mappingsPaths.stratigraphyRms }),
+    enabled: isDialogOpen,
+  });
   const availableStratigraphyLoaded =
     availableHorizonsLoaded && availableZonesLoaded;
 
@@ -319,6 +330,13 @@ function Edit({
     },
   });
 
+  const mappingsMutation = useMappingsMutation(
+    mappingsPaths.stratigraphyRms,
+    "Could not save updated stratigraphy mappings",
+  );
+  const savePending =
+    rmsStratigraphyMutation.isPending || mappingsMutation.isPending;
+
   const form = useAppForm({
     defaultValues: {
       zones: projectZones,
@@ -346,22 +364,41 @@ function Edit({
     const availableZoneNames = new Set(
       availableZones?.map((zone) => zone.name),
     );
+    const savedFramework = {
+      horizons: formValue.horizons.filter((horizon) =>
+        availableHorizonNames.has(horizon.name),
+      ),
+      zones: formValue.zones.filter((zone) =>
+        availableZoneNames.has(zone.name),
+      ),
+    };
+    const currentMappings = stratigraphyMappingsQuery.data?.stratigraphy ?? [];
+    const prunedMappings = pruneStratigraphyMappings(currentMappings, [
+      ...savedFramework.horizons.map((horizon) => horizon.name),
+      ...savedFramework.zones.map((zone) => zone.name),
+    ]);
+    const finishSave = (message: string) => {
+      formSubmitCallback({ message, formReset });
+      closeDialog();
+    };
 
     rmsStratigraphyMutation.mutate(
       {
-        body: {
-          horizons: formValue.horizons.filter((horizon) =>
-            availableHorizonNames.has(horizon.name),
-          ),
-          zones: formValue.zones.filter((zone) =>
-            availableZoneNames.has(zone.name),
-          ),
-        },
+        body: savedFramework,
       },
       {
         onSuccess: (data) => {
-          formSubmitCallback({ message: data.message, formReset });
-          closeDialog();
+          if (prunedMappings.length === currentMappings.length) {
+            finishSave(data.message);
+
+            return;
+          }
+
+          mappingsMutation.mutateMappings(prunedMappings, {
+            onSuccess: () => {
+              finishSave(data.message);
+            },
+          });
         },
       },
     );
@@ -438,6 +475,12 @@ function Edit({
                   (namesNotInReference(horizons, availableHorizons).length >
                     0 ||
                     namesNotInReference(zones, availableZones).length > 0);
+                const requiresMappingPruning =
+                  hasOrphans ||
+                  namesNotInReference(projectHorizons, horizons).length > 0 ||
+                  namesNotInReference(projectZones, zones).length > 0;
+                const mappingsBlockSave =
+                  stratigraphyMappingsQuery.isError && requiresMappingPruning;
 
                 return (
                   <form.SubmitButton
@@ -446,15 +489,22 @@ function Edit({
                       projectReadOnly ||
                       (isDefaultValue && !hasOrphans) ||
                       !canSubmit ||
-                      !availableStratigraphyLoaded
+                      !availableStratigraphyLoaded ||
+                      stratigraphyMappingsQuery.isPending ||
+                      mappingsBlockSave ||
+                      savePending
                     }
-                    isPending={rmsStratigraphyMutation.isPending}
+                    isPending={savePending}
                     helperTextDisabled={
                       projectReadOnly
                         ? "Project is read-only"
                         : !availableStratigraphyLoaded
                           ? "RMS stratigraphy must be loaded before saving"
-                          : "Form can be saved when the values have changed"
+                          : stratigraphyMappingsQuery.isPending
+                            ? "Stratigraphy mappings must be loaded before saving"
+                            : mappingsBlockSave
+                              ? "Stored mappings must be fixed before removing stratigraphy"
+                              : "Form can be saved when the values have changed"
                     }
                   />
                 );
