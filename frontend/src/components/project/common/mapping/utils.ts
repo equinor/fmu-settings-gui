@@ -1,9 +1,16 @@
 import type { OptionProps } from "#components/form/field";
 import type {
   ElementMapping,
+  ElementMappings,
   ElementType,
   SpecialOptionId,
 } from "../../mappings/stratigraphy/types";
+import type { UnmappedElements } from "./types";
+
+export const elementTypePlural: Record<ElementType, string> = {
+  horizon: "horizons",
+  zone: "zones",
+};
 
 export const emptyName = "(not set)";
 export const noHorizonName = "No horizon";
@@ -50,6 +57,10 @@ export function createSpecialOptions(
   return options;
 }
 
+export function isElementMappingUnmapped(elementMapping: ElementMapping) {
+  return elementMapping.smdaName === "" && !elementMapping.unmappable;
+}
+
 export function getElementMappingSmdaName(elementMapping: ElementMapping) {
   if (elementMapping.smdaName !== "") {
     return elementMapping.smdaName;
@@ -79,4 +90,22 @@ export function getElementMappingSmdaNameOptionsInitialValue(
   }
 
   return { value, label: elementMapping?.smdaName ?? "" };
+}
+
+export function getUnmappedElementNames(
+  elementMappings: ElementMappings,
+  elementTypes: ElementType[],
+) {
+  const unmappedElements = {} as UnmappedElements;
+  elementTypes.forEach((elementType) => {
+    unmappedElements[elementType] = Object.values(elementMappings)
+      .filter(
+        (mapping) =>
+          mapping.elementType === elementType &&
+          isElementMappingUnmapped(mapping),
+      )
+      .map((mapping) => mapping.rmsName);
+  });
+
+  return unmappedElements;
 }

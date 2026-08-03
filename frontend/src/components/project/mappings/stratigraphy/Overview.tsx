@@ -27,7 +27,11 @@ import {
   smdaPostStratUnitsOptions,
 } from "#client/@tanstack/react-query.gen";
 import { ConfirmCloseDialog } from "#components/common";
-import { CancelButton, SubmitButton } from "#components/form/button";
+import {
+  CancelButton,
+  GeneralButton,
+  SubmitButton,
+} from "#components/form/button";
 import {
   ArrayTextAddItem,
   ArrayTextField,
@@ -44,6 +48,7 @@ import type {
 } from "#components/form/form";
 import { mappingsPaths } from "#services/project";
 import {
+  ActionButtonsContainer,
   EditDialog,
   PageSectionSpacer,
   PageSectionWidthConstrained,
@@ -55,7 +60,9 @@ import {
   httpValidationErrorToString,
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
+import { enumerateWords } from "#utils/string";
 import { useConfirmClose } from "#utils/ui";
+import { AutomaticMapping } from "../../common/mapping/AutomaticMapping";
 import {
   createElementMappings,
   createMutationValue,
@@ -67,8 +74,11 @@ import {
 import { MappingDataContext } from "../../common/mapping/MappingData";
 import {
   createSpecialOptions,
+  elementTypePlural,
   getElementMappingSmdaName,
   getElementMappingSmdaNameOptionsInitialValue,
+  getUnmappedElementNames,
+  isElementMappingUnmapped,
   specialOptions,
 } from "../../common/mapping/utils";
 import {
@@ -89,6 +99,8 @@ import {
 } from "./Overview.style";
 import type { ElementMapping, ElementMappings, ElementType } from "./types";
 import { validateSelectValue } from "./utils";
+
+const elementTypes: ElementType[] = ["horizon", "zone"];
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -298,8 +310,7 @@ function Element({
 }) {
   const mappingData = useMappingData();
 
-  const isMissingValue =
-    elementMapping.smdaName === "" && !elementMapping.unmappable;
+  const isMissingValue = isElementMappingUnmapped(elementMapping);
   const aliasCount = elementMapping.aliases.length;
 
   return (
@@ -564,6 +575,11 @@ export function Overview({
   projectReadOnly: boolean;
   editMode: boolean;
 }) {
+  const [automaticMappingElementType, setAutomaticMappingElementType] =
+    useState<ElementType | undefined>();
+  const [automaticMappingDialogOpen, setAutomaticMappingDialogOpen] =
+    useState(false);
+
   const { data: projectMappings } = useSuspenseQuery(
     projectGetMappingsOptions({
       path: mappingsPaths.stratigraphyRms,
@@ -627,6 +643,26 @@ export function Overview({
     setElementMappings,
   ]);
 
+  const [unmappedElements, unmappedTypes, unmappedTypesText] = useMemo(() => {
+    const elements = getUnmappedElementNames(elementMappings, elementTypes);
+    const types = elementTypes
+      .filter((type) => elements[type].length)
+      .map((type) => type);
+    const text = enumerateWords(types.map((type) => elementTypePlural[type]));
+
+    return [elements, types, text];
+  }, [elementMappings]);
+
+  function openAutomaticMappingDialog(elementType: ElementType) {
+    setAutomaticMappingElementType(elementType);
+    setAutomaticMappingDialogOpen(true);
+  }
+
+  function closeAutomaticMappingDialog() {
+    setAutomaticMappingDialogOpen(false);
+    setAutomaticMappingElementType(undefined);
+  }
+
   return (
     <>
       <PageSectionWidthConstrained>
@@ -656,6 +692,36 @@ export function Overview({
       rmsProject.zones !== undefined &&
       rmsProject.zones !== null ? (
         <MappingDataContext value={mappingData}>
+          {mappingData.canEdit && unmappedTypes.length && (
+            <>
+              <PageText>
+                Some of the {unmappedTypesText} are not currently mapped with
+                SMDA names. You can get name suggestions by performing the
+                automatic mapping:
+              </PageText>
+
+              <ActionButtonsContainer>
+                {unmappedTypes.map((elementType) => (
+                  <GeneralButton
+                    key={elementType}
+                    variant="outlined"
+                    label={`Automatic mapping of ${elementTypePlural[elementType]}`}
+                    onClick={() => {
+                      openAutomaticMappingDialog(elementType);
+                    }}
+                  ></GeneralButton>
+                ))}
+              </ActionButtonsContainer>
+
+              <AutomaticMapping
+                elementType={automaticMappingElementType}
+                unmappedElements={unmappedElements}
+                isOpen={automaticMappingDialogOpen}
+                closeDialog={closeAutomaticMappingDialog}
+              />
+            </>
+          )}
+
           <StratigraphicFramework
             horizons={rmsProject.horizons}
             zones={rmsProject.zones}

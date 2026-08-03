@@ -1,7 +1,10 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import type { StratigraphicColumn } from "#client";
-import type { ElementMappings } from "../../mappings/stratigraphy/types";
+import type {
+  ElementMappings,
+  ElementType,
+} from "../../mappings/stratigraphy/types";
 
 export type MappingData = {
   elementMappings: ElementMappings;
@@ -10,3 +13,5 @@ export type MappingData = {
   projectReadOnly: boolean;
   canEdit: boolean;
 };
+
+export type UnmappedElements = Record<ElementType, string[]>;
