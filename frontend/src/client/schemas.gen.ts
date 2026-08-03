@@ -707,7 +707,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.0.0'
+            default: '1.0.1.dev7+g07ebe1449'
         }
     },
     type: 'object',
@@ -1757,7 +1757,7 @@ export const SmdaSelectedFieldSchema = {
         'identifier'
     ],
     title: 'SmdaSelectedField',
-    description: 'A selected field for masterdata lookup.'
+    description: 'A selected SMDA field.'
 } as const;
 
 export const SmdaStratColumnSchema = {

@@ -1152,7 +1152,7 @@ export type SmdaMasterdataResult = {
 /**
  * SmdaSelectedField
  *
- * A selected field for masterdata lookup.
+ * A selected SMDA field.
  */
 export type SmdaSelectedField = {
     /**
@@ -3865,7 +3865,7 @@ export type SmdaPostStratUnitsResponses = {
 export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
 
 export type SmdaPostWellHeadersData = {
-    body: SmdaField;
+    body: SmdaSelectedField;
     path?: never;
     query?: never;
     url: '/api/v1/smda/well_headers';
