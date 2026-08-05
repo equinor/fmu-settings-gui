@@ -12,11 +12,13 @@ export function Overview({
   fields,
   smdaHealthStatus,
   projectReadOnly,
+  editMode,
 }: {
   rmsProject: RmsProject;
   fields: FieldItem[];
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
+  editMode: boolean;
 }) {
   const rmsWellbores = useMemo(
     () => rmsProject.wells ?? [],
@@ -34,6 +36,7 @@ export function Overview({
   const wellHeaders = useSmdaWellHeaders({
     fields,
     enabled:
+      editMode &&
       smdaHealthStatus &&
       !projectReadOnly &&
       nonPlannedRmsWellboreNames.length > 0,
@@ -42,22 +45,23 @@ export function Overview({
   return (
     <>
       <PageText>
-        The following are the mappings for wellbores, showing the names in RMS,
-        simulator files, and SMDA. Blue rows are planned wellbores and can be
-        mapped to simulator names, but not SMDA names.
+        The following mappings show wellbore names in RMS, simulator files, and
+        SMDA. Blue rows are planned wellbores.
       </PageText>
 
-      {!wellHeaders.hasFields && nonPlannedRmsWellboreNames.length > 0 && (
-        <WarningBox>
-          <PageText $marginBottom="0">
-            No field is set in the masterdata.{" "}
-            <Link to="/project/masterdata">Add a field</Link> to enable matching
-            RMS wellbores to SMDA names.
-          </PageText>
-        </WarningBox>
-      )}
+      {editMode &&
+        !wellHeaders.hasFields &&
+        nonPlannedRmsWellboreNames.length > 0 && (
+          <WarningBox>
+            <PageText $marginBottom="0">
+              No field is set in the masterdata.{" "}
+              <Link to="/project/masterdata">Add a field</Link> to enable
+              matching RMS wellbores to SMDA names.
+            </PageText>
+          </WarningBox>
+        )}
 
-      {wellHeaders.isError && (
+      {editMode && wellHeaders.isError && (
         <WarningBox>
           <PageText $marginBottom="0">
             Some SMDA wellbore names could not be loaded. The SMDA names
@@ -72,6 +76,7 @@ export function Overview({
         smdaHeaders={wellHeaders.smdaHeaders}
         smdaHealthStatus={smdaHealthStatus}
         projectReadOnly={projectReadOnly}
+        editMode={editMode}
         isSaving={isSaving}
         saveMappings={saveMappings}
       />

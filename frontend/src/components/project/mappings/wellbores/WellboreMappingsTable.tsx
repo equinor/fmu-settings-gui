@@ -368,6 +368,7 @@ export function WellboreMappingsTable({
   smdaHeaders,
   smdaHealthStatus,
   projectReadOnly,
+  editMode,
   isSaving,
   saveMappings,
 }: {
@@ -376,6 +377,7 @@ export function WellboreMappingsTable({
   smdaHeaders: SmdaWellHeader[];
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
+  editMode: boolean;
   isSaving: boolean;
   saveMappings: SaveWellboreMappings;
 }) {
@@ -419,7 +421,6 @@ export function WellboreMappingsTable({
     <>
       {activeRow && (
         <EditMappingDialog
-          key={activeRow.rmsWellboreName}
           row={activeRow}
           mappings={mappings}
           smdaHeaders={smdaHeaders}
@@ -434,8 +435,11 @@ export function WellboreMappingsTable({
         />
       )}
 
-      {!projectReadOnly && rows.length > 0 && (
-        <PageText>Select a row to edit its simulator and SMDA names.</PageText>
+      {editMode && !projectReadOnly && rows.length > 0 && (
+        <PageText>
+          Select a row to edit its simulator and SMDA names. Planned wellbores
+          can only be mapped to simulator names.
+        </PageText>
       )}
 
       {rows.length ? (
@@ -465,14 +469,14 @@ export function WellboreMappingsTable({
               onColumnFiltersChange={setColumnFilters}
               rowClass={(row) =>
                 [
-                  !projectReadOnly && "editable-row",
+                  editMode && !projectReadOnly && "editable-row",
                   row.original.planned && "planned-row",
                 ]
                   .filter(Boolean)
                   .join(" ")
               }
               onRowClick={(selectedRow) => {
-                if (!projectReadOnly) {
+                if (editMode && !projectReadOnly) {
                   setActiveRow(selectedRow.original);
                 }
               }}
@@ -480,7 +484,7 @@ export function WellboreMappingsTable({
             />
           </WellboreMappingsContainer>
 
-          <PageText $marginBottom="0">💡 Tips:</PageText>
+          <PageText $marginBottom="0">Table controls:</PageText>
           <PageList>
             <List.Item>Select a column title to sort the table</List.Item>
             <List.Item>

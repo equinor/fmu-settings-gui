@@ -1,5 +1,6 @@
+import { Typography } from "@equinor/eds-core-react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 import type { FieldItem, RmsProject } from "#client";
 import { Loading, SmdaHealthCheckInfo } from "#components/common";
@@ -7,19 +8,71 @@ import { Overview } from "#components/project/mappings/wellbores/Overview";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
 import { PageHeader, PageText } from "#styles/common";
+import {
+  getStorageItem,
+  STORAGENAME_WELLBORE_MAPPINGS_EDIT_MODE,
+  setStorageItem,
+} from "#utils/storage";
 
 export const Route = createFileRoute("/project/mappings/wellbores")({
   component: RouteComponent,
 });
 
-function RouteComponent() {
+function RmsProjectContent({
+  rmsProject,
+  fields,
+  projectReadOnly,
+}: {
+  rmsProject: RmsProject;
+  fields: FieldItem[];
+  projectReadOnly: boolean;
+}) {
+  const [editMode, setEditMode] = useState(() =>
+    getStorageItem(
+      sessionStorage,
+      STORAGENAME_WELLBORE_MAPPINGS_EDIT_MODE,
+      "boolean",
+    ),
+  );
+  const { data: healthCheck } = useSmdaHealthCheck();
+  const { setRequestAcquireSsoAccessToken } = Route.useRouteContext();
+
+  function toggleEditMode() {
+    setEditMode((prevMode) => {
+      setStorageItem(
+        sessionStorage,
+        STORAGENAME_WELLBORE_MAPPINGS_EDIT_MODE,
+        !prevMode,
+      );
+
+      return !prevMode;
+    });
+  }
+
   return (
     <>
-      <PageHeader>Wellbores</PageHeader>
+      <Overview
+        rmsProject={rmsProject}
+        fields={fields}
+        smdaHealthStatus={healthCheck.status}
+        projectReadOnly={projectReadOnly}
+        editMode={editMode}
+      />
 
-      <Suspense fallback={<Loading />}>
-        <Content />
-      </Suspense>
+      {editMode ? (
+        <SmdaHealthCheckInfo
+          feature="editing SMDA wellbore names"
+          healthCheck={healthCheck}
+          setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
+        />
+      ) : (
+        <PageText>
+          💡 To manage mappings,{" "}
+          <Typography onClick={toggleEditMode} link>
+            enable editing mode.
+          </Typography>
+        </PageText>
+      )}
     </>
   );
 }
@@ -45,36 +98,14 @@ function Content() {
   );
 }
 
-function RmsProjectContent({
-  rmsProject,
-  fields,
-  projectReadOnly,
-}: {
-  rmsProject: RmsProject;
-  fields: FieldItem[];
-  projectReadOnly: boolean;
-}) {
-  const { data: healthCheck } = useSmdaHealthCheck();
-  const { setRequestAcquireSsoAccessToken } = Route.useRouteContext();
-
+function RouteComponent() {
   return (
     <>
-      <Overview
-        rmsProject={rmsProject}
-        fields={fields}
-        smdaHealthStatus={healthCheck.status}
-        projectReadOnly={projectReadOnly}
-      />
+      <PageHeader>Wellbores</PageHeader>
 
-      {!healthCheck.status && (
-        <div id="smda-connection-details">
-          <SmdaHealthCheckInfo
-            feature="editing SMDA wellbore names"
-            healthCheck={healthCheck}
-            setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
-          />
-        </div>
-      )}
+      <Suspense fallback={<Loading />}>
+        <Content />
+      </Suspense>
     </>
   );
 }
