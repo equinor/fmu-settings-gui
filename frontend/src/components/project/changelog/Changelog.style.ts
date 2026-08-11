@@ -42,24 +42,8 @@ export const ChangelogFilterBar = styled.div`
   margin-bottom: ${tokens.spacings.comfortable.medium};
 `;
 
-export const ChangelogFilterField = styled.label`
-  display: flex;
-  flex-direction: column;
-  gap: ${tokens.spacings.comfortable.xx_small};
+export const ChangelogFilterField = styled.div`
   min-width: 12rem;
-  color: ${tokens.colors.text.static_icons__default.hex};
-  font-size: 0.875rem;
-  font-weight: 500;
-`;
-
-export const ChangelogFilterSelect = styled.select`
-  min-height: 2.5rem;
-  padding: 0 ${tokens.spacings.comfortable.small};
-  border: 1px solid ${tokens.colors.ui.background__medium.hex};
-  border-radius: ${tokens.shape.corners.borderRadius};
-  background: ${tokens.colors.ui.background__default.hex};
-  color: ${tokens.colors.text.static_icons__default.hex};
-  font: inherit;
 `;
 
 export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`

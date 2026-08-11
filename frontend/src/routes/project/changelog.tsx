@@ -27,7 +27,8 @@ function RouteComponent() {
 
       <PageText>
         This page displays the full changelog for the selected project. Use the
-        filters to narrow the list by change type or number of entries.
+        filters to narrow the list by change type, settings type, or how many
+        changes to show.
       </PageText>
 
       <Suspense fallback={<Loading />}>

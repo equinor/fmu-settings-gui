@@ -1,27 +1,26 @@
+import { NativeSelect } from "@equinor/eds-core-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { type ChangeEvent, Suspense, useState } from "react";
 
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
-import type { ChangeInfo, ChangeType } from "#client/types.gen";
+import type { ChangeType, ProjectGetChangelogData } from "#client/types.gen";
 import { Loading, QueryErrorBoundary } from "#components/common";
 import { PageContainerNotWidthConstrained, PageText } from "#styles/common";
 import {
   HTTP_STATUS_404_NOT_FOUND,
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
 } from "#utils/api";
-import {
-  ChangelogFilterBar,
-  ChangelogFilterField,
-  ChangelogFilterSelect,
-} from "./Changelog.style";
+import { ChangelogFilterBar, ChangelogFilterField } from "./Changelog.style";
 import { ChangelogTable } from "./ChangelogTable";
 import { getTypeLabel } from "./utils";
 
 type EntryLimit = "all" | "10" | "25" | "50" | "100";
+type SettingsTypeFilter = "all" | "config.json" | "mappings.json";
 
 type ChangelogFilters = {
   changeType: "all" | ChangeType;
+  settingsType: SettingsTypeFilter;
   entryLimit: EntryLimit;
 };
 
@@ -39,14 +38,48 @@ const CHANGE_TYPE_OPTIONS: ("all" | ChangeType)[] = [
 
 const ENTRY_LIMIT_OPTIONS: EntryLimit[] = ["all", "10", "25", "50", "100"];
 
-const DEFAULT_CHANGELOG_FILTERS: ChangelogFilters = {
-  changeType: "all",
-  entryLimit: "all",
+const SETTINGS_TYPE_OPTIONS: SettingsTypeFilter[] = [
+  "all",
+  "config.json",
+  "mappings.json",
+];
+
+const SETTINGS_TYPE_LABELS: Record<SettingsTypeFilter, string> = {
+  all: "All settings types",
+  "config.json": "Project configuration",
+  "mappings.json": "Mappings",
 };
 
-function useChangelogEntries() {
+const DEFAULT_CHANGELOG_FILTERS: ChangelogFilters = {
+  changeType: "all",
+  settingsType: "all",
+  entryLimit: "25",
+};
+
+function getChangelogQuery(filters: ChangelogFilters) {
+  const query: ProjectGetChangelogData["query"] = {};
+
+  if (filters.changeType !== "all") {
+    query.change_type = filters.changeType;
+  }
+
+  if (filters.settingsType !== "all") {
+    query.field_name = "file";
+    query.filter_value = filters.settingsType;
+    query.filter_type = "text";
+    query.operator = "==";
+  }
+
+  if (filters.entryLimit !== "all") {
+    query.max_entries = Number(filters.entryLimit);
+  }
+
+  return query;
+}
+
+function useChangelogEntries(filters: ChangelogFilters) {
   const { data } = useSuspenseQuery({
-    ...projectGetChangelogOptions(),
+    ...projectGetChangelogOptions({ query: getChangelogQuery(filters) }),
     meta: {
       preventDefaultErrorHandling: [
         HTTP_STATUS_404_NOT_FOUND,
@@ -74,26 +107,10 @@ function useChangelogEntries() {
 
 function getChangeTypeOptionLabel(changeType: "all" | ChangeType) {
   if (changeType === "all") {
-    return "All change types";
+    return "All changes";
   }
 
   return getTypeLabel(changeType);
-}
-
-function filterChangelogEntries(
-  entries: ChangeInfo[],
-  filters: ChangelogFilters,
-) {
-  const changeTypeFilteredEntries =
-    filters.changeType === "all"
-      ? entries
-      : entries.filter((entry) => entry.change_type === filters.changeType);
-
-  if (filters.entryLimit === "all") {
-    return changeTypeFilteredEntries;
-  }
-
-  return changeTypeFilteredEntries.slice(0, Number(filters.entryLimit));
 }
 
 function ChangelogFilterControls({
@@ -113,8 +130,9 @@ function ChangelogFilterControls({
   return (
     <ChangelogFilterBar>
       <ChangelogFilterField>
-        Change type
-        <ChangelogFilterSelect
+        <NativeSelect
+          id="changelog-change-type"
+          label="Filter changes by"
           value={filters.changeType}
           onChange={(event) => {
             handleChange("changeType", event);
@@ -125,12 +143,30 @@ function ChangelogFilterControls({
               {getChangeTypeOptionLabel(changeType)}
             </option>
           ))}
-        </ChangelogFilterSelect>
+        </NativeSelect>
       </ChangelogFilterField>
 
       <ChangelogFilterField>
-        Number of entries
-        <ChangelogFilterSelect
+        <NativeSelect
+          id="changelog-settings-type"
+          label="Settings type"
+          value={filters.settingsType}
+          onChange={(event) => {
+            handleChange("settingsType", event);
+          }}
+        >
+          {SETTINGS_TYPE_OPTIONS.map((settingsType) => (
+            <option key={settingsType} value={settingsType}>
+              {SETTINGS_TYPE_LABELS[settingsType]}
+            </option>
+          ))}
+        </NativeSelect>
+      </ChangelogFilterField>
+
+      <ChangelogFilterField>
+        <NativeSelect
+          id="changelog-entry-limit"
+          label="Show"
           value={filters.entryLimit}
           onChange={(event) => {
             handleChange("entryLimit", event);
@@ -138,43 +174,35 @@ function ChangelogFilterControls({
         >
           {ENTRY_LIMIT_OPTIONS.map((entryLimit) => (
             <option key={entryLimit} value={entryLimit}>
-              {entryLimit === "all" ? "All entries" : entryLimit}
+              {entryLimit === "all" ? "All changes" : `Latest ${entryLimit}`}
             </option>
           ))}
-        </ChangelogFilterSelect>
+        </NativeSelect>
       </ChangelogFilterField>
     </ChangelogFilterBar>
   );
 }
 
 function Content() {
-  const allChanges = useChangelogEntries();
   const [filters, setFilters] = useState<ChangelogFilters>(
     DEFAULT_CHANGELOG_FILTERS,
   );
-
-  if (allChanges.length === 0) {
-    return <PageText>No changelog entries yet.</PageText>;
-  }
-
-  const changes = filterChangelogEntries(allChanges, filters);
+  const changes = useChangelogEntries(filters);
 
   return (
-    <>
-      <PageText>
-        Showing {changes.length} of {allChanges.length} changes to this
-        project's settings.
-      </PageText>
-
-      <PageContainerNotWidthConstrained>
-        <ChangelogFilterControls filters={filters} onChange={setFilters} />
-        {changes.length === 0 ? (
-          <PageText>No changelog entries match the selected filters.</PageText>
-        ) : (
+    <PageContainerNotWidthConstrained>
+      <ChangelogFilterControls filters={filters} onChange={setFilters} />
+      {changes.length === 0 ? (
+        <PageText>No changelog entries match the selected filters.</PageText>
+      ) : (
+        <>
+          <PageText>
+            Showing {changes.length} changes to this project's settings.
+          </PageText>
           <ChangelogTable entries={changes} />
-        )}
-      </PageContainerNotWidthConstrained>
-    </>
+        </>
+      )}
+    </PageContainerNotWidthConstrained>
   );
 }
 
