@@ -189,7 +189,7 @@ function AccessEditorForm({
                         .map((asset) => asset.name)
                         .sort((a, b) => stringCompare(a, b))}
                       noOptionsText="No assets found"
-                      disabled={!!formValues.manualAssetName}
+                      disabled={!!formValues?.manualAssetName}
                       helperText="Newly onboarded assets may not exist in the list yet"
                     />
                   )}
@@ -201,7 +201,7 @@ function AccessEditorForm({
                   {(field) => (
                     <field.TextField
                       label="Alternatively, enter asset manually"
-                      disabled={!!formValues.assetName}
+                      disabled={!!formValues?.assetName}
                     />
                   )}
                 </form.AppField>
@@ -256,7 +256,9 @@ function AccessEditorForm({
             {([isDefaultValue, canSubmit]) => (
               <form.SubmitButton
                 label="Save"
-                disabled={isDefaultValue || !canSubmit || projectReadOnly}
+                disabled={
+                  projectReadOnly ? true : isDefaultValue ? true : !canSubmit
+                }
                 isPending={isPending}
                 helperTextDisabled={
                   projectReadOnly ? "Project is read-only" : undefined

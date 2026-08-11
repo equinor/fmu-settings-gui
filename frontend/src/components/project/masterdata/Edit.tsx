@@ -136,10 +136,10 @@ function ConfirmItemsOperationDialog({
     textItemName = getNameFromMultipleNameUuidValues(
       selectedItems.items.country,
     );
-  } else if (selectedItems.items.discovery[DUMMYGROUP_NAME].length) {
+  } else if ((selectedItems.items.discovery[DUMMYGROUP_NAME] ?? []).length) {
     textItemType = "discovery";
     textItemName = getNameFromMultipleNameUuidValues(
-      selectedItems.items.discovery[DUMMYGROUP_NAME],
+      selectedItems.items.discovery[DUMMYGROUP_NAME] ?? [],
     );
   }
 
@@ -195,10 +195,10 @@ function ConfirmItemsOperationDialog({
                     .join(", ")}
                 </List.Item>
               )}
-              {affectedItems.discovery[DUMMYGROUP_NAME].length > 0 && (
+              {(affectedItems.discovery[DUMMYGROUP_NAME] ?? []).length > 0 && (
                 <List.Item>
                   Discovery:{" "}
-                  {affectedItems.discovery[DUMMYGROUP_NAME]
+                  {(affectedItems.discovery[DUMMYGROUP_NAME] ?? [])
                     .map((d) => d.short_identifier)
                     .sort((a, b) => stringCompare(a, b))
                     .join(", ")}
@@ -266,8 +266,9 @@ function Items({
             </PageHeader>
           )}
           <ChipsContainer>
-            {group in itemListGrouped && itemListGrouped[group].length > 0 ? (
-              itemListGrouped[group]
+            {group in itemListGrouped &&
+            (itemListGrouped[group] ?? []).length > 0 ? (
+              (itemListGrouped[group] ?? [])
                 .sort((a, b) =>
                   stringCompare(
                     getNameFromNameUuidValue(a),
@@ -325,13 +326,13 @@ export function Edit({
   const [confirmItemsOperationDialogOpen, setConfirmItemsOperationDialogOpen] =
     useState(false);
   const [smdaFields, setSmdaFields] = useState<Array<SmdaFieldReference>>([]);
-  const [projectData, setProjectData] = useState<FormMasterdataProject>(
+  const [projectData, setProjectData] = useState<FormMasterdataProject>(() =>
     emptyFormMasterdataProject(),
   );
-  const [availableData, setAvailableData] = useState<FormMasterdataBase>(
+  const [availableData, setAvailableData] = useState<FormMasterdataBase>(() =>
     emptyFormMasterdataBase(),
   );
-  const [orphanData, setOrphanData] = useState<FormMasterdataSub>(
+  const [orphanData, setOrphanData] = useState<FormMasterdataSub>(() =>
     emptyFormMasterdataSub({ withDummyGroup: true }),
   );
   const [isOngoingItemsOperation, setIsOngoingItemsOperation] = useState(false);
@@ -376,21 +377,28 @@ export function Edit({
     combine: (results) => ({
       data: results.reduce<SmdaMasterdataResultGrouped>((acc, curr, idx) => {
         if (curr.data !== undefined) {
-          acc[smdaFields[idx].uuid] = curr.data;
+          const field =
+            smdaFields.at(idx)?.uuid ??
+            curr.data.field.at(0)?.uuid ??
+            `index-${String(idx)}`;
+          acc[field] = curr.data;
         }
 
         return acc;
       }, {}),
       isPending: results.some((result) => result.isPending),
       isSuccess: results.every((result) => result.isSuccess),
-      failedSearchFieldUuids: results.flatMap((result, idx) =>
-        result.isLoadingError &&
-        !projectMasterdata.field.some(
-          (field) => field.uuid === smdaFields[idx].uuid,
-        )
-          ? [smdaFields[idx].uuid]
-          : [],
-      ),
+      failedSearchFieldUuids: results.flatMap((result, idx) => {
+        const smdaField = smdaFields.at(idx);
+
+        return result.isLoadingError &&
+          smdaField !== undefined &&
+          !projectMasterdata.field.some(
+            (field) => field.uuid === smdaField.uuid,
+          )
+          ? [smdaField.uuid]
+          : [];
+      }),
     }),
   });
 
@@ -434,11 +442,14 @@ export function Edit({
       return;
     }
 
-    setSmdaFields((fields) =>
-      fields.filter(
-        (field) => !smdaMasterdata.failedSearchFieldUuids.includes(field.uuid),
-      ),
-    );
+    void Promise.resolve().then(() => {
+      setSmdaFields((fields) =>
+        fields.filter(
+          (field) =>
+            !smdaMasterdata.failedSearchFieldUuids.includes(field.uuid),
+        ),
+      );
+    });
   }, [smdaMasterdata.failedSearchFieldUuids]);
 
   const handleItemsOperation = useCallback(() => {
@@ -468,9 +479,9 @@ export function Edit({
       );
     }
 
-    const discoveries = selectedItems.items.discovery[DUMMYGROUP_NAME].concat(
-      affectedItems?.discovery[DUMMYGROUP_NAME] ?? [],
-    );
+    const discoveries = (
+      selectedItems.items.discovery[DUMMYGROUP_NAME] ?? []
+    ).concat(affectedItems?.discovery[DUMMYGROUP_NAME] ?? []);
     if (discoveries.length) {
       handleNameUuidListOperationOnForm(
         form,
@@ -515,13 +526,18 @@ export function Edit({
 
   useEffect(() => {
     if (isOpen) {
-      setSmdaFields(
-        projectMasterdata.field
-          .map(({ identifier, uuid }) => ({ identifier, uuid }))
-          .sort((a, b) => stringCompare(a.identifier, b.identifier)),
-      );
+      void Promise.resolve().then(() => {
+        setSmdaFields(
+          projectMasterdata.field
+            .map((field) => ({
+              identifier: field.identifier,
+              uuid: field.uuid,
+            }))
+            .sort((a, b) => stringCompare(a.identifier, b.identifier)),
+        );
+      });
     }
-  }, [isOpen, projectMasterdata]);
+  }, [isOpen, projectMasterdata.field]);
 
   useEffect(() => {
     if (
@@ -553,7 +569,9 @@ export function Edit({
       smdaMasterdata.isSuccess &&
       Object.keys(smdaMasterdata.data).length
     ) {
-      startItemsOperation(selectedItems);
+      void Promise.resolve().then(() => {
+        startItemsOperation(selectedItems);
+      });
     }
   }, [
     isOngoingItemsOperation,
@@ -574,13 +592,16 @@ export function Edit({
   function addFields(fields: Array<SmdaFieldReference>) {
     setSmdaFields((smdaFields) =>
       fields
-        .reduce((acc, curr) => {
-          if (!acc.some((field) => field.uuid === curr.uuid)) {
-            acc.push(curr);
-          }
+        .reduce<Array<SmdaFieldReference>>(
+          (acc, curr) => {
+            if (!acc.some((field) => field.uuid === curr.uuid)) {
+              acc.push(curr);
+            }
 
-          return acc;
-        }, smdaFields)
+            return acc;
+          },
+          [...smdaFields],
+        )
         .sort((a, b) => stringCompare(a.identifier, b.identifier)),
     );
   }
@@ -808,11 +829,13 @@ export function Edit({
                     mode="array"
                     listeners={{
                       onSubmit: ({ fieldApi }) => {
-                        if (orphanData.discovery[DUMMYGROUP_NAME].length) {
+                        if (
+                          (orphanData.discovery[DUMMYGROUP_NAME] ?? []).length
+                        ) {
                           handleNameUuidListOperation(
                             fieldApi,
                             "removal",
-                            orphanData.discovery[DUMMYGROUP_NAME],
+                            orphanData.discovery[DUMMYGROUP_NAME] ?? [],
                           );
                         }
                       },
@@ -832,7 +855,8 @@ export function Edit({
                             />
                           </ItemsContainer>
 
-                          {orphanData.discovery[DUMMYGROUP_NAME].length > 0 && (
+                          {(orphanData.discovery[DUMMYGROUP_NAME] ?? [])
+                            .length > 0 && (
                             <OrphanTypesContainer>
                               <PageText>
                                 The following discoveries are currently present
@@ -841,9 +865,9 @@ export function Edit({
                                 removed when the project masterdata is saved.
                               </PageText>
                               <PageList>
-                                {orphanData.discovery[
-                                  DUMMYGROUP_NAME
-                                ].map<React.ReactNode>((discovery) => (
+                                {(
+                                  orphanData.discovery[DUMMYGROUP_NAME] ?? []
+                                ).map<React.ReactNode>((discovery) => (
                                   <List.Item key={discovery.uuid}>
                                     {discovery.short_identifier}
                                   </List.Item>

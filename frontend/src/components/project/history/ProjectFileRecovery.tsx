@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -27,10 +27,11 @@ export function ProjectFileRecovery({
 }) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const showDialog = hasProject && isDialogOpen;
 
   const restoreCheckQuery = useQuery({
     ...projectGetRestoreCheckOptions(),
-    enabled: hasProject && isDialogOpen,
+    enabled: showDialog,
     staleTime: 0,
     refetchOnMount: "always",
     meta: { errorPrefix: "Error checking deleted project files" },
@@ -60,15 +61,8 @@ export function ProjectFileRecovery({
     },
   });
 
-  useEffect(() => {
-    if (!hasProject) {
-      setIsDialogOpen(false);
-    }
-  }, [hasProject]);
-
   const isCheckingFiles =
-    isDialogOpen &&
-    (restoreCheckQuery.isPending || restoreCheckQuery.isFetching);
+    showDialog && (restoreCheckQuery.isPending || restoreCheckQuery.isFetching);
   const restorableFiles = isCheckingFiles
     ? []
     : (restoreCheckQuery.data?.files ?? []);
@@ -76,7 +70,7 @@ export function ProjectFileRecovery({
   return (
     <>
       <DeletedFilesRecoveryDialog
-        isOpen={isDialogOpen}
+        isOpen={showDialog}
         title="Recover deleted project files"
         files={restorableFiles}
         emptyMessage="No deleted project files were found."

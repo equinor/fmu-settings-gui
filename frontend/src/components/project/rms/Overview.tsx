@@ -13,6 +13,7 @@ import {
   projectPatchRmsMutation,
   rmsDeleteRmsProjectMutation,
   rmsGetHorizonsQueryKey,
+  rmsGetWellsQueryKey,
   rmsGetZonesQueryKey,
   rmsPostRmsProjectMutation,
   sessionGetSessionQueryKey,
@@ -30,7 +31,6 @@ import {
   InfoBox,
   PageCode,
   PageSectionSpacer,
-  PageSectionWidthConstrained,
   PageText,
 } from "#styles/common";
 import {
@@ -192,7 +192,7 @@ function RmsEditorForm({
             {([isDefaultValue, canSubmit]) => (
               <form.SubmitButton
                 label="Save"
-                disabled={isDefaultValue || !canSubmit}
+                disabled={isDefaultValue ? true : !canSubmit}
                 isPending={isPending}
                 helperTextDisabled="Value can be saved when it has been changed and is valid"
               />
@@ -257,6 +257,9 @@ function RmsProjectActions({
       });
       void queryClient.invalidateQueries({
         queryKey: rmsGetZonesQueryKey(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: rmsGetWellsQueryKey(),
       });
     },
     onError: (error, variables) => {
@@ -342,9 +345,9 @@ function RmsProjectActions({
               disabled={projectCloseMutation.isPending}
               variant={isRmsProjectOpen ? "outlined" : "contained"}
               onClick={() => {
-                projectOpenMutation.mutate({
-                  body: useRmsVersion ? { version: useRmsVersion } : undefined,
-                });
+                projectOpenMutation.mutate(
+                  useRmsVersion ? { body: { version: useRmsVersion } } : {},
+                );
               }}
             />
 
@@ -381,7 +384,7 @@ export function Overview({
   isRmsProjectOpen: boolean;
 }) {
   return (
-    <PageSectionWidthConstrained>
+    <>
       <PageText>
         The following is the main RMS project located in the <i>rms/model</i>{" "}
         directory. The version is detected automatically:
@@ -400,6 +403,6 @@ export function Overview({
       />
 
       <PageSectionSpacer />
-    </PageSectionWidthConstrained>
+    </>
   );
 }

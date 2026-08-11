@@ -1,5 +1,5 @@
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { Dialog } from "@equinor/eds-core-react";
+import { Dialog, List } from "@equinor/eds-core-react";
 import {
   QueryErrorResetBoundary,
   useSuspenseQuery,
@@ -18,6 +18,8 @@ import { GeneralButton } from "#components/form/button";
 import type { HealthCheck } from "#services/smda";
 import {
   GenericDialog,
+  OrphanWarningContainer,
+  OrphanWarningList,
   PageCode,
   PageHeader,
   PageText,
@@ -26,17 +28,47 @@ import {
 import { handleSsoLogin } from "#utils/authentication";
 
 type StatusCodeHandlingProps = {
-  message?: string;
-  enableRetry?: boolean;
+  message?: string | undefined;
+  enableRetry?: boolean | undefined;
 };
 
 type ErrorFallbackProps = {
-  header?: string;
-  statusCodeHandling?: Record<number, StatusCodeHandlingProps>;
+  header?: string | undefined;
+  statusCodeHandling?: Record<number, StatusCodeHandlingProps> | undefined;
 };
 
 export function Loading() {
   return <PageText>Loading...</PageText>;
+}
+
+const ORPHAN_LIST_PREVIEW_LIMIT = 20;
+
+export function OrphanWarningBox({
+  message,
+  listItems,
+}: {
+  message: string;
+  listItems: string[];
+}) {
+  const visibleListItems = listItems.slice(0, ORPHAN_LIST_PREVIEW_LIMIT);
+  const hiddenItemCount = listItems.length - visibleListItems.length;
+
+  return (
+    <OrphanWarningContainer>
+      <PageText>{message}</PageText>
+
+      <OrphanWarningList>
+        {visibleListItems.map((item) => (
+          <List.Item key={item}>{item}</List.Item>
+        ))}
+        {hiddenItemCount > 0 && (
+          <List.Item key="remaining-items">
+            and {hiddenItemCount} more
+          </List.Item>
+        )}
+      </OrphanWarningList>
+    </OrphanWarningContainer>
+  );
 }
 
 function ErrorFallback({
@@ -55,10 +87,10 @@ function ErrorFallback({
     error.response.status in statusCodeHandling
   ) {
     const handling = statusCodeHandling[error.response.status];
-    if (handling.message !== undefined) {
+    if (handling?.message !== undefined) {
       message = handling.message;
     }
-    if (handling.enableRetry !== undefined) {
+    if (handling?.enableRetry !== undefined) {
       enableRetry = handling.enableRetry;
     }
   }

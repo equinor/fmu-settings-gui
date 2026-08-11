@@ -24,8 +24,8 @@ export interface BasicTextFieldProps {
   name: string;
   label: string;
   value: string;
-  placeholder?: string;
-  helperText?: string;
+  placeholder?: string | undefined;
+  helperText?: string | undefined;
 }
 
 export interface CommonTextFieldProps
@@ -50,18 +50,20 @@ export function TextField({
   toUpperCase,
 }: {
   label: string;
-  multiline?: boolean;
-  rows?: number;
-  placeholder?: string;
-  disabled?: boolean;
-  helperText?: string;
-  isReadOnly?: boolean;
-  toUpperCase?: boolean;
+  multiline?: boolean | undefined;
+  rows?: number | undefined;
+  placeholder?: string | undefined;
+  disabled?: boolean | undefined;
+  helperText?: string | undefined;
+  isReadOnly?: boolean | undefined;
+  toUpperCase?: boolean | undefined;
 }) {
   const field = useFieldContext<string>();
 
   return (
-    <InputWrapper helperProps={{ text: helperText }}>
+    <InputWrapper
+      {...(helperText !== undefined && { helperProps: { text: helperText } })}
+    >
       <EdsTextField
         id={field.name}
         name={field.name}
@@ -97,14 +99,16 @@ export function SearchField({
   helperText,
   toUpperCase,
 }: {
-  placeholder?: string;
-  helperText?: string;
-  toUpperCase?: boolean;
+  placeholder?: string | undefined;
+  helperText?: string | undefined;
+  toUpperCase?: boolean | undefined;
 }) {
   const field = useFieldContext<string>();
 
   return (
-    <InputWrapper helperProps={{ text: helperText }}>
+    <InputWrapper
+      {...(helperText !== undefined && { helperProps: { text: helperText } })}
+    >
       <SearchFieldInput
         id={field.name}
         value={field.state.value}
@@ -150,7 +154,7 @@ export function ArrayTextAddItem({
   emptyText,
   pushEmpty,
 }: {
-  emptyText?: string;
+  emptyText?: string | undefined;
   pushEmpty: () => void;
 }) {
   const field = useFieldContext<string>();
@@ -182,10 +186,10 @@ export function Select({
   onChange,
 }: {
   label: string;
-  helperText?: string;
+  helperText?: string | undefined;
   value: string;
   options: OptionProps[];
-  loadingOptions?: boolean;
+  loadingOptions?: boolean | undefined;
   onChange: (value: string) => void;
 }) {
   const field = useFieldContext();
@@ -194,7 +198,11 @@ export function Select({
     <CommonInputWrapper
       helperProps={
         field.state.meta.isValid || loadingOptions
-          ? { text: loadingOptions ? helperTextLoadingOptions : helperText }
+          ? {
+              text: loadingOptions
+                ? helperTextLoadingOptions
+                : (helperText ?? ""),
+            }
           : {
               className: "errorText",
               icon: <Icon name="error_filled" title="Error" size={16} />,
@@ -232,10 +240,10 @@ export function AutocompleteField({
 }: {
   label: string;
   options: string[];
-  noOptionsText?: string;
-  disabled?: boolean;
-  helperText?: string;
-  loadingOptions?: boolean;
+  noOptionsText?: string | undefined;
+  disabled?: boolean | undefined;
+  helperText?: string | undefined;
+  loadingOptions?: boolean | undefined;
 }) {
   const field = useFieldContext<string>();
 
@@ -244,7 +252,11 @@ export function AutocompleteField({
       helperIcon={<Icon name="info_circle" title="Info" size={16} />}
       helperProps={
         field.state.meta.isValid || loadingOptions
-          ? { text: loadingOptions ? helperTextLoadingOptions : helperText }
+          ? {
+              text: loadingOptions
+                ? helperTextLoadingOptions
+                : (helperText ?? ""),
+            }
           : {
               className: "errorText",
               icon: <Icon name="error_filled" title="Error" size={16} />,
@@ -259,14 +271,14 @@ export function AutocompleteField({
         id={field.name}
         label={label}
         options={options}
-        loading={loadingOptions}
+        {...(loadingOptions !== undefined && { loading: loadingOptions })}
         initialSelectedOptions={[field.state.value]}
-        noOptionsText={noOptionsText}
+        {...(noOptionsText !== undefined && { noOptionsText })}
         onOptionsChange={({ selectedItems }) => {
           field.handleChange(selectedItems[0] ?? "");
         }}
-        disabled={disabled}
-        variant={!field.state.meta.isValid ? "error" : undefined}
+        {...(disabled !== undefined && { disabled })}
+        {...(!field.state.meta.isValid && { variant: "error" })}
       />
     </CommonInputWrapper>
   );

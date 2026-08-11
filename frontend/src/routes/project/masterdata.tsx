@@ -20,7 +20,7 @@ export const Route = createFileRoute("/project/masterdata")({
 function Content() {
   const project = useProject();
   const { data: healthCheck } = useSmdaHealthCheck();
-  const [editMode, setEditMode] = useState(
+  const [editMode, setEditMode] = useState(() =>
     getStorageItem(sessionStorage, STORAGENAME_MASTERDATA_EDIT_MODE, "boolean"),
   );
   const { setRequestAcquireSsoAccessToken } = Route.useRouteContext();

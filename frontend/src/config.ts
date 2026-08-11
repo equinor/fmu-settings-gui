@@ -1,5 +1,7 @@
 import type { Configuration } from "@azure/msal-browser";
 
+export const applicationLocale = "no";
+
 export const msalConfig: Configuration = {
   auth: {
     clientId: "a97989e5-5477-4e8c-b2e4-b6bfda581331",

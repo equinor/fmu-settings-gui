@@ -2,7 +2,7 @@ import { Accordion, Icon, Typography } from "@equinor/eds-core-react";
 import { checkbox, warning_filled } from "@equinor/eds-icons";
 import { tokens } from "@equinor/eds-tokens";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useTaskList } from "#services/tasks";
 import {
@@ -16,10 +16,6 @@ export function TaskList() {
   const completedCount = tasks.filter((t) => t.done).length;
   const allDone = completedCount === tasks.length;
   const [open, setOpen] = useState(!allDone);
-
-  useEffect(() => {
-    if (allDone) setOpen(false);
-  }, [allDone]);
 
   if (tasks.length === 0) {
     return null;

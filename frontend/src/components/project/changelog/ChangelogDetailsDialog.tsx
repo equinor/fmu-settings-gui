@@ -30,7 +30,7 @@ export function ChangelogDetailsDialog({
   entry?: ChangeInfo;
   onClose: () => void;
 }) {
-  const fieldPath = entry?.key || undefined;
+  const fieldPath = entry?.key ?? undefined;
   const details = entry
     ? parseChangeDetails(entry.change, fieldPath)
     : undefined;

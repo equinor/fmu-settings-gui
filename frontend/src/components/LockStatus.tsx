@@ -2,7 +2,7 @@ import { Button, Icon, Popover, Table } from "@equinor/eds-core-react";
 import { lock, lock_open } from "@equinor/eds-icons";
 import { tokens } from "@equinor/eds-tokens";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 import {
@@ -14,7 +14,11 @@ import type { LockInfo, LockStatus } from "#client/types.gen";
 import { Banner } from "#styles/common";
 import { displayTimestamp } from "#utils/datetime";
 
-function EnableEditingButton({ lockStatus }: { lockStatus?: LockStatus }) {
+function EnableEditingButton({
+  lockStatus,
+}: {
+  lockStatus?: LockStatus | undefined;
+}) {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     ...projectPostLockAcquireMutation(),
@@ -54,7 +58,7 @@ function EnableEditingButton({ lockStatus }: { lockStatus?: LockStatus }) {
 
 function LockInformation({ lock_info }: { lock_info: LockInfo }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const anchorRef = useRef<HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const openPopover = () => {
     setIsOpen(true);
   };
@@ -67,7 +71,7 @@ function LockInformation({ lock_info }: { lock_info: LockInfo }) {
       <Button
         variant="outlined"
         color="primary"
-        ref={anchorRef}
+        ref={setAnchorEl}
         onClick={openPopover}
         aria-haspopup
         aria-expanded={isOpen}
@@ -76,7 +80,7 @@ function LockInformation({ lock_info }: { lock_info: LockInfo }) {
       </Button>
 
       <Popover
-        anchorEl={anchorRef.current}
+        anchorEl={anchorEl}
         open={isOpen}
         onClose={closePopover}
         placement="top"
@@ -130,7 +134,11 @@ export function LockIcon({ isReadOnly }: { isReadOnly: boolean }) {
   );
 }
 
-export function LockStatusBanner({ lockStatus }: { lockStatus?: LockStatus }) {
+export function LockStatusBanner({
+  lockStatus,
+}: {
+  lockStatus?: LockStatus | undefined;
+}) {
   const isReadOnly = !(lockStatus?.is_lock_acquired ?? false);
 
   return (

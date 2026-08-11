@@ -65,6 +65,9 @@ const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   update: "Updated",
 };
 
+const TECHNICAL_FIELD_CHANGE_PATTERN =
+  /^(Added|Copied|Initialized|Merged|Removed|Reset|Restored|Updated) field ['"]?([^'"]+)['"]?\.?$/i;
+
 export function getTypeLabel(changeType: ChangeType) {
   if (changeType === "update") {
     return "Modified";
@@ -100,12 +103,17 @@ function formatBriefDescription(entry: ChangeInfo) {
   const change = entry.change;
   const compact = change.replace(/\s+/g, " ");
   const withoutDiffPayload = compact.replace(/\. Old value:.*/, "");
-  const technicalFieldChange = withoutDiffPayload.match(
-    /^(Added|Copied|Initialized|Merged|Removed|Reset|Restored|Updated) field ['"]?([^'"]+)['"]?\.?$/i,
+  const technicalFieldChange = TECHNICAL_FIELD_CHANGE_PATTERN.exec(
+    withoutDiffPayload,
   );
 
   if (technicalFieldChange) {
-    const [, verb, field] = technicalFieldChange;
+    const verb = technicalFieldChange[1];
+    const field = technicalFieldChange[2];
+    if (verb === undefined || field === undefined) {
+      return withoutDiffPayload;
+    }
+
     const label = getFieldLabel(entry.file, field) ?? humanizeSettingKey(field);
 
     return `${verb} ${label}`;
@@ -164,8 +172,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function parseSerializedValue(value: string): unknown {
   try {
     return JSON.parse(value) as unknown;
-  } catch {}
-  // Some changelog payloads may come from Python-style repr strings.
+  } catch {
+    // Some changelog payloads may come from Python-style repr strings.
+  }
 
   try {
     return JSON.parse(
@@ -260,33 +269,33 @@ export function parseChangeDetails(
     );
     const summaryEndIndex = Math.min(...summaryEndIndexes);
     const oldValueEndIndex = hasNewValue ? newValueIndex : details.length;
-
-    return {
+    const parsedDetails: ParsedChangeDetails = {
       raw: details,
       summary: details
         .slice(0, summaryEndIndex)
         .replace(/\.\s*$/, "")
         .trim(),
-      oldValue: hasOldValue
-        ? formatChangeValue(
-            normalizeChangeValue(
-              details.slice(
-                oldValueIndex + "Old value:".length,
-                oldValueEndIndex,
-              ),
-            ),
-            fieldPath,
-          )
-        : undefined,
-      newValue: hasNewValue
-        ? formatChangeValue(
-            normalizeChangeValue(
-              details.slice(newValueIndex + "New value:".length),
-            ),
-            fieldPath,
-          )
-        : undefined,
     };
+
+    if (hasOldValue) {
+      parsedDetails.oldValue = formatChangeValue(
+        normalizeChangeValue(
+          details.slice(oldValueIndex + "Old value:".length, oldValueEndIndex),
+        ),
+        fieldPath,
+      );
+    }
+
+    if (hasNewValue) {
+      parsedDetails.newValue = formatChangeValue(
+        normalizeChangeValue(
+          details.slice(newValueIndex + "New value:".length),
+        ),
+        fieldPath,
+      );
+    }
+
+    return parsedDetails;
   }
 
   return { raw: details };

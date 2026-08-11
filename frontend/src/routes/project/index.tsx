@@ -57,7 +57,7 @@ function ProjectInfo({
   lockStatus,
 }: {
   projectData: FmuProject;
-  lockStatus?: LockStatus;
+  lockStatus?: LockStatus | undefined;
 }) {
   return (
     <>

@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 import pluginRouter from "@tanstack/eslint-plugin-router";
+import { defineConfig, globalIgnores } from "eslint/config";
 import reactDom from "eslint-plugin-react-dom";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
@@ -9,19 +10,21 @@ import reactX from "eslint-plugin-react-x";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
-  { ignores: ["dist", "src/client"] },
+export default defineConfig([
+  globalIgnores(["dist", "src/client"]),
+
   {
+    files: ["**/*.{ts,tsx}"],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.strictTypeCheckedOnly,
       ...tseslint.configs.stylisticTypeCheckedOnly,
       ...pluginRouter.configs["flat/recommended"],
-      ...pluginQuery.configs["flat/recommended"],
+      ...pluginQuery.configs["flat/recommended-strict"],
+      reactDom.configs.recommended,
+      reactX.configs["recommended-typescript"],
     ],
-    files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      ecmaVersion: 2024,
       globals: globals.browser,
       parserOptions: {
         projectService: true,
@@ -29,36 +32,25 @@ export default tseslint.config(
       },
     },
     plugins: {
-      "react-dom": reactDom,
-      "react-hooks": reactHooks,
-      "react-refresh": reactRefresh,
-      "react-x": reactX,
-      stylistic: stylistic,
+      "@stylistic": stylistic,
     },
     rules: {
-      ...reactDom.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
-      "stylistic/jsx-curly-brace-presence": [
+      "@stylistic/jsx-curly-brace-presence": [
         "warn",
         { props: "never", children: "never", propElementValues: "always" },
       ],
-      "stylistic/padding-line-between-statements": [
+      "@stylistic/padding-line-between-statements": [
         "error",
         { blankLine: "always", prev: "*", next: "function" },
         { blankLine: "always", prev: "*", next: "return" },
       ],
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
-      ...reactX.configs["recommended-typescript"].rules,
+      "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
           ignoreRestSiblings: true,
         },
       ],
-      "no-unused-vars": "off",
       "@typescript-eslint/restrict-template-expressions": [
         "error",
         {
@@ -67,4 +59,14 @@ export default tseslint.config(
       ],
     },
   },
-);
+
+  reactHooks.configs.flat.recommended,
+  // reactRefresh.configs.vite,
+  {
+    ...reactRefresh.configs.vite,
+    rules: {
+      ...reactRefresh.configs.vite.rules,
+      "react-refresh/only-export-components": "off",
+    },
+  },
+]);

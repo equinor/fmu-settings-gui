@@ -57,10 +57,18 @@ export function LockExpireNotification() {
   });
 
   useEffect(() => {
-    if (!isLockAcquired || !lockInfo) {
-      setTimeUntilExpire(Number.POSITIVE_INFINITY);
+    let ignore = false;
 
-      return;
+    if (!isLockAcquired || !lockInfo) {
+      void Promise.resolve().then(() => {
+        if (!ignore) {
+          setTimeUntilExpire(Number.POSITIVE_INFINITY);
+        }
+      });
+
+      return () => {
+        ignore = true;
+      };
     }
 
     const initialTimeLeft = Math.max(
@@ -68,7 +76,11 @@ export function LockExpireNotification() {
       Math.ceil(lockInfo.expires_at - Date.now() / 1000),
     );
 
-    setTimeUntilExpire(initialTimeLeft);
+    void Promise.resolve().then(() => {
+      if (!ignore) {
+        setTimeUntilExpire(initialTimeLeft);
+      }
+    });
 
     const interval = setInterval(() => {
       setTimeUntilExpire((currentTimeLeft) => {
@@ -81,6 +93,7 @@ export function LockExpireNotification() {
     }, 1000);
 
     return () => {
+      ignore = true;
       clearInterval(interval);
     };
   }, [isLockAcquired, lockInfo]);
@@ -95,7 +108,9 @@ export function LockExpireNotification() {
       isDialogOpen &&
       timeUntilExpire > projectLockExpireNotificationThreshold
     ) {
-      setIsDialogOpen(false);
+      void Promise.resolve().then(() => {
+        setIsDialogOpen(false);
+      });
     } else if (
       isLockAcquired &&
       !isDialogOpen &&
@@ -133,7 +148,9 @@ export function LockExpireNotification() {
       !isLockAcquired &&
       timeUntilExpire !== Number.POSITIVE_INFINITY
     ) {
-      setTimeUntilExpire(Number.POSITIVE_INFINITY);
+      void Promise.resolve().then(() => {
+        setTimeUntilExpire(Number.POSITIVE_INFINITY);
+      });
     }
   }, [isDialogOpen, isLockAcquired, timeUntilExpire, queryClient]);
 

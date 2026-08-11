@@ -85,12 +85,20 @@ export function isApiTokenNonEmpty(apiToken: string) {
   return apiToken !== "";
 }
 
+function isApiUrl(url: string | undefined, apiUrl: string): boolean {
+  try {
+    return new URL(url ?? "", "http://localhost").pathname === apiUrl;
+  } catch {
+    return false;
+  }
+}
+
 export function isApiUrlSession(url?: string): boolean {
-  return url === APIURL_SESSION;
+  return isApiUrl(url, APIURL_SESSION);
 }
 
 function isApiUrlSmdaHealthcheck(url?: string): boolean {
-  return url === APIURL_SMDA_HEALTHCHECK;
+  return isApiUrl(url, APIURL_SMDA_HEALTHCHECK);
 }
 
 export function isExternalApi(

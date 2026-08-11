@@ -13,7 +13,7 @@ type DeletedFilesRecoveryDialogProps = {
   isCheckError: boolean;
   isRecoverPending: boolean;
   isRecoverDisabled: boolean;
-  recoverTooltipText?: string;
+  recoverTooltipText?: string | undefined;
   onRecover: () => void;
   onClose: () => void;
 };
@@ -80,7 +80,7 @@ export function DeletedFilesRecoveryDialog({
 
         <GeneralButton
           label="Close"
-          variant={shouldShowRecover ? "outlined" : undefined}
+          {...(shouldShowRecover && { variant: "outlined" })}
           onClick={onClose}
         />
       </Dialog.Actions>

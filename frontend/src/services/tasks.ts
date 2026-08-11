@@ -23,6 +23,7 @@ export function useTaskList(): Task[] {
   }
 
   const config = project.data.config;
+  const wellbores = config.rms?.wells ?? [];
   const zones = config.rms?.zones ?? [];
   const horizons = config.rms?.horizons ?? [];
   const mappedRmsIds = new Set(
@@ -53,13 +54,19 @@ export function useTaskList(): Task[] {
       id: "rms",
       label: "Set RMS project",
       done: !!config.rms?.path,
-      to: "/project/rms/overview",
+      to: "/project/rms",
     },
     {
       id: "rms-stratigraphy",
       label: "Set RMS stratigraphy",
       done: zones.length > 0 || horizons.length > 0,
       to: "/project/rms/stratigraphy",
+    },
+    {
+      id: "rms-wellbores",
+      label: "Set RMS wellbores",
+      done: wellbores.length > 0,
+      to: "/project/rms/wellbores",
     },
     {
       id: "mappings",

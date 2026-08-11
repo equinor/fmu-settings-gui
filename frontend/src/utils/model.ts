@@ -24,8 +24,9 @@ export function getNameFromNameUuidValue(value: NameUuidType) {
 export function getNameFromMultipleNameUuidValues(values: Array<NameUuidType>) {
   let name = "";
 
-  if (values.length) {
-    name = getNameFromNameUuidValue(values[0]);
+  const firstValue = values.at(0);
+  if (firstValue !== undefined) {
+    name = getNameFromNameUuidValue(firstValue);
     if (values.length > 1) {
       name += ` (and ${String(values.length - 1)} more)`;
     }

@@ -225,13 +225,13 @@ function DiffDetailsDialog({
 }: {
   isOpen: boolean;
   resourceLabel: string;
-  selectedCacheEntry?: CacheEntry;
-  diffEntries?: Array<ScalarFieldDiff | ListFieldDiff>;
+  selectedCacheEntry?: CacheEntry | undefined;
+  diffEntries?: Array<ScalarFieldDiff | ListFieldDiff> | undefined;
   isDiffPending: boolean;
   isDiffError: boolean;
   isRestorePending: boolean;
   isRestoreDisabled: boolean;
-  restoreTooltipText?: string;
+  restoreTooltipText?: string | undefined;
   onRestore: () => void;
   onClose: () => void;
 }) {
@@ -325,10 +325,10 @@ function RestoreSnapshotDialog({
 }: {
   isOpen: boolean;
   resourceLabel: string;
-  selectedCacheEntry?: CacheEntry;
+  selectedCacheEntry?: CacheEntry | undefined;
   isRestorePending: boolean;
   isRestoreDisabled: boolean;
-  restoreTooltipText?: string;
+  restoreTooltipText?: string | undefined;
   onRestore: () => void;
   onCancel: () => void;
 }) {
@@ -384,7 +384,7 @@ function ConfirmMaxSnapshotsDialog({
   onCancel,
 }: {
   isOpen: boolean;
-  maxRevisions?: number;
+  maxRevisions?: number | undefined;
   affectedResources: SnapshotDeletionImpact[];
   totalDeleteCount: number;
   isSavePending: boolean;
@@ -443,7 +443,7 @@ export function SnapshotHistory({
 }: {
   hasProject: boolean;
   projectReadOnly: boolean;
-  cacheMaxRevisions?: number;
+  cacheMaxRevisions?: number | undefined;
 }) {
   const queryClient = useQueryClient();
   const [resource, setResource] = useState<CacheResource>("config.json");
@@ -460,7 +460,9 @@ export function SnapshotHistory({
   );
 
   useEffect(() => {
-    setMaxRevisions(cacheMaxRevisions);
+    void Promise.resolve().then(() => {
+      setMaxRevisions(cacheMaxRevisions);
+    });
   }, [cacheMaxRevisions]);
 
   const cacheQueries = useQueries({
@@ -479,8 +481,8 @@ export function SnapshotHistory({
   const cachesQuery = cacheQueries[selectedResourceIndex];
 
   const allCaches: string[] = useMemo(
-    () => [...(cachesQuery.data?.revisions ?? [])].reverse(),
-    [cachesQuery.data?.revisions],
+    () => [...(cachesQuery?.data?.revisions ?? [])].reverse(),
+    [cachesQuery?.data?.revisions],
   );
 
   const cacheEntries = useMemo<CacheEntry[]>(
@@ -562,13 +564,17 @@ export function SnapshotHistory({
 
   useEffect(() => {
     if (allCaches.length === 0) {
-      setSelectedCacheId(null);
+      void Promise.resolve().then(() => {
+        setSelectedCacheId(null);
+      });
 
       return;
     }
 
     if (selectedCacheId === null || !allCaches.includes(selectedCacheId)) {
-      setSelectedCacheId(allCaches[0]);
+      void Promise.resolve().then(() => {
+        setSelectedCacheId(allCaches.at(0) ?? null);
+      });
     }
   }, [allCaches, selectedCacheId]);
 
@@ -698,16 +704,20 @@ export function SnapshotHistory({
 
   useEffect(() => {
     if (!hasProject) {
-      setIsDiffDialogOpen(false);
-      setIsRestoreDialogOpen(false);
-      setIsMaxRevisionsDialogOpen(false);
-      setSelectedCacheId(null);
+      void Promise.resolve().then(() => {
+        setIsDiffDialogOpen(false);
+        setIsRestoreDialogOpen(false);
+        setIsMaxRevisionsDialogOpen(false);
+        setSelectedCacheId(null);
+      });
     }
   }, [hasProject]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset pre-restore state when resource changes.
   useEffect(() => {
-    setLastRestoredCacheId(null);
+    void Promise.resolve().then(() => {
+      setLastRestoredCacheId(null);
+    });
   }, [resource]);
 
   return (
@@ -869,14 +879,14 @@ export function SnapshotHistory({
             </MaxSnapshotsControls>
           </SelectorRow>
 
-          {cachesQuery.isPending && <PageText>Loading snapshots...</PageText>}
+          {cachesQuery?.isPending && <PageText>Loading snapshots...</PageText>}
 
-          {cachesQuery.isError && (
+          {cachesQuery?.isError && (
             <PageText>Unable to load snapshot history.</PageText>
           )}
 
-          {!cachesQuery.isPending &&
-            !cachesQuery.isError &&
+          {!cachesQuery?.isPending &&
+            !cachesQuery?.isError &&
             allCaches.length === 0 && (
               <PageText>No snapshots found for {resourceLabel}.</PageText>
             )}

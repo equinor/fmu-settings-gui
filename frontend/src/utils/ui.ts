@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function useConfirmClose({
   enable,
@@ -10,12 +10,7 @@ export function useConfirmClose({
   onCloseConfirmed: () => void;
 }) {
   const [confirmCloseDialogOpen, setConfirmCloseDialogOpen] = useState(false);
-
-  useEffect(() => {
-    if (!enable) {
-      setConfirmCloseDialogOpen(false);
-    }
-  }, [enable]);
+  const isConfirmCloseDialogOpen = enable && confirmCloseDialogOpen;
 
   const closeDialogs = () => {
     setConfirmCloseDialogOpen(false);
@@ -39,7 +34,7 @@ export function useConfirmClose({
   };
 
   return {
-    confirmCloseDialogOpen,
+    confirmCloseDialogOpen: isConfirmCloseDialogOpen,
     handleCloseRequest,
     handleDecision,
   };

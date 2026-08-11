@@ -70,11 +70,17 @@ function LockStatusIcon({
   );
 }
 
-function ProjectInfoItem({ label, value }: { label: string; value?: string }) {
+function ProjectInfoItem({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | undefined;
+}) {
   return (
     <ProjectInfoItemContainer>
       <Typography variant="caption">{label}</Typography>
-      <Typography bold color={value ? undefined : "warning"}>
+      <Typography bold {...(!value && { color: "warning" })}>
         {value ?? "not set"}
       </Typography>
     </ProjectInfoItemContainer>

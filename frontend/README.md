@@ -92,6 +92,11 @@ complete URL for the frontend application, including the authorization token. Th
 be opened in the web browser, and as the URL contains the token the API access will be
 authorized and communication will work as expected.
 
+In development, the generated client uses `http://localhost:8000` for API requests. In a
+production build, it uses the browser origin. The `fmu settings` command serves the built
+frontend and the API from that one origin, so production use does not need a separate
+Vite or GUI server.
+
 ### Updating API endpoints and models
 
 Whenever there are been updates to the API endpoints and models, a tool can be used to
@@ -105,6 +110,8 @@ This command will get the API's `openapi.json` specification file, and create Ty
 code for the various endpoints as well as the models. The code is placed in the
 `frontend/src/client` directory, and is part of the repo. Any changes will thus be
 tracked and needs to be commited.
+The OpenAPI specification used for generation is also stored in
+`frontend/src/client/source/openapi.json`, making API changes visible in reviews.
 
 ### Path aliases
 

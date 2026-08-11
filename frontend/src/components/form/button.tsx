@@ -7,12 +7,15 @@ import {
 
 type GeneralButtonProps = {
   label: string;
-  isPending?: boolean;
-  disabled?: boolean;
-  tooltipText?: string;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-} & Pick<ButtonProps, "variant" | "color" | "type">;
+  isPending?: boolean | undefined;
+  disabled?: boolean | undefined;
+  tooltipText?: string | undefined;
+  onClick?: ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined;
+  onMouseDown?: ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined;
+  variant?: ButtonProps["variant"] | undefined;
+  color?: ButtonProps["color"] | undefined;
+  type?: ButtonProps["type"] | undefined;
+};
 
 export function GeneralButton({
   type = "button",
@@ -29,9 +32,9 @@ export function GeneralButton({
     <Tooltip title={tooltipText ?? ""}>
       <Button
         type={type}
-        variant={variant}
         aria-disabled={disabled}
-        color={color}
+        {...(variant !== undefined && { variant })}
+        {...(color !== undefined && { color })}
         onClick={
           disabled
             ? (e) => {
@@ -43,7 +46,7 @@ export function GeneralButton({
       >
         {isPending && (
           <DotProgress
-            color={variant === "outlined" ? "primary" : undefined}
+            {...(variant === "outlined" && { color: "primary" })}
             style={{ position: "absolute" }}
           />
         )}
@@ -62,9 +65,9 @@ export function SubmitButton({
   helperTextDisabled = "Form can be submitted when errors have been resolved",
 }: {
   label: string;
-  disabled?: boolean;
-  isPending?: boolean;
-  helperTextDisabled?: string;
+  disabled?: boolean | undefined;
+  isPending?: boolean | undefined;
+  helperTextDisabled?: string | undefined;
 }) {
   return (
     <GeneralButton
@@ -81,8 +84,8 @@ export function CancelButton({
   onClick,
   onMouseDown,
 }: {
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick?: ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined;
+  onMouseDown?: ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined;
 }) {
   return (
     <GeneralButton

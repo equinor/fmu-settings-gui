@@ -42,7 +42,7 @@ function parseCacheDate(cacheId: string): Date | null {
   if (!match) return null;
 
   const [, year, month, day, hour, minute, second, frac] = match;
-  const ms = frac.slice(0, 3).padEnd(3, "0");
+  const ms = (frac ?? "").slice(0, 3).padEnd(3, "0");
 
   return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}.${ms}Z`);
 }

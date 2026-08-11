@@ -9,7 +9,7 @@ export function Overview({
 }: {
   hasProject: boolean;
   projectReadOnly: boolean;
-  cacheMaxRevisions?: number;
+  cacheMaxRevisions?: number | undefined;
 }) {
   return (
     <>
