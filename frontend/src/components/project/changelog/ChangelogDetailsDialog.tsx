@@ -6,6 +6,7 @@ import { displayDateTime } from "#utils/datetime";
 import {
   ChangeDetails,
   ChangeDetailsContent,
+  ChangeDetailsDialogContent,
   ChangeDetailsHeader,
   ChangeDetailsSummary,
   ChangeDetailsValueGrid,
@@ -43,70 +44,74 @@ export function ChangelogDetailsDialog({
       </Dialog.Header>
 
       <Dialog.CustomContent>
-        {entry && (
-          <ChangeDetails>
-            <ChangeDetailsHeader>
-              <PageText $marginBottom="0">
-                <span className="emphasis">
-                  {formatEntryDescription(entry)}
-                </span>
-                {entry.change_type !== "init" && (
-                  <> in {FILE_LABELS[entry.file] ?? entry.file}</>
-                )}
-                {entry.key && (
-                  <>
-                    <br />
-                    Changed setting: {formatSettingLabel(entry)}
-                  </>
-                )}
-                <br />
-                {entry.timestamp
-                  ? displayDateTime(entry.timestamp)
-                  : "(unknown date)"}{" "}
-                by {entry.user}
-              </PageText>
-              <ChangeTypeChip $changeType={entry.change_type}>
-                {getTypeLabel(entry.change_type)}
-              </ChangeTypeChip>
-            </ChangeDetailsHeader>
+        <ChangeDetailsDialogContent>
+          {entry && (
+            <ChangeDetails>
+              <ChangeDetailsHeader>
+                <PageText $marginBottom="0">
+                  <span className="emphasis">
+                    {formatEntryDescription(entry)}
+                  </span>
+                  {entry.change_type !== "init" && (
+                    <> in {FILE_LABELS[entry.file] ?? entry.file}</>
+                  )}
+                  {entry.key && (
+                    <>
+                      <br />
+                      Changed setting: {formatSettingLabel(entry)}
+                    </>
+                  )}
+                  <br />
+                  {entry.timestamp
+                    ? displayDateTime(entry.timestamp)
+                    : "(unknown date)"}{" "}
+                  by {entry.user}
+                </PageText>
+                <ChangeTypeChip $changeType={entry.change_type}>
+                  {getTypeLabel(entry.change_type)}
+                </ChangeTypeChip>
+              </ChangeDetailsHeader>
 
-            {hasValueDiff ? (
-              <>
-                {details.summary && (
-                  <ChangeDetailsSummary>{details.summary}</ChangeDetailsSummary>
-                )}
-                <ChangeDetailsValueGrid>
-                  <ChangeDetailsValuePanel $kind="before">
-                    <ChangeDetailsValueHeader>
-                      Before change
-                    </ChangeDetailsValueHeader>
-                    <ChangeDetailsContent>
-                      {details.oldValue ?? "(empty)"}
-                    </ChangeDetailsContent>
-                  </ChangeDetailsValuePanel>
-                  <ChangeDetailsValuePanel $kind="after">
-                    <ChangeDetailsValueHeader>
-                      After change
-                    </ChangeDetailsValueHeader>
-                    <ChangeDetailsContent>
-                      {details.newValue ?? "(empty)"}
-                    </ChangeDetailsContent>
-                  </ChangeDetailsValuePanel>
-                </ChangeDetailsValueGrid>
-              </>
-            ) : (
-              <>
-                <ChangeDetailsSummary>
-                  Detailed before and after values were not recorded for this
-                  changelog entry.
-                </ChangeDetailsSummary>
-                <ChangeDetailsContent>
-                  {formatChangeDetails(entry.change, fieldPath)}
-                </ChangeDetailsContent>
-              </>
-            )}
-          </ChangeDetails>
-        )}
+              {hasValueDiff ? (
+                <>
+                  {details.summary && (
+                    <ChangeDetailsSummary>
+                      {details.summary}
+                    </ChangeDetailsSummary>
+                  )}
+                  <ChangeDetailsValueGrid>
+                    <ChangeDetailsValuePanel $kind="before">
+                      <ChangeDetailsValueHeader>
+                        Before change
+                      </ChangeDetailsValueHeader>
+                      <ChangeDetailsContent>
+                        {details.oldValue ?? "(empty)"}
+                      </ChangeDetailsContent>
+                    </ChangeDetailsValuePanel>
+                    <ChangeDetailsValuePanel $kind="after">
+                      <ChangeDetailsValueHeader>
+                        After change
+                      </ChangeDetailsValueHeader>
+                      <ChangeDetailsContent>
+                        {details.newValue ?? "(empty)"}
+                      </ChangeDetailsContent>
+                    </ChangeDetailsValuePanel>
+                  </ChangeDetailsValueGrid>
+                </>
+              ) : (
+                <>
+                  <ChangeDetailsSummary>
+                    Detailed before and after values were not recorded for this
+                    changelog entry.
+                  </ChangeDetailsSummary>
+                  <ChangeDetailsContent>
+                    {formatChangeDetails(entry.change, fieldPath)}
+                  </ChangeDetailsContent>
+                </>
+              )}
+            </ChangeDetails>
+          )}
+        </ChangeDetailsDialogContent>
       </Dialog.CustomContent>
 
       <Dialog.Actions>

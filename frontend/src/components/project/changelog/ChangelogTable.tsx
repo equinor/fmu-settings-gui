@@ -75,9 +75,6 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
           rows={entries}
           columns={columns}
           getRowId={(row) => getEntryKey(row, entries.indexOf(row))}
-          onRowClick={(row) => {
-            setSelectedEntry(row.original);
-          }}
         ></EdsDataGrid>
       </ChangelogTableContainer>
     </>

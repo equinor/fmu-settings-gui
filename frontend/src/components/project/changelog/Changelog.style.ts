@@ -63,6 +63,11 @@ export const ChangeDetails = styled.div`
   background: ${tokens.colors.ui.background__default.hex};
 `;
 
+export const ChangeDetailsDialogContent = styled.div`
+  max-height: 70vh;
+  overflow-y: auto;
+`;
+
 export const ChangeDetailsHeader = styled.div`
   display: flex;
   align-items: flex-start;
