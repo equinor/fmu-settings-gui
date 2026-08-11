@@ -231,6 +231,14 @@ function formatChangeValue(value: string, fieldPath?: string): string {
   return formatDetailedValue(nestedValue ?? parsedValue);
 }
 
+function normalizeChangeValue(value: string): string {
+  return value
+    .replace(/\.\s*$/, "")
+    .replace(/\s*->\s*$/, "")
+    .replace(/^\s*->\s*/, "")
+    .trim();
+}
+
 export function parseChangeDetails(
   change: string,
   fieldPath?: string,
@@ -243,29 +251,41 @@ export function parseChangeDetails(
 
   const oldValueIndex = details.indexOf("Old value:");
   const newValueIndex = details.indexOf("New value:");
+  const hasOldValue = oldValueIndex !== -1;
+  const hasNewValue = newValueIndex !== -1;
 
-  if (
-    oldValueIndex !== -1 &&
-    newValueIndex !== -1 &&
-    oldValueIndex < newValueIndex
-  ) {
+  if (hasOldValue || hasNewValue) {
+    const summaryEndIndexes = [oldValueIndex, newValueIndex].filter(
+      (index) => index !== -1,
+    );
+    const summaryEndIndex = Math.min(...summaryEndIndexes);
+    const oldValueEndIndex = hasNewValue ? newValueIndex : details.length;
+
     return {
       raw: details,
       summary: details
-        .slice(0, oldValueIndex)
+        .slice(0, summaryEndIndex)
         .replace(/\.\s*$/, "")
         .trim(),
-      oldValue: formatChangeValue(
-        details
-          .slice(oldValueIndex + "Old value:".length, newValueIndex)
-          .replace(/\.\s*$/, "")
-          .trim(),
-        fieldPath,
-      ),
-      newValue: formatChangeValue(
-        details.slice(newValueIndex + "New value:".length).trim(),
-        fieldPath,
-      ),
+      oldValue: hasOldValue
+        ? formatChangeValue(
+            normalizeChangeValue(
+              details.slice(
+                oldValueIndex + "Old value:".length,
+                oldValueEndIndex,
+              ),
+            ),
+            fieldPath,
+          )
+        : undefined,
+      newValue: hasNewValue
+        ? formatChangeValue(
+            normalizeChangeValue(
+              details.slice(newValueIndex + "New value:".length),
+            ),
+            fieldPath,
+          )
+        : undefined,
     };
   }
 
