@@ -75,7 +75,6 @@ function getFieldLabel(file: string, path: string): string | undefined {
     return labels[path];
   }
 
-  // Prefix match for paths with sub-keys or array indices (longest match wins)
   const sortedKeys = SORTED_PATH_LABEL_KEYS[file];
   if (!sortedKeys) {
     return undefined;
@@ -140,9 +139,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function parseSerializedValue(value: string): unknown {
   try {
     return JSON.parse(value) as unknown;
-  } catch {
-    // Some changelog payloads may come from Python-style repr strings.
-  }
+  } catch {}
+  // Some changelog payloads may come from Python-style repr strings.
 
   try {
     return JSON.parse(

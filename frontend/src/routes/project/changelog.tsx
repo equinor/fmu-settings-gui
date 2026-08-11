@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { Loading } from "#components/common";
-import { FullChangelog } from "#components/home/Changelog";
+import { Changelog } from "#components/project/changelog/Changelog";
 import { useProject } from "#services/project";
 import { PageHeader, PageText } from "#styles/common";
 
@@ -17,7 +17,7 @@ function Content() {
     return <PageText>No project selected.</PageText>;
   }
 
-  return <FullChangelog />;
+  return <Changelog />;
 }
 
 function RouteComponent() {
