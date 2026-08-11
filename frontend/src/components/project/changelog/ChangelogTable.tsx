@@ -6,19 +6,14 @@ import type { ChangeInfo } from "#client/types.gen";
 import { displayDateTime } from "#utils/datetime";
 import { ChangelogTableContainer } from "./Changelog.style";
 import { ChangelogDetailsDialog } from "./ChangelogDetailsDialog";
-import {
-  FILE_LABELS,
-  formatChangedField,
-  formatEntryDescription,
-  getTypeLabel,
-} from "./utils";
+import { FILE_LABELS, formatEntryDescription } from "./utils";
 
 function getEntryKey(entry: ChangeInfo, index: number) {
   return [
     entry.timestamp ?? "no-time",
     entry.user,
     entry.file,
-    entry.key || entry.path || "no-field",
+    entry.key || "no-field",
     entry.change_type,
     index,
   ].join(":");
@@ -36,28 +31,18 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
           : "(unknown date)",
     },
     {
-      accessorKey: "change_type",
-      header: "Change type",
-      cell: ({ row }) => getTypeLabel(row.original.change_type),
-    },
-    {
       id: "description",
       header: "Change",
       accessorFn: (entry) => formatEntryDescription(entry),
     },
     {
       accessorKey: "file",
-      header: "File",
+      header: "Settings type",
       cell: ({ row }) => FILE_LABELS[row.original.file] ?? row.original.file,
     },
     {
-      id: "field",
-      header: "Field",
-      accessorFn: (entry) => formatChangedField(entry),
-    },
-    {
       accessorKey: "user",
-      header: "User",
+      header: "Changed by",
     },
     {
       id: "details",

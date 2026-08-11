@@ -35,7 +35,7 @@ function getEntryKey(entry: ChangeInfo, index: number) {
     entry.timestamp ?? "no-time",
     entry.user,
     entry.file,
-    entry.key || entry.path || "no-field",
+    entry.key || "no-field",
     entry.change_type,
     index,
   ].join(":");

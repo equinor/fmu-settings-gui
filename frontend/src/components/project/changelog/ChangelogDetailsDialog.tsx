@@ -16,8 +16,8 @@ import {
 import {
   FILE_LABELS,
   formatChangeDetails,
-  formatChangedField,
   formatEntryDescription,
+  formatSettingLabel,
   getTypeLabel,
   parseChangeDetails,
 } from "./utils";
@@ -29,7 +29,7 @@ export function ChangelogDetailsDialog({
   entry?: ChangeInfo;
   onClose: () => void;
 }) {
-  const fieldPath = entry ? entry.key || entry.path : undefined;
+  const fieldPath = entry?.key || undefined;
   const details = entry
     ? parseChangeDetails(entry.change, fieldPath)
     : undefined;
@@ -53,8 +53,12 @@ export function ChangelogDetailsDialog({
                 {entry.change_type !== "init" && (
                   <> in {FILE_LABELS[entry.file] ?? entry.file}</>
                 )}
-                <br />
-                Changed field: {formatChangedField(entry)}
+                {entry.key && (
+                  <>
+                    <br />
+                    Changed setting: {formatSettingLabel(entry)}
+                  </>
+                )}
                 <br />
                 {entry.timestamp
                   ? displayDateTime(entry.timestamp)

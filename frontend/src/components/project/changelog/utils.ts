@@ -12,6 +12,8 @@ const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
     "access.asset.name": "asset name",
     "access.classification": "classification",
     cache_max_revisions: "max snapshots",
+    created_at: "project creation date",
+    created_by: "project creator",
     masterdata: "masterdata",
     "masterdata.smda": "SMDA",
     "masterdata.smda.coordinate_system": "SMDA coordinate system",
@@ -30,9 +32,15 @@ const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
     "rms.version": "RMS version",
     "rms.wells": "RMS wells",
     "rms.zones": "RMS stratigraphic zones",
+    updated_at: "last updated date",
+    updated_by: "last updated by",
   },
   "mappings.json": {
+    created_at: "mapping creation date",
+    created_by: "mapping creator",
     stratigraphy: "stratigraphy",
+    updated_at: "last updated date",
+    updated_by: "last updated by",
     wellbore: "wellbore",
   },
 };
@@ -88,9 +96,21 @@ function getFieldLabel(file: string, path: string): string | undefined {
   return undefined;
 }
 
-function formatBriefDescription(change: string) {
+function formatBriefDescription(entry: ChangeInfo) {
+  const change = entry.change;
   const compact = change.replace(/\s+/g, " ");
   const withoutDiffPayload = compact.replace(/\. Old value:.*/, "");
+  const technicalFieldChange = withoutDiffPayload.match(
+    /^(Added|Copied|Initialized|Merged|Removed|Reset|Restored|Updated) field ['"]?([^'"]+)['"]?\.?$/i,
+  );
+
+  if (technicalFieldChange) {
+    const [, verb, field] = technicalFieldChange;
+    const label = getFieldLabel(entry.file, field) ?? humanizeSettingKey(field);
+
+    return `${verb} ${label}`;
+  }
+
   const concise = withoutDiffPayload || compact;
 
   if (concise.length <= 72) {
@@ -105,24 +125,29 @@ export function formatEntryDescription(entry: ChangeInfo): string {
     return "Initialized FMU settings project";
   }
 
-  const label = getFieldLabel(entry.file, entry.key);
+  const label = formatSettingLabel(entry);
   if (label !== undefined) {
     const verb = CHANGE_TYPE_VERBS[entry.change_type];
 
     return `${verb} ${label}`;
   } else {
-    return formatBriefDescription(entry.change);
+    return formatBriefDescription(entry);
   }
 }
 
-export function formatChangedField(entry: ChangeInfo): string {
-  const field = entry.key || entry.path;
-
-  if (!field) {
-    return "Unknown field";
+export function formatSettingLabel(entry: ChangeInfo): string | undefined {
+  if (!entry.key) {
+    return undefined;
   }
 
-  return field;
+  return getFieldLabel(entry.file, entry.key) ?? humanizeSettingKey(entry.key);
+}
+
+function humanizeSettingKey(key: string): string {
+  const lastSegment = key.split(".").at(-1) ?? key;
+  const withoutArrayIndex = lastSegment.replace(/\[\d+\]/g, "");
+
+  return withoutArrayIndex.replace(/_/g, " ");
 }
 
 export type ParsedChangeDetails = {
