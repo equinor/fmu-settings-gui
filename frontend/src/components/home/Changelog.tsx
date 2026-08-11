@@ -92,9 +92,13 @@ function getEntryKey(entry: ChangeInfo, index: number) {
   ].join(":");
 }
 
-function useChangelogEntries() {
+function useChangelogEntries(maxEntries?: number) {
   const { data } = useSuspenseQuery({
-    ...projectGetChangelogOptions(),
+    ...projectGetChangelogOptions(
+      maxEntries === undefined
+        ? undefined
+        : { query: { max_entries: maxEntries } },
+    ),
     meta: {
       preventDefaultErrorHandling: [
         HTTP_STATUS_404_NOT_FOUND,
@@ -400,7 +404,9 @@ function ChangelogFilterControls({
 }
 
 function Content({ full = false }: ChangelogContentProps) {
-  const allChanges = useChangelogEntries();
+  const allChanges = useChangelogEntries(
+    full ? undefined : RECENT_CHANGE_COUNT,
+  );
   const [filters, setFilters] = useState<ChangelogFilters>(
     DEFAULT_CHANGELOG_FILTERS,
   );
@@ -411,7 +417,7 @@ function Content({ full = false }: ChangelogContentProps) {
 
   const changes = full
     ? filterChangelogEntries(allChanges, filters)
-    : allChanges.slice(0, RECENT_CHANGE_COUNT);
+    : allChanges;
 
   return (
     <>
@@ -421,6 +427,14 @@ function Content({ full = false }: ChangelogContentProps) {
           : changes.length === 1
             ? "Showing the most recent change to this project's settings."
             : `Showing the ${changes.length} most recent changes to this project's settings.`}
+        {!full && (
+          <>
+            {" "}
+            <Typography link as={Link} to="/project/changelog">
+              View full changelog
+            </Typography>
+          </>
+        )}
       </PageText>
 
       {full ? (
@@ -445,13 +459,6 @@ function Content({ full = false }: ChangelogContentProps) {
               />
             ))}
           </ChangeList>
-          {allChanges.length > RECENT_CHANGE_COUNT && (
-            <PageText>
-              <Typography link as={Link} to="/project/changelog">
-                View full changelog
-              </Typography>
-            </PageText>
-          )}
         </>
       )}
     </>
