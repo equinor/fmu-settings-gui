@@ -138,6 +138,9 @@ export function ArrayTextField({ removeValue }: { removeValue: () => void }) {
         onChange={(e: ChangeEvent<HTMLInputElement>) => {
           field.handleChange(e.target.value);
         }}
+        onBlur={(e: ChangeEvent<HTMLInputElement>) => {
+          field.handleChange(e.target.value.trim());
+        }}
       />
       <Icon
         className="removeIcon"
