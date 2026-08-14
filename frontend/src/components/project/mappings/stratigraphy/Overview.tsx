@@ -18,7 +18,12 @@ import {
 } from "react";
 import { toast } from "react-toastify";
 
-import type { RmsProject, StratigraphicColumn } from "#client";
+import type {
+  DataSystem,
+  InternalStratigraphyIdentifierMapping,
+  RmsProject,
+  StratigraphicColumn,
+} from "#client";
 import {
   projectGetChangelogQueryKey,
   projectGetMappingsOptions,
@@ -42,6 +47,12 @@ import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form";
+import type {
+  ElementMapping,
+  ElementMappings,
+  ElementMappingTargetUpdates,
+  ElementType,
+} from "#components/project/common/mapping/types";
 import { mappingsPaths } from "#services/project";
 import {
   EditDialog,
@@ -67,9 +78,10 @@ import {
 import { MappingDataContext } from "../../common/mapping/MappingData";
 import {
   createSpecialOptions,
-  getElementMappingSmdaName,
-  getElementMappingSmdaNameOptionsInitialValue,
-  specialOptions,
+  emptyElementMappingTargetUpdate,
+  getElementMappingTargetName,
+  getElementMappingTargetNameOptionsInitialValue,
+  getUnmappableOption,
 } from "../../common/mapping/utils";
 import {
   getHorizonLineStyle,
@@ -87,8 +99,9 @@ import {
   HorizonItem,
   ZoneItem,
 } from "./Overview.style";
-import type { ElementMapping, ElementMappings, ElementType } from "./types";
 import { validateSelectValue } from "./utils";
+
+const supportedTargets: DataSystem[] = ["smda"] as const;
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -123,12 +136,16 @@ function Edit({
   const form = useAppForm({
     defaultValues: {
       ...elementMapping,
-      ...(elementMapping?.unmappable && {
-        smdaUuid:
-          elementMapping.elementType === "horizon"
-            ? specialOptions.unmappableHorizon.value
-            : specialOptions.unmappableZone.value,
-      }),
+      ...(elementMapping?.elementType &&
+        elementMapping.targets.smda?.unmappable && {
+          targets: {
+            ...elementMapping.targets,
+            smda: {
+              ...elementMapping.targets.smda,
+              uuid: getUnmappableOption(elementMapping.elementType).value,
+            },
+          },
+        }),
     } as ElementMapping,
     onSubmit: ({ formApi, value }) => {
       if (!mappingData.projectReadOnly) {
@@ -144,9 +161,9 @@ function Edit({
   useEffect(() => {
     handleErrorUnknownInitialValue(
       form.setFieldMeta,
-      "smdaUuid",
+      "targets.smda.uuid",
       smdaNameOptions,
-      getElementMappingSmdaNameOptionsInitialValue(elementMapping),
+      getElementMappingTargetNameOptionsInitialValue(elementMapping, "smda"),
     );
   }, [form.setFieldMeta, smdaNameOptions, elementMapping]);
 
@@ -192,20 +209,21 @@ function Edit({
           }}
         >
           <Dialog.Header>
-            Edit {elementMapping.elementType}: {elementMapping.rmsName}
+            Edit {elementMapping.elementType}: {elementMapping.name}
           </Dialog.Header>
 
           <Dialog.CustomContent>
             <form.AppField
-              name="smdaUuid"
+              name="targets.smda.uuid"
               validators={{
-                onChange: ({ value }) => validateSelectValue(value),
+                onChange: ({ value }) =>
+                  validateSelectValue(value as unknown as string),
               }}
             >
               {(field) => (
                 <field.Select
                   label="SMDA name"
-                  value={field.state.value}
+                  value={field.state.value as unknown as string}
                   options={smdaNameOptions}
                   loadingOptions={optionsIsPending}
                   onChange={(value) => {
@@ -299,7 +317,8 @@ function Element({
   const mappingData = useMappingData();
 
   const isMissingValue =
-    elementMapping.smdaName === "" && !elementMapping.unmappable;
+    elementMapping.targets.smda?.name === "" &&
+    !elementMapping.targets.smda.unmappable;
   const aliasCount = elementMapping.aliases.length;
 
   return (
@@ -311,7 +330,7 @@ function Element({
               RMS
             </ElementSystemName>
             <ElementName>
-              {elementMapping.rmsName}
+              {elementMapping.name}
               {aliasCount > 0 && (
                 <Icon
                   className="aliases"
@@ -334,10 +353,10 @@ function Element({
             </ElementSystemName>
             <ElementName
               $isTargetSystem={true}
-              $isUnmappable={elementMapping.unmappable}
+              $isUnmappable={Boolean(elementMapping.targets.smda?.unmappable)}
               $isMissingvalue={isMissingValue}
             >
-              {getElementMappingSmdaName(elementMapping)}
+              {getElementMappingTargetName(elementMapping, "smda")}
             </ElementName>
           </ElementInfo>
         </ElementSystem>
@@ -410,7 +429,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
     }
 
     return createHorizonOptions(
-      activeElementMapping?.rmsName ?? "",
+      activeElementMapping?.name ?? "",
       frameworkData.zones,
       mappingData.elementMappings,
       stratigraphicUnits.stratigraphic_units,
@@ -418,7 +437,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
   }, [
     elementType,
     stratigraphicUnits,
-    activeElementMapping?.rmsName,
+    activeElementMapping?.name,
     frameworkData.zones,
     mappingData.elementMappings,
   ]);
@@ -464,19 +483,34 @@ function Elements({ elementType }: { elementType: ElementType }) {
     formSubmitCallback,
     formReset,
   }: MutationCallbackProps<ElementMapping>) => {
-    const smdaName =
-      formValue.elementType === "horizon"
-        ? (horizonOptionsData.horizonNamesByUuid[formValue.smdaUuid] ?? "")
-        : (stratigraphicUnits?.stratigraphic_units.find(
-            (unit) => unit.uuid === formValue.smdaUuid,
-          )?.identifier ?? "");
+    const targetUpdates = {
+      smda:
+        "smda" in formValue.targets
+          ? {
+              name:
+                formValue.elementType === "horizon"
+                  ? (horizonOptionsData.horizonNamesByUuid[
+                      formValue.targets.smda.uuid
+                    ] ?? "")
+                  : (stratigraphicUnits?.stratigraphic_units.find(
+                      (unit) => unit.uuid === formValue.targets.smda?.uuid,
+                    )?.identifier ?? ""),
+              uuid: formValue.targets.smda.uuid,
+            }
+          : emptyElementMappingTargetUpdate(),
+    } as ElementMappingTargetUpdates;
 
-    const updated = updatedElementMapping(formValue, smdaName);
+    const updated = updatedElementMapping(formValue, targetUpdates);
 
-    const mutationValue = createMutationValue({
-      ...mappingData.elementMappings,
-      ...(updated && { [formValue.rmsName]: updated }),
-    });
+    const mutationValue =
+      createMutationValue<InternalStratigraphyIdentifierMapping>(
+        "stratigraphy",
+        "rms",
+        {
+          ...mappingData.elementMappings,
+          [formValue.name]: updated,
+        },
+      );
 
     mappingsMutation.mutate(
       {
@@ -487,7 +521,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
         onSuccess: (data) => {
           mappingData.setElementMappings((elementMappings) => ({
             ...elementMappings,
-            ...(updated && { [formValue.rmsName]: updated }),
+            [formValue.name]: updated,
           }));
           formSubmitCallback({ message: data.message, formReset });
           closeEditDialog();
@@ -571,11 +605,26 @@ export function Overview({
   );
 
   const baseElementMappings = useMemo(() => {
-    const lookup = createProjectMappingsLookup("stratigraphy", projectMappings);
+    const lookup = createProjectMappingsLookup(
+      "stratigraphy",
+      "rms",
+      supportedTargets,
+      projectMappings,
+    );
 
     return {
-      ...createElementMappings("horizon", rmsProject.horizons ?? [], lookup),
-      ...createElementMappings("zone", rmsProject.zones ?? [], lookup),
+      ...createElementMappings(
+        "horizon",
+        supportedTargets,
+        rmsProject.horizons ?? [],
+        lookup,
+      ),
+      ...createElementMappings(
+        "zone",
+        supportedTargets,
+        rmsProject.zones ?? [],
+        lookup,
+      ),
     };
   }, [projectMappings, rmsProject.horizons, rmsProject.zones]);
 

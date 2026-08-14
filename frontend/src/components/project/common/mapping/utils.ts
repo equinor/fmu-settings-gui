@@ -1,24 +1,14 @@
+import type { DataSystem } from "#client";
 import type { OptionProps } from "#components/form/field";
 import type {
   ElementMapping,
+  ElementMappingTarget,
+  ElementMappingTargetUpdate,
   ElementType,
   SpecialOptionId,
-} from "../../mappings/stratigraphy/types";
+} from "./types";
 
-export const emptyName = "(not set)";
-export const noHorizonName = "No horizon";
-export const noZoneName = "No zone";
-
-export function emptyElementMapping(): ElementMapping {
-  return {
-    elementType: undefined,
-    rmsName: "",
-    unmappable: false,
-    smdaName: "",
-    smdaUuid: "",
-    aliases: [],
-  };
-}
+const emptyName = "(not set)";
 
 export const specialOptions: Record<SpecialOptionId, OptionProps> = {
   empty: { value: "_empty", label: emptyName },
@@ -27,11 +17,81 @@ export const specialOptions: Record<SpecialOptionId, OptionProps> = {
     value: "_unmappableHorizon",
     label: "Horizon doesn't exist in SMDA",
   },
+  unmappableWellbore: {
+    value: "_unmappableWellbore",
+    label: "Wellbore doesn't exist in SMDA",
+  },
   unmappableZone: {
     value: "_unmappableZone",
     label: "Zone doesn't exist in SMDA",
   },
 };
+
+export const specialOptionsValuesUnmappable = [
+  specialOptions.unmappableHorizon.value,
+  specialOptions.unmappableWellbore.value,
+  specialOptions.unmappableZone.value,
+];
+
+export function emptyElementMapping(
+  targetSystems: DataSystem[],
+): ElementMapping {
+  return {
+    elementType: undefined,
+    name: "",
+    aliases: [],
+    meta: {},
+    targets: targetSystems.reduce<ElementMapping["targets"]>(
+      (acc, targetSystem) => {
+        acc[targetSystem] = emptyElementMappingTarget();
+
+        return acc;
+      },
+      {},
+    ),
+  };
+}
+
+export function emptyElementMappingTarget(): ElementMappingTarget {
+  return {
+    unmappable: false,
+    name: "",
+    uuid: "",
+  };
+}
+
+export function emptyElementMappingTargetUpdate(): ElementMappingTargetUpdate {
+  return {
+    name: "",
+    uuid: "",
+  };
+}
+
+function getNoElementName(elementType: ElementType) {
+  switch (elementType) {
+    case "horizon":
+      return "No horizon";
+    case "wellbore":
+      return "No wellbore";
+    case "zone":
+      return "No zone";
+    default:
+      return "(unknown element type)";
+  }
+}
+
+export function getUnmappableOption(elementType: ElementType) {
+  switch (elementType) {
+    case "horizon":
+      return specialOptions.unmappableHorizon;
+    case "wellbore":
+      return specialOptions.unmappableWellbore;
+    case "zone":
+      return specialOptions.unmappableZone;
+    default:
+      return { value: "_unknown", label: "(unknown element type)" };
+  }
+}
 
 export function createSpecialOptions(
   elementType: ElementType,
@@ -39,9 +99,7 @@ export function createSpecialOptions(
 ) {
   const options: OptionProps[] = [
     specialOptions.empty,
-    elementType === "horizon"
-      ? specialOptions.unmappableHorizon
-      : specialOptions.unmappableZone,
+    getUnmappableOption(elementType),
   ];
   if (withDivider) {
     options.push(specialOptions.divider);
@@ -50,33 +108,43 @@ export function createSpecialOptions(
   return options;
 }
 
-export function getElementMappingSmdaName(elementMapping: ElementMapping) {
-  if (elementMapping.smdaName !== "") {
-    return elementMapping.smdaName;
-  } else if (elementMapping.unmappable) {
-    return elementMapping.elementType === "horizon"
-      ? noHorizonName
-      : noZoneName;
-  } else {
-    return emptyName;
+export function getElementMappingTargetName(
+  elementMapping: ElementMapping,
+  targetSystem: DataSystem,
+) {
+  if (elementMapping.elementType && targetSystem in elementMapping.targets) {
+    const targetData = elementMapping.targets[targetSystem];
+    if (targetData !== undefined) {
+      if (targetData.name !== "") {
+        return targetData.name;
+      } else if (targetData.unmappable) {
+        return getNoElementName(elementMapping.elementType);
+      }
+    }
   }
+
+  return emptyName;
 }
 
-export function getElementMappingSmdaNameOptionsInitialValue(
+export function getElementMappingTargetNameOptionsInitialValue(
   elementMapping: ElementMapping | undefined,
-) {
-  let value: string;
+  targetSystem: DataSystem,
+): OptionProps {
+  if (elementMapping?.elementType && targetSystem in elementMapping.targets) {
+    const targetData = elementMapping.targets[targetSystem];
+    if (targetData !== undefined) {
+      let value: string;
+      if (targetData.unmappable) {
+        value = getUnmappableOption(elementMapping.elementType).value;
+      } else if (targetData.uuid === "") {
+        value = specialOptions.empty.value;
+      } else {
+        value = targetData.uuid;
+      }
 
-  if (elementMapping?.unmappable) {
-    value =
-      elementMapping.elementType === "horizon"
-        ? specialOptions.unmappableHorizon.value
-        : specialOptions.unmappableZone.value;
-  } else if ((elementMapping?.smdaUuid ?? "") === "") {
-    value = specialOptions.empty.value;
-  } else {
-    value = elementMapping?.smdaUuid ?? "";
+      return { value, label: targetData.name };
+    }
   }
 
-  return { value, label: elementMapping?.smdaName ?? "" };
+  return { value: "", label: "" };
 }

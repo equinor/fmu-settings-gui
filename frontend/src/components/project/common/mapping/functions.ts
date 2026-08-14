@@ -1,23 +1,35 @@
-import type { AnyFieldLikeMetaBase, Updater } from "@tanstack/react-form";
+import type {
+  AnyFieldLikeMetaBase,
+  DeepKeys,
+  Updater,
+} from "@tanstack/react-form";
 import { use } from "react";
 
 import type {
   DataSystem,
   InternalMappings,
-  InternalStratigraphyMappings,
+  InternalStratigraphyIdentifierMapping,
+  InternalWellboreIdentifierMapping,
   MappingType,
   RmsHorizon,
   RmsStratigraphicZone,
+  RmsWell,
 } from "#client";
 import type { OptionProps } from "#components/form/field";
 import { findOptionValueInOptionsArray } from "#utils/form";
+import { MappingDataContext } from "./MappingData";
 import type {
   ElementMapping,
   ElementMappings,
+  ElementMappingTargetUpdates,
   ElementType,
-} from "../../mappings/stratigraphy/types";
-import { MappingDataContext } from "./MappingData";
-import { emptyElementMapping, specialOptions } from "./utils";
+} from "./types";
+import {
+  emptyElementMapping,
+  emptyElementMappingTarget,
+  specialOptions,
+  specialOptionsValuesUnmappable,
+} from "./utils";
 
 export function useMappingData() {
   const data = use(MappingDataContext);
@@ -31,38 +43,43 @@ export function useMappingData() {
 
 export function createProjectMappingsLookup(
   mappingType: MappingType,
+  sourceSystem: DataSystem,
+  targetSystems: DataSystem[],
   projectMappings: InternalMappings,
 ) {
-  const sourceSystem: DataSystem = "rms";
-  const targetSystem: DataSystem = "smda";
   const lookup: Record<string, ElementMapping> = {};
 
-  projectMappings[mappingType]?.forEach((mapping) => {
-    const rmsName =
-      mapping.relation_type === "alias" && mapping.target_id != null
-        ? mapping.target_id
-        : mapping.source_id;
-    if (!(rmsName in lookup)) {
-      lookup[rmsName] = {
-        ...emptyElementMapping(),
-        rmsName: rmsName,
+  projectMappings[mappingType]?.forEach((projectMapping) => {
+    const name =
+      projectMapping.relation_type === "alias" &&
+      projectMapping.target_id != null
+        ? projectMapping.target_id
+        : projectMapping.source_id;
+    if (!(name in lookup)) {
+      lookup[name] = {
+        ...emptyElementMapping(targetSystems),
+        name,
       };
     }
-    const lookupEntry = lookup[rmsName];
+    const lookupEntry = lookup[name];
     if (lookupEntry === undefined) {
       return;
     }
 
-    if (mapping.target_system === targetSystem) {
-      if (mapping.relation_type === "primary") {
-        lookupEntry.smdaName = mapping.target_id ?? "";
-        lookupEntry.smdaUuid = mapping.target_uuid ?? "";
-      } else if (mapping.relation_type === "unmappable") {
-        lookupEntry.unmappable = true;
-      }
-    } else if (mapping.target_system === sourceSystem) {
-      if (mapping.relation_type === "alias") {
-        lookupEntry.aliases.push(mapping.source_id);
+    if (
+      projectMapping.target_system === sourceSystem &&
+      projectMapping.relation_type === "alias"
+    ) {
+      lookupEntry.aliases.push(projectMapping.source_id);
+    } else if (targetSystems.includes(projectMapping.target_system)) {
+      const targetData = lookupEntry.targets[projectMapping.target_system];
+      if (targetData !== undefined) {
+        if (projectMapping.relation_type === "primary") {
+          targetData.name = projectMapping.target_id ?? "";
+          targetData.uuid = projectMapping.target_uuid ?? "";
+        } else if (projectMapping.relation_type === "unmappable") {
+          targetData.unmappable = true;
+        }
       }
     }
   });
@@ -72,10 +89,10 @@ export function createProjectMappingsLookup(
 
 export function handleErrorUnknownInitialValue(
   setFieldMeta: (
-    field: keyof ElementMapping,
+    field: DeepKeys<ElementMapping>,
     updater: Updater<AnyFieldLikeMetaBase>,
   ) => void,
-  field: keyof ElementMapping,
+  field: DeepKeys<ElementMapping>,
   array: OptionProps[],
   initialValue: OptionProps,
 ): void {
@@ -91,18 +108,24 @@ export function handleErrorUnknownInitialValue(
 
 export function createElementMappings(
   elementType: ElementType,
-  elements: Array<RmsHorizon | RmsStratigraphicZone>,
+  targetSystems: DataSystem[],
+  projectElements: Array<RmsHorizon | RmsStratigraphicZone | RmsWell>,
   projectMappingsLookup: Record<string, ElementMapping>,
 ) {
   const elementMappings: ElementMappings = {};
 
-  elements.forEach((element) => {
-    elementMappings[element.name] = {
-      ...(projectMappingsLookup[element.name] ?? {
-        ...emptyElementMapping(),
-        rmsName: element.name,
+  projectElements.forEach((projectElement) => {
+    elementMappings[projectElement.name] = {
+      ...(projectMappingsLookup[projectElement.name] ?? {
+        ...emptyElementMapping(targetSystems),
+        name: projectElement.name,
       }),
       elementType,
+      meta: {
+        ...("planned" in projectElement && {
+          planned: projectElement.planned,
+        }),
+      },
     };
   });
 
@@ -110,80 +133,103 @@ export function createElementMappings(
 }
 
 export function updatedElementMapping(
-  value: ElementMapping,
-  smdaName: string,
-): ElementMapping | undefined {
-  if (value.smdaUuid === specialOptions.empty.value) {
-    return {
-      ...value,
-      unmappable: false,
-      smdaName: "",
-      smdaUuid: "",
-    };
-  } else if (
-    value.smdaUuid === specialOptions.unmappableHorizon.value ||
-    value.smdaUuid === specialOptions.unmappableZone.value
-  ) {
-    return {
-      ...value,
-      unmappable: true,
-    };
-  } else if (value.smdaUuid === specialOptions.divider.value) {
-    return undefined;
-  } else {
-    return {
-      ...value,
-      unmappable: false,
-      smdaName,
-    };
-  }
+  elementMapping: ElementMapping,
+  targetUpdates: ElementMappingTargetUpdates,
+): ElementMapping {
+  const updatedTargets: ElementMapping["targets"] = {};
+
+  Object.keys(targetUpdates).forEach((key) => {
+    const target = key as DataSystem;
+    const updateData = targetUpdates[target];
+    if (
+      updateData.uuid === specialOptions.empty.value ||
+      updateData.uuid === specialOptions.divider.value
+    ) {
+      updatedTargets[target] = emptyElementMappingTarget();
+    } else if (specialOptionsValuesUnmappable.includes(updateData.uuid)) {
+      updatedTargets[target] = {
+        ...emptyElementMappingTarget(),
+        unmappable: true,
+      };
+    } else {
+      updatedTargets[target] = {
+        unmappable: false,
+        ...updateData,
+      };
+    }
+  });
+
+  return {
+    ...elementMapping,
+    aliases: elementMapping.aliases.filter((alias) => alias !== ""),
+    targets: {
+      ...elementMapping.targets,
+      ...updatedTargets,
+    },
+  };
 }
 
-export function createMutationValue(elementMappings: ElementMappings) {
-  const mappingType: MappingType = "stratigraphy";
-  const sourceSystem: DataSystem = "rms";
-  const targetSystem: DataSystem = "smda";
-  const result: InternalStratigraphyMappings = [];
+export function createMutationValue<
+  T extends
+    | InternalStratigraphyIdentifierMapping
+    | InternalWellboreIdentifierMapping,
+>(
+  mappingType: MappingType,
+  sourceSystem: DataSystem,
+  elementMappings: ElementMappings,
+) {
+  const result: T[] = [];
 
-  Object.values(elementMappings).forEach((mapping) => {
-    if (
-      mapping.smdaUuid !== "" ||
-      mapping.unmappable ||
-      mapping.aliases.length
-    ) {
+  Object.values(elementMappings).forEach((elementMapping) => {
+    const targetMappings: T[] = [];
+    Object.keys(elementMapping.targets).forEach((key) => {
+      const target = key as DataSystem;
+      const targetData = elementMapping.targets[target];
+      if (
+        (targetData?.unmappable ?? false) ||
+        (target === "simulator" && targetData?.name !== "") ||
+        (target === "smda" && targetData?.uuid !== "")
+      ) {
+        targetMappings.push({
+          mapping_type: mappingType,
+          source_system: sourceSystem,
+          target_system: target,
+          source_id: elementMapping.name,
+          ...(targetData?.unmappable
+            ? {
+                relation_type: "unmappable",
+              }
+            : {
+                relation_type: "primary",
+                target_id: targetData?.name ?? null,
+                target_uuid: targetData?.uuid ?? null,
+              }),
+        } as T);
+      }
+    });
+
+    if (targetMappings.length || elementMapping.aliases.length) {
       result.push({
         mapping_type: mappingType,
         source_system: sourceSystem,
         target_system: sourceSystem,
         relation_type: "primary",
-        source_id: mapping.rmsName,
-        target_id: mapping.rmsName,
-      });
+        source_id: elementMapping.name,
+        target_id: elementMapping.name,
+      } as T);
 
-      if (mapping.smdaUuid !== "" || mapping.unmappable) {
-        result.push({
-          mapping_type: mappingType,
-          source_system: sourceSystem,
-          target_system: targetSystem,
-          relation_type: mapping.unmappable ? "unmappable" : "primary",
-          source_id: mapping.rmsName,
-          target_id: mapping.unmappable ? null : mapping.smdaName,
-          target_uuid: mapping.unmappable ? null : mapping.smdaUuid,
-        });
-      }
+      result.push(...targetMappings);
 
-      mapping.aliases.forEach((alias) => {
-        const name_trimmed = alias.trim();
-        if (name_trimmed !== "") {
+      elementMapping.aliases.forEach((alias) => {
+        if (alias !== "") {
           result.push({
             mapping_type: mappingType,
             source_system: sourceSystem,
             target_system: sourceSystem,
             relation_type: "alias",
-            source_id: name_trimmed,
-            target_id: mapping.rmsName,
-            target_uuid: null,
-          });
+            source_id: alias,
+            target_id: elementMapping.name,
+          } as T);
         }
       });
     }

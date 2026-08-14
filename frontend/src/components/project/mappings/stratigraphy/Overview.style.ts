@@ -1,11 +1,11 @@
 import { tokens } from "@equinor/eds-tokens";
 import styled, { css } from "styled-components";
 
+import type { ElementType } from "#components/project/common/mapping/types";
 import type {
   HorizonLineStyle,
   ZonePlacementInfo,
 } from "../../common/stratigraphicFramework/types";
-import type { ElementType } from "./types";
 
 function getColors(
   isTargetSystem: boolean,

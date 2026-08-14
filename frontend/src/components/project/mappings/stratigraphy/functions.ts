@@ -1,6 +1,7 @@
 import type { RmsStratigraphicZone, StratigraphicUnit } from "#client";
 import type { OptionProps } from "#components/form/field";
-import type { ElementMappings, StratUnitRelation } from "./types";
+import type { ElementMappings } from "#components/project/common/mapping/types";
+import type { StratUnitRelation } from "./types";
 import { getLabelForStratUnitOption } from "./utils";
 
 function getOptionPropsForChildren(
@@ -67,15 +68,18 @@ export function createHorizonOptions(
     )
     .forEach((zone) => {
       const zoneMapping = elementMappings[zone.name];
-      if (zoneMapping === undefined) {
+      if (zoneMapping === undefined || !("smda" in zoneMapping.targets)) {
         return;
       }
-      if (zoneMapping.unmappable || zoneMapping.smdaUuid === "") {
+      if (
+        zoneMapping.targets.smda.unmappable ||
+        zoneMapping.targets.smda.uuid === ""
+      ) {
         return;
       }
 
       const mappedUnit = stratigraphicUnits.find(
-        (unit) => unit.uuid === zoneMapping.smdaUuid,
+        (unit) => unit.uuid === zoneMapping.targets.smda?.uuid,
       );
       // The relevant suggestion is the zone boundary that coincides with the
       // edited horizon: the base of a zone above, the top of a zone below.
