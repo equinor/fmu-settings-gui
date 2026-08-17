@@ -221,7 +221,8 @@ export function createMutationValue<
       result.push(...targetMappings);
 
       elementMapping.aliases.forEach((alias) => {
-        if (alias !== "") {
+        const name_trimmed = alias.trim();
+        if (name_trimmed !== "") {
           result.push({
             mapping_type: mappingType,
             source_system: sourceSystem,
