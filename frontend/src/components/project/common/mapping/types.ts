@@ -29,9 +29,8 @@ export type ElementMappingTargetUpdate = Pick<
   "name" | "uuid"
 >;
 
-export type ElementMappingTargetUpdates = Record<
-  DataSystem,
-  ElementMappingTargetUpdate
+export type ElementMappingTargetUpdates = Partial<
+  Record<DataSystem, ElementMappingTargetUpdate>
 >;
 
 export type MappingData = {

@@ -483,7 +483,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
     formSubmitCallback,
     formReset,
   }: MutationCallbackProps<ElementMapping>) => {
-    const targetUpdates = {
+    const targetUpdates: ElementMappingTargetUpdates = {
       smda:
         "smda" in formValue.targets
           ? {
@@ -498,7 +498,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
               uuid: formValue.targets.smda.uuid,
             }
           : emptyElementMappingTargetUpdate(),
-    } as ElementMappingTargetUpdates;
+    };
 
     const updated = updatedElementMapping(formValue, targetUpdates);
 

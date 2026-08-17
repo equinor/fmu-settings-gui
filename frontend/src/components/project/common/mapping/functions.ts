@@ -141,21 +141,23 @@ export function updatedElementMapping(
   Object.keys(targetUpdates).forEach((key) => {
     const target = key as DataSystem;
     const updateData = targetUpdates[target];
-    if (
-      updateData.uuid === specialOptions.empty.value ||
-      updateData.uuid === specialOptions.divider.value
-    ) {
-      updatedTargets[target] = emptyElementMappingTarget();
-    } else if (specialOptionsValuesUnmappable.includes(updateData.uuid)) {
-      updatedTargets[target] = {
-        ...emptyElementMappingTarget(),
-        unmappable: true,
-      };
-    } else {
-      updatedTargets[target] = {
-        unmappable: false,
-        ...updateData,
-      };
+    if (updateData !== undefined) {
+      if (
+        updateData.uuid === specialOptions.empty.value ||
+        updateData.uuid === specialOptions.divider.value
+      ) {
+        updatedTargets[target] = emptyElementMappingTarget();
+      } else if (specialOptionsValuesUnmappable.includes(updateData.uuid)) {
+        updatedTargets[target] = {
+          ...emptyElementMappingTarget(),
+          unmappable: true,
+        };
+      } else {
+        updatedTargets[target] = {
+          unmappable: false,
+          ...updateData,
+        };
+      }
     }
   });
 
@@ -202,7 +204,8 @@ export function createMutationValue<
             : {
                 relation_type: "primary",
                 target_id: targetData?.name ?? null,
-                target_uuid: targetData?.uuid ?? null,
+                target_uuid:
+                  (targetData?.uuid ?? "") !== "" ? targetData?.uuid : null,
               }),
         } as T);
       }
