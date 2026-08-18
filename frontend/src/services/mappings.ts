@@ -6,10 +6,7 @@ import {
 import { useMemo } from "react";
 import { toast } from "react-toastify";
 
-import type {
-  InternalWellboreIdentifierMapping,
-  InternalWellboreMappings,
-} from "#client";
+import type { InternalWellboreMappings } from "#client";
 import {
   projectGetChangelogQueryKey,
   projectGetMappingsOptions,
@@ -31,17 +28,6 @@ export type SaveWellboreMappings = (
   mappings: InternalWellboreMappings,
   options: SaveWellboreMappingsOptions,
 ) => void;
-
-export function isSmdaWellboreMapping(
-  mapping: InternalWellboreIdentifierMapping,
-) {
-  return (
-    mapping.source_system === "rms" &&
-    mapping.target_system === "smda" &&
-    (mapping.relation_type === "primary" ||
-      mapping.relation_type === "unmappable")
-  );
-}
 
 export function useWellboreMappings() {
   const queryClient = useQueryClient();

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import type {
+  InternalWellboreIdentifierMapping,
   InternalWellboreMappings,
   RmsWell,
   SmdaWellHeader,
@@ -13,9 +14,20 @@ import { ConfirmCloseDialog } from "#components/common";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import { type OptionProps, TextField } from "#components/form/field";
 import {
-  emptyName,
-  noWellboreName,
+  createMutationValue,
+  updatedElementMapping,
+} from "#components/project/common/mapping/functions";
+import type {
+  ElementMapping,
+  ElementMappings,
+} from "#components/project/common/mapping/types";
+import {
+  createSpecialOptions,
+  getElementMappingTargetName,
+  getElementMappingTargetNameOptionsInitialValue,
+  getOtherSourceUsingTargetUuid,
   type SourceTargetPair,
+  specialOptions,
 } from "#components/project/common/mapping/utils";
 import type { SaveWellboreMappings } from "#services/mappings";
 import { EditDialog, PageCode, PageList, PageText } from "#styles/common";
@@ -24,13 +36,11 @@ import { fieldContext, formContext } from "#utils/form";
 import { stringCompare } from "#utils/string";
 import { useConfirmClose } from "#utils/ui";
 import {
+  createWellboreElementMappings,
   createWellboreMappingRows,
-  isRmsMapping,
-  updateWellboreMapping,
-  wellboreSmdaOptions,
-  wellboreSmdaTargetPairs,
+  wellboreMappingTargetUpdates,
 } from "./functions";
-import type { WellboreMappingFormValue, WellboreMappingRow } from "./types";
+import type { WellboreMappingFormValue } from "./types";
 import {
   MappingEditFields,
   SmdaOptionDivider,
@@ -47,19 +57,19 @@ const { useAppForm } = createFormHook({
 type WellboreMappingColumnId = "rmsWellboreName" | "simulatorName" | "smdaName";
 type ColumnFilters = Array<{ id: string; value: unknown }>;
 const WELLBORE_MAPPINGS_GRID_MAX_HEIGHT = 480;
+const emptyName = specialOptions.empty.label;
 
 const wellboreMappingDisplayValue: Record<
   WellboreMappingColumnId,
-  (row: WellboreMappingRow) => string
+  (row: ElementMapping) => string
 > = {
-  rmsWellboreName: (row) => row.rmsWellboreName,
-  simulatorName: (row) => row.simulatorName || emptyName,
-  smdaName: (row) =>
-    row.unmappable ? noWellboreName : row.smdaName || emptyName,
+  rmsWellboreName: (row) => row.name,
+  simulatorName: (row) => getElementMappingTargetName(row, "simulator"),
+  smdaName: (row) => getElementMappingTargetName(row, "smda"),
 };
 
 function matchesColumnFilters(
-  row: WellboreMappingRow,
+  row: ElementMapping,
   columnFilters: ColumnFilters,
 ) {
   return columnFilters.every(({ id, value }) => {
@@ -76,25 +86,19 @@ function matchesColumnFilters(
 }
 
 function smdaOptions(
-  row: WellboreMappingRow,
+  row: ElementMapping,
   headers: SmdaWellHeader[],
 ): OptionProps[] {
-  const options: OptionProps[] = [
-    wellboreSmdaOptions.empty,
-    wellboreSmdaOptions.unmappable,
-  ];
-
-  if (headers.length) {
-    options.push(wellboreSmdaOptions.divider);
-  }
+  const options = createSpecialOptions("wellbore", headers.length > 0);
+  const smdaTarget = row.targets.smda;
 
   if (
-    row.smdaUuid &&
-    !headers.some((header) => header.wellbore_uuid === row.smdaUuid)
+    smdaTarget?.uuid &&
+    !headers.some((header) => header.wellbore_uuid === smdaTarget.uuid)
   ) {
     options.push({
-      value: row.smdaUuid,
-      label: `${row.smdaName} (not available in current SMDA results)`,
+      value: smdaTarget.uuid,
+      label: `${smdaTarget.name} (not available in current SMDA results)`,
     });
   }
 
@@ -111,34 +115,28 @@ function smdaOptions(
 
 function EditMappingDialog({
   row,
-  mappings,
+  elementMappings,
   smdaHeaders,
-  smdaTargetPairs,
   smdaHealthStatus,
   projectReadOnly,
   isPending,
   closeDialog,
   saveMapping,
 }: {
-  row: WellboreMappingRow;
-  mappings: InternalWellboreMappings;
+  row: ElementMapping;
+  elementMappings: ElementMappings;
   smdaHeaders: SmdaWellHeader[];
-  smdaTargetPairs: SourceTargetPair[];
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   isPending: boolean;
   closeDialog: () => void;
-  saveMapping: (
-    row: WellboreMappingRow,
-    value: WellboreMappingFormValue,
-  ) => void;
+  saveMapping: (row: ElementMapping, value: WellboreMappingFormValue) => void;
 }) {
   const form = useAppForm({
     defaultValues: {
-      simulatorName: row.simulatorName,
-      smdaUuid: row.unmappable
-        ? wellboreSmdaOptions.unmappable.value
-        : row.smdaUuid,
+      simulatorName: row.targets.simulator?.name ?? "",
+      smdaUuid: getElementMappingTargetNameOptionsInitialValue(row, "smda")
+        .value,
     },
     onSubmit: ({ value }) => {
       if (!projectReadOnly) {
@@ -159,14 +157,16 @@ function EditMappingDialog({
     () => smdaOptions(row, smdaHeaders),
     [row, smdaHeaders],
   );
-  const blockedSmdaUuids = useMemo(
+  const smdaTargetPairs = useMemo<SourceTargetPair[]>(
     () =>
-      new Set(
-        smdaTargetPairs
-          .filter((pair) => pair.sourceId !== row.rmsWellboreName)
-          .map((pair) => pair.targetUuid),
-      ),
-    [smdaTargetPairs, row.rmsWellboreName],
+      Object.values(elementMappings).flatMap((elementMapping) => {
+        const smdaTarget = elementMapping.targets.smda;
+
+        return smdaTarget?.uuid
+          ? [{ sourceId: elementMapping.name, targetUuid: smdaTarget.uuid }]
+          : [];
+      }),
+    [elementMappings],
   );
   const simulatorNameValidation = useMemo(
     () =>
@@ -175,25 +175,23 @@ function EditMappingDialog({
         .refine(
           (simulatorName) =>
             !simulatorName.trim() ||
-            !mappings.some(
-              (mapping) =>
-                mapping.source_id !== row.rmsWellboreName &&
-                isRmsMapping(mapping, "simulator") &&
-                mapping.relation_type === "primary" &&
-                mapping.target_id === simulatorName.trim(),
+            !Object.values(elementMappings).some(
+              (elementMapping) =>
+                elementMapping.name !== row.name &&
+                elementMapping.targets.simulator?.name === simulatorName.trim(),
             ),
           {
             error:
               "This simulator name is already mapped to another RMS wellbore",
           },
         ),
-    [mappings, row.rmsWellboreName],
+    [elementMappings, row.name],
   );
-  const smdaHelperText = row.planned
+  const smdaHelperText = row.meta.planned
     ? "SMDA mapping is disabled because this is a planned wellbore."
     : !smdaHealthStatus
       ? "Connect to SMDA to edit the SMDA name."
-      : blockedSmdaUuids.size > 0
+      : smdaTargetPairs.some((pair) => pair.sourceId !== row.name)
         ? "SMDA names that are already mapped to another RMS wellbore cannot " +
           "be selected."
         : undefined;
@@ -218,7 +216,7 @@ function EditMappingDialog({
             void form.handleSubmit();
           }}
         >
-          <Dialog.Header>Edit mappings for {row.rmsWellboreName}</Dialog.Header>
+          <Dialog.Header>Edit mappings for {row.name}</Dialog.Header>
 
           <Dialog.CustomContent>
             <MappingEditFields>
@@ -227,7 +225,6 @@ function EditMappingDialog({
                 validators={{
                   onMount: simulatorNameValidation,
                   onBlur: simulatorNameValidation,
-                  onSubmit: simulatorNameValidation,
                 }}
               >
                 {(field) => (
@@ -248,29 +245,37 @@ function EditMappingDialog({
                     <Autocomplete<OptionProps>
                       label="SMDA name"
                       options={options}
-                      disabled={row.planned || !smdaHealthStatus}
+                      disabled={
+                        (row.meta.planned ?? false) || !smdaHealthStatus
+                      }
                       {...(smdaHelperText !== undefined && {
                         helperText: smdaHelperText,
                       })}
                       selectedOptions={selectedOption ? [selectedOption] : []}
                       optionLabel={(option) => option.label}
                       optionComponent={(option) =>
-                        option.value === wellboreSmdaOptions.divider.value ? (
+                        option.value === specialOptions.divider.value ? (
                           <SmdaOptionDivider />
                         ) : undefined
                       }
                       optionDisabled={(option) =>
-                        option.value === wellboreSmdaOptions.divider.value ||
-                        blockedSmdaUuids.has(option.value)
+                        option.value === specialOptions.divider.value ||
+                        getOtherSourceUsingTargetUuid(
+                          smdaTargetPairs,
+                          option.value,
+                          row.name,
+                        ) !== undefined
                       }
                       itemToKey={(option) => option?.value}
                       noOptionsText="No SMDA names found"
                       autoWidth={true}
                       onOptionsChange={({ selectedItems }) => {
-                        field.handleChange(selectedItems[0]?.value ?? "");
+                        field.handleChange(
+                          selectedItems[0]?.value ?? specialOptions.empty.value,
+                        );
                       }}
                       onClear={() => {
-                        field.handleChange("");
+                        field.handleChange(specialOptions.empty.value);
                       }}
                     />
                   );
@@ -320,11 +325,11 @@ function EditMappingDialog({
   );
 }
 
-const wellboreMappingColumns: ColumnDef<WellboreMappingRow>[] = [
+const wellboreMappingColumns: ColumnDef<ElementMapping>[] = [
   {
     id: "rmsWellboreName",
     accessorFn: wellboreMappingDisplayValue.rmsWellboreName,
-    header: "Wellbore",
+    header: "RMS",
     size: 210,
   },
   {
@@ -339,18 +344,19 @@ const wellboreMappingColumns: ColumnDef<WellboreMappingRow>[] = [
     header: "SMDA",
     size: 210,
     sortingFn: (rowA, rowB) => {
-      const valueForSorting = (row: WellboreMappingRow) => {
-        if (!row.smdaName && !row.unmappable) {
+      const valueForSorting = (row: ElementMapping) => {
+        const smdaTarget = row.targets.smda;
+        if (!smdaTarget?.name && !smdaTarget?.unmappable) {
           return { rank: 0, name: "" };
         }
-        if (row.unmappable) {
+        if (smdaTarget.unmappable) {
           return {
             rank: 1,
-            name: noWellboreName,
+            name: getElementMappingTargetName(row, "smda"),
           };
         }
 
-        return { rank: 2, name: row.smdaName };
+        return { rank: 2, name: smdaTarget.name };
       };
       const valueA = valueForSorting(rowA.original);
       const valueB = valueForSorting(rowB.original);
@@ -381,18 +387,18 @@ export function WellboreMappingsTable({
   isSaving: boolean;
   saveMappings: SaveWellboreMappings;
 }) {
-  const [activeRow, setActiveRow] = useState<WellboreMappingRow>();
+  const [activeRow, setActiveRow] = useState<ElementMapping>();
   const [sorting, setSorting] = useState<Array<{ id: string; desc: boolean }>>(
     [],
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>([]);
-  const rows = useMemo(
-    () => createWellboreMappingRows(rmsWellbores, mappings),
-    [rmsWellbores, mappings],
+  const elementMappings = useMemo(
+    () => createWellboreElementMappings(rmsWellbores, mappings),
+    [mappings, rmsWellbores],
   );
-  const smdaTargetPairs = useMemo(
-    () => wellboreSmdaTargetPairs(mappings),
-    [mappings],
+  const rows = useMemo(
+    () => createWellboreMappingRows(rmsWellbores, elementMappings),
+    [elementMappings, rmsWellbores],
   );
   const filteredRowCount = useMemo(
     () => rows.filter((row) => matchesColumnFilters(row, columnFilters)).length,
@@ -400,21 +406,41 @@ export function WellboreMappingsTable({
   );
   const manualSmdaMappingCount = useMemo(
     () =>
-      rows.filter((row) => !row.planned && !row.smdaName && !row.unmappable)
-        .length,
+      rows.filter(
+        (row) =>
+          !row.meta.planned &&
+          !row.targets.smda?.name &&
+          !row.targets.smda?.unmappable,
+      ).length,
     [rows],
   );
 
   const saveEditedMapping = (
-    row: WellboreMappingRow,
+    row: ElementMapping,
     value: WellboreMappingFormValue,
   ) => {
-    saveMappings(updateWellboreMapping(mappings, row, value, smdaHeaders), {
-      successMessage: "Wellbore mappings saved",
-      onSuccess: () => {
-        setActiveRow(undefined);
+    const updatedMapping = updatedElementMapping(
+      row,
+      wellboreMappingTargetUpdates(row, value, smdaHeaders),
+    );
+    const updatedMappings = {
+      ...elementMappings,
+      [row.name]: updatedMapping,
+    };
+
+    saveMappings(
+      createMutationValue<InternalWellboreIdentifierMapping>(
+        "wellbore",
+        "rms",
+        updatedMappings,
+      ),
+      {
+        successMessage: "Wellbore mappings saved",
+        onSuccess: () => {
+          setActiveRow(undefined);
+        },
       },
-    });
+    );
   };
 
   return (
@@ -422,9 +448,8 @@ export function WellboreMappingsTable({
       {activeRow && (
         <EditMappingDialog
           row={activeRow}
-          mappings={mappings}
+          elementMappings={elementMappings}
           smdaHeaders={smdaHeaders}
-          smdaTargetPairs={smdaTargetPairs}
           smdaHealthStatus={smdaHealthStatus}
           projectReadOnly={projectReadOnly}
           isPending={isSaving}
@@ -460,7 +485,7 @@ export function WellboreMappingsTable({
               )}
               rows={rows}
               columns={wellboreMappingColumns}
-              getRowId={(row) => row.rmsWellboreName}
+              getRowId={(row) => row.name}
               enableSorting
               sortingState={sorting}
               onSortingChange={setSorting}
@@ -470,7 +495,7 @@ export function WellboreMappingsTable({
               rowClass={(row) =>
                 [
                   editMode && !projectReadOnly && "editable-row",
-                  row.original.planned && "planned-row",
+                  row.original.meta.planned && "planned-row",
                 ]
                   .filter(Boolean)
                   .join(" ")
