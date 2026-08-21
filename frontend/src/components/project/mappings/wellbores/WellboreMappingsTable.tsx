@@ -1,7 +1,7 @@
 import { Dialog, List } from "@equinor/eds-core-react";
 import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { createFormHook } from "@tanstack/react-form";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 import type {
@@ -19,6 +19,7 @@ import {
 } from "#components/form/field";
 import {
   createMutationValue,
+  handleErrorUnknownInitialValue,
   updatedElementMapping,
 } from "#components/project/common/mapping/functions";
 import type {
@@ -54,6 +55,7 @@ const { useAppForm } = createFormHook({
 
 type WellboreMappingColumnId = "rmsWellboreName" | "simulatorName" | "smdaName";
 type ColumnFilters = Array<{ id: string; value: unknown }>;
+type InaccessibleSmdaData = { name: string; uuid: string };
 const WELLBORE_MAPPINGS_GRID_MAX_HEIGHT = 480;
 const emptyName = specialOptions.empty.label;
 
@@ -84,19 +86,15 @@ function matchesColumnFilters(
 }
 
 function smdaOptions(
-  row: ElementMapping,
   headers: SmdaWellHeader[],
+  inaccessibleSmdaData: InaccessibleSmdaData | undefined,
 ): OptionProps[] {
   const options = createSpecialOptions("wellbore", headers.length > 0);
-  const smdaTarget = row.targets.smda;
 
-  if (
-    smdaTarget?.uuid &&
-    !headers.some((header) => header.wellbore_uuid === smdaTarget.uuid)
-  ) {
-    options.push({
-      value: smdaTarget.uuid,
-      label: `${smdaTarget.name} (not available in current SMDA results)`,
+  if (inaccessibleSmdaData) {
+    options.splice(2, 0, {
+      value: inaccessibleSmdaData.uuid,
+      label: `${inaccessibleSmdaData.name} (unavailable)`,
     });
   }
 
@@ -115,6 +113,7 @@ function EditMappingDialog({
   row,
   elementMappings,
   smdaHeaders,
+  inaccessibleSmdaData,
   smdaHealthStatus,
   projectReadOnly,
   isPending,
@@ -124,6 +123,7 @@ function EditMappingDialog({
   row: ElementMapping;
   elementMappings: ElementMappings;
   smdaHeaders: SmdaWellHeader[];
+  inaccessibleSmdaData: InaccessibleSmdaData | undefined;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   isPending: boolean;
@@ -160,9 +160,19 @@ function EditMappingDialog({
     },
   });
   const options = useMemo(
-    () => smdaOptions(row, smdaHeaders),
-    [row, smdaHeaders],
+    () => smdaOptions(smdaHeaders, inaccessibleSmdaData),
+    [inaccessibleSmdaData, smdaHeaders],
   );
+
+  useEffect(() => {
+    handleErrorUnknownInitialValue(
+      form.setFieldMeta,
+      "targets.smda.uuid",
+      options,
+      getElementMappingTargetNameOptionsInitialValue(row, "smda"),
+    );
+  }, [form.setFieldMeta, options, row]);
+
   const simulatorNameValidation = useMemo(
     () =>
       z
@@ -186,7 +196,9 @@ function EditMappingDialog({
     ? "SMDA mapping is disabled because this is a planned wellbore."
     : !smdaHealthStatus
       ? "Connect to SMDA to edit the SMDA name."
-      : undefined;
+      : inaccessibleSmdaData
+        ? "This existing mapping is unavailable in the current SMDA results."
+        : undefined;
 
   return (
     <>
@@ -227,7 +239,13 @@ function EditMappingDialog({
                 )}
               </form.AppField>
 
-              <form.AppField name="targets.smda.uuid">
+              <form.AppField
+                name="targets.smda.uuid"
+                validators={{
+                  onChange:
+                    undefined /* Resets errors set by setFieldMeta after the user selects an option */,
+                }}
+              >
                 {(field) => (
                   <field.AutocompleteField
                     label="SMDA name"
@@ -340,6 +358,7 @@ export function WellboreMappingsTable({
   rmsWellbores,
   mappings,
   smdaHeaders,
+  smdaHeadersError,
   smdaHealthStatus,
   projectReadOnly,
   editMode,
@@ -349,6 +368,7 @@ export function WellboreMappingsTable({
   rmsWellbores: RmsWell[];
   mappings: InternalWellboreMappings;
   smdaHeaders: SmdaWellHeader[];
+  smdaHeadersError: boolean;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   editMode: boolean;
@@ -379,8 +399,22 @@ export function WellboreMappingsTable({
       ).length,
     [rows],
   );
+  const inaccessibleSmdaData = useMemo(() => {
+    const smdaTarget = activeRow?.targets.smda;
+    const smdaResultsIncomplete = smdaHeadersError || !smdaHealthStatus;
+    if (
+      !smdaResultsIncomplete ||
+      !smdaTarget?.uuid ||
+      smdaHeaders.some((header) => header.wellbore_uuid === smdaTarget.uuid)
+    ) {
+      return undefined;
+    }
+
+    return { name: smdaTarget.name, uuid: smdaTarget.uuid };
+  }, [activeRow, smdaHeaders, smdaHeadersError, smdaHealthStatus]);
 
   const saveEditedMapping = (formValue: ElementMapping) => {
+    const smdaUuid = formValue.targets.smda?.uuid ?? "";
     const targetUpdates: ElementMappingTargetUpdates = {
       simulator: {
         name: formValue.targets.simulator?.name.trim() ?? "",
@@ -388,12 +422,11 @@ export function WellboreMappingsTable({
       },
       smda: {
         name:
-          smdaHeaders.find(
-            (header) => header.wellbore_uuid === formValue.targets.smda?.uuid,
-          )?.unique_wellbore_identifier ??
-          formValue.targets.smda?.name ??
-          "",
-        uuid: formValue.targets.smda?.uuid ?? "",
+          (inaccessibleSmdaData?.uuid === smdaUuid
+            ? inaccessibleSmdaData.name
+            : smdaHeaders.find((header) => header.wellbore_uuid === smdaUuid)
+                ?.unique_wellbore_identifier) ?? "",
+        uuid: smdaUuid,
       },
     };
     const updated = updatedElementMapping(formValue, targetUpdates);
@@ -420,6 +453,7 @@ export function WellboreMappingsTable({
           row={activeRow}
           elementMappings={elementMappings}
           smdaHeaders={smdaHeaders}
+          inaccessibleSmdaData={inaccessibleSmdaData}
           smdaHealthStatus={smdaHealthStatus}
           projectReadOnly={projectReadOnly}
           isPending={isSaving}

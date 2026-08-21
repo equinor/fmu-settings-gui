@@ -74,6 +74,7 @@ export function Overview({
         rmsWellbores={rmsWellbores}
         mappings={mappings}
         smdaHeaders={wellHeaders.smdaHeaders}
+        smdaHeadersError={wellHeaders.isError}
         smdaHealthStatus={smdaHealthStatus}
         projectReadOnly={projectReadOnly}
         editMode={editMode}
