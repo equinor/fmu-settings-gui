@@ -188,6 +188,7 @@ function AccessEditorForm({
                       options={sumoAssets
                         .map((asset) => asset.name)
                         .sort((a, b) => stringCompare(a, b))}
+                      optionValue={(option) => option}
                       noOptionsText="No assets found"
                       disabled={!!formValues?.manualAssetName}
                       helperText="Newly onboarded assets may not exist in the list yet"

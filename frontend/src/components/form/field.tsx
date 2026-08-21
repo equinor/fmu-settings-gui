@@ -1,5 +1,6 @@
 import {
   Autocomplete,
+  type AutocompleteProps,
   TextField as EdsTextField,
   Icon,
   InputWrapper,
@@ -233,22 +234,39 @@ export function Select({
   );
 }
 
-export function AutocompleteField({
+type AutocompleteFieldProps<T> = Pick<
+  AutocompleteProps<T>,
+  | "disabled"
+  | "label"
+  | "noOptionsText"
+  | "optionComponent"
+  | "optionDisabled"
+  | "optionLabel"
+  | "options"
+> & {
+  emptyValue?: string | undefined;
+  helperText?: string | undefined;
+  loadingOptions?: boolean | undefined;
+  optionValue: (option: T) => string;
+};
+
+export function AutocompleteField<T>({
   label,
   options,
   noOptionsText,
   helperText,
   disabled,
   loadingOptions,
-}: {
-  label: string;
-  options: string[];
-  noOptionsText?: string | undefined;
-  disabled?: boolean | undefined;
-  helperText?: string | undefined;
-  loadingOptions?: boolean | undefined;
-}) {
+  optionValue,
+  emptyValue = "",
+  optionLabel,
+  optionComponent,
+  optionDisabled,
+}: AutocompleteFieldProps<T>) {
   const field = useFieldContext<string>();
+  const selectedOption = options.find(
+    (option) => optionValue(option) === field.state.value,
+  );
 
   return (
     <CommonInputWrapper
@@ -269,16 +287,27 @@ export function AutocompleteField({
             }
       }
     >
-      <Autocomplete
+      <Autocomplete<T>
         autoWidth
         id={field.name}
         label={label}
         options={options}
         {...(loadingOptions !== undefined && { loading: loadingOptions })}
-        initialSelectedOptions={[field.state.value]}
+        selectedOptions={selectedOption ? [selectedOption] : []}
         {...(noOptionsText !== undefined && { noOptionsText })}
+        {...(optionLabel !== undefined && { optionLabel })}
+        {...(optionComponent !== undefined && { optionComponent })}
+        {...(optionDisabled !== undefined && { optionDisabled })}
+        itemToKey={(option) => (option === null ? null : optionValue(option))}
         onOptionsChange={({ selectedItems }) => {
-          field.handleChange(selectedItems[0] ?? "");
+          field.handleChange(
+            selectedItems[0] !== undefined
+              ? optionValue(selectedItems[0])
+              : emptyValue,
+          );
+        }}
+        onClear={() => {
+          field.handleChange(emptyValue);
         }}
         {...(disabled !== undefined && { disabled })}
         {...(!field.state.meta.isValid && { variant: "error" })}

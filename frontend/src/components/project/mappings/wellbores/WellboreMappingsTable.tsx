@@ -1,4 +1,4 @@
-import { Autocomplete, Dialog, List } from "@equinor/eds-core-react";
+import { Dialog, List } from "@equinor/eds-core-react";
 import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMemo, useState } from "react";
@@ -12,7 +12,11 @@ import type {
 } from "#client";
 import { ConfirmCloseDialog } from "#components/common";
 import { CancelButton, SubmitButton } from "#components/form/button";
-import { type OptionProps, TextField } from "#components/form/field";
+import {
+  AutocompleteField,
+  type OptionProps,
+  TextField,
+} from "#components/form/field";
 import {
   createMutationValue,
   updatedElementMapping,
@@ -46,7 +50,7 @@ import {
 const { useAppForm } = createFormHook({
   fieldContext,
   formContext,
-  fieldComponents: { TextField },
+  fieldComponents: { AutocompleteField, TextField },
   formComponents: { CancelButton, SubmitButton },
 });
 
@@ -240,50 +244,31 @@ function EditMappingDialog({
               </form.AppField>
 
               <form.AppField name="targets.smda.uuid">
-                {(field) => {
-                  const selectedOption = options.find(
-                    (option) => option.value === field.state.value,
-                  );
-
-                  return (
-                    <Autocomplete<OptionProps>
-                      label="SMDA name"
-                      options={options}
-                      disabled={
-                        (row.meta.planned ?? false) || !smdaHealthStatus
-                      }
-                      {...(smdaHelperText !== undefined && {
-                        helperText: smdaHelperText,
-                      })}
-                      selectedOptions={selectedOption ? [selectedOption] : []}
-                      optionLabel={(option) => option.label}
-                      optionComponent={(option) =>
-                        option.value === specialOptions.divider.value ? (
-                          <SmdaOptionDivider />
-                        ) : undefined
-                      }
-                      optionDisabled={(option) =>
-                        option.value === specialOptions.divider.value ||
-                        getOtherSourceUsingTargetUuid(
-                          smdaTargetPairs,
-                          option.value,
-                          row.name,
-                        ) !== undefined
-                      }
-                      itemToKey={(option) => option?.value}
-                      noOptionsText="No SMDA names found"
-                      autoWidth={true}
-                      onOptionsChange={({ selectedItems }) => {
-                        field.handleChange(
-                          selectedItems[0]?.value ?? specialOptions.empty.value,
-                        );
-                      }}
-                      onClear={() => {
-                        field.handleChange(specialOptions.empty.value);
-                      }}
-                    />
-                  );
-                }}
+                {(field) => (
+                  <field.AutocompleteField
+                    label="SMDA name"
+                    options={options}
+                    optionValue={(option) => option.value}
+                    emptyValue={specialOptions.empty.value}
+                    disabled={(row.meta.planned ?? false) || !smdaHealthStatus}
+                    helperText={smdaHelperText}
+                    optionLabel={(option) => option.label}
+                    optionComponent={(option) =>
+                      option.value === specialOptions.divider.value ? (
+                        <SmdaOptionDivider />
+                      ) : undefined
+                    }
+                    optionDisabled={(option) =>
+                      option.value === specialOptions.divider.value ||
+                      getOtherSourceUsingTargetUuid(
+                        smdaTargetPairs,
+                        option.value,
+                        row.name,
+                      ) !== undefined
+                    }
+                    noOptionsText="No SMDA names found"
+                  />
+                )}
               </form.AppField>
             </MappingEditFields>
           </Dialog.CustomContent>
