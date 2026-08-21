@@ -20,6 +20,7 @@ import {
 import type {
   ElementMapping,
   ElementMappings,
+  ElementMappingTargetUpdates,
 } from "#components/project/common/mapping/types";
 import {
   createSpecialOptions,
@@ -35,11 +36,7 @@ import { dataGridHeight } from "#styles/dataGrid";
 import { fieldContext, formContext } from "#utils/form";
 import { stringCompare } from "#utils/string";
 import { useConfirmClose } from "#utils/ui";
-import {
-  createWellboreElementMappings,
-  wellboreMappingTargetUpdates,
-} from "./functions";
-import type { WellboreMappingFormValue } from "./types";
+import { createWellboreElementMappings } from "./functions";
 import {
   MappingEditFields,
   SmdaOptionDivider,
@@ -129,17 +126,25 @@ function EditMappingDialog({
   projectReadOnly: boolean;
   isPending: boolean;
   closeDialog: () => void;
-  saveMapping: (row: ElementMapping, value: WellboreMappingFormValue) => void;
+  saveMapping: (formValue: ElementMapping) => void;
 }) {
   const form = useAppForm({
     defaultValues: {
-      simulatorName: row.targets.simulator?.name ?? "",
-      smdaUuid: getElementMappingTargetNameOptionsInitialValue(row, "smda")
-        .value,
+      ...row,
+      ...(row.targets.smda && {
+        targets: {
+          ...row.targets,
+          smda: {
+            ...row.targets.smda,
+            uuid: getElementMappingTargetNameOptionsInitialValue(row, "smda")
+              .value,
+          },
+        },
+      }),
     },
     onSubmit: ({ value }) => {
       if (!projectReadOnly) {
-        saveMapping(row, value);
+        saveMapping(value);
       }
     },
   });
@@ -220,7 +225,7 @@ function EditMappingDialog({
           <Dialog.CustomContent>
             <MappingEditFields>
               <form.AppField
-                name="simulatorName"
+                name="targets.simulator.name"
                 validators={{
                   onMount: simulatorNameValidation,
                   onBlur: simulatorNameValidation,
@@ -234,7 +239,7 @@ function EditMappingDialog({
                 )}
               </form.AppField>
 
-              <form.AppField name="smdaUuid">
+              <form.AppField name="targets.smda.uuid">
                 {(field) => {
                   const selectedOption = options.find(
                     (option) => option.value === field.state.value,
@@ -411,32 +416,37 @@ export function WellboreMappingsTable({
     [rows],
   );
 
-  const saveEditedMapping = (
-    row: ElementMapping,
-    value: WellboreMappingFormValue,
-  ) => {
-    const updatedMapping = updatedElementMapping(
-      row,
-      wellboreMappingTargetUpdates(row, value, smdaHeaders),
-    );
-    const updatedMappings = {
-      ...elementMappings,
-      [row.name]: updatedMapping,
+  const saveEditedMapping = (formValue: ElementMapping) => {
+    const targetUpdates: ElementMappingTargetUpdates = {
+      simulator: {
+        name: formValue.targets.simulator?.name.trim() ?? "",
+        uuid: "",
+      },
+      smda: {
+        name:
+          smdaHeaders.find(
+            (header) => header.wellbore_uuid === formValue.targets.smda?.uuid,
+          )?.unique_wellbore_identifier ??
+          formValue.targets.smda?.name ??
+          "",
+        uuid: formValue.targets.smda?.uuid ?? "",
+      },
     };
+    const updated = updatedElementMapping(formValue, targetUpdates);
 
-    saveMappings(
+    const mutationValue =
       createMutationValue<InternalWellboreIdentifierMapping>(
         "wellbore",
         "rms",
-        updatedMappings,
-      ),
-      {
-        successMessage: "Wellbore mappings saved",
-        onSuccess: () => {
-          setActiveRow(undefined);
-        },
+        { ...elementMappings, [formValue.name]: updated },
+      );
+
+    saveMappings(mutationValue, {
+      successMessage: "Wellbore mappings saved",
+      onSuccess: () => {
+        setActiveRow(undefined);
       },
-    );
+    });
   };
 
   return (
