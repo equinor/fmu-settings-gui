@@ -18,6 +18,22 @@ import type { WellboreMappingFormValue } from "./types";
 
 export const wellboreTargetSystems: DataSystem[] = ["simulator", "smda"];
 
+function clearPlannedWellboreSmdaTarget(
+  elementMapping: ElementMapping,
+): ElementMapping {
+  if (!elementMapping.meta.planned) {
+    return elementMapping;
+  }
+
+  return {
+    ...elementMapping,
+    targets: {
+      ...elementMapping.targets,
+      smda: emptyElementMappingTarget(),
+    },
+  };
+}
+
 export function createWellboreElementMappings(
   rmsWellbores: RmsWell[],
   mappings: InternalWellboreMappings,
@@ -29,41 +45,13 @@ export function createWellboreElementMappings(
     { wellbore: mappings },
   );
 
-  return {
-    ...projectMappingsLookup,
-    ...createElementMappings(
-      "wellbore",
-      wellboreTargetSystems,
-      rmsWellbores,
-      projectMappingsLookup,
-    ),
-  };
-}
-
-export function createWellboreMappingRows(
-  rmsWellbores: RmsWell[],
-  elementMappings: ElementMappings,
-): ElementMapping[] {
-  return rmsWellbores.flatMap((wellbore) => {
-    const elementMapping = elementMappings[wellbore.name];
-    if (elementMapping === undefined) {
-      return [];
-    }
-
-    if (!wellbore.planned) {
-      return [elementMapping];
-    }
-
-    return [
-      {
-        ...elementMapping,
-        targets: {
-          ...elementMapping.targets,
-          smda: emptyElementMappingTarget(),
-        },
-      },
-    ];
-  });
+  return createElementMappings(
+    "wellbore",
+    wellboreTargetSystems,
+    rmsWellbores,
+    projectMappingsLookup,
+    clearPlannedWellboreSmdaTarget,
+  );
 }
 
 export function wellboreMappingTargetUpdates(

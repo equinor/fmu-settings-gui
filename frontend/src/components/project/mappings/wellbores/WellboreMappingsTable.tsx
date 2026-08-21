@@ -37,7 +37,6 @@ import { stringCompare } from "#utils/string";
 import { useConfirmClose } from "#utils/ui";
 import {
   createWellboreElementMappings,
-  createWellboreMappingRows,
   wellboreMappingTargetUpdates,
 } from "./functions";
 import type { WellboreMappingFormValue } from "./types";
@@ -396,10 +395,7 @@ export function WellboreMappingsTable({
     () => createWellboreElementMappings(rmsWellbores, mappings),
     [mappings, rmsWellbores],
   );
-  const rows = useMemo(
-    () => createWellboreMappingRows(rmsWellbores, elementMappings),
-    [elementMappings, rmsWellbores],
-  );
+  const rows = useMemo(() => Object.values(elementMappings), [elementMappings]);
   const filteredRowCount = useMemo(
     () => rows.filter((row) => matchesColumnFilters(row, columnFilters)).length,
     [columnFilters, rows],
