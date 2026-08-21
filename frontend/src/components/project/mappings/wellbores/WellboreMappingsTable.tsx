@@ -30,8 +30,6 @@ import {
   createSpecialOptions,
   getElementMappingTargetName,
   getElementMappingTargetNameOptionsInitialValue,
-  getOtherSourceUsingTargetUuid,
-  type SourceTargetPair,
   specialOptions,
 } from "#components/project/common/mapping/utils";
 import type { SaveWellboreMappings } from "#services/mappings";
@@ -165,17 +163,6 @@ function EditMappingDialog({
     () => smdaOptions(row, smdaHeaders),
     [row, smdaHeaders],
   );
-  const smdaTargetPairs = useMemo<SourceTargetPair[]>(
-    () =>
-      Object.values(elementMappings).flatMap((elementMapping) => {
-        const smdaTarget = elementMapping.targets.smda;
-
-        return smdaTarget?.uuid
-          ? [{ sourceId: elementMapping.name, targetUuid: smdaTarget.uuid }]
-          : [];
-      }),
-    [elementMappings],
-  );
   const simulatorNameValidation = useMemo(
     () =>
       z
@@ -199,10 +186,7 @@ function EditMappingDialog({
     ? "SMDA mapping is disabled because this is a planned wellbore."
     : !smdaHealthStatus
       ? "Connect to SMDA to edit the SMDA name."
-      : smdaTargetPairs.some((pair) => pair.sourceId !== row.name)
-        ? "SMDA names that are already mapped to another RMS wellbore cannot " +
-          "be selected."
-        : undefined;
+      : undefined;
 
   return (
     <>
@@ -259,12 +243,7 @@ function EditMappingDialog({
                       ) : undefined
                     }
                     optionDisabled={(option) =>
-                      option.value === specialOptions.divider.value ||
-                      getOtherSourceUsingTargetUuid(
-                        smdaTargetPairs,
-                        option.value,
-                        row.name,
-                      ) !== undefined
+                      option.value === specialOptions.divider.value
                     }
                     noOptionsText="No SMDA names found"
                   />

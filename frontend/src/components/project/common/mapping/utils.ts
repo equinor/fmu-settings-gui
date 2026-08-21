@@ -8,22 +8,6 @@ import type {
   SpecialOptionId,
 } from "./types";
 
-export type SourceTargetPair = {
-  sourceId: string;
-  targetUuid: string;
-};
-
-export function getOtherSourceUsingTargetUuid(
-  pairs: SourceTargetPair[],
-  targetUuid: string,
-  currentSourceId: string,
-) {
-  return pairs.find(
-    (pair) =>
-      pair.targetUuid === targetUuid && pair.sourceId !== currentSourceId,
-  )?.sourceId;
-}
-
 const emptyName = "(not set)";
 
 export const specialOptions: Record<SpecialOptionId, OptionProps> = {
