@@ -264,9 +264,9 @@ export function AutocompleteField<T>({
   optionDisabled,
 }: AutocompleteFieldProps<T>) {
   const field = useFieldContext<string>();
-  const selectedOption = options.find(
-    (option) => optionValue(option) === field.state.value,
-  );
+  const selectedOption =
+    options.find((option) => optionValue(option) === field.state.value) ??
+    options.find((option) => optionValue(option) === emptyValue);
 
   return (
     <CommonInputWrapper
