@@ -92,9 +92,9 @@ function smdaOptions(
   const options = createSpecialOptions("wellbore", headers.length > 0);
 
   if (inaccessibleSmdaData) {
-    options.splice(2, 0, {
+    options.splice(options.indexOf(specialOptions.unmappableWellbore) + 1, 0, {
       value: inaccessibleSmdaData.uuid,
-      label: `${inaccessibleSmdaData.name} (unavailable)`,
+      label: `${inaccessibleSmdaData.name} (currently unavailable in SMDA)`,
     });
   }
 
@@ -211,7 +211,7 @@ function EditMappingDialog({
         open={true}
         isDismissable={true}
         onClose={confirmClose.handleCloseRequest}
-        $width="26em"
+        $minWidth="30em"
       >
         <form
           onSubmit={(event) => {
