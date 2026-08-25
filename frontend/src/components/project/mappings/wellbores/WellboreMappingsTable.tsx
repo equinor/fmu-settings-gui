@@ -474,9 +474,11 @@ export function WellboreMappingsTable({
       {rows.length ? (
         <>
           <PageText>
-            Wellbores included for mapping:{" "}
-            <span className="emphasis">{rows.length}</span>. Need manual SMDA
-            mapping: <span className="emphasis">{manualSmdaMappingCount}</span>.
+            <span className="emphasis">{rows.length}</span> wellbores are stored
+            in the project.
+            <br />
+            <span className="emphasis">{manualSmdaMappingCount}</span> wellbores
+            need SMDA mapping.
           </PageText>
 
           <WellboreMappingsContainer>

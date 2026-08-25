@@ -59,7 +59,11 @@ function RmsProjectContent({
         editMode={editMode}
       />
 
-      {editMode ? (
+      {projectReadOnly ? (
+        <PageText>
+          💡 The project is read-only, so the mappings are not editable.
+        </PageText>
+      ) : editMode ? (
         <SmdaHealthCheckInfo
           feature="editing SMDA wellbore names"
           healthCheck={healthCheck}

@@ -633,7 +633,7 @@ export function Wellbores({
           <PageText>
             <span className="emphasis">{projectWellbores.length}</span>{" "}
             {projectWellbores.length === 1 ? "wellbore is" : "wellbores are"}{" "}
-            included in the project.
+            stored in the project.
           </PageText>
 
           <WellboresContainer>
