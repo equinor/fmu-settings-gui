@@ -29,6 +29,7 @@ import type {
 } from "#components/project/common/mapping/types";
 import {
   createSpecialOptions,
+  emptyName,
   getElementMappingTargetName,
   getElementMappingTargetNameOptionsInitialValue,
   specialOptions,
@@ -57,7 +58,6 @@ type WellboreMappingColumnId = "rmsWellboreName" | "simulatorName" | "smdaName";
 type ColumnFilters = Array<{ id: string; value: unknown }>;
 type InaccessibleSmdaData = { name: string; uuid: string };
 const WELLBORE_MAPPINGS_GRID_MAX_HEIGHT = 480;
-const emptyName = specialOptions.empty.label;
 
 const wellboreMappingDisplayValue: Record<
   WellboreMappingColumnId,
@@ -193,11 +193,11 @@ function EditMappingDialog({
     [elementMappings, row.name],
   );
   const smdaHelperText = row.meta.planned
-    ? "SMDA mapping is disabled because this is a planned wellbore."
+    ? "SMDA mapping is disabled because this is a planned wellbore"
     : !smdaHealthStatus
-      ? "Connect to SMDA to edit the SMDA name."
+      ? "Connect to SMDA to edit the SMDA name"
       : inaccessibleSmdaData
-        ? "This existing mapping is unavailable in the current SMDA results."
+        ? "This existing mapping is unavailable in the current SMDA results"
         : undefined;
 
   return (
@@ -220,7 +220,7 @@ function EditMappingDialog({
             void form.handleSubmit();
           }}
         >
-          <Dialog.Header>Edit mappings for {row.name}</Dialog.Header>
+          <Dialog.Header>Edit wellbore: {row.name}</Dialog.Header>
 
           <Dialog.CustomContent>
             <MappingEditFields>
@@ -524,7 +524,7 @@ export function WellboreMappingsTable({
             </List.Item>
             <List.Item>
               For example, filter SMDA by{" "}
-              <span className="emphasis">{emptyName}</span> to find wellbores
+              <span className="emphasis">"{emptyName}"</span> to find wellbores
               without an SMDA mapping
             </List.Item>
           </PageList>
