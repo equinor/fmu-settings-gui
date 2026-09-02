@@ -160,12 +160,12 @@ function RmsEditorForm({
                 availableRmsProjects.length === 0
                   ? "Could not detect any RMS projects in the rms/model directory"
                   : rmsData && !isProjectInAvailable(rmsData.path)
-                    ? "Selected project does not exist"
+                    ? "Selected RMS project does not exist"
                     : undefined,
 
               onChange: ({ value }) =>
                 !isProjectInAvailable(value)
-                  ? "Selected project does not exist"
+                  ? "Selected RMS project does not exist"
                   : undefined,
             }}
           >
@@ -216,7 +216,7 @@ function RmsInfo({ rmsData }: { rmsData: RmsProject }) {
       <table>
         <tbody>
           <tr>
-            <th>Project</th>
+            <th>RMS project</th>
             <td>{getRmsProjectName(rmsData.path)}</td>
           </tr>
           <tr>
@@ -322,7 +322,7 @@ function RmsProjectActions({
           }
           tooltipText={
             projectIsReadOnly
-              ? "Project is read-only"
+              ? "FMU project is read-only"
               : isRmsProjectOpen
                 ? "Close the RMS project to select a new one"
                 : ""
@@ -393,7 +393,9 @@ export function Overview({
       {rmsData ? (
         <RmsInfo rmsData={rmsData} />
       ) : (
-        <PageCode>No RMS project information found in the project.</PageCode>
+        <PageCode>
+          No RMS project information found in the FMU project.
+        </PageCode>
       )}
 
       <RmsProjectActions

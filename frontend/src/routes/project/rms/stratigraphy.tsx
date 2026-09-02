@@ -26,7 +26,7 @@ function Content() {
     />
   ) : (
     <PageSectionWidthConstrained>
-      <PageText>Project not set.</PageText>
+      <PageText>FMU project not set.</PageText>
     </PageSectionWidthConstrained>
   );
 }

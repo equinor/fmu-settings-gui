@@ -171,18 +171,18 @@ export function LockExpireNotification() {
       <Dialog.Content>
         {isExpired ? (
           <PageText $marginBottom="0">
-            Your lock has expired. Project is now read-only. It can be opened
-            for editing from the project overview page.
+            Your lock has expired. FMU project is now read-only. It can be
+            opened for editing from the FMU project overview page.
           </PageText>
         ) : (
           <>
             <PageText>
               Your editing access will expire in <b>{timeUntilExpire}</b>{" "}
-              seconds, and the project will then become read-only.
+              seconds, and the FMU project will then become read-only.
             </PageText>
 
             <PageText $marginBottom="0">
-              Do you want to continue editing this project?
+              Do you want to continue editing this FMU project?
             </PageText>
           </>
         )}

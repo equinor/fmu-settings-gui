@@ -25,7 +25,7 @@ export function TaskList() {
     <Accordion>
       <Accordion.Item isExpanded={open} onExpandedChange={setOpen}>
         <Accordion.Header>
-          Project setup checklist
+          FMU project setup checklist
           <TasksProgressLabel $allDone={allDone}>
             {completedCount} / {tasks.length} completed
           </TasksProgressLabel>

@@ -102,7 +102,7 @@ export function Sidebar() {
         />
 
         <EdsSideBar.Accordion
-          label="Project"
+          label="FMU project"
           icon={folder}
           isExpanded={projectExpanded}
         >

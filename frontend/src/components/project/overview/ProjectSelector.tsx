@@ -158,7 +158,7 @@ function ProjectSelectorForm({
         { body: { path } },
         {
           onSuccess: () => {
-            toast.info(`Successfully set project ${path}`);
+            toast.info(`Successfully set FMU project ${path}`);
             closeProjectSelector({ formReset: formApi.reset });
           },
           onError: (error) => {
@@ -269,7 +269,7 @@ function ProjectSelectorForm({
                   icon: <Icon data={error_filled} size={16} />,
                 }}
               >
-                <field.TextField label="Alternatively, enter a path to the project" />
+                <field.TextField label="Alternatively, enter a path to the FMU project" />
               </InputWrapper>
             )}
           </form.AppField>
@@ -293,7 +293,7 @@ function ProjectSelectorForm({
                   label="Select"
                   disabled={state.isDefaultValue || !state.canSubmit}
                   isPending={isPending}
-                  helperTextDisabled="Select a recent project or enter a valid project path"
+                  helperTextDisabled="Select a recent FMU project or enter a valid FMU project path"
                 />
               )}
             </form.Subscribe>
@@ -411,12 +411,12 @@ function ConfirmInitProjectDialog({
   return (
     <EditDialog open={isOpen}>
       <Dialog.Header>
-        <Dialog.Title>Initialize project</Dialog.Title>
+        <Dialog.Title>Initialize FMU project</Dialog.Title>
       </Dialog.Header>
       <Dialog.CustomContent>
         <PageText bold={true}> {projectPath} </PageText>
         <PageText>
-          This project needs to be initialized to use FMU settings.
+          This FMU project needs to be initialized to use FMU settings.
           <br />
           Would you like to initialize?
         </PageText>
@@ -435,7 +435,9 @@ export function ProjectSelector({
   hasSelectedProject?: boolean;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const actionLabel = hasSelectedProject ? "Change project" : "Select project";
+  const actionLabel = hasSelectedProject
+    ? "Change FMU project"
+    : "Select FMU project";
 
   const handleOpen = () => {
     setIsDialogOpen(true);

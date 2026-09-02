@@ -11,7 +11,7 @@ export const RESOURCE_OPTIONS: CacheResource[] = [
   "mappings.json",
 ];
 export const RESOURCE_LABELS: Record<CacheResource, string> = {
-  "config.json": "Project configuration",
+  "config.json": "FMU project configuration",
   "mappings.json": "Mappings",
 };
 export const ITEM_NAME_KEYS = [
