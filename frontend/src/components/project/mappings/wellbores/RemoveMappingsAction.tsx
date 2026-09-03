@@ -6,36 +6,34 @@ import { CancelButton, GeneralButton } from "#components/form/button";
 import { getUnmappableOption } from "#components/project/common/mapping/utils";
 import type { SaveWellboreMappings } from "#services/mappings";
 import { GenericDialog, PageText } from "#styles/common";
+import type { wellboreTargetSystems } from "./functions";
 
-type RemoveMappingsOperation = "simulator" | "smda";
+type WellboreTargetSystem = (typeof wellboreTargetSystems)[number];
 
-const mappingNames: Record<
-  RemoveMappingsOperation,
-  { label: string; title: string }
-> = {
-  simulator: { label: "simulator", title: "Simulator" },
-  smda: { label: "SMDA", title: "SMDA" },
+const mappingNames: Record<WellboreTargetSystem, string> = {
+  simulator: "simulator",
+  smda: "SMDA",
 };
 
 export function RemoveMappingsAction({
-  operation,
+  targetSystem,
   mappingsAfterRemoval,
   projectReadOnly,
   isSaving,
   saveMappings,
 }: {
-  operation: RemoveMappingsOperation;
+  targetSystem: WellboreTargetSystem;
   mappingsAfterRemoval: () => InternalWellboreMappings;
   projectReadOnly: boolean;
   isSaving: boolean;
   saveMappings: SaveWellboreMappings;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { label, title } = mappingNames[operation];
+  const label = mappingNames[targetSystem];
 
   const removeMappings = () => {
     saveMappings(mappingsAfterRemoval(), {
-      successMessage: `${title} names removed`,
+      successMessage: `${label.charAt(0).toUpperCase()}${label.slice(1)} names removed`,
       onSuccess: () => {
         setDialogOpen(false);
       },
@@ -57,7 +55,7 @@ export function RemoveMappingsAction({
 
           <Dialog.CustomContent>
             <PageText>
-              {operation === "smda"
+              {targetSystem === "smda"
                 ? "This clears all SMDA names and “" +
                   `${getUnmappableOption("wellbore").label}” selections. RMS ` +
                   "and simulator names will stay unchanged."

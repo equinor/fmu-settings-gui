@@ -21,10 +21,6 @@ export const MappingActionTitle = styled.div`
   font-weight: 500;
 `;
 
-export const MappingActionDescription = styled.div`
-  color: ${tokens.colors.text.static_icons__secondary.hex};
-`;
-
 export const MappingActionButtons = styled.div`
   display: flex;
   flex-wrap: wrap;

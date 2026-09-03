@@ -1,6 +1,6 @@
-import type { InternalWellboreMappings } from "#client";
+import type { ElementMappings } from "#components/project/common/mapping/types";
 
 export type PendingImport = {
-  mappings: InternalWellboreMappings;
+  mappings: ElementMappings;
   excludedRmsWellboreNames: string[];
 };

@@ -15,13 +15,15 @@ import type {
   ElementMappings,
 } from "#components/project/common/mapping/types";
 import {
-  emptyElementMapping,
   emptyElementMappingTarget,
   emptyElementMappingTargetUpdate,
 } from "#components/project/common/mapping/utils";
 import type { PendingImport } from "./types";
 
-export const wellboreTargetSystems: DataSystem[] = ["simulator", "smda"];
+export const wellboreTargetSystems = [
+  "simulator",
+  "smda",
+] satisfies DataSystem[];
 
 function createWellboreMappingsLookup(
   mappings: InternalWellboreMappings,
@@ -62,57 +64,43 @@ export function createWellboreElementMappings(
   );
 }
 
-export function isRmsMapping(
-  mapping: InternalWellboreIdentifierMapping,
-  targetSystem: DataSystem,
-) {
-  return (
-    mapping.source_system === "rms" && mapping.target_system === targetSystem
-  );
-}
-
 export function prepareImportedMappings(
   importedMappings: InternalWellboreMappings,
-  savedRmsWellboreNames: string[],
+  currentElementMappings: ElementMappings,
 ): PendingImport {
-  const savedNames = new Set(savedRmsWellboreNames);
-  const importedRmsWellboreNames = new Set(
-    importedMappings
-      .filter((mapping) => isRmsMapping(mapping, "simulator"))
-      .map((mapping) => mapping.source_id),
-  );
+  const importedElementMappings =
+    createWellboreMappingsLookup(importedMappings);
+  const currentRmsWellboreNames = new Set(Object.keys(currentElementMappings));
 
   return {
-    mappings: importedMappings.filter((mapping) =>
-      savedNames.has(mapping.source_id),
+    mappings: Object.fromEntries(
+      Object.entries(importedElementMappings).filter(([name]) =>
+        currentRmsWellboreNames.has(name),
+      ),
     ),
-    excludedRmsWellboreNames: [...importedRmsWellboreNames]
-      .filter((name) => !savedNames.has(name))
+    excludedRmsWellboreNames: Object.keys(importedElementMappings)
+      .filter((name) => !currentRmsWellboreNames.has(name))
       .sort(),
   };
 }
 
 export function mergeImportedMappings(
-  currentMappings: InternalWellboreMappings,
-  importedMappings: InternalWellboreMappings,
+  currentElementMappings: ElementMappings,
+  importedElementMappings: ElementMappings,
 ) {
-  const currentElementMappings = createWellboreMappingsLookup(currentMappings);
-  const importedElementMappings =
-    createWellboreMappingsLookup(importedMappings);
   const mergedElementMappings = { ...currentElementMappings };
 
   Object.entries(importedElementMappings).forEach(
     ([sourceId, importedElementMapping]) => {
+      const currentElementMapping = currentElementMappings[sourceId];
       const importedSimulatorTarget = importedElementMapping.targets.simulator;
-      if (importedSimulatorTarget === undefined) {
+      if (
+        currentElementMapping === undefined ||
+        importedSimulatorTarget === undefined
+      ) {
         return;
       }
 
-      const currentElementMapping = currentElementMappings[sourceId] ?? {
-        ...emptyElementMapping(wellboreTargetSystems),
-        elementType: "wellbore",
-        name: sourceId,
-      };
       mergedElementMappings[sourceId] = updatedElementMapping(
         currentElementMapping,
         {
@@ -132,8 +120,7 @@ export function mergeImportedMappings(
   );
 }
 
-export function removeSimulatorMappings(mappings: InternalWellboreMappings) {
-  const elementMappings = createWellboreMappingsLookup(mappings);
+export function removeSimulatorMappings(elementMappings: ElementMappings) {
   const mappingsWithoutSimulator = Object.fromEntries(
     Object.entries(elementMappings).map(([sourceId, elementMapping]) => [
       sourceId,

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
+import { PageText } from "#styles/common";
 import {
   MappingActionButtons,
-  MappingActionDescription,
   MappingActionRow,
   MappingActionTitle,
 } from "./MappingAction.style";
@@ -20,7 +20,7 @@ export function MappingAction({
     <MappingActionRow>
       <div>
         <MappingActionTitle>{title}</MappingActionTitle>
-        <MappingActionDescription>{description}</MappingActionDescription>
+        <PageText $marginBottom="0">{description}</PageText>
       </div>
       <MappingActionButtons>{children}</MappingActionButtons>
     </MappingActionRow>
