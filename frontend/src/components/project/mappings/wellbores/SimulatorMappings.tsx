@@ -195,7 +195,7 @@ function ImportWarningDialog({
       <Dialog.CustomContent>
         <OrphanWarningBox
           message={
-            "The following RMS wellbores are not stored in this project configuration. " +
+            "The following RMS wellbores are not stored in the project configuration. " +
             "Their simulator names will not be imported."
           }
           listItems={pendingImport.excludedRmsWellboreNames}
@@ -204,11 +204,11 @@ function ImportWarningDialog({
         <PageText $marginBottom="0">
           {hasAcceptedMappings ? (
             "Confirm that you want to import all simulator names in the file " +
-            "that map to RMS wellbores stored in this project configuration."
+            "that map to RMS wellbores stored in the project configuration."
           ) : (
             <>
               None of the RMS wellbores in <code>rms_eclipse.csv</code> are
-              stored in this project configuration, so no simulator names can be
+              stored in the project configuration, so no simulator names can be
               imported.
             </>
           )}
@@ -287,7 +287,7 @@ export function SimulatorMappings({
   const importBlocked = projectReadOnly
     ? "Project is read-only"
     : !Object.keys(elementMappings).length
-      ? "Select RMS wellbores to store in this project configuration before importing simulator names"
+      ? "Select RMS wellbores to store in the project configuration before importing simulator names"
       : undefined;
 
   const saveImportedMappings = (
@@ -317,7 +317,7 @@ export function SimulatorMappings({
             saveImportedMappings(prepared.mappings);
           } else {
             toast.info(
-              "The file does not contain any RMS wellbores stored in this " +
+              "The file does not contain any RMS wellbores stored in the " +
                 "project configuration",
             );
           }
