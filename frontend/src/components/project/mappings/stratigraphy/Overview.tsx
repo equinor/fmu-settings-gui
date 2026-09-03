@@ -681,8 +681,17 @@ export function Overview({
       <PageSectionWidthConstrained>
         <PageText>
           The following are the mappings for horizons and zones, showing the
-          names in RMS and SMDA.
+          names in RMS and SMDA. In SMDA, zones are stratigraphic units, while
+          horizons define the tops and bases of those units.
         </PageText>
+
+        {stratigraphicColumn && (
+          <PageText>
+            The selected SMDA stratigraphic column is{" "}
+            {stratigraphicColumn.identifier}, as set on the{" "}
+            <Link to="/project/masterdata">masterdata</Link> page.
+          </PageText>
+        )}
 
         <PageText>
           SMDA (Subsurface Master Data) is the storage system for masterdata in
