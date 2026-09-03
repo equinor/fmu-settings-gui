@@ -681,14 +681,15 @@ export function Overview({
       <PageSectionWidthConstrained>
         <PageText>
           The following are the mappings for horizons and zones, showing the
-          names in RMS and SMDA. Both horizons and zones are defined as
-          stratigraphic units in SMDA.
+          names in RMS and SMDA. In SMDA, zones are stratigraphic units, while
+          horizons define the tops and bases of those units.
         </PageText>
 
         {stratigraphicColumn && (
           <PageText>
-            RMS horizons and zones are mapped to the stratigraphic column{" "}
-            {stratigraphicColumn.identifier} in SMDA.
+            The selected SMDA stratigraphic column is{" "}
+            {stratigraphicColumn.identifier}, as set on the{" "}
+            <Link to="/project/masterdata">masterdata</Link> page.
           </PageText>
         )}
 
