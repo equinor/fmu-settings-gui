@@ -707,7 +707,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.0.0'
+            default: '1.1.1.dev4+g8358e5bdb'
         }
     },
     type: 'object',
@@ -1113,7 +1113,7 @@ export const ProjectConfigSchema = {
             type: 'integer',
             minimum: 5,
             title: 'Cache Max Revisions',
-            default: 5
+            default: 10
         },
         rms: {
             anyOf: [
@@ -1341,24 +1341,58 @@ export const RmsProjectPathsResultSchema = {
     description: 'List of RMS project paths within the FMU project.'
 } as const;
 
-export const RmsSimulatorMappingFilePathSchema = {
+export const RmsSimulatorMappingExportRequestSchema = {
     properties: {
         relative_path: {
-            type: 'string',
-            format: 'path',
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'path'
+                },
+                {
+                    type: 'null'
+                }
+            ],
             title: 'Relative Path',
-            description: 'Relative path in the project to an RMS-to-simulator mapping file.',
+            description: 'Output path relative to the project root, or the default path if omitted.',
+            examples: [
+                'rms/input/well_modelling/well_info/rms_simulator.renaming_table'
+            ]
+        },
+        overwrite: {
+            type: 'boolean',
+            title: 'Overwrite',
+            description: 'Whether an existing export file may be overwritten.',
+            default: false
+        }
+    },
+    type: 'object',
+    title: 'RmsSimulatorMappingExportRequest',
+    description: 'Options for exporting RMS-to-simulator mappings.'
+} as const;
+
+export const RmsSimulatorMappingImportRequestSchema = {
+    properties: {
+        relative_path: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'path'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Relative Path',
+            description: 'Input path relative to the project root, or the default path if omitted.',
             examples: [
                 'rms/input/well_modelling/well_info/rms_eclipse.csv'
             ]
         }
     },
     type: 'object',
-    required: [
-        'relative_path'
-    ],
-    title: 'RmsSimulatorMappingFilePath',
-    description: 'A path to an RMS-to-simulator mapping import or export file.'
+    title: 'RmsSimulatorMappingImportRequest',
+    description: 'Options for importing RMS-to-simulator mappings.'
 } as const;
 
 export const RmsStratigraphicFrameworkSchema = {
@@ -1458,6 +1492,50 @@ export const RmsWellSchema = {
             type: 'boolean',
             title: 'Planned',
             default: false
+        },
+        unique_well_identifier: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Unique Well Identifier'
+        },
+        easting: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Easting'
+        },
+        northing: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Northing'
+        },
+        rkb: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Rkb'
         }
     },
     type: 'object',

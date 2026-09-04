@@ -4215,13 +4215,13 @@
               "schema": {
                 "anyOf": [
                   {
-                    "$ref": "#/components/schemas/RmsSimulatorMappingFilePath"
+                    "$ref": "#/components/schemas/RmsSimulatorMappingImportRequest"
                   },
                   {
                     "type": "null"
                   }
                 ],
-                "title": "Path"
+                "title": "Import Request"
               }
             }
           }
@@ -4258,16 +4258,13 @@
             }
           },
           "403": {
-            "description": "The RMS-to-simulator wellbore mapping file could not be read or written",
+            "description": "The RMS-to-simulator wellbore mapping file could not be read",
             "content": {
               "application/json": {
                 "example": {
                   "examples": [
                     {
                       "detail": "Permission denied accessing .fmu at {path}"
-                    },
-                    {
-                      "detail": "Permission denied while trying to export the mappings."
                     }
                   ]
                 }
@@ -4282,9 +4279,6 @@
                   "examples": [
                     {
                       "detail": "CSV file not found: '{path}'"
-                    },
-                    {
-                      "detail": "Mappings file not found"
                     }
                   ]
                 }
@@ -4292,7 +4286,7 @@
             }
           },
           "422": {
-            "description": "\nThe RMS-to-simulator wellbore mapping file contains invalid content,\nor no mappings can be exported.\n",
+            "description": "The RMS-to-simulator wellbore mapping file contains invalid content",
             "content": {
               "application/json": {
                 "example": {
@@ -4305,15 +4299,6 @@
                     },
                     {
                       "detail": "Invalid mappings: {error_message}"
-                    },
-                    {
-                      "detail": "Invalid mappings in existing file: {error_message}"
-                    },
-                    {
-                      "detail": "Mappings were not exported because the project contains invalid saved mappings."
-                    },
-                    {
-                      "detail": "No rms-to-simulator primary wellbore mappings available to export as rms_simulator.renaming_table"
                     }
                   ]
                 }
@@ -4372,13 +4357,13 @@
               "schema": {
                 "anyOf": [
                   {
-                    "$ref": "#/components/schemas/RmsSimulatorMappingFilePath"
+                    "$ref": "#/components/schemas/RmsSimulatorMappingExportRequest"
                   },
                   {
                     "type": "null"
                   }
                 ],
-                "title": "Path"
+                "title": "Export Request"
               }
             }
           }
@@ -4415,14 +4400,11 @@
             }
           },
           "403": {
-            "description": "The RMS-to-simulator wellbore mapping file could not be read or written",
+            "description": "The RMS-to-simulator wellbore mapping file could not be written",
             "content": {
               "application/json": {
                 "example": {
                   "examples": [
-                    {
-                      "detail": "Permission denied accessing .fmu at {path}"
-                    },
                     {
                       "detail": "Permission denied while trying to export the mappings."
                     }
@@ -4432,14 +4414,11 @@
             }
           },
           "404": {
-            "description": "The RMS-to-simulator wellbore mapping file could not be found",
+            "description": "The saved project mappings could not be found",
             "content": {
               "application/json": {
                 "example": {
                   "examples": [
-                    {
-                      "detail": "CSV file not found: '{path}'"
-                    },
                     {
                       "detail": "Mappings file not found"
                     }
@@ -4448,20 +4427,31 @@
               }
             }
           },
-          "422": {
-            "description": "\nThe RMS-to-simulator wellbore mapping file contains invalid content,\nor no mappings can be exported.\n",
+          "409": {
+            "description": "The export file already exists and overwrite was not authorized",
             "content": {
               "application/json": {
                 "example": {
                   "examples": [
                     {
-                      "detail": "CSV file is missing required columns: {column_names}"
+                      "detail": "Export file already exists: '{path}'"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\nThe export path or saved mappings are invalid, or no mappings can\nbe exported.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Cannot export mappings to a directory. Select a file path: '{path}'"
                     },
                     {
-                      "detail": "CSV row has missing well mapping values at line {line_number}"
-                    },
-                    {
-                      "detail": "Invalid mappings: {error_message}"
+                      "detail": "Cannot export mappings because part of the folder path is a file. Select a valid file path: '{path}'"
                     },
                     {
                       "detail": "Invalid mappings in existing file: {error_message}"
@@ -5722,6 +5712,198 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/rms/validate": {
+      "post": {
+        "tags": [
+          "rms"
+        ],
+        "summary": "Validate saved RMS settings against the open RMS project",
+        "description": "Compare the RMS settings saved in the FMU project with the open RMS\nproject.\n\nThe operation does not modify saved RMS settings. When validation\nsucceeds, it updates RMS validation metadata in project config.",
+        "operationId": "rms-post_validate_rms_project",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\nRMS project path is not configured in the project config file,\nor no RMS project is currently open in the session.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "RMS project path is not set in the project config file."
+                    },
+                    {
+                      "detail": "No RMS project is currently open. Please open an RMS project first."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The project configuration cannot be accessed for writing.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied accessing .fmu at {project_fmu_directory_path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "\nThe RMS project saved in the FMU project or its .master file could not\nbe accessed while determining its version.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "RMS project not found at '{rms_project_path}'."
+                    },
+                    {
+                      "detail": "RMS version cannot be determined because the RMS project .master file is not found at {rms_project_path}."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "\nThe FMU project has no saved RMS settings, the saved settings do not\nmatch the open RMS project, or the RMS version cannot be used.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No RMS settings are saved in the FMU project."
+                    },
+                    {
+                      "detail": {
+                        "message": "Saved RMS settings do not match the open RMS project.",
+                        "mismatches": [
+                          {
+                            "key": "rms.horizons.Top",
+                            "saved_value": {
+                              "name": "Top",
+                              "type": "interpreted"
+                            },
+                            "source_value": {
+                              "name": "Top",
+                              "type": "calculated"
+                            },
+                            "message": "RMS horizon 'Top' has different settings in the FMU project and the open RMS project."
+                          },
+                          {
+                            "key": "rms.wells.A-1",
+                            "saved_value": {
+                              "name": "A-1",
+                              "planned": false
+                            },
+                            "message": "RMS well 'A-1' is saved in the FMU project but is not present in the open RMS project."
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "detail": "RMS version error for project at '{rms_project_path}'"
+                    },
+                    {
+                      "detail": "Failed to validate the open RMS project: {error_message}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "The project is not locked for writing by the current session.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Project is not locked. Acquire the lock before writing."
+                    },
+                    {
+                      "detail": "Project lock file is missing. Project is treated as read-only."
+                    },
+                    {
+                      "detail": "Project is read-only. Cannot write to project that is locked by another process."
+                    }
+                  ]
                 }
               }
             }
@@ -7725,7 +7907,7 @@
             "type": "string",
             "pattern": "(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)",
             "title": "Version",
-            "default": "1.0.0"
+            "default": "1.1.1.dev4+g8358e5bdb"
           }
         },
         "type": "object",
@@ -8119,7 +8301,7 @@
             "type": "integer",
             "minimum": 5,
             "title": "Cache Max Revisions",
-            "default": 5
+            "default": 10
           },
           "rms": {
             "anyOf": [
@@ -8339,24 +8521,57 @@
         "title": "RmsProjectPathsResult",
         "description": "List of RMS project paths within the FMU project."
       },
-      "RmsSimulatorMappingFilePath": {
+      "RmsSimulatorMappingExportRequest": {
         "properties": {
           "relative_path": {
-            "type": "string",
-            "format": "path",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "path"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Relative Path",
-            "description": "Relative path in the project to an RMS-to-simulator mapping file.",
+            "description": "Output path relative to the project root, or the default path if omitted.",
+            "examples": [
+              "rms/input/well_modelling/well_info/rms_simulator.renaming_table"
+            ]
+          },
+          "overwrite": {
+            "type": "boolean",
+            "title": "Overwrite",
+            "description": "Whether an existing export file may be overwritten.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "RmsSimulatorMappingExportRequest",
+        "description": "Options for exporting RMS-to-simulator mappings."
+      },
+      "RmsSimulatorMappingImportRequest": {
+        "properties": {
+          "relative_path": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "path"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative Path",
+            "description": "Input path relative to the project root, or the default path if omitted.",
             "examples": [
               "rms/input/well_modelling/well_info/rms_eclipse.csv"
             ]
           }
         },
         "type": "object",
-        "required": [
-          "relative_path"
-        ],
-        "title": "RmsSimulatorMappingFilePath",
-        "description": "A path to an RMS-to-simulator mapping import or export file."
+        "title": "RmsSimulatorMappingImportRequest",
+        "description": "Options for importing RMS-to-simulator mappings."
       },
       "RmsStratigraphicFramework": {
         "properties": {
@@ -8452,6 +8667,50 @@
             "type": "boolean",
             "title": "Planned",
             "default": false
+          },
+          "unique_well_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unique Well Identifier"
+          },
+          "easting": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Easting"
+          },
+          "northing": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Northing"
+          },
+          "rkb": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rkb"
           }
         },
         "type": "object",

@@ -18,7 +18,10 @@ import { TextField } from "#components/form/field";
 import type { ElementMappings } from "#components/project/common/mapping/types";
 import type { SaveWellboreMappings } from "#services/mappings";
 import { EditDialog, GenericDialog, PageText } from "#styles/common";
-import { HTTP_STATUS_404_NOT_FOUND } from "#utils/api";
+import {
+  HTTP_STATUS_404_NOT_FOUND,
+  HTTP_STATUS_409_CONFLICT,
+} from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui";
 import {
@@ -47,6 +50,7 @@ function MappingFilePathDialog({
   operation,
   disabled,
   isPending,
+  isDismissable,
   pathError,
   clearPathError,
   closeDialog,
@@ -55,6 +59,7 @@ function MappingFilePathDialog({
   operation: MappingFileOperation;
   disabled: boolean;
   isPending: boolean;
+  isDismissable: boolean;
   pathError?: string | undefined;
   clearPathError: () => void;
   closeDialog: () => void;
@@ -89,7 +94,7 @@ function MappingFilePathDialog({
 
       <EditDialog
         open={true}
-        isDismissable={true}
+        isDismissable={isDismissable}
         onClose={confirmClose.handleCloseRequest}
         $width="42em"
       >
@@ -241,6 +246,62 @@ function ImportWarningDialog({
   );
 }
 
+function ExportOverwriteDialog({
+  path,
+  disabled,
+  isPending,
+  closeDialog,
+  overwriteFile,
+}: {
+  path: string;
+  disabled: boolean;
+  isPending: boolean;
+  closeDialog: () => void;
+  overwriteFile: () => void;
+}) {
+  return (
+    <GenericDialog
+      open={true}
+      isDismissable={true}
+      onClose={closeDialog}
+      $width="32em"
+    >
+      <Dialog.Header>Overwrite existing renaming table</Dialog.Header>
+
+      <Dialog.CustomContent>
+        <PageText>
+          A renaming table already exists{" "}
+          {path ? "at " : "at the default location."}
+          {path && <code>{path}</code>}
+          {path && "."}
+        </PageText>
+
+        <PageText $marginBottom="0">
+          Do you want to overwrite the existing file?
+        </PageText>
+      </Dialog.CustomContent>
+
+      <Dialog.Actions>
+        <GeneralButton
+          label="Overwrite file"
+          color="danger"
+          disabled={disabled}
+          isPending={isPending}
+          tooltipText={
+            disabled
+              ? isPending
+                ? "File operation in progress"
+                : "Project is read-only"
+              : undefined
+          }
+          onClick={overwriteFile}
+        />
+        <CancelButton onClick={closeDialog} />
+      </Dialog.Actions>
+    </GenericDialog>
+  );
+}
+
 export function SimulatorMappings({
   elementMappings,
   projectReadOnly,
@@ -255,6 +316,7 @@ export function SimulatorMappings({
   const [mappingFileOperation, setMappingFileOperation] =
     useState<MappingFileOperation>();
   const [pendingImport, setPendingImport] = useState<PendingImport>();
+  const [pendingOverwritePath, setPendingOverwritePath] = useState<string>();
   const importMutation = useMutation({
     ...projectPostMappingsImportRmsEclipseCsvMutation(),
     meta: {
@@ -266,6 +328,7 @@ export function SimulatorMappings({
     ...projectPostMappingsExportRmsSimulatorRenamingTableMutation(),
     meta: {
       errorPrefix: "Could not export simulator names to a renaming table",
+      preventDefaultErrorHandling: [HTTP_STATUS_409_CONFLICT],
     },
   });
   const hasSimulatorMappings = useMemo(
@@ -326,13 +389,25 @@ export function SimulatorMappings({
     );
   };
 
-  const exportMappings = (path: string) => {
+  const exportMappings = (path: string, overwrite: boolean = false) => {
+    const body = path
+      ? { relative_path: path, ...(overwrite && { overwrite: true }) }
+      : overwrite
+        ? { overwrite: true }
+        : null;
+
     exportMutation.mutate(
-      { body: path ? { relative_path: path } : null },
+      { body },
       {
         onSuccess: (result) => {
+          setPendingOverwritePath(undefined);
           setMappingFileOperation(undefined);
           toast.info(result.message);
+        },
+        onError: (error) => {
+          if (error.response?.status === HTTP_STATUS_409_CONFLICT) {
+            setPendingOverwritePath(path);
+          }
         },
       },
     );
@@ -359,17 +434,39 @@ export function SimulatorMappings({
           operation={mappingFileOperation}
           disabled={projectReadOnly || fileOperationPending}
           isPending={fileOperationPending}
+          isDismissable={pendingOverwritePath === undefined}
           pathError={
             mappingFileOperation === "import" ? importPathError : undefined
           }
-          clearPathError={importMutation.reset}
+          clearPathError={
+            mappingFileOperation === "import"
+              ? importMutation.reset
+              : exportMutation.reset
+          }
           closeDialog={() => {
             importMutation.reset();
+            exportMutation.reset();
+            setPendingOverwritePath(undefined);
             setMappingFileOperation(undefined);
           }}
           submitPath={
             mappingFileOperation === "import" ? importMappings : exportMappings
           }
+        />
+      )}
+
+      {pendingOverwritePath !== undefined && (
+        <ExportOverwriteDialog
+          path={pendingOverwritePath}
+          disabled={projectReadOnly || exportMutation.isPending}
+          isPending={exportMutation.isPending}
+          closeDialog={() => {
+            exportMutation.reset();
+            setPendingOverwritePath(undefined);
+          }}
+          overwriteFile={() => {
+            exportMappings(pendingOverwritePath, true);
+          }}
         />
       )}
 
@@ -406,6 +503,8 @@ export function SimulatorMappings({
               isPending={exportMutation.isPending}
               tooltipText={projectReadOnly ? "Project is read-only" : undefined}
               onClick={() => {
+                exportMutation.reset();
+                setPendingOverwritePath(undefined);
                 setMappingFileOperation("export");
               }}
             />
