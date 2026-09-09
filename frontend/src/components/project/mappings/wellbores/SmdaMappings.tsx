@@ -1,10 +1,9 @@
-import { Checkbox, Dialog } from "@equinor/eds-core-react";
+import { Autocomplete, Checkbox, Dialog } from "@equinor/eds-core-react";
 import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-import type { MatchReplacementRule } from "#client";
 import { matchPostMatchMutation } from "#client/@tanstack/react-query.gen";
 import { ConfirmCloseDialog } from "#components/common";
 import { CancelButton, GeneralButton } from "#components/form/button";
@@ -13,7 +12,7 @@ import { emptyName } from "#components/project/common/mapping/utils";
 import { applicationLocale } from "#config";
 import type { SaveWellboreMappings } from "#services/mappings";
 import type { SmdaWellHeaders } from "#services/smda";
-import { EditDialog, InfoBox, PageText } from "#styles/common";
+import { PageText, ParametersBox } from "#styles/common";
 import {
   DataGridFilterContainer,
   DataGridSearch,
@@ -30,7 +29,12 @@ import { MappingAction } from "./MappingAction";
 import { RemoveMappingsAction } from "./RemoveMappingsAction";
 import {
   ConfidenceBadge,
+  MappingDialog,
+  MappingHelp,
+  MappingParametersRow,
+  MappingSummary,
   MatchingResultsContainer,
+  PrefixSelector,
 } from "./SmdaMappings.style";
 import type { AutomaticMatchProposal, DisplayedMatchQuality } from "./types";
 
@@ -42,34 +46,15 @@ const MATCH_QUALITY_ORDER: Record<DisplayedMatchQuality, number> = {
   High: 1,
   Exact: 2,
 };
-const AUTOMATIC_MATCHING_GRID_MAX_HEIGHT = 391;
+const AUTOMATIC_MAPPING_GRID_MAX_HEIGHT = 391;
+const coverageFormatter = new Intl.NumberFormat(applicationLocale, {
+  style: "percent",
+  maximumFractionDigits: 1,
+});
 
-function createWellPrefixReplacements(
-  wellboreNames: string[],
-): MatchReplacementRule[] {
-  const prefixes = new Set<string>();
-
-  wellboreNames.forEach((wellboreName) => {
-    const firstNumberIndex = wellboreName.search(/\d/);
-    if (firstNumberIndex <= 0) {
-      return;
-    }
-
-    const prefix = wellboreName
-      .slice(0, firstNumberIndex)
-      .toLocaleLowerCase(applicationLocale)
-      .replace(/[_.\-/]/g, " ")
-      .trim()
-      .replace(/\s+/g, " ");
-    if (prefix) {
-      prefixes.add(prefix);
-    }
-  });
-
-  return [...prefixes]
-    .sort((prefixA, prefixB) => prefixB.length - prefixA.length)
-    .map((original) => ({ original, replacement: "" }));
-}
+const COUNTRY_PREFIX_OPTION = "Country prefixes";
+const COUNTRY_PREFIXES = ["NO", "BR", "CA", "US", "GB"];
+const KNOWN_PREFIX_OPTIONS = [COUNTRY_PREFIX_OPTION, "RFT", "MLW"];
 
 function displayedMatchQuality(
   proposal: AutomaticMatchProposal,
@@ -107,104 +92,130 @@ function matchesNameSimilarityFilter(
   );
 }
 
-function AutomaticMatchingSetupDialog({
+function AutomaticMappingParameters({
   disabled,
   isPending,
-  closeDialog,
-  runMatching,
+  runMapping,
+  prefixOptions,
+  selectedPrefixes,
+  setSelectedPrefixes,
+  addPrefix,
+  hasSuggestions,
 }: {
   disabled: boolean;
   isPending: boolean;
-  closeDialog: () => void;
-  runMatching: (ignorePrefixes: boolean) => void;
+  runMapping: () => void;
+  prefixOptions: string[];
+  selectedPrefixes: string[];
+  setSelectedPrefixes: (value: string[]) => void;
+  addPrefix: (value: string) => void;
+  hasSuggestions: boolean;
 }) {
-  const [ignorePrefixes, setIgnorePrefixes] = useState(true);
-
-  const submitMatching = () => {
-    runMatching(ignorePrefixes);
-  };
-  const confirmClose = useConfirmClose({
-    enable: true,
-    determineRequiresConfirmation: () => !ignorePrefixes,
-    onCloseConfirmed: closeDialog,
-  });
-
   return (
-    <>
-      <ConfirmCloseDialog
-        isOpen={confirmClose.confirmCloseDialogOpen}
-        handleConfirmCloseDecision={confirmClose.handleDecision}
-      />
-
-      <EditDialog
-        open={true}
-        isDismissable={true}
-        onClose={confirmClose.handleCloseRequest}
-        $width="42em"
-      >
-        <Dialog.Header>Suggest SMDA names</Dialog.Header>
-
-        <Dialog.CustomContent>
-          <PageText>
-            This compares each unmapped RMS wellbore name with the available
-            SMDA wellbore names and suggests the most similar SMDA name. You can
-            review every suggestion before anything is saved.
-          </PageText>
-
-          <Checkbox
-            label="Ignore prefixes before the first wellbore number (recommended)"
-            checked={ignorePrefixes}
-            onChange={(event) => {
-              setIgnorePrefixes(event.target.checked);
-            }}
-          />
-
-          <PageText $marginBottom="0">
-            RMS and SMDA wellbore names can begin with prefixes such as{" "}
-            <code>RFT</code> or <code>NO</code>. These prefixes are ignored when
-            the names are compared. The complete SMDA name, including the
-            country prefix, is still saved.
-          </PageText>
-        </Dialog.CustomContent>
-
-        <Dialog.Actions>
-          <GeneralButton
-            label="Generate suggestions"
+    <ParametersBox>
+      <MappingParametersRow>
+        <PrefixSelector>
+          <Autocomplete
+            multiple
+            autoWidth
+            label="Prefixes to ignore"
+            placeholder="Select or enter a prefix"
+            options={prefixOptions}
+            selectedOptions={selectedPrefixes}
             disabled={disabled}
-            isPending={isPending}
-            tooltipText={
-              disabled
-                ? isPending
-                  ? "SMDA name suggestions are being generated"
-                  : "Project is read-only"
-                : undefined
+            onOptionsChange={({ selectedItems }) => {
+              setSelectedPrefixes(selectedItems);
+            }}
+            onAddNewOption={addPrefix}
+            optionComponent={(option) =>
+              option === COUNTRY_PREFIX_OPTION
+                ? `${option} (${COUNTRY_PREFIXES.join(", ")})`
+                : option
             }
-            onClick={submitMatching}
+            helperText="Country prefixes are ignored by default"
           />
-          <CancelButton onClick={confirmClose.handleCloseRequest} />
-        </Dialog.Actions>
-      </EditDialog>
-    </>
+        </PrefixSelector>
+        <GeneralButton
+          label={hasSuggestions ? "Update suggestions" : "Generate suggestions"}
+          disabled={disabled}
+          isPending={isPending}
+          variant={hasSuggestions ? "outlined" : "contained"}
+          tooltipText={
+            disabled
+              ? isPending
+                ? "SMDA name suggestions are being generated"
+                : "Project is read-only"
+              : undefined
+          }
+          onClick={runMapping}
+        />
+      </MappingParametersRow>
+      <MappingHelp>
+        <summary>About prefix rules</summary>
+        <PageText>
+          RMS and SMDA can use different prefixes for the same wellbore, so
+          ignoring them can help find similar names. Select known prefixes or
+          add your own.
+        </PageText>
+        <PageText>
+          For example, ignoring RFT and NO lets{" "}
+          <span className="emphasis">RFT_55_33-A-2</span> match{" "}
+          <span className="emphasis">NO 55/33-A-2</span>. Only the comparison is
+          affected. The complete SMDA name is still saved.
+        </PageText>
+        <PageText>
+          Your selections and deselections are kept when the same SMDA wellbore
+          is suggested again.
+        </PageText>
+      </MappingHelp>
+    </ParametersBox>
   );
 }
 
-function AutomaticMatchingDialog({
-  proposals,
+function AutomaticMappingDialog({
+  mappingProposals,
   unmappedRmsWellboreCount,
   disabled,
   isPending,
+  isGenerating,
+  hasGenerationError,
   closeDialog,
   applyProposals,
   toggleProposal,
+  runMapping,
+  prefixOptions,
+  selectedPrefixes,
+  setSelectedPrefixes,
+  addPrefix,
+  ignoredPrefixes,
 }: {
-  proposals: AutomaticMatchProposal[];
+  mappingProposals: AutomaticMatchProposal[] | null;
   unmappedRmsWellboreCount: number;
   disabled: boolean;
   isPending: boolean;
+  isGenerating: boolean;
+  hasGenerationError: boolean;
   closeDialog: () => void;
   applyProposals: () => void;
   toggleProposal: (rmsWellboreName: string) => void;
+  runMapping: () => void;
+  prefixOptions: string[];
+  selectedPrefixes: string[];
+  setSelectedPrefixes: (value: string[]) => void;
+  addPrefix: (value: string) => void;
+  ignoredPrefixes: string[];
 }) {
+  const proposals = useMemo(() => mappingProposals ?? [], [mappingProposals]);
+  const hasSuggestions = mappingProposals !== null;
+  const isBusy = isPending || isGenerating;
+  const prefixesChanged =
+    hasSuggestions &&
+    (selectedPrefixes.length !== ignoredPrefixes.length ||
+      selectedPrefixes.some((prefix) => !ignoredPrefixes.includes(prefix)));
+  const formatCoverage = (count: number) =>
+    coverageFormatter.format(
+      unmappedRmsWellboreCount === 0 ? 0 : count / unmappedRmsWellboreCount,
+    );
   const [sorting, setSorting] = useState<Array<{ id: string; desc: boolean }>>([
     { id: "nameSimilarity", desc: true },
   ]);
@@ -215,7 +226,7 @@ function AutomaticMatchingDialog({
   ).length;
   const confirmClose = useConfirmClose({
     enable: true,
-    determineRequiresConfirmation: () => selectedCount > 0,
+    determineRequiresConfirmation: () => proposals.length > 0,
     onCloseConfirmed: closeDialog,
   });
   const remainingCount = unmappedRmsWellboreCount - selectedCount;
@@ -254,6 +265,7 @@ function AutomaticMatchingDialog({
           return (
             <Checkbox
               checked={proposal.selected}
+              disabled={disabled || isBusy}
               onChange={() => {
                 toggleProposal(proposal.rmsWellboreName);
               }}
@@ -267,13 +279,11 @@ function AutomaticMatchingDialog({
         accessorKey: "rmsWellboreName",
         header: "RMS",
         enableColumnFilter: false,
-        size: 195,
       },
       {
         accessorKey: "smdaName",
         header: "Suggested SMDA",
         enableColumnFilter: false,
-        size: 236,
         cell: ({ row }) => row.original.smdaName || emptyName,
       },
       {
@@ -298,10 +308,13 @@ function AutomaticMatchingDialog({
         },
       },
     ],
-    [toggleProposal],
+    [toggleProposal, disabled, isBusy],
   );
-  const emptyMessage =
-    proposals.length === 0
+  const emptyMessage = !hasSuggestions
+    ? isGenerating
+      ? "Generating suggestions..."
+      : "No suggestions generated yet."
+    : proposals.length === 0
       ? "No medium or higher similarity suggestions were found."
       : normalizedWellboreFilter && visibleProposals.length === 0
         ? "No wellbores match the filter."
@@ -314,56 +327,103 @@ function AutomaticMatchingDialog({
         handleConfirmCloseDecision={confirmClose.handleDecision}
         title="Discard suggestions"
         description={
-          "The selected SMDA names have not been saved. If the review is " +
-          "cancelled, the suggestions will be lost."
+          "Closing this review will discard its suggestions and your " +
+          "selections and deselections."
         }
         question="Do you want to discard the suggestions?"
         confirmLabel="Keep reviewing"
         cancelLabel="Discard suggestions"
       />
 
-      <EditDialog
+      <MappingDialog
         open={true}
-        isDismissable={true}
+        isDismissable={!confirmClose.confirmCloseDialogOpen && !isBusy}
         onClose={confirmClose.handleCloseRequest}
-        $width="48em"
+        $width="54em"
+        $maxWidth="calc(100vw - 2.5rem)"
       >
-        <Dialog.Header>Review suggested SMDA names</Dialog.Header>
+        <Dialog.Header>Suggest SMDA names</Dialog.Header>
 
         <Dialog.CustomContent>
           <PageText>
-            Review each suggestion before saving. Name similarity does not
-            verify that the RMS and SMDA names refer to the same wellbore.
-            Suggestions with low name similarity are not shown.
+            Find suggested SMDA names for unmapped non-planned RMS wellbores.
           </PageText>
+
+          <AutomaticMappingParameters
+            disabled={disabled || isBusy}
+            isPending={isGenerating}
+            runMapping={runMapping}
+            prefixOptions={prefixOptions}
+            selectedPrefixes={selectedPrefixes}
+            setSelectedPrefixes={setSelectedPrefixes}
+            addPrefix={addPrefix}
+            hasSuggestions={hasSuggestions}
+          />
 
           <PageText>
-            <span className="emphasis">Exact</span> means a 100% name match and
-            is selected by default. The same SMDA name can be selected for more
-            than one RMS wellbore.
+            Review each suggestion before saving. Name similarity does not
+            verify that the RMS and SMDA names refer to the same wellbore.
           </PageText>
 
-          <InfoBox>
-            <table>
-              <tbody>
-                <tr>
-                  <th>Suggestions found</th>
-                  <td>
-                    <span className="emphasis">{proposals.length}</span> of{" "}
-                    {unmappedRmsWellboreCount} unmapped non-planned wellbores
-                  </td>
-                </tr>
-                <tr>
-                  <th>Selected suggestions</th>
-                  <td className="emphasis">{selectedCount}</td>
-                </tr>
-                <tr>
-                  <th>Need manual mapping</th>
-                  <td className="emphasis">{remainingCount}</td>
-                </tr>
-              </tbody>
-            </table>
-          </InfoBox>
+          <MappingHelp>
+            <summary>About name similarity</summary>
+            <PageText>
+              <span className="emphasis">Exact</span> means a 100&nbsp;% name
+              match after normalization and any selected prefix removal. Exact
+              matches are selected automatically unless you previously
+              deselected that match. The same SMDA name can be selected for more
+              than one RMS wellbore.
+            </PageText>
+          </MappingHelp>
+
+          <MappingSummary>
+            {isGenerating ? (
+              <PageText role="status">
+                {hasSuggestions
+                  ? "Updating suggestions. Previous results are shown below."
+                  : "Generating suggestions..."}
+              </PageText>
+            ) : hasGenerationError ? (
+              <PageText role="alert">
+                {hasSuggestions
+                  ? "Could not update suggestions. Previous results and choices are unchanged."
+                  : "Could not generate suggestions. Try again."}
+              </PageText>
+            ) : null}
+            {prefixesChanged && !isGenerating && (
+              <PageText role="status">
+                Prefix rules have changed. Results still use the ignored
+                prefixes listed below.
+              </PageText>
+            )}
+            {hasSuggestions && (
+              <PageText>
+                Ignored prefixes: {ignoredPrefixes.join(", ") || "None"}
+              </PageText>
+            )}
+            <dl>
+              <div>
+                <dt>Suggestions found</dt>
+                <dd>
+                  {hasSuggestions ? proposals.length : "-"} of{" "}
+                  {unmappedRmsWellboreCount}
+                  {hasSuggestions && ` (${formatCoverage(proposals.length)})`}
+                </dd>
+              </div>
+              <div>
+                <dt>Selected suggestions</dt>
+                <dd>
+                  {selectedCount} ({formatCoverage(selectedCount)})
+                </dd>
+              </div>
+              <div>
+                <dt>Remaining unmapped</dt>
+                <dd>
+                  {remainingCount} ({formatCoverage(remainingCount)})
+                </dd>
+              </div>
+            </dl>
+          </MappingSummary>
 
           {proposals.length > 0 && (
             <DataGridFilterContainer>
@@ -374,6 +434,7 @@ function AutomaticMatchingDialog({
                   setWellboreFilter(event.target.value);
                 }}
               />
+
               {normalizedWellboreFilter && (
                 <PageText $marginBottom="0">
                   Filter is showing{" "}
@@ -388,15 +449,25 @@ function AutomaticMatchingDialog({
             <EdsDataGrid
               stickyHeader
               enableVirtual
+              width="100%"
               height={dataGridHeight(
                 filteredProposalCount,
-                AUTOMATIC_MATCHING_GRID_MAX_HEIGHT,
+                AUTOMATIC_MAPPING_GRID_MAX_HEIGHT,
               )}
               rows={visibleProposals}
               columns={columns}
               getRowId={(row) => row.rmsWellboreName}
               headerClass={(column) =>
-                column.id === "useSuggestion" ? "centered-column-header" : ""
+                column.id === "useSuggestion"
+                  ? "centered-column-header"
+                  : column.id === "rmsWellboreName" || column.id === "smdaName"
+                    ? "name-column"
+                    : ""
+              }
+              cellClass={(_row, columnId) =>
+                columnId === "rmsWellboreName" || columnId === "smdaName"
+                  ? "name-column"
+                  : ""
               }
               enableSorting
               enableColumnFiltering
@@ -412,22 +483,24 @@ function AutomaticMatchingDialog({
         <Dialog.Actions>
           <GeneralButton
             label="Save selected SMDA names"
-            disabled={disabled || selectedCount === 0}
+            disabled={disabled || isBusy || selectedCount === 0}
             isPending={isPending}
             tooltipText={
               isPending
                 ? "Wellbore mappings are being saved"
-                : disabled
-                  ? "Project is read-only"
-                  : selectedCount === 0
-                    ? "Select at least one suggestion to save"
-                    : undefined
+                : isGenerating
+                  ? "SMDA name suggestions are being generated"
+                  : disabled
+                    ? "Project is read-only"
+                    : selectedCount === 0
+                      ? "Select at least one suggestion to save"
+                      : undefined
             }
             onClick={applyProposals}
           />
           <CancelButton onClick={confirmClose.handleCloseRequest} />
         </Dialog.Actions>
-      </EditDialog>
+      </MappingDialog>
     </>
   );
 }
@@ -500,11 +573,16 @@ export function SmdaMappings({
   isSaving: boolean;
   saveMappings: SaveWellboreMappings;
 }) {
-  const [automaticMatchProposals, setAutomaticMatchProposals] = useState<
+  const [automaticMappingProposals, setAutomaticMappingProposals] = useState<
     AutomaticMatchProposal[] | null
   >(null);
-  const [automaticMatchingSetupOpen, setAutomaticMatchingSetupOpen] =
-    useState(false);
+  const [automaticMappingOpen, setAutomaticMappingOpen] = useState(false);
+  const [selectedPrefixes, setSelectedPrefixes] = useState<string[]>([
+    COUNTRY_PREFIX_OPTION,
+  ]);
+  const [prefixOptions, setPrefixOptions] = useState(KNOWN_PREFIX_OPTIONS);
+  const [reviewPrefixes, setReviewPrefixes] = useState<string[]>([]);
+  const reviewChoices = useRef(new Map<string, boolean>());
   const matchMutation = useMutation({
     ...matchPostMatchMutation(),
     meta: { errorPrefix: "Could not generate SMDA name suggestions" },
@@ -539,7 +617,42 @@ export function SmdaMappings({
     wellHeaders,
   });
 
-  const startAutomaticMatching = (ignorePrefixes: boolean) => {
+  const closeAutomaticMapping = () => {
+    matchMutation.reset();
+    reviewChoices.current.clear();
+    setAutomaticMappingOpen(false);
+    setAutomaticMappingProposals(null);
+    setReviewPrefixes([]);
+  };
+
+  const addPrefix = (value: string) => {
+    const prefix = value
+      .replace(/[_.\-/]/g, " ")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toUpperCase();
+    if (!prefix) {
+      return;
+    }
+
+    const option =
+      prefixOptions.find((item) => item.toUpperCase() === prefix) ?? prefix;
+    setPrefixOptions((options) =>
+      options.includes(option) ? options : [...options, option],
+    );
+    setSelectedPrefixes((options) =>
+      options.includes(option) ? options : [...options, option],
+    );
+  };
+
+  const startAutomaticMapping = () => {
+    if (suggestionsBlocked || matchMutation.isPending || isSaving) {
+      return;
+    }
+
+    const prefixes = prefixOptions.filter((prefix) =>
+      selectedPrefixes.includes(prefix),
+    );
     const smdaWellboreNames = wellHeaders.smdaHeaders.map(
       (header) => header.unique_wellbore_identifier,
     );
@@ -549,12 +662,13 @@ export function SmdaMappings({
         body: {
           sources: rmsWellboreNamesMissingSmda,
           targets: smdaWellboreNames,
-          replacements: ignorePrefixes
-            ? createWellPrefixReplacements([
-                ...rmsWellboreNamesMissingSmda,
-                ...smdaWellboreNames,
-              ])
-            : [],
+          prefixes_to_remove: [
+            ...new Set(
+              prefixes.flatMap((prefix) =>
+                prefix === COUNTRY_PREFIX_OPTION ? COUNTRY_PREFIXES : [prefix],
+              ),
+            ),
+          ],
         },
       },
       {
@@ -563,60 +677,80 @@ export function SmdaMappings({
             results,
             wellHeaders.smdaHeaders,
           );
-          setAutomaticMatchingSetupOpen(false);
-          setAutomaticMatchProposals(proposals);
+          setReviewPrefixes(prefixes);
+          setAutomaticMappingProposals(
+            proposals.map((proposal) => ({
+              ...proposal,
+              selected:
+                reviewChoices.current.get(
+                  JSON.stringify([proposal.rmsWellboreName, proposal.smdaUuid]),
+                ) ?? proposal.selected,
+            })),
+          );
         },
       },
     );
   };
 
-  const toggleProposal = useCallback((rmsWellboreName: string) => {
-    setAutomaticMatchProposals((proposals) =>
-      proposals === null
-        ? null
-        : toggleMatchProposal(proposals, rmsWellboreName),
-    );
-  }, []);
+  const toggleProposal = useCallback(
+    (rmsWellboreName: string) => {
+      const proposal = automaticMappingProposals?.find(
+        (item) => item.rmsWellboreName === rmsWellboreName,
+      );
+      if (!proposal) {
+        return;
+      }
 
-  const applyAutomaticMatches = () => {
-    if (automaticMatchProposals === null) {
+      reviewChoices.current.set(
+        JSON.stringify([proposal.rmsWellboreName, proposal.smdaUuid]),
+        !proposal.selected,
+      );
+      setAutomaticMappingProposals((proposals) =>
+        proposals === null
+          ? null
+          : toggleMatchProposal(proposals, rmsWellboreName),
+      );
+    },
+    [automaticMappingProposals],
+  );
+
+  const saveAutomaticMappings = () => {
+    if (
+      projectReadOnly ||
+      isSaving ||
+      matchMutation.isPending ||
+      !automaticMappingProposals?.some((proposal) => proposal.selected)
+    ) {
       return;
     }
 
     saveMappings(
-      applyAutomaticMatchProposals(elementMappings, automaticMatchProposals),
+      applyAutomaticMatchProposals(elementMappings, automaticMappingProposals),
       {
         successMessage: "Selected SMDA names saved",
-        onSuccess: () => {
-          setAutomaticMatchProposals(null);
-        },
+        onSuccess: closeAutomaticMapping,
       },
     );
   };
 
   return (
     <>
-      {automaticMatchingSetupOpen && (
-        <AutomaticMatchingSetupDialog
-          disabled={projectReadOnly || matchMutation.isPending}
-          isPending={matchMutation.isPending}
-          closeDialog={() => {
-            setAutomaticMatchingSetupOpen(false);
-          }}
-          runMatching={startAutomaticMatching}
-        />
-      )}
-
-      {automaticMatchProposals !== null && (
-        <AutomaticMatchingDialog
-          proposals={automaticMatchProposals}
+      {automaticMappingOpen && (
+        <AutomaticMappingDialog
+          mappingProposals={automaticMappingProposals}
           unmappedRmsWellboreCount={rmsWellboreNamesMissingSmda.length}
           disabled={projectReadOnly || isSaving}
           isPending={isSaving}
-          closeDialog={() => {
-            setAutomaticMatchProposals(null);
-          }}
-          applyProposals={applyAutomaticMatches}
+          isGenerating={matchMutation.isPending}
+          hasGenerationError={matchMutation.isError}
+          closeDialog={closeAutomaticMapping}
+          runMapping={startAutomaticMapping}
+          prefixOptions={prefixOptions}
+          selectedPrefixes={selectedPrefixes}
+          setSelectedPrefixes={setSelectedPrefixes}
+          addPrefix={addPrefix}
+          ignoredPrefixes={reviewPrefixes}
+          applyProposals={saveAutomaticMappings}
           toggleProposal={toggleProposal}
         />
       )}
@@ -630,11 +764,15 @@ export function SmdaMappings({
       >
         <GeneralButton
           label="Suggest SMDA names"
-          disabled={Boolean(suggestionsBlocked) || matchMutation.isPending}
+          disabled={
+            Boolean(suggestionsBlocked) || matchMutation.isPending || isSaving
+          }
           isPending={matchMutation.isPending}
-          tooltipText={suggestionsBlocked}
+          tooltipText={
+            isSaving ? "Wellbore mappings are being saved" : suggestionsBlocked
+          }
           onClick={() => {
-            setAutomaticMatchingSetupOpen(true);
+            setAutomaticMappingOpen(true);
           }}
         />
         {hasSmdaMappings && (

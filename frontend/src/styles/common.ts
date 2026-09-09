@@ -92,6 +92,12 @@ export const GenericInnerBox = styled(GenericBox)`
   background: ${tokens.colors.ui.background__default.hex};
 `;
 
+export const ParametersBox = styled(GenericBox)`
+  border-color: ${tokens.colors.text.static_icons__default.hex};
+  border-style: dotted;
+  background: ${tokens.colors.ui.background__default.hex};
+`;
+
 export const InfoBox = styled(GenericBox)`
   th {
     padding-right: ${tokens.spacings.comfortable.small};
@@ -106,6 +112,10 @@ export const InfoBox = styled(GenericBox)`
 
   td {
     vertical-align: top;
+  }
+
+  .emphasis {
+    font-weight: 500;
   }
 
   .missingValue {
