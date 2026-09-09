@@ -93,8 +93,9 @@ function matchesNameSimilarityFilter(
 }
 
 function AutomaticMappingParameters({
-  disabled,
-  isPending,
+  projectReadOnly,
+  isSaving,
+  isGenerating,
   runMapping,
   prefixOptions,
   selectedPrefixes,
@@ -102,8 +103,9 @@ function AutomaticMappingParameters({
   addPrefix,
   hasSuggestions,
 }: {
-  disabled: boolean;
-  isPending: boolean;
+  projectReadOnly: boolean;
+  isSaving: boolean;
+  isGenerating: boolean;
   runMapping: () => void;
   prefixOptions: string[];
   selectedPrefixes: string[];
@@ -111,6 +113,8 @@ function AutomaticMappingParameters({
   addPrefix: (value: string) => void;
   hasSuggestions: boolean;
 }) {
+  const disabled = projectReadOnly || isSaving || isGenerating;
+
   return (
     <ParametersBox>
       <MappingParametersRow>
@@ -138,31 +142,37 @@ function AutomaticMappingParameters({
         <GeneralButton
           label={hasSuggestions ? "Update suggestions" : "Generate suggestions"}
           disabled={disabled}
-          isPending={isPending}
+          isPending={isGenerating}
           variant={hasSuggestions ? "outlined" : "contained"}
           tooltipText={
-            disabled
-              ? isPending
-                ? "SMDA name suggestions are being generated"
-                : "Project is read-only"
-              : undefined
+            isGenerating
+              ? "SMDA name suggestions are being generated"
+              : isSaving
+                ? "Wellbore mappings are being saved"
+                : projectReadOnly
+                  ? "Project is read-only"
+                  : undefined
           }
           onClick={runMapping}
         />
       </MappingParametersRow>
+
       <MappingHelp>
         <summary>About prefix rules</summary>
+
         <PageText>
           RMS and SMDA can use different prefixes for the same wellbore, so
           ignoring them can help find similar names. Select known prefixes or
           add your own.
         </PageText>
+
         <PageText>
           For example, ignoring RFT and NO lets{" "}
           <span className="emphasis">RFT_55_33-A-2</span> match{" "}
           <span className="emphasis">NO 55/33-A-2</span>. Only the comparison is
           affected. The complete SMDA name is still saved.
         </PageText>
+
         <PageText>
           Your selections and deselections are kept when the same SMDA wellbore
           is suggested again.
@@ -175,8 +185,8 @@ function AutomaticMappingParameters({
 function AutomaticMappingDialog({
   mappingProposals,
   unmappedRmsWellboreCount,
-  disabled,
-  isPending,
+  projectReadOnly,
+  isSaving,
   isGenerating,
   hasGenerationError,
   closeDialog,
@@ -191,8 +201,8 @@ function AutomaticMappingDialog({
 }: {
   mappingProposals: AutomaticMatchProposal[] | null;
   unmappedRmsWellboreCount: number;
-  disabled: boolean;
-  isPending: boolean;
+  projectReadOnly: boolean;
+  isSaving: boolean;
   isGenerating: boolean;
   hasGenerationError: boolean;
   closeDialog: () => void;
@@ -207,7 +217,7 @@ function AutomaticMappingDialog({
 }) {
   const proposals = useMemo(() => mappingProposals ?? [], [mappingProposals]);
   const hasSuggestions = mappingProposals !== null;
-  const isBusy = isPending || isGenerating;
+  const isBusy = isSaving || isGenerating;
   const prefixesChanged =
     hasSuggestions &&
     (selectedPrefixes.length !== ignoredPrefixes.length ||
@@ -265,7 +275,7 @@ function AutomaticMappingDialog({
           return (
             <Checkbox
               checked={proposal.selected}
-              disabled={disabled || isBusy}
+              disabled={projectReadOnly || isBusy}
               onChange={() => {
                 toggleProposal(proposal.rmsWellboreName);
               }}
@@ -308,7 +318,7 @@ function AutomaticMappingDialog({
         },
       },
     ],
-    [toggleProposal, disabled, isBusy],
+    [toggleProposal, projectReadOnly, isBusy],
   );
   const emptyMessage = !hasSuggestions
     ? isGenerating
@@ -350,8 +360,9 @@ function AutomaticMappingDialog({
           </PageText>
 
           <AutomaticMappingParameters
-            disabled={disabled || isBusy}
-            isPending={isGenerating}
+            projectReadOnly={projectReadOnly}
+            isSaving={isSaving}
+            isGenerating={isGenerating}
             runMapping={runMapping}
             prefixOptions={prefixOptions}
             selectedPrefixes={selectedPrefixes}
@@ -367,6 +378,7 @@ function AutomaticMappingDialog({
 
           <MappingHelp>
             <summary>About name similarity</summary>
+
             <PageText>
               <span className="emphasis">Exact</span> means a 100&nbsp;% name
               match after normalization and any selected prefix removal. Exact
@@ -390,17 +402,20 @@ function AutomaticMappingDialog({
                   : "Could not generate suggestions. Try again."}
               </PageText>
             ) : null}
+
             {prefixesChanged && !isGenerating && (
               <PageText role="status">
                 Prefix rules have changed. Results still use the ignored
                 prefixes listed below.
               </PageText>
             )}
+
             {hasSuggestions && (
               <PageText>
                 Ignored prefixes: {ignoredPrefixes.join(", ") || "None"}
               </PageText>
             )}
+
             <dl>
               <div>
                 <dt>Suggestions found</dt>
@@ -410,12 +425,14 @@ function AutomaticMappingDialog({
                   {hasSuggestions && ` (${formatCoverage(proposals.length)})`}
                 </dd>
               </div>
+
               <div>
                 <dt>Selected suggestions</dt>
                 <dd>
                   {selectedCount} ({formatCoverage(selectedCount)})
                 </dd>
               </div>
+
               <div>
                 <dt>Remaining unmapped</dt>
                 <dd>
@@ -483,14 +500,14 @@ function AutomaticMappingDialog({
         <Dialog.Actions>
           <GeneralButton
             label="Save selected SMDA names"
-            disabled={disabled || isBusy || selectedCount === 0}
-            isPending={isPending}
+            disabled={projectReadOnly || isBusy || selectedCount === 0}
+            isPending={isSaving}
             tooltipText={
-              isPending
+              isSaving
                 ? "Wellbore mappings are being saved"
                 : isGenerating
                   ? "SMDA name suggestions are being generated"
-                  : disabled
+                  : projectReadOnly
                     ? "Project is read-only"
                     : selectedCount === 0
                       ? "Select at least one suggestion to save"
@@ -498,7 +515,10 @@ function AutomaticMappingDialog({
             }
             onClick={applyProposals}
           />
-          <CancelButton onClick={confirmClose.handleCloseRequest} />
+          <CancelButton
+            disabled={isBusy}
+            onClick={confirmClose.handleCloseRequest}
+          />
         </Dialog.Actions>
       </MappingDialog>
     </>
@@ -739,8 +759,8 @@ export function SmdaMappings({
         <AutomaticMappingDialog
           mappingProposals={automaticMappingProposals}
           unmappedRmsWellboreCount={rmsWellboreNamesMissingSmda.length}
-          disabled={projectReadOnly || isSaving}
-          isPending={isSaving}
+          projectReadOnly={projectReadOnly}
+          isSaving={isSaving}
           isGenerating={matchMutation.isPending}
           hasGenerationError={matchMutation.isError}
           closeDialog={closeAutomaticMapping}
