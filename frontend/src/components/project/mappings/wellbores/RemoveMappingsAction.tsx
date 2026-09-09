@@ -69,7 +69,7 @@ export function RemoveMappingsAction({
 
           <Dialog.Actions>
             <GeneralButton
-              label={`Remove all ${label} names`}
+              label={`Clear all ${label} names`}
               color="danger"
               disabled={projectReadOnly || isSaving}
               isPending={isSaving}
@@ -85,7 +85,7 @@ export function RemoveMappingsAction({
       )}
 
       <GeneralButton
-        label={`Remove all ${label} names`}
+        label={`Clear all ${label} names`}
         variant="outlined"
         color="danger"
         disabled={projectReadOnly}
