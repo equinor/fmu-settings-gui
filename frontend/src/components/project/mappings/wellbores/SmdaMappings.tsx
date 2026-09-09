@@ -37,6 +37,7 @@ import type { AutomaticMatchProposal, DisplayedMatchQuality } from "./types";
 type ColumnFilters = Array<{ id: string; value: unknown }>;
 
 const MATCH_QUALITY_ORDER: Record<DisplayedMatchQuality, number> = {
+  Low: -1,
   Medium: 0,
   High: 1,
   Exact: 2,
@@ -77,7 +78,14 @@ function displayedMatchQuality(
     return "Exact";
   }
 
-  return proposal.candidate.confidence === "high" ? "High" : "Medium";
+  switch (proposal.candidate.confidence) {
+    case "high":
+      return "High";
+    case "medium":
+      return "Medium";
+    case "low":
+      return "Low";
+  }
 }
 
 function matchesNameSimilarityFilter(
@@ -236,7 +244,7 @@ function AutomaticMatchingDialog({
     () => [
       {
         id: "useSuggestion",
-        accessorFn: (proposal) => proposal.selected,
+        accessorKey: "selected",
         header: "Use",
         enableColumnFilter: false,
         size: 80,
@@ -445,12 +453,12 @@ function suggestionsBlockedReason({
     return "Project is read-only";
   }
   if (!Object.keys(elementMappings).length) {
-    return "Select RMS wellbores to store in this project configuration before generating SMDA name suggestions";
+    return "Select RMS wellbores to store in the project configuration before generating SMDA name suggestions";
   }
   if (!nonPlannedRmsWellboreNames.length) {
     return (
       "SMDA mapping is not available because all RMS wellbores stored in " +
-      "this project configuration are planned"
+      "the project configuration are planned"
     );
   }
   if (!rmsWellboreNamesMissingSmda.length) {
@@ -466,7 +474,7 @@ function suggestionsBlockedReason({
     return "Some SMDA wellbore names could not be loaded";
   }
   if (wellHeaders.isLoading) {
-    return "Loading SMDA wellbore names";
+    return "Loading SMDA wellbore names...";
   }
   if (!wellHeaders.smdaHeaders.length) {
     return "No SMDA wellbore names are available";
@@ -503,16 +511,16 @@ export function SmdaMappings({
   });
   const { hasSmdaMappings, rmsWellboreNamesMissingSmda } = useMemo(() => {
     const mappedRmsWellboreNames = new Set(
-      Object.values(elementMappings).flatMap((elementMapping) => {
-        const smdaTarget = elementMapping.targets.smda;
+      Object.values(elementMappings)
+        .filter((elementMapping) => {
+          const smdaTarget = elementMapping.targets.smda;
 
-        return smdaTarget !== undefined &&
-          (smdaTarget.unmappable ||
-            smdaTarget.name !== "" ||
-            smdaTarget.uuid !== "")
-          ? [elementMapping.name]
-          : [];
-      }),
+          return (
+            smdaTarget !== undefined &&
+            (smdaTarget.unmappable || smdaTarget.uuid !== "")
+          );
+        })
+        .map((elementMapping) => elementMapping.name),
     );
 
     return {
@@ -616,10 +624,8 @@ export function SmdaMappings({
       <MappingAction
         title="SMDA names"
         description={
-          hasSmdaMappings
-            ? "Generate more suggestions or remove the current SMDA names."
-            : "Get suggested SMDA names for non-planned RMS wellbores that " +
-              "are not yet mapped."
+          "Get suggested SMDA names for non-planned RMS wellbores that " +
+          "are not yet mapped."
         }
       >
         <GeneralButton

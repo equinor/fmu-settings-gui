@@ -1,7 +1,7 @@
 import type { MatchCandidate } from "#client";
 import type { ElementMappings } from "#components/project/common/mapping/types";
 
-export type DisplayedMatchQuality = "Exact" | "High" | "Medium";
+export type DisplayedMatchQuality = "Exact" | "High" | "Medium" | "Low";
 
 export type AutomaticMatchProposal = {
   rmsWellboreName: string;

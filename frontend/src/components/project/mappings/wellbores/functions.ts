@@ -158,26 +158,26 @@ export function createAutomaticMatchProposals(
     smdaHeaders.map((header) => [header.unique_wellbore_identifier, header]),
   );
 
-  return matchResults.flatMap((result) => {
-    const candidate = result.matches[0];
-    if (!candidate || candidate.confidence === "low") {
-      return [];
-    }
-    const header = headersByIdentifier.get(candidate.target);
-    if (!header) {
-      return [];
-    }
+  return matchResults
+    .map((result) => {
+      const candidate = result.matches[0];
+      if (!candidate || candidate.confidence === "low") {
+        return undefined;
+      }
+      const header = headersByIdentifier.get(candidate.target);
+      if (!header) {
+        return undefined;
+      }
 
-    return [
-      {
+      return {
         rmsWellboreName: result.source,
         smdaName: header.unique_wellbore_identifier,
         smdaUuid: header.wellbore_uuid,
         candidate,
         selected: candidate.score === 100,
-      },
-    ];
-  });
+      };
+    })
+    .filter((proposal) => proposal !== undefined);
 }
 
 export function toggleMatchProposal(
