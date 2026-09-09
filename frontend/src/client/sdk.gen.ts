@@ -854,7 +854,7 @@ export const smdaPostWellHeaders = <ThrowOnError extends boolean = false>(option
  *
  * The endpoint is a pure matching utility. Callers provide both the
  * source names and target names, and can optionally provide string
- * replacement rules to apply before matching.
+ * replacement rules and prefix removal options to apply before matching.
  *
  * Names are normalized before matching by lowercasing, replacing
  * underscores, dots, dashes, and slashes with spaces, collapsing
@@ -862,6 +862,11 @@ export const smdaPostWellHeaders = <ThrowOnError extends boolean = false>(option
  * rules match whole normalized token sequences only, so a rule like
  * `Fm -> Formation` changes `Tarbert Fm` to `Tarbert Formation`,
  * while `Top -> ""` leaves `Stop Viking` unchanged.
+ *
+ * Callers can provide a list of individual prefixes to remove. Prefixes
+ * are removed only from the text before the first digit and match
+ * normalized tokens. Prefix removal changes only the values used for
+ * comparison. The original names remain in the response.
  *
  * The response contains one result per source. Each result contains up
  * to three target matches, ordered from highest to lowest score.

@@ -7070,7 +7070,7 @@
           "match"
         ],
         "summary": "Match source names to target names",
-        "description": "Match source names to target names using strict name similarity.\n\nThe endpoint is a pure matching utility. Callers provide both the\nsource names and target names, and can optionally provide string\nreplacement rules to apply before matching.\n\nNames are normalized before matching by lowercasing, replacing\nunderscores, dots, dashes, and slashes with spaces, collapsing\nwhitespace, and applying optional replacement rules. Replacement\nrules match whole normalized token sequences only, so a rule like\n`Fm -> Formation` changes `Tarbert Fm` to `Tarbert Formation`,\nwhile `Top -> \"\"` leaves `Stop Viking` unchanged.\n\nThe response contains one result per source. Each result contains up\nto three target matches, ordered from highest to lowest score.\n\nConfidence levels:\n- 'high': score > 80\n- 'medium': score 50-80\n- 'low': score < 50",
+        "description": "Match source names to target names using strict name similarity.\n\nThe endpoint is a pure matching utility. Callers provide both the\nsource names and target names, and can optionally provide string\nreplacement rules and prefix removal options to apply before matching.\n\nNames are normalized before matching by lowercasing, replacing\nunderscores, dots, dashes, and slashes with spaces, collapsing\nwhitespace, and applying optional replacement rules. Replacement\nrules match whole normalized token sequences only, so a rule like\n`Fm -> Formation` changes `Tarbert Fm` to `Tarbert Formation`,\nwhile `Top -> \"\"` leaves `Stop Viking` unchanged.\n\nCallers can provide a list of individual prefixes to remove. Prefixes\nare removed only from the text before the first digit and match\nnormalized tokens. Prefix removal changes only the values used for\ncomparison. The original names remain in the response.\n\nThe response contains one result per source. Each result contains up\nto three target matches, ordered from highest to lowest score.\n\nConfidence levels:\n- 'high': score > 80\n- 'medium': score 50-80\n- 'low': score < 50",
         "operationId": "match-post_match",
         "requestBody": {
           "content": {
@@ -7907,7 +7907,7 @@
             "type": "string",
             "pattern": "(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)",
             "title": "Version",
-            "default": "1.1.1.dev4+g8358e5bdb"
+            "default": "1.2.0"
           }
         },
         "type": "object",
@@ -8122,6 +8122,14 @@
             "type": "array",
             "title": "Replacements",
             "description": "Optional normalized token sequence replacements to apply before matching."
+          },
+          "prefixes_to_remove": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Prefixes To Remove",
+            "description": "Prefixes to remove from the text before the first digit."
           }
         },
         "type": "object",
