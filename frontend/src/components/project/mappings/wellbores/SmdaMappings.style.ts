@@ -64,6 +64,7 @@ export const MappingSummary = styled(InfoBox)`
   }
 
   > p {
+    color: inherit;
     margin: 0 0 ${tokens.spacings.comfortable.small};
     overflow-wrap: anywhere;
   }
