@@ -33,7 +33,7 @@ export function RemoveMappingsAction({
 
   const removeMappings = () => {
     saveMappings(mappingsAfterRemoval(), {
-      successMessage: `${label.charAt(0).toUpperCase()}${label.slice(1)} names removed`,
+      successMessage: `${label.charAt(0).toUpperCase()}${label.slice(1)} names cleared`,
       onSuccess: () => {
         setDialogOpen(false);
       },
@@ -45,13 +45,13 @@ export function RemoveMappingsAction({
       {dialogOpen && (
         <GenericDialog
           open={true}
-          isDismissable={true}
+          isDismissable={!isSaving}
           onClose={() => {
             setDialogOpen(false);
           }}
           $width="34em"
         >
-          <Dialog.Header>Remove all {label} names</Dialog.Header>
+          <Dialog.Header>Clear all {label} names</Dialog.Header>
 
           <Dialog.CustomContent>
             <PageText>
@@ -63,7 +63,7 @@ export function RemoveMappingsAction({
                   "mappings. RMS and SMDA names will stay unchanged."}
             </PageText>
             <PageText $marginBottom="0">
-              Do you want to remove all {label} names?
+              Do you want to clear all {label} names?
             </PageText>
           </Dialog.CustomContent>
 
@@ -76,6 +76,7 @@ export function RemoveMappingsAction({
               onClick={removeMappings}
             />
             <CancelButton
+              disabled={isSaving}
               onClick={() => {
                 setDialogOpen(false);
               }}

@@ -12,7 +12,7 @@ import { emptyName } from "#components/project/common/mapping/utils";
 import { applicationLocale } from "#config";
 import type { SaveWellboreMappings } from "#services/mappings";
 import type { SmdaWellHeaders } from "#services/smda";
-import { PageText, ParametersBox } from "#styles/common";
+import { PageText, ParametersBox, WarningBox } from "#styles/common";
 import {
   DataGridFilterContainer,
   DataGridSearch,
@@ -136,7 +136,7 @@ function AutomaticMappingParameters({
                 ? `${option} (${COUNTRY_PREFIXES.join(", ")})`
                 : option
             }
-            helperText="Country prefixes are ignored by default"
+            helperText="Country prefixes are selected by default"
           />
         </PrefixSelector>
         <GeneralButton
@@ -239,7 +239,6 @@ function AutomaticMappingDialog({
     determineRequiresConfirmation: () => proposals.length > 0,
     onCloseConfirmed: closeDialog,
   });
-  const remainingCount = unmappedRmsWellboreCount - selectedCount;
   const normalizedWellboreFilter = wellboreFilter
     .trim()
     .toLocaleLowerCase(applicationLocale);
@@ -388,58 +387,54 @@ function AutomaticMappingDialog({
             </PageText>
           </MappingHelp>
 
+          {prefixesChanged && !isGenerating && (
+            <WarningBox>
+              <PageText $marginBottom="0">
+                Prefix rules changed. Click <i>Update suggestions</i> to apply
+                them.
+              </PageText>
+            </WarningBox>
+          )}
+
           <MappingSummary>
             {isGenerating ? (
-              <PageText role="status">
+              <PageText>
                 {hasSuggestions
                   ? "Updating suggestions. Previous results are shown below."
                   : "Generating suggestions..."}
               </PageText>
             ) : hasGenerationError ? (
-              <PageText role="alert">
+              <PageText>
                 {hasSuggestions
                   ? "Could not update suggestions. Previous results and choices are unchanged."
                   : "Could not generate suggestions. Try again."}
               </PageText>
             ) : null}
 
-            {prefixesChanged && !isGenerating && (
-              <PageText role="status">
-                Prefix rules have changed. Results still use the ignored
-                prefixes listed below.
-              </PageText>
-            )}
-
-            {hasSuggestions && (
-              <PageText>
-                Ignored prefixes: {ignoredPrefixes.join(", ") || "None"}
-              </PageText>
-            )}
-
-            <dl>
-              <div>
-                <dt>Suggestions found</dt>
-                <dd>
-                  {hasSuggestions ? proposals.length : "-"} of{" "}
-                  {unmappedRmsWellboreCount}
-                  {hasSuggestions && ` (${formatCoverage(proposals.length)})`}
-                </dd>
-              </div>
-
-              <div>
-                <dt>Selected suggestions</dt>
-                <dd>
-                  {selectedCount} ({formatCoverage(selectedCount)})
-                </dd>
-              </div>
-
-              <div>
-                <dt>Remaining unmapped</dt>
-                <dd>
-                  {remainingCount} ({formatCoverage(remainingCount)})
-                </dd>
-              </div>
-            </dl>
+            <table>
+              <tbody>
+                {hasSuggestions && (
+                  <tr>
+                    <th scope="row">Ignored prefixes</th>
+                    <td>{ignoredPrefixes.join(", ") || "None"}</td>
+                  </tr>
+                )}
+                <tr>
+                  <th scope="row">Suggestions found</th>
+                  <td>
+                    {hasSuggestions ? proposals.length : "-"} of{" "}
+                    {unmappedRmsWellboreCount}
+                    {hasSuggestions && ` (${formatCoverage(proposals.length)})`}
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Selected suggestions</th>
+                  <td>
+                    {selectedCount} ({formatCoverage(selectedCount)})
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </MappingSummary>
 
           {proposals.length > 0 && (

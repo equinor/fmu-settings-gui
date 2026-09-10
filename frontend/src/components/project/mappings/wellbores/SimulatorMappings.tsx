@@ -94,7 +94,9 @@ function MappingFilePathDialog({
 
       <EditDialog
         open={true}
-        isDismissable={isDismissable}
+        isDismissable={
+          isDismissable && !isPending && !confirmClose.confirmCloseDialogOpen
+        }
         onClose={confirmClose.handleCloseRequest}
         $width="42em"
       >
@@ -138,6 +140,7 @@ function MappingFilePathDialog({
               {(field) => (
                 <field.TextField
                   label="File path from project root"
+                  disabled={isPending}
                   helperText={`Default: ${defaultPath}`}
                   errorText={pathError}
                 />
@@ -159,6 +162,7 @@ function MappingFilePathDialog({
               }
             />
             <CancelButton
+              disabled={isPending}
               onClick={(event) => {
                 event.preventDefault();
                 confirmClose.handleCloseRequest();
@@ -191,7 +195,7 @@ function ImportWarningDialog({
   return (
     <GenericDialog
       open={true}
-      isDismissable={true}
+      isDismissable={!isPending}
       onClose={closeDialog}
       $width="38em"
     >
@@ -236,7 +240,7 @@ function ImportWarningDialog({
               }
               onClick={saveImport}
             />
-            <CancelButton onClick={closeDialog} />
+            <CancelButton disabled={isPending} onClick={closeDialog} />
           </>
         ) : (
           <GeneralButton label="Close" onClick={closeDialog} />
@@ -262,7 +266,7 @@ function ExportOverwriteDialog({
   return (
     <GenericDialog
       open={true}
-      isDismissable={true}
+      isDismissable={!isPending}
       onClose={closeDialog}
       $width="32em"
     >
@@ -296,7 +300,7 @@ function ExportOverwriteDialog({
           }
           onClick={overwriteFile}
         />
-        <CancelButton onClick={closeDialog} />
+        <CancelButton disabled={isPending} onClick={closeDialog} />
       </Dialog.Actions>
     </GenericDialog>
   );

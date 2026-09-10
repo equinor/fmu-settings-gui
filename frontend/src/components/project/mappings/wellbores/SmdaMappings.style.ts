@@ -24,7 +24,7 @@ export const MappingParametersRow = styled.div`
   align-items: end;
   gap: ${tokens.spacings.comfortable.medium};
 
-  > button {
+  && > button {
     margin-bottom: ${tokens.spacings.comfortable.large};
   }
 `;
@@ -47,20 +47,8 @@ export const MappingHelp = styled.details`
 `;
 
 export const MappingSummary = styled(InfoBox)`
-  dl {
-    display: flex;
-    flex-wrap: wrap;
-    gap: ${tokens.spacings.comfortable.medium};
-    margin: 0;
-  }
-
-  dl > div {
-    flex: 1 1 10rem;
-  }
-
-  dd {
-    margin: 0;
-    font-weight: 500;
+  td {
+    overflow-wrap: anywhere;
   }
 
   > p {

@@ -180,7 +180,7 @@ export const GenericDialog = styled(Dialog).attrs<{
     padding: ${tokens.spacings.comfortable.medium};
   }
 
-  button + button {
+  && button + button {
     margin-left: ${tokens.spacings.comfortable.small};
   }
 `;
