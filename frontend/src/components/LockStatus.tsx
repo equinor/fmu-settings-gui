@@ -41,7 +41,7 @@ function EnableEditingButton({
             onSuccess: (data) => {
               if (data.message !== "Project lock acquired.") {
                 toast.error(
-                  "An error occured and project remains read-only. " +
+                  "An error occured and FMU project remains read-only. " +
                     (lockStatus?.last_lock_acquire_error ?? ""),
                   { autoClose: false },
                 );
@@ -148,7 +148,7 @@ export function LockStatusBanner({
       </Banner.Icon>
 
       <Banner.Message>
-        {`Project is ${isReadOnly ? "read-only" : "editable"}`}
+        {`FMU project is ${isReadOnly ? "read-only" : "editable"}`}
       </Banner.Message>
 
       {isReadOnly && (

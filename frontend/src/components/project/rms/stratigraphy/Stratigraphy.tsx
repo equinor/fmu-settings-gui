@@ -76,8 +76,8 @@ function ConfirmActionDialog({
       <Dialog.CustomContent>
         <PageText>
           {confirmAction === "add"
-            ? "This will add all available stratigraphy to the project."
-            : "This will remove all stratigraphy from the project."}
+            ? "This will add all available stratigraphy to the FMU project."
+            : "This will remove all stratigraphy from the FMU project."}
         </PageText>
 
         <PageText $marginBottom="0">Do you want to continue? </PageText>
@@ -176,7 +176,7 @@ function StratigraphyEditor({
   return (
     <StratigraphyEditorContainer>
       <div>
-        <PageHeader $variant="h4">Project stratigraphy</PageHeader>
+        <PageHeader $variant="h4">FMU project stratigraphy</PageHeader>
 
         <StratigraphicFramework
           maxHeight="55vh"
@@ -197,7 +197,9 @@ function StratigraphyEditor({
 
         {hasOrphans && (
           <OrphanWarningBox
-            message={`${orphanTypeCounts.join(" and ")} stored in the project ${
+            message={`${orphanTypeCounts.join(
+              " and ",
+            )} stored in the FMU project ${
               orphanCount === 1 ? "is" : "are"
             } currently not available in RMS. ${
               orphanCount === 1 ? "It" : "They"
@@ -253,8 +255,8 @@ function StratigraphyEditor({
         </ActionButtonsContainer>
 
         <PageText>
-          💡 Click on horizons or zones to add or remove them from the project
-          stratigraphy.
+          💡 Click on horizons or zones to add or remove them from the FMU
+          project stratigraphy.
         </PageText>
       </div>
 
@@ -314,7 +316,7 @@ function Edit({
       }
     },
     meta: {
-      errorPrefix: "Error updating project stratigraphy",
+      errorPrefix: "Error updating FMU project stratigraphy",
       preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
     },
   });
@@ -406,7 +408,7 @@ function Edit({
             void form.handleSubmit();
           }}
         >
-          <Dialog.Header>Set project stratigraphy</Dialog.Header>
+          <Dialog.Header>Set FMU project stratigraphy</Dialog.Header>
 
           <Dialog.CustomContent>
             <form.AppForm>
@@ -451,7 +453,7 @@ function Edit({
                     isPending={rmsStratigraphyMutation.isPending}
                     helperTextDisabled={
                       projectReadOnly
-                        ? "Project is read-only"
+                        ? "FMU project is read-only"
                         : !availableStratigraphyLoaded
                           ? "RMS stratigraphy must be loaded before saving"
                           : "Form can be saved when the values have changed"
@@ -498,10 +500,10 @@ export function Stratigraphy({
     <>
       <PageSectionWidthConstrained>
         <PageText>
-          The following is the model stratigraphy stored in the project, this
-          can be a subset or the full RMS stratigraphy. It is only the stored
-          stratigraphy that will be possible to map to official stratigraphic
-          names.
+          The following is the model stratigraphy stored in the FMU project,
+          this can be a subset or the full RMS stratigraphy. It is only the
+          stored stratigraphy that will be possible to map to official
+          stratigraphic names.
         </PageText>
       </PageSectionWidthConstrained>
 
@@ -518,7 +520,7 @@ export function Stratigraphy({
       ) : (
         <PageSectionWidthConstrained>
           <PageCode>
-            No stratigraphy information currently stored in the project.
+            No stratigraphy information currently stored in the FMU project.
           </PageCode>
         </PageSectionWidthConstrained>
       )}
@@ -529,7 +531,7 @@ export function Stratigraphy({
           disabled={projectReadOnly || !isRmsProjectOpen}
           tooltipText={
             projectReadOnly
-              ? "Project is read-only"
+              ? "FMU project is read-only"
               : !isRmsProjectOpen
                 ? "RMS project is not ready for access"
                 : undefined

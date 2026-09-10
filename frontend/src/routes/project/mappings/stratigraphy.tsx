@@ -50,7 +50,7 @@ function Content() {
   if (!project.status) {
     return (
       <PageSectionWidthConstrained>
-        <PageText>Project not set.</PageText>
+        <PageText>FMU project not set.</PageText>
       </PageSectionWidthConstrained>
     );
   }

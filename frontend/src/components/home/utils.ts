@@ -1,7 +1,7 @@
 import type { ChangeInfo, ChangeType } from "#client/types.gen";
 
 export const FILE_LABELS: Record<string, string> = {
-  "config.json": "Project configuration",
+  "config.json": "FMU project configuration",
   "mappings.json": "Mappings",
 };
 
@@ -103,7 +103,7 @@ function formatBriefDescription(change: string) {
 
 export function formatEntryDescription(entry: ChangeInfo): string {
   if (entry.change_type === "init") {
-    return "Initialized FMU settings project";
+    return "Initialized FMU project settings";
   }
 
   const label = getFieldLabel(entry.file, entry.key);

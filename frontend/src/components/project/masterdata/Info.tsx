@@ -7,7 +7,9 @@ import { stringCompare } from "#utils/string";
 export function Info({ masterdata }: { masterdata: Smda }) {
   return (
     <>
-      <PageText>The following masterdata is stored in the project:</PageText>
+      <PageText>
+        The following masterdata is stored in the FMU project:
+      </PageText>
 
       <InfoBox>
         <table>

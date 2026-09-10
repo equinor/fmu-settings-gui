@@ -169,7 +169,7 @@ function ModelEditorForm({
                 }
                 isPending={isPending}
                 helperTextDisabled={
-                  projectReadOnly ? "Project is read-only" : undefined
+                  projectReadOnly ? "FMU project is read-only" : undefined
                 }
               />
             )}
@@ -231,21 +231,21 @@ export function EditableModelInfo({
 
       <PageText>
         Each model needs a <i>name</i> and <i>revision</i>, usually matching
-        your project's directory structure. For example, for the project path
-        /project/field/resmod/ff/25.0.0/ the name would be <i>ff</i> and the
-        revision <i>25.0.0</i>.
+        your FMU project's directory structure. For example, for the FMU project
+        path /project/field/resmod/ff/25.0.0/ the name would be <i>ff</i> and
+        the revision <i>25.0.0</i>.
       </PageText>
 
       {modelData ? (
         <ModelInfo modelData={modelData} />
       ) : (
-        <PageCode>No model information found in the project.</PageCode>
+        <PageCode>No model information found in the FMU project.</PageCode>
       )}
 
       <GeneralButton
         label={modelData ? "Edit" : "Add"}
         disabled={projectReadOnly}
-        tooltipText={projectReadOnly ? "Project is read-only" : ""}
+        tooltipText={projectReadOnly ? "FMU project is read-only" : ""}
         onClick={() => {
           setIsDialogOpen(true);
         }}

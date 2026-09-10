@@ -16,7 +16,7 @@ function RouteComponent() {
       <PageText>
         {project.status
           ? "Wellbore mappings are coming soon."
-          : "Project not set."}
+          : "FMU project not set."}
       </PageText>
     </>
   );

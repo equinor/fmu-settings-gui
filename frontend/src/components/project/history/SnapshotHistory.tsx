@@ -739,7 +739,7 @@ export function SnapshotHistory({
         }
         restoreTooltipText={
           projectReadOnly
-            ? "Project is read-only"
+            ? "FMU project is read-only"
             : diffQuery.data?.length === 0
               ? "No differences to restore"
               : undefined
@@ -761,7 +761,7 @@ export function SnapshotHistory({
           selectedCacheId === null
         }
         restoreTooltipText={
-          projectReadOnly ? "Project is read-only" : undefined
+          projectReadOnly ? "FMU project is read-only" : undefined
         }
         onRestore={restoreSelectedCache}
         onCancel={() => {
@@ -793,8 +793,8 @@ export function SnapshotHistory({
             the snapshot and the current version.{" "}
             {projectReadOnly ? (
               <>
-                The project is currently read-only, so restore of the snapshot
-                is not possible.
+                The FMU project is currently read-only, so restore of the
+                snapshot is not possible.
               </>
             ) : (
               <>
@@ -805,7 +805,7 @@ export function SnapshotHistory({
 
           <PageText>
             Use <strong>Max snapshots</strong> to control how many snapshots are
-            kept on disk for this project.
+            kept on disk for this FMU project.
           </PageText>
 
           <SelectorRow>
@@ -863,7 +863,7 @@ export function SnapshotHistory({
                 }
                 tooltipText={
                   projectReadOnly
-                    ? "Project is read-only"
+                    ? "FMU project is read-only"
                     : maxRevisions === undefined
                       ? "Select a max snapshots value to save"
                       : maxRevisions === cacheMaxRevisions
@@ -906,7 +906,8 @@ export function SnapshotHistory({
         </>
       ) : (
         <PageText>
-          Project not set. Select a project to view and restore snapshots.
+          FMU project not set. Select an FMU project to view and restore
+          snapshots.
         </PageText>
       )}
     </>
