@@ -707,7 +707,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.1.1.dev4+g8358e5bdb'
+            default: '1.2.0'
         }
     },
     type: 'object',
@@ -929,6 +929,14 @@ export const MatchRequestSchema = {
             type: 'array',
             title: 'Replacements',
             description: 'Optional normalized token sequence replacements to apply before matching.'
+        },
+        prefixes_to_remove: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Prefixes To Remove',
+            description: 'Prefixes to remove from the text before the first digit.'
         }
     },
     type: 'object',

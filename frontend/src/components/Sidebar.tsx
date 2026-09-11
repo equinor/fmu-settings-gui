@@ -2,6 +2,7 @@ import { SideBar as EdsSideBar } from "@equinor/eds-core-react";
 import type { IconData } from "@equinor/eds-icons";
 import { account_circle, dashboard, folder } from "@equinor/eds-icons";
 import { Link, useLocation } from "@tanstack/react-router";
+import { type ReactNode, useState } from "react";
 
 import { useProject } from "#services/project";
 import { NestedAccordion } from "./Sidebar.style";
@@ -21,6 +22,52 @@ type AccordionSubItem = {
   children?: AccordionSubItem[];
 };
 
+type SidebarAccordionState = {
+  expanded: boolean;
+  collapsedPath: string | undefined;
+};
+
+function SidebarAccordion({
+  label,
+  icon,
+  path,
+  currentPath,
+  children,
+}: {
+  label: string;
+  icon: IconData;
+  path: string;
+  currentPath: string;
+  children: ReactNode;
+}) {
+  const [state, setState] = useState<SidebarAccordionState>(() => ({
+    expanded: currentPath.startsWith(path),
+    collapsedPath: undefined,
+  }));
+  const isExpanded =
+    state.expanded ||
+    (currentPath.startsWith(path) && state.collapsedPath !== currentPath);
+
+  const toggleExpand = () => {
+    const expanded = !isExpanded;
+    setState({
+      expanded,
+      collapsedPath: expanded ? undefined : currentPath,
+    });
+  };
+
+  return (
+    <EdsSideBar.Accordion
+      label={label}
+      icon={icon}
+      isExpanded={isExpanded}
+      toggleExpand={toggleExpand}
+    >
+      {children}
+    </EdsSideBar.Accordion>
+  );
+}
+
 function SidebarItem({
   item,
   currentPath,
@@ -31,10 +78,11 @@ function SidebarItem({
   if (item.children) {
     return (
       <NestedAccordion>
-        <EdsSideBar.Accordion
+        <SidebarAccordion
           label={item.label}
           icon={blankIcon}
-          isExpanded={currentPath.startsWith(item.to)}
+          path={item.to}
+          currentPath={currentPath}
         >
           {item.children.map((child) => (
             <SidebarItem
@@ -43,7 +91,7 @@ function SidebarItem({
               currentPath={currentPath}
             />
           ))}
-        </EdsSideBar.Accordion>
+        </SidebarAccordion>
       </NestedAccordion>
     );
   }
@@ -63,9 +111,6 @@ export function Sidebar() {
   const location = useLocation();
 
   const currentPath = location.pathname;
-
-  const projectExpanded = currentPath.startsWith("/project");
-  const userExpanded = currentPath.startsWith("/user");
 
   const ProjectSubItems: AccordionSubItem[] = [];
   if (project.status) {
@@ -101,10 +146,11 @@ export function Sidebar() {
           active={currentPath === "/"}
         />
 
-        <EdsSideBar.Accordion
+        <SidebarAccordion
           label="Project"
           icon={folder}
-          isExpanded={projectExpanded}
+          path="/project"
+          currentPath={currentPath}
         >
           <EdsSideBar.AccordionItem
             label="Overview"
@@ -116,12 +162,13 @@ export function Sidebar() {
           {ProjectSubItems.map((item) => (
             <SidebarItem key={item.to} item={item} currentPath={currentPath} />
           ))}
-        </EdsSideBar.Accordion>
+        </SidebarAccordion>
 
-        <EdsSideBar.Accordion
+        <SidebarAccordion
           label="User"
           icon={account_circle}
-          isExpanded={userExpanded}
+          path="/user"
+          currentPath={currentPath}
         >
           <EdsSideBar.AccordionItem
             label="API keys"
@@ -136,7 +183,7 @@ export function Sidebar() {
             to="/user/recovery"
             active={currentPath === "/user/recovery"}
           />
-        </EdsSideBar.Accordion>
+        </SidebarAccordion>
       </EdsSideBar.Content>
     </EdsSideBar>
   );

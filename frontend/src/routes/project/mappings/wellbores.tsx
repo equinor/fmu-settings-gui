@@ -64,11 +64,13 @@ function RmsProjectContent({
           💡 The project is read-only, so the mappings are not editable.
         </PageText>
       ) : editMode ? (
-        <SmdaHealthCheckInfo
-          feature="editing SMDA wellbore names"
-          healthCheck={healthCheck}
-          setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
-        />
+        <div id="smda-connection-details">
+          <SmdaHealthCheckInfo
+            feature="editing SMDA wellbore names"
+            healthCheck={healthCheck}
+            setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
+          />
+        </div>
       ) : (
         <PageText>
           💡 To manage mappings,{" "}

@@ -644,6 +644,12 @@ export type MatchRequest = {
      * Optional normalized token sequence replacements to apply before matching.
      */
     replacements?: Array<MatchReplacementRule>;
+    /**
+     * Prefixes To Remove
+     *
+     * Prefixes to remove from the text before the first digit.
+     */
+    prefixes_to_remove?: Array<string>;
 };
 
 /**

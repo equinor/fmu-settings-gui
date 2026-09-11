@@ -2,7 +2,9 @@ import type {
   DataSystem,
   InternalWellboreIdentifierMapping,
   InternalWellboreMappings,
+  MatchResult,
   RmsWell,
+  SmdaWellHeader,
 } from "#client";
 import {
   createElementMappings,
@@ -18,7 +20,7 @@ import {
   emptyElementMappingTarget,
   emptyElementMappingTargetUpdate,
 } from "#components/project/common/mapping/utils";
-import type { PendingImport } from "./types";
+import type { AutomaticMatchProposal, PendingImport } from "./types";
 
 export const wellboreTargetSystems = [
   "simulator",
@@ -113,26 +115,109 @@ export function mergeImportedMappings(
     },
   );
 
+  return createWellboreMutationValue(mergedElementMappings);
+}
+
+function createWellboreMutationValue(elementMappings: ElementMappings) {
   return createMutationValue<InternalWellboreIdentifierMapping>(
     "wellbore",
     "rms",
-    mergedElementMappings,
+    elementMappings,
   );
 }
 
-export function removeSimulatorMappings(elementMappings: ElementMappings) {
-  const mappingsWithoutSimulator = Object.fromEntries(
+function removeTargetMappings(
+  elementMappings: ElementMappings,
+  targetSystem: (typeof wellboreTargetSystems)[number],
+) {
+  const mappingsWithoutTarget = Object.fromEntries(
     Object.entries(elementMappings).map(([sourceId, elementMapping]) => [
       sourceId,
       updatedElementMapping(elementMapping, {
-        simulator: emptyElementMappingTargetUpdate(),
+        [targetSystem]: emptyElementMappingTargetUpdate(),
       }),
     ]),
   );
 
-  return createMutationValue<InternalWellboreIdentifierMapping>(
-    "wellbore",
-    "rms",
-    mappingsWithoutSimulator,
+  return createWellboreMutationValue(mappingsWithoutTarget);
+}
+
+export function removeSimulatorMappings(elementMappings: ElementMappings) {
+  return removeTargetMappings(elementMappings, "simulator");
+}
+
+export function removeSmdaMappings(elementMappings: ElementMappings) {
+  return removeTargetMappings(elementMappings, "smda");
+}
+
+export function createAutomaticMatchProposals(
+  matchResults: MatchResult[],
+  smdaHeaders: SmdaWellHeader[],
+): AutomaticMatchProposal[] {
+  const headersByIdentifier = new Map(
+    smdaHeaders.map((header) => [header.unique_wellbore_identifier, header]),
   );
+
+  return matchResults
+    .map((result) => {
+      const candidate = result.matches[0];
+      if (!candidate || candidate.confidence === "low") {
+        return undefined;
+      }
+      const header = headersByIdentifier.get(candidate.target);
+      if (!header) {
+        return undefined;
+      }
+
+      return {
+        rmsWellboreName: result.source,
+        smdaName: header.unique_wellbore_identifier,
+        smdaUuid: header.wellbore_uuid,
+        candidate,
+        selected: candidate.score === 100,
+      };
+    })
+    .filter((proposal) => proposal !== undefined);
+}
+
+export function toggleMatchProposal(
+  proposals: AutomaticMatchProposal[],
+  rmsWellboreName: string,
+) {
+  return proposals.map((proposal) => {
+    if (proposal.rmsWellboreName !== rmsWellboreName) {
+      return proposal;
+    }
+
+    return { ...proposal, selected: !proposal.selected };
+  });
+}
+
+export function applyAutomaticMatchProposals(
+  currentElementMappings: ElementMappings,
+  proposals: AutomaticMatchProposal[],
+) {
+  const updatedElementMappings = { ...currentElementMappings };
+
+  proposals
+    .filter((proposal) => proposal.selected)
+    .forEach((proposal) => {
+      const currentElementMapping =
+        currentElementMappings[proposal.rmsWellboreName];
+      if (currentElementMapping === undefined) {
+        return;
+      }
+
+      updatedElementMappings[proposal.rmsWellboreName] = updatedElementMapping(
+        currentElementMapping,
+        {
+          smda: {
+            name: proposal.smdaName,
+            uuid: proposal.smdaUuid,
+          },
+        },
+      );
+    });
+
+  return createWellboreMutationValue(updatedElementMappings);
 }
