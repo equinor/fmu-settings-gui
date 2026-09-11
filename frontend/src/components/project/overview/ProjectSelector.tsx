@@ -19,7 +19,6 @@ import { toast } from "react-toastify";
 import {
   projectGetChangelogQueryKey,
   projectGetLockStatusQueryKey,
-  projectGetMappingsQueryKey,
   projectGetProjectQueryKey,
   projectGetRmsProjectsQueryKey,
   projectPostInitProjectMutation,
@@ -30,7 +29,6 @@ import {
 } from "#client/@tanstack/react-query.gen";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import { TextField } from "#components/form/field";
-import { mappingsPaths } from "#services/project";
 import { EditDialog, PageSectionSpacer, PageText } from "#styles/common";
 import {
   HTTP_STATUS_403_FORBIDDEN,
@@ -48,6 +46,7 @@ import {
   queryKeyProjectGetCache,
   queryKeyProjectGetCacheDiff,
   queryKeyProjectGetCacheRevision,
+  queryKeyProjectGetMappings,
 } from "#utils/query";
 
 const { useAppForm: useAppFormProjectSelectorForm } = createFormHook({
@@ -109,9 +108,11 @@ function ProjectSelectorForm({
         queryKey: projectGetChangelogQueryKey(),
       });
       void queryClient.invalidateQueries({
-        queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRms,
-        }),
+        predicate: (query) => {
+          const key = query.queryKey[0] as { _id?: string } | undefined;
+
+          return key?._id === queryKeyProjectGetMappings;
+        },
       });
       void queryClient.invalidateQueries({
         predicate: (query) => {
@@ -371,9 +372,11 @@ function ConfirmInitProjectDialog({
         queryKey: projectGetChangelogQueryKey(),
       });
       void queryClient.invalidateQueries({
-        queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRms,
-        }),
+        predicate: (query) => {
+          const key = query.queryKey[0] as { _id?: string } | undefined;
+
+          return key?._id === queryKeyProjectGetMappings;
+        },
       });
       void queryClient.invalidateQueries({
         queryKey: userGetUserQueryKey(),

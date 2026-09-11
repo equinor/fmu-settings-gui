@@ -8,7 +8,7 @@ import type {
   SpecialOptionId,
 } from "./types";
 
-const emptyName = "(not set)";
+export const emptyName = "(not set)";
 
 export const specialOptions: Record<SpecialOptionId, OptionProps> = {
   empty: { value: "_empty", label: emptyName },

@@ -64,6 +64,10 @@ export const PageList = styled(List).attrs<{
   $marginBottom: props.$marginBottom ?? tokens.spacings.comfortable.medium,
 }))`
   margin-bottom: ${({ $marginBottom }) => $marginBottom};
+
+  .emphasis {
+    font-weight: 500;
+  }
 `;
 
 export const ActionButtonsContainer = styled.div`

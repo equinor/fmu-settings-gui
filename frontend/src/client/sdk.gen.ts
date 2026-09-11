@@ -816,8 +816,11 @@ export const smdaPostStratUnits = <ThrowOnError extends boolean = false>(options
  *
  * A route to gather well header data from SMDA for a specified field.
  *
- * This route receives a valid field identifier and returns the well header
- * fields needed to identify and map SMDA wellbores against model well names.
+ * This route receives a selected SMDA field and returns the well header
+ * attributes needed to identify and map SMDA wellbores against model well
+ * names. When provided, the field UUID is used to find well headers for the
+ * selected SMDA field. If no field UUID is provided, the field identifier is
+ * used instead.
  */
 export const smdaPostWellHeaders = <ThrowOnError extends boolean = false>(options: Options<SmdaPostWellHeadersData, ThrowOnError>): RequestResult<SmdaPostWellHeadersResponses, SmdaPostWellHeadersErrors, ThrowOnError> => (options.client ?? client).post<SmdaPostWellHeadersResponses, SmdaPostWellHeadersErrors, ThrowOnError>({
     responseType: 'json',

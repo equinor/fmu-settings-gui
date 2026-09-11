@@ -1757,7 +1757,7 @@ export const SmdaSelectedFieldSchema = {
         'identifier'
     ],
     title: 'SmdaSelectedField',
-    description: 'A selected field for masterdata lookup.'
+    description: 'A selected SMDA field.'
 } as const;
 
 export const SmdaStratColumnSchema = {
