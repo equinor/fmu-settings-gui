@@ -95,7 +95,7 @@ export function useTaskList(): Task[] {
       to: "/project/rms/wellbores",
     },
     {
-      id: "mappings",
+      id: "mappings-stratigraphy",
       label: "Set RMS stratigraphy to SMDA mappings",
       done:
         (zones.length > 0 || horizons.length > 0) &&
@@ -105,8 +105,8 @@ export function useTaskList(): Task[] {
       to: "/project/mappings/stratigraphy",
     },
     {
-      id: "wellbore-mappings",
-      label: "Set RMS wellbore to SMDA mappings",
+      id: "mappings-wellbores",
+      label: "Set RMS wellbores to SMDA mappings",
       done:
         rmsWellbores.length > 0 &&
         nonPlannedRmsWellboreNames.every((name) =>

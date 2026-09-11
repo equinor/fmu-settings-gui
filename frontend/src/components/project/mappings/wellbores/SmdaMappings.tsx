@@ -128,7 +128,13 @@ function AutomaticMappingParameters({
             selectedOptions={selectedPrefixes}
             disabled={disabled}
             onOptionsChange={({ selectedItems }) => {
-              setSelectedPrefixes(selectedItems);
+              setSelectedPrefixes(
+                selectedItems.includes(COUNTRY_PREFIX_OPTION)
+                  ? selectedItems.filter(
+                      (item) => !COUNTRY_PREFIXES.includes(item.toUpperCase()),
+                    )
+                  : selectedItems,
+              );
             }}
             onAddNewOption={addPrefix}
             optionComponent={(option) =>
@@ -650,6 +656,13 @@ export function SmdaMappings({
       return;
     }
 
+    if (
+      selectedPrefixes.includes(COUNTRY_PREFIX_OPTION) &&
+      COUNTRY_PREFIXES.includes(prefix)
+    ) {
+      return;
+    }
+
     const option =
       prefixOptions.find((item) => item.toUpperCase() === prefix) ?? prefix;
     setPrefixOptions((options) =>
@@ -658,6 +671,18 @@ export function SmdaMappings({
     setSelectedPrefixes((options) =>
       options.includes(option) ? options : [...options, option],
     );
+  };
+
+  const updateSelectedPrefixes = (prefixes: string[]) => {
+    if (prefixes.includes(COUNTRY_PREFIX_OPTION)) {
+      setPrefixOptions((options) =>
+        options.filter(
+          (option) => !COUNTRY_PREFIXES.includes(option.toUpperCase()),
+        ),
+      );
+    }
+
+    setSelectedPrefixes(prefixes);
   };
 
   const startAutomaticMapping = () => {
@@ -762,7 +787,7 @@ export function SmdaMappings({
           runMapping={startAutomaticMapping}
           prefixOptions={prefixOptions}
           selectedPrefixes={selectedPrefixes}
-          setSelectedPrefixes={setSelectedPrefixes}
+          setSelectedPrefixes={updateSelectedPrefixes}
           addPrefix={addPrefix}
           ignoredPrefixes={reviewPrefixes}
           applyProposals={saveAutomaticMappings}
