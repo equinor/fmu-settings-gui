@@ -4,6 +4,7 @@ import {
   type EventMessage,
   EventType,
   InteractionRequiredAuthError,
+  InteractionStatus,
   InteractionType,
   PublicClientApplication,
 } from "@azure/msal-browser";
@@ -185,7 +186,8 @@ const router = createRouter({
 });
 
 export function App() {
-  const { instance: msalInstance } = useMsal();
+  const { instance: msalInstance, inProgress: msalInteractionStatus } =
+    useMsal();
   const [apiToken, setApiToken] = useState("");
   const [apiTokenStatus, setApiTokenStatus] = useState<TokenStatus>({});
   const [selectProjectInvalidAttempt, setSelectProjectInvalidAttempt] =
@@ -293,6 +295,7 @@ export function App() {
     }
 
     if (
+      msalInteractionStatus === InteractionStatus.None &&
       hasResponseInterceptor &&
       !sessionReady &&
       !sessionCreationFailed &&
@@ -305,6 +308,7 @@ export function App() {
     apiToken,
     hasResponseInterceptor,
     isCreatingSession,
+    msalInteractionStatus,
     requestSessionCreation,
     sessionCreationFailed,
     sessionReady,
@@ -315,7 +319,11 @@ export function App() {
       await createSessionAsync(createSessionMutateAsync, apiToken);
     }
 
-    if (requestSessionCreation && !isCreatingSession) {
+    if (
+      msalInteractionStatus === InteractionStatus.None &&
+      requestSessionCreation &&
+      !isCreatingSession
+    ) {
       setIsCreatingSession(true);
       setSessionCreationFailed(false);
       void callCreateSessionAsync()
@@ -345,6 +353,7 @@ export function App() {
     apiToken,
     createSessionMutateAsync,
     isCreatingSession,
+    msalInteractionStatus,
     patchAccessTokenMutate,
     requestSessionCreation,
   ]);

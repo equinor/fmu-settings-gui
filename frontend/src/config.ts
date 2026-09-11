@@ -5,7 +5,7 @@ export const msalConfig: Configuration = {
     clientId: "a97989e5-5477-4e8c-b2e4-b6bfda581331",
     authority:
       "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
-    redirectUri: "/",
+    redirectUri: "/redirect.html",
   },
 };
 
