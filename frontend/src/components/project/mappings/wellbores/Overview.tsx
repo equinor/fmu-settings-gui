@@ -5,6 +5,9 @@ import type { FieldItem, RmsProject } from "#client";
 import { useWellboreMappings } from "#services/mappings";
 import { useSmdaWellHeaders } from "#services/smda";
 import { PageText, WarningBox } from "#styles/common";
+import { createWellboreElementMappings } from "./functions";
+import { MappingActions } from "./Overview.style";
+import { SimulatorMappings } from "./SimulatorMappings";
 import { WellboreMappingsTable } from "./WellboreMappingsTable";
 
 export function Overview({
@@ -24,6 +27,11 @@ export function Overview({
     () => rmsProject.wells ?? [],
     [rmsProject.wells],
   );
+  const { mappings, saveMappings, isSaving } = useWellboreMappings();
+  const elementMappings = useMemo(
+    () => createWellboreElementMappings(rmsWellbores, mappings),
+    [mappings, rmsWellbores],
+  );
   const nonPlannedRmsWellboreNames = useMemo(
     () =>
       rmsWellbores
@@ -31,8 +39,6 @@ export function Overview({
         .map((wellbore) => wellbore.name),
     [rmsWellbores],
   );
-
-  const { mappings, saveMappings, isSaving } = useWellboreMappings();
   const wellHeaders = useSmdaWellHeaders({
     fields,
     enabled:
@@ -48,6 +54,17 @@ export function Overview({
         The following mappings show wellbore names in RMS, simulator files, and
         SMDA. Blue rows are planned wellbores.
       </PageText>
+
+      {editMode && rmsWellbores.length > 0 && (
+        <MappingActions>
+          <SimulatorMappings
+            elementMappings={elementMappings}
+            projectReadOnly={projectReadOnly}
+            isSaving={isSaving}
+            saveMappings={saveMappings}
+          />
+        </MappingActions>
+      )}
 
       {editMode &&
         !wellHeaders.hasFields &&
@@ -71,8 +88,7 @@ export function Overview({
       )}
 
       <WellboreMappingsTable
-        rmsWellbores={rmsWellbores}
-        mappings={mappings}
+        elementMappings={elementMappings}
         smdaHeaders={wellHeaders.smdaHeaders}
         smdaHeadersError={wellHeaders.isError}
         smdaHealthStatus={smdaHealthStatus}

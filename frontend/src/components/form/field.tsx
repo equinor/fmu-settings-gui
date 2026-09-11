@@ -47,6 +47,7 @@ export function TextField({
   placeholder,
   disabled,
   helperText,
+  errorText,
   isReadOnly,
   toUpperCase,
 }: {
@@ -56,14 +57,20 @@ export function TextField({
   placeholder?: string | undefined;
   disabled?: boolean | undefined;
   helperText?: string | undefined;
+  errorText?: string | undefined;
   isReadOnly?: boolean | undefined;
   toUpperCase?: boolean | undefined;
 }) {
   const field = useFieldContext<string>();
+  const validationErrorText = field.state.meta.isValid
+    ? undefined
+    : field.state.meta.errors.map((err: z.ZodError) => err.message).join(", ");
+  const displayedErrorText = errorText ?? validationErrorText;
 
   return (
     <InputWrapper
-      {...(helperText !== undefined && { helperProps: { text: helperText } })}
+      {...(helperText !== undefined &&
+        errorText === undefined && { helperProps: { text: helperText } })}
     >
       <EdsTextField
         id={field.name}
@@ -83,12 +90,10 @@ export function TextField({
           }
           field.handleChange(value);
         }}
-        {...(!field.state.meta.isValid && {
+        {...(displayedErrorText !== undefined && {
           variant: "error",
           helperIcon: <Icon name="error_filled" title="Error" size={16} />,
-          helperText: field.state.meta.errors
-            .map((err: z.ZodError) => err.message)
-            .join(", "),
+          helperText: displayedErrorText,
         })}
       />
     </InputWrapper>

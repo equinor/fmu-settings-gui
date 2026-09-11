@@ -6,8 +6,6 @@ import { z } from "zod";
 
 import type {
   InternalWellboreIdentifierMapping,
-  InternalWellboreMappings,
-  RmsWell,
   SmdaWellHeader,
 } from "#client";
 import { ConfirmCloseDialog } from "#components/common";
@@ -40,7 +38,6 @@ import { dataGridHeight } from "#styles/dataGrid";
 import { fieldContext, formContext } from "#utils/form";
 import { stringCompare } from "#utils/string";
 import { useConfirmClose } from "#utils/ui";
-import { createWellboreElementMappings } from "./functions";
 import {
   MappingEditFields,
   SmdaOptionDivider,
@@ -355,8 +352,7 @@ const wellboreMappingColumns: ColumnDef<ElementMapping>[] = [
 ];
 
 export function WellboreMappingsTable({
-  rmsWellbores,
-  mappings,
+  elementMappings,
   smdaHeaders,
   smdaHeadersError,
   smdaHealthStatus,
@@ -365,8 +361,7 @@ export function WellboreMappingsTable({
   isSaving,
   saveMappings,
 }: {
-  rmsWellbores: RmsWell[];
-  mappings: InternalWellboreMappings;
+  elementMappings: ElementMappings;
   smdaHeaders: SmdaWellHeader[];
   smdaHeadersError: boolean;
   smdaHealthStatus: boolean;
@@ -380,10 +375,6 @@ export function WellboreMappingsTable({
     [],
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>([]);
-  const elementMappings = useMemo(
-    () => createWellboreElementMappings(rmsWellbores, mappings),
-    [mappings, rmsWellbores],
-  );
   const rows = useMemo(() => Object.values(elementMappings), [elementMappings]);
   const filteredRowCount = useMemo(
     () => rows.filter((row) => matchesColumnFilters(row, columnFilters)).length,
