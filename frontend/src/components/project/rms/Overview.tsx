@@ -24,7 +24,6 @@ import {
   SubmitButton,
 } from "#components/form/button";
 import { type OptionProps, Select } from "#components/form/field";
-import { rmsMinimumVersion } from "#config";
 import {
   ActionButtonsContainer,
   EditDialog,
@@ -39,7 +38,6 @@ import {
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
 import { getRmsProjectName } from "#utils/model";
-import { isVersionLessThan } from "#utils/string";
 
 const { useAppForm: useAppFormRmsEditor } = createFormHook({
   fieldComponents: {
@@ -241,11 +239,6 @@ function RmsProjectActions({
   const queryClient = useQueryClient();
   const [selectProjectDialogOpen, setSelectProjectDialogOpen] = useState(false);
 
-  const useRmsVersion =
-    rmsData && isVersionLessThan(rmsData.version, rmsMinimumVersion)
-      ? rmsMinimumVersion
-      : undefined;
-
   const projectOpenMutation = useMutation({
     ...rmsPostRmsProjectMutation(),
     onSuccess: () => {
@@ -262,20 +255,9 @@ function RmsProjectActions({
         queryKey: rmsGetWellsQueryKey(),
       });
     },
-    onError: (error, variables) => {
+    onError: (error) => {
       if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
         const message = (error.response.data as { detail?: string }).detail;
-
-        // If version was specified, retry without to use actual version
-        if (
-          variables.body?.version &&
-          message?.includes("RMS version") &&
-          message.includes("is not supported")
-        ) {
-          projectOpenMutation.mutate({});
-
-          return;
-        }
 
         console.error(message);
         toast.error(message, { autoClose: false });
@@ -345,9 +327,7 @@ function RmsProjectActions({
               disabled={projectCloseMutation.isPending}
               variant={isRmsProjectOpen ? "outlined" : "contained"}
               onClick={() => {
-                projectOpenMutation.mutate(
-                  useRmsVersion ? { body: { version: useRmsVersion } } : {},
-                );
+                projectOpenMutation.mutate({});
               }}
             />
 
