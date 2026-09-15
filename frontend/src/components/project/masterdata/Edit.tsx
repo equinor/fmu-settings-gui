@@ -145,7 +145,7 @@ function ConfirmItemsOperationDialog({
 
   let textItemsDescription = "selected";
   if (hasAffectedItems) {
-    textItemsDescription += " and dependant";
+    textItemsDescription += " and dependent";
   }
 
   return (
@@ -173,7 +173,7 @@ function ConfirmItemsOperationDialog({
               {selectedItems.operation === "addition"
                 ? "added to"
                 : "removed from"}{" "}
-              the project, as they are dependant on this {textItemType}:
+              the project, as they are dependent on this {textItemType}:
             </PageText>
 
             <PageList>
