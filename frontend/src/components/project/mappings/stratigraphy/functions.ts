@@ -1,8 +1,43 @@
-import type { RmsStratigraphicZone, StratigraphicUnit } from "#client";
+import type {
+  DataSystem,
+  InternalStratigraphyMappings,
+  RmsHorizon,
+  RmsStratigraphicZone,
+  StratigraphicUnit,
+} from "#client";
 import type { OptionProps } from "#components/form/field";
+import {
+  createElementMappings,
+  createProjectMappingsLookup,
+} from "#components/project/common/mapping/functions";
 import type { ElementMappings } from "#components/project/common/mapping/types";
 import type { StratUnitRelation } from "./types";
 import { getLabelForStratUnitOption } from "./utils";
+
+export const stratigraphyTargetSystems = ["smda"] satisfies DataSystem[];
+
+export function createStratigraphyElementMappings(
+  horizons: RmsHorizon[],
+  zones: RmsStratigraphicZone[],
+  mappings: InternalStratigraphyMappings,
+) {
+  const lookup = createProjectMappingsLookup(
+    "stratigraphy",
+    "rms",
+    stratigraphyTargetSystems,
+    { stratigraphy: mappings },
+  );
+
+  return {
+    ...createElementMappings(
+      "horizon",
+      stratigraphyTargetSystems,
+      horizons,
+      lookup,
+    ),
+    ...createElementMappings("zone", stratigraphyTargetSystems, zones, lookup),
+  };
+}
 
 function getOptionPropsForChildren(
   stratUnits: StratUnitRelation[],

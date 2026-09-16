@@ -33,6 +33,20 @@ export type ElementMappingTargetUpdates = Partial<
   Record<DataSystem, ElementMappingTargetUpdate>
 >;
 
+export type ElementMappingTargetDataToClear = Partial<
+  Record<DataSystem, string[]>
+>;
+
+export type ElementMappingTargetDataCleared = Record<
+  DataSystem,
+  ElementMappingTarget
+>;
+
+export type ElementMappingsTargetDataCleared = Record<
+  string,
+  Partial<ElementMappingTargetDataCleared>
+>;
+
 export type MappingData = {
   elementMappings: ElementMappings;
   setElementMappings: Dispatch<SetStateAction<ElementMappings>>;

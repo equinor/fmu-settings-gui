@@ -1,11 +1,11 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { type AnyFormApi, createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import type {
-  InternalStratigraphyMappings,
+  InternalStratigraphyIdentifierMapping,
   RmsHorizon,
   RmsProject,
   RmsStratigraphicFramework,
@@ -30,10 +30,12 @@ import type {
   MutationCallbackProps,
 } from "#components/form/form.tsx";
 import {
-  getRemovedMappingTexts,
-  pruneStratigraphyMappings,
-  useMappingsMutation,
-} from "#services/mappings";
+  createMutationValue,
+  removeElementMappings,
+} from "#components/project/common/mapping/functions";
+import type { ElementMappings } from "#components/project/common/mapping/types";
+import { createStratigraphyElementMappings } from "#components/project/mappings/stratigraphy/functions";
+import { useMappingsMutation } from "#services/mappings";
 import { mappingsPaths } from "#services/project";
 import {
   ActionButtonsContainer,
@@ -55,6 +57,7 @@ import {
   ConfirmMappingRemovalDialog,
   type PendingMappingRemoval,
 } from "../ConfirmMappingRemovalDialog";
+import { getRemovedMappingTexts } from "../functions";
 import { Horizons, Zones } from "./StratigraphicFramework";
 import { StratigraphyEditorContainer } from "./Stratigraphy.style";
 import { namesNotInReference, useItemHandlers } from "./utils.ts";
@@ -117,14 +120,14 @@ function ConfirmActionDialog({
 function StratigraphyEditor({
   availableHorizons,
   availableZones,
-  mappings,
+  elementMappings,
   confirmRemoval,
   confirmAction,
   setConfirmAction,
 }: {
   availableHorizons: RmsHorizon[];
   availableZones: RmsStratigraphicZone[];
-  mappings: InternalStratigraphyMappings;
+  elementMappings: ElementMappings;
   confirmRemoval: (removal: PendingMappingRemoval) => void;
   confirmAction: ConfirmAction;
   setConfirmAction: Dispatch<SetStateAction<ConfirmAction>>;
@@ -174,19 +177,23 @@ function StratigraphyEditor({
       confirmWithoutMappings?: boolean;
     } = {},
   ) => {
-    const removedNames = new Set([...horizonNames, ...zoneNames]);
     const currentNames = [...projectHorizons, ...projectZones].map(
       (item) => item.name,
     );
-    const remainingNames = currentNames.filter(
-      (name) => !removedNames.has(name),
+    const previouslyRemovedNames = Object.keys(elementMappings).filter(
+      (name) => !currentNames.includes(name),
     );
     // Diff against the current form state, not the stored mappings, so
     // earlier unsaved removals are not previewed again.
-    const mappingTexts = getRemovedMappingTexts(
-      pruneStratigraphyMappings(mappings, currentNames),
-      pruneStratigraphyMappings(mappings, remainingNames),
-    );
+    const currentElementMappings = removeElementMappings(
+      elementMappings,
+      previouslyRemovedNames,
+    ).preserved;
+    const removeResults = removeElementMappings(currentElementMappings, [
+      ...horizonNames,
+      ...zoneNames,
+    ]);
+    const mappingTexts = getRemovedMappingTexts(removeResults.removed);
     const apply = () => {
       applyRemoval(horizonNames, [...zoneNames, ...dependentZoneNames]);
     };
@@ -398,6 +405,19 @@ function Edit({
     ...projectGetMappingsOptions({ path: mappingsPaths.stratigraphyRms }),
     enabled: isDialogOpen,
   });
+  const elementMappings = useMemo(
+    () =>
+      createStratigraphyElementMappings(
+        projectHorizons,
+        projectZones,
+        stratigraphyMappingsQuery.data?.stratigraphy ?? [],
+      ),
+    [
+      projectHorizons,
+      projectZones,
+      stratigraphyMappingsQuery.data?.stratigraphy,
+    ],
+  );
   const availableStratigraphyLoaded =
     availableHorizonsLoaded && availableZonesLoaded;
   const [pendingRemoval, setPendingRemoval] = useState<PendingMappingRemoval>();
@@ -470,11 +490,17 @@ function Edit({
         availableZoneNames.has(zone.name),
       ),
     };
-    const currentMappings = stratigraphyMappingsQuery.data?.stratigraphy ?? [];
-    const prunedMappings = pruneStratigraphyMappings(currentMappings, [
+    const savedNames = [
       ...savedFramework.horizons.map((horizon) => horizon.name),
       ...savedFramework.zones.map((zone) => zone.name),
-    ]);
+    ];
+    const removedMappingNames = Object.keys(elementMappings).filter(
+      (name) => !savedNames.includes(name),
+    );
+    const removeResults = removeElementMappings(
+      elementMappings,
+      removedMappingNames,
+    );
 
     rmsStratigraphyMutation.mutate(
       { body: savedFramework },
@@ -485,12 +511,19 @@ function Edit({
             closeDialog();
           };
 
-          if (prunedMappings.length === currentMappings.length) {
+          if (removedMappingNames.length === 0) {
             finishSave();
           } else {
-            mappingsMutation.mutateMappings(prunedMappings, {
-              onSuccess: finishSave,
-            });
+            mappingsMutation.mutateMappings(
+              createMutationValue<InternalStratigraphyIdentifierMapping>(
+                "stratigraphy",
+                "rms",
+                removeResults.preserved,
+              ),
+              {
+                onSuccess: finishSave,
+              },
+            );
           }
         },
       },
@@ -554,9 +587,7 @@ function Edit({
                   <form.StratigraphyEditor
                     availableHorizons={availableHorizons ?? []}
                     availableZones={availableZones ?? []}
-                    mappings={
-                      stratigraphyMappingsQuery.data?.stratigraphy ?? []
-                    }
+                    elementMappings={elementMappings}
                     confirmRemoval={setPendingRemoval}
                     confirmAction={confirmAction}
                     setConfirmAction={setConfirmAction}

@@ -14,7 +14,6 @@ import {
 import { toast } from "react-toastify";
 
 import type {
-  DataSystem,
   InternalStratigraphyIdentifierMapping,
   RmsProject,
   StratigraphicColumn,
@@ -57,9 +56,7 @@ import {
 import { fieldContext, formContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui";
 import {
-  createElementMappings,
   createMutationValue,
-  createProjectMappingsLookup,
   handleErrorUnknownInitialValue,
   updatedElementMapping,
   useMappingData,
@@ -77,7 +74,11 @@ import {
   useFrameworkData,
 } from "../../common/stratigraphicFramework/functions";
 import { StratigraphicFramework } from "../../common/stratigraphicFramework/StratigraphicFramework";
-import { createHorizonOptions, createStratUnitOptions } from "./functions";
+import {
+  createHorizonOptions,
+  createStratigraphyElementMappings,
+  createStratUnitOptions,
+} from "./functions";
 import {
   ElementActions,
   ElementInfo,
@@ -89,8 +90,6 @@ import {
   ZoneItem,
 } from "./Overview.style";
 import { validateSelectValue } from "./utils";
-
-const supportedTargets: DataSystem[] = ["smda"] as const;
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -566,29 +565,15 @@ export function Overview({
     }),
   );
 
-  const baseElementMappings = useMemo(() => {
-    const lookup = createProjectMappingsLookup(
-      "stratigraphy",
-      "rms",
-      supportedTargets,
-      projectMappings,
-    );
-
-    return {
-      ...createElementMappings(
-        "horizon",
-        supportedTargets,
+  const baseElementMappings = useMemo(
+    () =>
+      createStratigraphyElementMappings(
         rmsProject.horizons ?? [],
-        lookup,
-      ),
-      ...createElementMappings(
-        "zone",
-        supportedTargets,
         rmsProject.zones ?? [],
-        lookup,
+        projectMappings.stratigraphy ?? [],
       ),
-    };
-  }, [projectMappings, rmsProject.horizons, rmsProject.zones]);
+    [projectMappings.stratigraphy, rmsProject.horizons, rmsProject.zones],
+  );
 
   const [elementMappingsState, setElementMappingsState] = useState(() => ({
     base: baseElementMappings,

@@ -5,7 +5,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-import type { InternalWellboreMappings, RmsProject, RmsWell } from "#client";
+import type {
+  InternalWellboreIdentifierMapping,
+  RmsProject,
+  RmsWell,
+} from "#client";
 import {
   projectGetChangelogQueryKey,
   projectGetMappingsOptions,
@@ -23,12 +27,14 @@ import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form.tsx";
-import { applicationLocale } from "#config";
 import {
-  getRemovedMappingTexts,
-  pruneWellboreMappings,
-  useMappingsMutation,
-} from "#services/mappings";
+  createMutationValue,
+  removeElementMappings,
+} from "#components/project/common/mapping/functions";
+import type { ElementMappings } from "#components/project/common/mapping/types";
+import { createWellboreElementMappings } from "#components/project/mappings/wellbores/functions";
+import { applicationLocale } from "#config";
+import { useMappingsMutation } from "#services/mappings";
 import { mappingsPaths } from "#services/project";
 import {
   ActionButtonsContainer,
@@ -52,6 +58,7 @@ import {
   ConfirmMappingRemovalDialog,
   type PendingMappingRemoval,
 } from "../ConfirmMappingRemovalDialog";
+import { getRemovedMappingTexts } from "../functions";
 import { WellboresContainer } from "./Wellbores.style";
 
 const { useAppForm } = createFormHook({
@@ -92,11 +99,11 @@ const storedWellboreColumns: ColumnDef<RmsWell>[] = [
 
 function WellboresEditor({
   availableWellbores,
-  mappings,
+  elementMappings,
   confirmRemoval,
 }: {
   availableWellbores: RmsWell[];
-  mappings: InternalWellboreMappings;
+  elementMappings: ElementMappings;
   confirmRemoval: (removal: PendingMappingRemoval) => void;
 }) {
   const form: AnyFormApi = useFormContext();
@@ -157,12 +164,23 @@ function WellboresEditor({
     const remainingWellbores = projectWellbores.filter(
       (wellbore) => !removedWellboreNames.has(wellbore.name),
     );
+    const currentWellboreNames = projectWellbores.map(
+      (wellbore) => wellbore.name,
+    );
+    const previouslyRemovedNames = Object.keys(elementMappings).filter(
+      (name) => !currentWellboreNames.includes(name),
+    );
     // Diff against the current form state, not the stored mappings, so
     // earlier unsaved removals are not previewed again.
-    const mappingTexts = getRemovedMappingTexts(
-      pruneWellboreMappings(mappings, projectWellbores),
-      pruneWellboreMappings(mappings, remainingWellbores),
+    const currentElementMappings = removeElementMappings(
+      elementMappings,
+      previouslyRemovedNames,
+    ).preserved;
+    const removeResults = removeElementMappings(
+      currentElementMappings,
+      wellboreNames,
     );
+    const mappingTexts = getRemovedMappingTexts(removeResults.removed);
 
     if (mappingTexts.length === 0) {
       setWellbores(remainingWellbores);
@@ -424,6 +442,14 @@ function Edit({
     ...projectGetMappingsOptions({ path: mappingsPaths.wellboreRms }),
     enabled: isDialogOpen,
   });
+  const elementMappings = useMemo(
+    () =>
+      createWellboreElementMappings(
+        projectWellbores,
+        wellboreMappingsQuery.data?.wellbore ?? [],
+      ),
+    [projectWellbores, wellboreMappingsQuery.data?.wellbore],
+  );
   const isInitialized = useRef(false);
   const availableWellboresLoaded = availableWellboresQuery.isSuccess;
   const [pendingRemoval, setPendingRemoval] = useState<PendingMappingRemoval>();
@@ -486,10 +512,20 @@ function Edit({
     const savedWellbores = formValue.wells.filter((wellbore) =>
       availableWellboreNames.has(wellbore.name),
     );
-    const currentMappings = wellboreMappingsQuery.data?.wellbore ?? [];
-    const prunedMappings = pruneWellboreMappings(
-      currentMappings,
-      savedWellbores,
+    const savedNames = savedWellbores.map((wellbore) => wellbore.name);
+    const savedPlannedNames = savedWellbores
+      .filter((wellbore) => wellbore.planned)
+      .map((wellbore) => wellbore.name);
+    const removedMappingNames = Object.keys(elementMappings).filter(
+      (name) => !savedNames.includes(name),
+    );
+    const clearSmdaTargetData = Object.keys(elementMappings).filter((name) =>
+      savedPlannedNames.includes(name),
+    );
+    const removeResults = removeElementMappings(
+      elementMappings,
+      removedMappingNames,
+      { smda: clearSmdaTargetData },
     );
 
     rmsWellboresMutation.mutate(
@@ -501,12 +537,22 @@ function Edit({
             closeDialog();
           };
 
-          if (prunedMappings.length === currentMappings.length) {
+          if (
+            removedMappingNames.length === 0 &&
+            Object.keys(removeResults.targetDataCleared).length === 0
+          ) {
             finishSave();
           } else {
-            mappingsMutation.mutateMappings(prunedMappings, {
-              onSuccess: finishSave,
-            });
+            mappingsMutation.mutateMappings(
+              createMutationValue<InternalWellboreIdentifierMapping>(
+                "wellbore",
+                "rms",
+                removeResults.preserved,
+              ),
+              {
+                onSuccess: finishSave,
+              },
+            );
           }
         },
       },
@@ -612,7 +658,7 @@ function Edit({
                       <form.WellboresEditor
                         key={isDialogOpen ? "open" : "closed"}
                         availableWellbores={availableWellboresQuery.data}
-                        mappings={wellboreMappingsQuery.data?.wellbore ?? []}
+                        elementMappings={elementMappings}
                         confirmRemoval={setPendingRemoval}
                       />
                     )}

@@ -21,6 +21,8 @@ import { MappingDataContext } from "./MappingData";
 import type {
   ElementMapping,
   ElementMappings,
+  ElementMappingsTargetDataCleared,
+  ElementMappingTargetDataToClear,
   ElementMappingTargetUpdates,
   ElementType,
 } from "./types";
@@ -174,6 +176,65 @@ export function updatedElementMapping(
       ...updatedTargets,
     },
   };
+}
+
+export function removeElementMappings(
+  elementMappings: ElementMappings,
+  removeNames: string[],
+  clearTargetData?: ElementMappingTargetDataToClear,
+) {
+  const result = Object.entries(elementMappings).reduce(
+    (acc, [name, mapping]) => {
+      if (removeNames.includes(name)) {
+        acc.removed[name] = mapping;
+      } else {
+        if (clearTargetData) {
+          Object.entries(clearTargetData).forEach(([clearKey, clearNames]) => {
+            const targetSystem = clearKey as DataSystem;
+            if (
+              targetSystem in mapping.targets &&
+              mapping.targets[targetSystem] !== undefined &&
+              clearNames.includes(mapping.name)
+            ) {
+              const targetData = mapping.targets[targetSystem];
+              if (
+                targetData.unmappable ||
+                (targetSystem === "simulator" && targetData.name !== "") ||
+                (targetSystem === "smda" && targetData.uuid !== "")
+              ) {
+                if (!(name in acc.targetDataCleared)) {
+                  acc.targetDataCleared[name] = {};
+                }
+                if (acc.targetDataCleared[name]) {
+                  acc.targetDataCleared[name][targetSystem] = targetData;
+                }
+              }
+              mapping = {
+                ...mapping,
+                targets: {
+                  ...mapping.targets,
+                  [targetSystem]: emptyElementMappingTarget(),
+                },
+              };
+            }
+          });
+        }
+        acc.preserved[name] = mapping;
+      }
+
+      return acc;
+    },
+    {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      preserved: {} as ElementMappings,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      removed: {} as ElementMappings,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      targetDataCleared: {} as ElementMappingsTargetDataCleared,
+    },
+  );
+
+  return result;
 }
 
 export function createMutationValue<
