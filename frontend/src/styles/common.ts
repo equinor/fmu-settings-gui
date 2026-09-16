@@ -64,6 +64,10 @@ export const PageList = styled(List).attrs<{
   $marginBottom: props.$marginBottom ?? tokens.spacings.comfortable.medium,
 }))`
   margin-bottom: ${({ $marginBottom }) => $marginBottom};
+
+  .emphasis {
+    font-weight: 500;
+  }
 `;
 
 export const ActionButtonsContainer = styled.div`
@@ -88,6 +92,12 @@ export const GenericInnerBox = styled(GenericBox)`
   background: ${tokens.colors.ui.background__default.hex};
 `;
 
+export const ParametersBox = styled(GenericBox)`
+  border-color: ${tokens.colors.text.static_icons__default.hex};
+  border-style: dotted;
+  background: ${tokens.colors.ui.background__default.hex};
+`;
+
 export const InfoBox = styled(GenericBox)`
   th {
     padding-right: ${tokens.spacings.comfortable.small};
@@ -102,6 +112,10 @@ export const InfoBox = styled(GenericBox)`
 
   td {
     vertical-align: top;
+  }
+
+  .emphasis {
+    font-weight: 500;
   }
 
   .missingValue {
@@ -166,7 +180,7 @@ export const GenericDialog = styled(Dialog).attrs<{
     padding: ${tokens.spacings.comfortable.medium};
   }
 
-  button + button {
+  && button + button {
     margin-left: ${tokens.spacings.comfortable.small};
   }
 `;

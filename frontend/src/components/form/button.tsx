@@ -81,9 +81,11 @@ export function SubmitButton({
 }
 
 export function CancelButton({
+  disabled,
   onClick,
   onMouseDown,
 }: {
+  disabled?: boolean;
   onClick?: ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined;
   onMouseDown?: ((e: React.MouseEvent<HTMLButtonElement>) => void) | undefined;
 }) {
@@ -92,6 +94,7 @@ export function CancelButton({
       type="reset"
       variant="outlined"
       label="Cancel"
+      disabled={disabled}
       onClick={onClick}
       onMouseDown={onMouseDown}
     />

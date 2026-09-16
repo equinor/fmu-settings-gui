@@ -4,8 +4,8 @@ import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanst
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { healthHealthCheck, healthV1HealthCheck, matchPostMatch, type Options, projectDeleteProjectSession, projectGetCache, projectGetCacheDiff, projectGetCacheRevision, projectGetChangelog, projectGetGlobalConfigStatus, projectGetLockStatus, projectGetMappings, projectGetProject, projectGetRestoreCheck, projectGetRmsProjects, projectGetSumoAssets, projectPatchAccess, projectPatchCacheMaxRevisions, projectPatchMasterdata, projectPatchModel, projectPatchRms, projectPatchRmsCoordinateSystem, projectPatchRmsStratigraphicFramework, projectPatchRmsWells, projectPostCacheRestore, projectPostGlobalConfig, projectPostInitProject, projectPostLockAcquire, projectPostLockRefresh, projectPostLockRelease, projectPostMappingsExportRmsSimulatorRenamingTable, projectPostMappingsImportRmsEclipseCsv, projectPostProject, projectPostRestore, projectPostValidateMasterdataSmda, projectPutMappings, rmsDeleteRmsProject, rmsGetCoordinateSystem, rmsGetHorizons, rmsGetWells, rmsGetZones, rmsPostRmsProject, sessionGetRestoreCheck, sessionGetSession, sessionPatchAccessToken, sessionPostRestore, sessionPostSession, smdaGetHealth, smdaPostField, smdaPostMasterdata, smdaPostStratUnits, smdaPostWellHeaders, userGetUser, userPatchApiKey } from '../sdk.gen';
-import type { HealthHealthCheckData, HealthHealthCheckResponse, HealthV1HealthCheckData, HealthV1HealthCheckError, HealthV1HealthCheckResponse, MatchPostMatchData, MatchPostMatchResponse, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionError, ProjectDeleteProjectSessionResponse, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffResponse, ProjectGetCacheError, ProjectGetCacheResponse, ProjectGetCacheRevisionData, ProjectGetCacheRevisionResponse, ProjectGetChangelogData, ProjectGetChangelogResponse, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusResponse, ProjectGetLockStatusData, ProjectGetLockStatusError, ProjectGetLockStatusResponse, ProjectGetMappingsData, ProjectGetMappingsResponse, ProjectGetProjectData, ProjectGetProjectError, ProjectGetProjectResponse, ProjectGetRestoreCheckData, ProjectGetRestoreCheckError, ProjectGetRestoreCheckResponse, ProjectGetRmsProjectsData, ProjectGetRmsProjectsError, ProjectGetRmsProjectsResponse, ProjectGetSumoAssetsData, ProjectGetSumoAssetsResponse, ProjectPatchAccessData, ProjectPatchAccessError, ProjectPatchAccessResponse, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsError, ProjectPatchCacheMaxRevisionsResponse, ProjectPatchMasterdataData, ProjectPatchMasterdataError, ProjectPatchMasterdataResponse, ProjectPatchModelData, ProjectPatchModelError, ProjectPatchModelResponse, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemResponse, ProjectPatchRmsData, ProjectPatchRmsError, ProjectPatchRmsResponse, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkResponse, ProjectPatchRmsWellsData, ProjectPatchRmsWellsResponse, ProjectPostCacheRestoreData, ProjectPostCacheRestoreResponse, ProjectPostGlobalConfigData, ProjectPostGlobalConfigResponse, ProjectPostInitProjectData, ProjectPostInitProjectResponse, ProjectPostLockAcquireData, ProjectPostLockAcquireError, ProjectPostLockAcquireResponse, ProjectPostLockRefreshData, ProjectPostLockRefreshError, ProjectPostLockRefreshResponse, ProjectPostLockReleaseData, ProjectPostLockReleaseError, ProjectPostLockReleaseResponse, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableResponse, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvResponse, ProjectPostProjectData, ProjectPostProjectError, ProjectPostProjectResponse, ProjectPostRestoreData, ProjectPostRestoreError, ProjectPostRestoreResponse, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaResponse, ProjectPutMappingsData, ProjectPutMappingsResponse, RmsDeleteRmsProjectData, RmsDeleteRmsProjectError, RmsDeleteRmsProjectResponse, RmsGetCoordinateSystemData, RmsGetCoordinateSystemError, RmsGetCoordinateSystemResponse, RmsGetHorizonsData, RmsGetHorizonsError, RmsGetHorizonsResponse, RmsGetWellsData, RmsGetWellsError, RmsGetWellsResponse, RmsGetZonesData, RmsGetZonesError, RmsGetZonesResponse, RmsPostRmsProjectData, RmsPostRmsProjectResponse, SessionGetRestoreCheckData, SessionGetRestoreCheckError, SessionGetRestoreCheckResponse, SessionGetSessionData, SessionGetSessionError, SessionGetSessionResponse, SessionPatchAccessTokenData, SessionPatchAccessTokenError, SessionPatchAccessTokenResponse, SessionPostRestoreData, SessionPostRestoreError, SessionPostRestoreResponse, SessionPostSessionData, SessionPostSessionError, SessionPostSessionResponse, SmdaGetHealthData, SmdaGetHealthError, SmdaGetHealthResponse, SmdaPostFieldData, SmdaPostFieldError, SmdaPostFieldResponse, SmdaPostMasterdataData, SmdaPostMasterdataResponse, SmdaPostStratUnitsData, SmdaPostStratUnitsResponse, SmdaPostWellHeadersData, SmdaPostWellHeadersResponse, UserGetUserData, UserGetUserError, UserGetUserResponse, UserPatchApiKeyData, UserPatchApiKeyError, UserPatchApiKeyResponse } from '../types.gen';
+import { healthHealthCheck, healthV1HealthCheck, matchPostMatch, type Options, projectDeleteProjectSession, projectGetCache, projectGetCacheDiff, projectGetCacheRevision, projectGetChangelog, projectGetGlobalConfigStatus, projectGetLockStatus, projectGetMappings, projectGetProject, projectGetRestoreCheck, projectGetRmsProjects, projectGetSumoAssets, projectPatchAccess, projectPatchCacheMaxRevisions, projectPatchMasterdata, projectPatchModel, projectPatchRms, projectPatchRmsCoordinateSystem, projectPatchRmsStratigraphicFramework, projectPatchRmsWells, projectPostCacheRestore, projectPostGlobalConfig, projectPostInitProject, projectPostLockAcquire, projectPostLockRefresh, projectPostLockRelease, projectPostMappingsExportRmsSimulatorRenamingTable, projectPostMappingsImportRmsEclipseCsv, projectPostProject, projectPostRestore, projectPostValidateMasterdataSmda, projectPutMappings, rmsDeleteRmsProject, rmsGetCoordinateSystem, rmsGetHorizons, rmsGetWells, rmsGetZones, rmsPostRmsProject, rmsPostValidateRmsProject, sessionGetRestoreCheck, sessionGetSession, sessionPatchAccessToken, sessionPostRestore, sessionPostSession, smdaGetHealth, smdaPostField, smdaPostMasterdata, smdaPostStratUnits, smdaPostWellHeaders, userGetUser, userPatchApiKey } from '../sdk.gen';
+import type { HealthHealthCheckData, HealthHealthCheckResponse, HealthV1HealthCheckData, HealthV1HealthCheckError, HealthV1HealthCheckResponse, MatchPostMatchData, MatchPostMatchResponse, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionError, ProjectDeleteProjectSessionResponse, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffResponse, ProjectGetCacheError, ProjectGetCacheResponse, ProjectGetCacheRevisionData, ProjectGetCacheRevisionResponse, ProjectGetChangelogData, ProjectGetChangelogResponse, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusResponse, ProjectGetLockStatusData, ProjectGetLockStatusError, ProjectGetLockStatusResponse, ProjectGetMappingsData, ProjectGetMappingsResponse, ProjectGetProjectData, ProjectGetProjectError, ProjectGetProjectResponse, ProjectGetRestoreCheckData, ProjectGetRestoreCheckError, ProjectGetRestoreCheckResponse, ProjectGetRmsProjectsData, ProjectGetRmsProjectsError, ProjectGetRmsProjectsResponse, ProjectGetSumoAssetsData, ProjectGetSumoAssetsResponse, ProjectPatchAccessData, ProjectPatchAccessError, ProjectPatchAccessResponse, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsError, ProjectPatchCacheMaxRevisionsResponse, ProjectPatchMasterdataData, ProjectPatchMasterdataError, ProjectPatchMasterdataResponse, ProjectPatchModelData, ProjectPatchModelError, ProjectPatchModelResponse, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemResponse, ProjectPatchRmsData, ProjectPatchRmsError, ProjectPatchRmsResponse, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkResponse, ProjectPatchRmsWellsData, ProjectPatchRmsWellsResponse, ProjectPostCacheRestoreData, ProjectPostCacheRestoreResponse, ProjectPostGlobalConfigData, ProjectPostGlobalConfigResponse, ProjectPostInitProjectData, ProjectPostInitProjectResponse, ProjectPostLockAcquireData, ProjectPostLockAcquireError, ProjectPostLockAcquireResponse, ProjectPostLockRefreshData, ProjectPostLockRefreshError, ProjectPostLockRefreshResponse, ProjectPostLockReleaseData, ProjectPostLockReleaseError, ProjectPostLockReleaseResponse, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableResponse, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvResponse, ProjectPostProjectData, ProjectPostProjectError, ProjectPostProjectResponse, ProjectPostRestoreData, ProjectPostRestoreError, ProjectPostRestoreResponse, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaResponse, ProjectPutMappingsData, ProjectPutMappingsResponse, RmsDeleteRmsProjectData, RmsDeleteRmsProjectError, RmsDeleteRmsProjectResponse, RmsGetCoordinateSystemData, RmsGetCoordinateSystemError, RmsGetCoordinateSystemResponse, RmsGetHorizonsData, RmsGetHorizonsError, RmsGetHorizonsResponse, RmsGetWellsData, RmsGetWellsError, RmsGetWellsResponse, RmsGetZonesData, RmsGetZonesError, RmsGetZonesResponse, RmsPostRmsProjectData, RmsPostRmsProjectResponse, RmsPostValidateRmsProjectData, RmsPostValidateRmsProjectResponse, SessionGetRestoreCheckData, SessionGetRestoreCheckError, SessionGetRestoreCheckResponse, SessionGetSessionData, SessionGetSessionError, SessionGetSessionResponse, SessionPatchAccessTokenData, SessionPatchAccessTokenError, SessionPatchAccessTokenResponse, SessionPostRestoreData, SessionPostRestoreError, SessionPostRestoreResponse, SessionPostSessionData, SessionPostSessionError, SessionPostSessionResponse, SmdaGetHealthData, SmdaGetHealthError, SmdaGetHealthResponse, SmdaPostFieldData, SmdaPostFieldError, SmdaPostFieldResponse, SmdaPostMasterdataData, SmdaPostMasterdataResponse, SmdaPostStratUnitsData, SmdaPostStratUnitsResponse, SmdaPostWellHeadersData, SmdaPostWellHeadersResponse, UserGetUserData, UserGetUserError, UserGetUserResponse, UserPatchApiKeyData, UserPatchApiKeyError, UserPatchApiKeyResponse } from '../types.gen';
 
 /**
  * Removes a project .fmu directory from a session
@@ -947,6 +947,29 @@ export const rmsPostRmsProjectMutation = (options?: Partial<Options<RmsPostRmsPr
     return mutationOptions;
 };
 
+/**
+ * Validate saved RMS settings against the open RMS project
+ *
+ * Compare the RMS settings saved in the FMU project with the open RMS
+ * project.
+ *
+ * The operation does not modify saved RMS settings. When validation
+ * succeeds, it updates RMS validation metadata in project config.
+ */
+export const rmsPostValidateRmsProjectMutation = (options?: Partial<Options<RmsPostValidateRmsProjectData>>): UseMutationOptions<RmsPostValidateRmsProjectResponse, AxiosError<DefaultError>, Options<RmsPostValidateRmsProjectData>> => {
+    const mutationOptions: UseMutationOptions<RmsPostValidateRmsProjectResponse, AxiosError<DefaultError>, Options<RmsPostValidateRmsProjectData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await rmsPostValidateRmsProject({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const rmsGetZonesQueryKey = (options?: Options<RmsGetZonesData>) => createQueryKey('rmsGetZones', options);
 
 /**
@@ -1268,8 +1291,11 @@ export const smdaPostWellHeadersQueryKey = (options: Options<SmdaPostWellHeaders
  *
  * A route to gather well header data from SMDA for a specified field.
  *
- * This route receives a valid field identifier and returns the well header
- * fields needed to identify and map SMDA wellbores against model well names.
+ * This route receives a selected SMDA field and returns the well header
+ * attributes needed to identify and map SMDA wellbores against model well
+ * names. When provided, the field UUID is used to find well headers for the
+ * selected SMDA field. If no field UUID is provided, the field identifier is
+ * used instead.
  */
 export const smdaPostWellHeadersOptions = (options: Options<SmdaPostWellHeadersData>) => queryOptions<SmdaPostWellHeadersResponse, AxiosError<DefaultError>, SmdaPostWellHeadersResponse, ReturnType<typeof smdaPostWellHeadersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -1289,8 +1315,11 @@ export const smdaPostWellHeadersOptions = (options: Options<SmdaPostWellHeadersD
  *
  * A route to gather well header data from SMDA for a specified field.
  *
- * This route receives a valid field identifier and returns the well header
- * fields needed to identify and map SMDA wellbores against model well names.
+ * This route receives a selected SMDA field and returns the well header
+ * attributes needed to identify and map SMDA wellbores against model well
+ * names. When provided, the field UUID is used to find well headers for the
+ * selected SMDA field. If no field UUID is provided, the field identifier is
+ * used instead.
  */
 export const smdaPostWellHeadersMutation = (options?: Partial<Options<SmdaPostWellHeadersData>>): UseMutationOptions<SmdaPostWellHeadersResponse, AxiosError<DefaultError>, Options<SmdaPostWellHeadersData>> => {
     const mutationOptions: UseMutationOptions<SmdaPostWellHeadersResponse, AxiosError<DefaultError>, Options<SmdaPostWellHeadersData>> = {
@@ -1315,7 +1344,7 @@ export const matchPostMatchQueryKey = (options: Options<MatchPostMatchData>) => 
  *
  * The endpoint is a pure matching utility. Callers provide both the
  * source names and target names, and can optionally provide string
- * replacement rules to apply before matching.
+ * replacement rules and prefix removal options to apply before matching.
  *
  * Names are normalized before matching by lowercasing, replacing
  * underscores, dots, dashes, and slashes with spaces, collapsing
@@ -1323,6 +1352,11 @@ export const matchPostMatchQueryKey = (options: Options<MatchPostMatchData>) => 
  * rules match whole normalized token sequences only, so a rule like
  * `Fm -> Formation` changes `Tarbert Fm` to `Tarbert Formation`,
  * while `Top -> ""` leaves `Stop Viking` unchanged.
+ *
+ * Callers can provide a list of individual prefixes to remove. Prefixes
+ * are removed only from the text before the first digit and match
+ * normalized tokens. Prefix removal changes only the values used for
+ * comparison. The original names remain in the response.
  *
  * The response contains one result per source. Each result contains up
  * to three target matches, ordered from highest to lowest score.
@@ -1352,7 +1386,7 @@ export const matchPostMatchOptions = (options: Options<MatchPostMatchData>) => q
  *
  * The endpoint is a pure matching utility. Callers provide both the
  * source names and target names, and can optionally provide string
- * replacement rules to apply before matching.
+ * replacement rules and prefix removal options to apply before matching.
  *
  * Names are normalized before matching by lowercasing, replacing
  * underscores, dots, dashes, and slashes with spaces, collapsing
@@ -1360,6 +1394,11 @@ export const matchPostMatchOptions = (options: Options<MatchPostMatchData>) => q
  * rules match whole normalized token sequences only, so a rule like
  * `Fm -> Formation` changes `Tarbert Fm` to `Tarbert Formation`,
  * while `Top -> ""` leaves `Stop Viking` unchanged.
+ *
+ * Callers can provide a list of individual prefixes to remove. Prefixes
+ * are removed only from the text before the first digit and match
+ * normalized tokens. Prefix removal changes only the values used for
+ * comparison. The original names remain in the response.
  *
  * The response contains one result per source. Each result contains up
  * to three target matches, ordered from highest to lowest score.

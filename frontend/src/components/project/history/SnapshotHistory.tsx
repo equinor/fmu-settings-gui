@@ -38,6 +38,7 @@ import {
 import {
   queryKeyProjectGetCache,
   queryKeyProjectGetCacheDiff,
+  queryKeyProjectGetMappings,
 } from "#utils/query";
 import { ReadableValue } from "./ReadableValue";
 import {
@@ -619,6 +620,15 @@ export function SnapshotHistory({
           );
         },
       });
+      if (variables.query.resource === "mappings.json") {
+        void queryClient.invalidateQueries({
+          predicate: (query) => {
+            const key = query.queryKey[0] as { _id?: string } | undefined;
+
+            return key?._id === queryKeyProjectGetMappings;
+          },
+        });
+      }
       toast.info(
         "Restore successful. An auto-backup of your previous state has been saved at the top of the list",
       );

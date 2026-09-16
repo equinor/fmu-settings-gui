@@ -31,16 +31,17 @@ import {
   PageText,
 } from "#styles/common";
 import {
+  DataGridFilterContainer,
+  DataGridSearch,
+  dataGridHeight,
+} from "#styles/dataGrid";
+import {
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api.ts";
 import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui.ts";
-import {
-  WellboreFilterContainer,
-  WellboreSearch,
-  WellboresContainer,
-} from "./Wellbores.style";
+import { WellboresContainer } from "./Wellbores.style";
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -62,19 +63,6 @@ function sortWellboresByAvailableOrder(
       (order.get(wellboreA.name) ?? Number.MAX_SAFE_INTEGER) -
       (order.get(wellboreB.name) ?? Number.MAX_SAFE_INTEGER),
   );
-}
-
-// The grid header and each row are 48px high at the EDS comfortable density.
-// Firefox also uses this fixed estimate because EDS disables dynamic row
-// measurement there.
-const GRID_ROW_HEIGHT = 48;
-
-// Keep short grids only as tall as their header and rows. Cap long grids at
-// maxHeight so they scroll and virtualize instead of expanding the page.
-function gridHeight(rowCount: number, maxHeight: number): number {
-  const bodyRowCount = Math.max(rowCount, 1);
-
-  return Math.min((bodyRowCount + 1) * GRID_ROW_HEIGHT, maxHeight);
 }
 
 const storedWellboreColumns: ColumnDef<RmsWell>[] = [
@@ -261,8 +249,8 @@ function WellboresEditor({
         {includedWellboreCount === 1 ? "is" : "are"} included.
       </PageText>
 
-      <WellboreFilterContainer>
-        <WellboreSearch
+      <DataGridFilterContainer>
+        <DataGridSearch
           placeholder="Filter wellbores"
           value={wellboreFilter}
           onChange={(event) => {
@@ -276,13 +264,13 @@ function WellboresEditor({
             {availableWellbores.length} wellbores.
           </PageText>
         )}
-      </WellboreFilterContainer>
+      </DataGridFilterContainer>
 
       <WellboresContainer>
         <EdsDataGrid
           stickyHeader
           enableVirtual
-          height={gridHeight(visibleWellbores.length, 391)}
+          height={dataGridHeight(visibleWellbores.length, 391)}
           rows={visibleWellbores}
           columns={wellboreColumns}
           getRowId={(row) => row.name}
@@ -652,7 +640,7 @@ export function Wellbores({
             <EdsDataGrid
               stickyHeader
               enableVirtual
-              height={gridHeight(projectWellbores.length, 576)}
+              height={dataGridHeight(projectWellbores.length, 576)}
               rows={projectWellbores}
               columns={storedWellboreColumns}
               getRowId={(row) => row.name}

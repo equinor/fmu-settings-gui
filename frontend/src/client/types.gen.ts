@@ -644,6 +644,12 @@ export type MatchRequest = {
      * Optional normalized token sequence replacements to apply before matching.
      */
     replacements?: Array<MatchReplacementRule>;
+    /**
+     * Prefixes To Remove
+     *
+     * Prefixes to remove from the text before the first digit.
+     */
+    prefixes_to_remove?: Array<string>;
 };
 
 /**
@@ -869,17 +875,37 @@ export type RmsProjectPathsResult = {
 };
 
 /**
- * RmsSimulatorMappingFilePath
+ * RmsSimulatorMappingExportRequest
  *
- * A path to an RMS-to-simulator mapping import or export file.
+ * Options for exporting RMS-to-simulator mappings.
  */
-export type RmsSimulatorMappingFilePath = {
+export type RmsSimulatorMappingExportRequest = {
     /**
      * Relative Path
      *
-     * Relative path in the project to an RMS-to-simulator mapping file.
+     * Output path relative to the project root, or the default path if omitted.
      */
-    relative_path: string;
+    relative_path?: string | null;
+    /**
+     * Overwrite
+     *
+     * Whether an existing export file may be overwritten.
+     */
+    overwrite?: boolean;
+};
+
+/**
+ * RmsSimulatorMappingImportRequest
+ *
+ * Options for importing RMS-to-simulator mappings.
+ */
+export type RmsSimulatorMappingImportRequest = {
+    /**
+     * Relative Path
+     *
+     * Input path relative to the project root, or the default path if omitted.
+     */
+    relative_path?: string | null;
 };
 
 /**
@@ -954,6 +980,22 @@ export type RmsWell = {
      * Planned
      */
     planned?: boolean;
+    /**
+     * Unique Well Identifier
+     */
+    unique_well_identifier?: string | null;
+    /**
+     * Easting
+     */
+    easting?: number | null;
+    /**
+     * Northing
+     */
+    northing?: number | null;
+    /**
+     * Rkb
+     */
+    rkb?: number | null;
 };
 
 /**
@@ -1152,7 +1194,7 @@ export type SmdaMasterdataResult = {
 /**
  * SmdaSelectedField
  *
- * A selected field for masterdata lookup.
+ * A selected SMDA field.
  */
 export type SmdaSelectedField = {
     /**
@@ -2991,9 +3033,9 @@ export type ProjectPutMappingsResponse = ProjectPutMappingsResponses[keyof Proje
 
 export type ProjectPostMappingsImportRmsEclipseCsvData = {
     /**
-     * Path
+     * Import Request
      */
-    body?: RmsSimulatorMappingFilePath | null;
+    body?: RmsSimulatorMappingImportRequest | null;
     path?: never;
     query?: never;
     url: '/api/v1/project/mappings/import/rms_eclipse_csv';
@@ -3005,7 +3047,7 @@ export type ProjectPostMappingsImportRmsEclipseCsvErrors = {
      */
     401: unknown;
     /**
-     * The RMS-to-simulator wellbore mapping file could not be read or written
+     * The RMS-to-simulator wellbore mapping file could not be read
      */
     403: unknown;
     /**
@@ -3013,10 +3055,7 @@ export type ProjectPostMappingsImportRmsEclipseCsvErrors = {
      */
     404: unknown;
     /**
-     *
-     * The RMS-to-simulator wellbore mapping file contains invalid content,
-     * or no mappings can be exported.
-     *
+     * The RMS-to-simulator wellbore mapping file contains invalid content
      */
     422: unknown;
     /**
@@ -3036,9 +3075,9 @@ export type ProjectPostMappingsImportRmsEclipseCsvResponse = ProjectPostMappings
 
 export type ProjectPostMappingsExportRmsSimulatorRenamingTableData = {
     /**
-     * Path
+     * Export Request
      */
-    body?: RmsSimulatorMappingFilePath | null;
+    body?: RmsSimulatorMappingExportRequest | null;
     path?: never;
     query?: never;
     url: '/api/v1/project/mappings/export/rms_simulator_renaming_table';
@@ -3050,17 +3089,21 @@ export type ProjectPostMappingsExportRmsSimulatorRenamingTableErrors = {
      */
     401: unknown;
     /**
-     * The RMS-to-simulator wellbore mapping file could not be read or written
+     * The RMS-to-simulator wellbore mapping file could not be written
      */
     403: unknown;
     /**
-     * The RMS-to-simulator wellbore mapping file could not be found
+     * The saved project mappings could not be found
      */
     404: unknown;
     /**
+     * The export file already exists and overwrite was not authorized
+     */
+    409: unknown;
+    /**
      *
-     * The RMS-to-simulator wellbore mapping file contains invalid content,
-     * or no mappings can be exported.
+     * The export path or saved mappings are invalid, or no mappings can
+     * be exported.
      *
      */
     422: unknown;
@@ -3519,6 +3562,62 @@ export type RmsPostRmsProjectResponses = {
 
 export type RmsPostRmsProjectResponse = RmsPostRmsProjectResponses[keyof RmsPostRmsProjectResponses];
 
+export type RmsPostValidateRmsProjectData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/rms/validate';
+};
+
+export type RmsPostValidateRmsProjectErrors = {
+    /**
+     *
+     * RMS project path is not configured in the project config file,
+     * or no RMS project is currently open in the session.
+     *
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The project configuration cannot be accessed for writing.
+     */
+    403: unknown;
+    /**
+     *
+     * The RMS project saved in the FMU project or its .master file could not
+     * be accessed while determining its version.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * The FMU project has no saved RMS settings, the saved settings do not
+     * match the open RMS project, or the RMS version cannot be used.
+     *
+     */
+    422: unknown;
+    /**
+     * The project is not locked for writing by the current session.
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type RmsPostValidateRmsProjectResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type RmsPostValidateRmsProjectResponse = RmsPostValidateRmsProjectResponses[keyof RmsPostValidateRmsProjectResponses];
+
 export type RmsGetZonesData = {
     body?: never;
     path?: never;
@@ -3865,7 +3964,7 @@ export type SmdaPostStratUnitsResponses = {
 export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
 
 export type SmdaPostWellHeadersData = {
-    body: SmdaField;
+    body: SmdaSelectedField;
     path?: never;
     query?: never;
     url: '/api/v1/smda/well_headers';

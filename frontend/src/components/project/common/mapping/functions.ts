@@ -111,11 +111,12 @@ export function createElementMappings(
   targetSystems: DataSystem[],
   projectElements: Array<RmsHorizon | RmsStratigraphicZone | RmsWell>,
   projectMappingsLookup: Record<string, ElementMapping>,
+  creationCallback?: (elementMapping: ElementMapping) => ElementMapping,
 ) {
   const elementMappings: ElementMappings = {};
 
   projectElements.forEach((projectElement) => {
-    elementMappings[projectElement.name] = {
+    const elementMapping: ElementMapping = {
       ...(projectMappingsLookup[projectElement.name] ?? {
         ...emptyElementMapping(targetSystems),
         name: projectElement.name,
@@ -127,6 +128,10 @@ export function createElementMappings(
         }),
       },
     };
+
+    elementMappings[projectElement.name] = creationCallback
+      ? creationCallback(elementMapping)
+      : elementMapping;
   });
 
   return elementMappings;
