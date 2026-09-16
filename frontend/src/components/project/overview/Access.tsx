@@ -262,7 +262,7 @@ function AccessEditorForm({
                 }
                 isPending={isPending}
                 helperTextDisabled={
-                  projectReadOnly ? "FMU project is read-only" : undefined
+                  projectReadOnly ? "Project is read-only" : undefined
                 }
               />
             )}
@@ -314,7 +314,7 @@ export function EditableAccessInfo({
 
       <PageText>
         This section is used to configure access permissions for data exported
-        from the FMU project.
+        from the project.
       </PageText>
 
       <PageText>
@@ -348,13 +348,15 @@ export function EditableAccessInfo({
       {accessData ? (
         <AccessInfo accessData={accessData} />
       ) : (
-        <PageCode>No access information found in the FMU project</PageCode>
+        <PageCode>
+          No access information found in the project configuration
+        </PageCode>
       )}
 
       <GeneralButton
         label={accessData ? "Edit" : "Add"}
         disabled={projectReadOnly}
-        tooltipText={projectReadOnly ? "FMU project is read-only" : ""}
+        tooltipText={projectReadOnly ? "Project is read-only" : ""}
         onClick={() => {
           setIsDialogOpen(true);
         }}

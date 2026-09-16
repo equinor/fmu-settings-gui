@@ -285,7 +285,7 @@ function Edit({
                       isPending={mutationIsPending}
                       helperTextDisabled={
                         mappingData.projectReadOnly
-                          ? "FMU project is read-only"
+                          ? "Project is read-only"
                           : "Form can be saved when the values have changed"
                       }
                     />

@@ -394,7 +394,7 @@ export function Overview({
         <RmsInfo rmsData={rmsData} />
       ) : (
         <PageCode>
-          No RMS project information found in the FMU project.
+          No RMS project information found in the project configuration.
         </PageCode>
       )}
 

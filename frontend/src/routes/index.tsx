@@ -81,7 +81,7 @@ function RouteComponent() {
         <>
           <PageText>
             {project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT
-              ? "FMU project configuration is invalid."
+              ? "Project configuration is invalid."
               : "No FMU project selected."}
           </PageText>
 

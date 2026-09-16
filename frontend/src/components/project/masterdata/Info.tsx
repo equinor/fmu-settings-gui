@@ -8,7 +8,7 @@ export function Info({ masterdata }: { masterdata: Smda }) {
   return (
     <>
       <PageText>
-        The following masterdata is stored in the FMU project:
+        The following masterdata is stored in the project configuration:
       </PageText>
 
       <InfoBox>

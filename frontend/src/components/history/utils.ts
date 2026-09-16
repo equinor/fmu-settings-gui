@@ -1,6 +1,6 @@
 export function formatRecoveredFilesMessage(
   files: string[],
-  scopeLabel: "FMU project" | "user",
+  scopeLabel: "project" | "user",
 ) {
   if (files.length === 0) {
     return `No deleted ${scopeLabel} files were recovered`;

@@ -76,8 +76,8 @@ function ConfirmActionDialog({
       <Dialog.CustomContent>
         <PageText>
           {confirmAction === "add"
-            ? "This will add all available stratigraphy to the FMU project."
-            : "This will remove all stratigraphy from the FMU project."}
+            ? "This will add all available stratigraphy to the project configuration."
+            : "This will remove all stratigraphy from the project configuration."}
         </PageText>
 
         <PageText $marginBottom="0">Do you want to continue? </PageText>
@@ -176,7 +176,7 @@ function StratigraphyEditor({
   return (
     <StratigraphyEditorContainer>
       <div>
-        <PageHeader $variant="h4">FMU project stratigraphy</PageHeader>
+        <PageHeader $variant="h4">Project stratigraphy</PageHeader>
 
         <StratigraphicFramework
           maxHeight="55vh"
@@ -199,7 +199,7 @@ function StratigraphyEditor({
           <OrphanWarningBox
             message={`${orphanTypeCounts.join(
               " and ",
-            )} stored in the FMU project ${
+            )} stored in the project configuration ${
               orphanCount === 1 ? "is" : "are"
             } currently not available in RMS. ${
               orphanCount === 1 ? "It" : "They"
@@ -255,8 +255,8 @@ function StratigraphyEditor({
         </ActionButtonsContainer>
 
         <PageText>
-          💡 Click on horizons or zones to add or remove them from the FMU
-          project stratigraphy.
+          💡 Click on horizons or zones to add or remove them from the project
+          stratigraphy.
         </PageText>
       </div>
 
@@ -316,7 +316,7 @@ function Edit({
       }
     },
     meta: {
-      errorPrefix: "Error updating FMU project stratigraphy",
+      errorPrefix: "Error updating project stratigraphy",
       preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
     },
   });
@@ -408,7 +408,7 @@ function Edit({
             void form.handleSubmit();
           }}
         >
-          <Dialog.Header>Set FMU project stratigraphy</Dialog.Header>
+          <Dialog.Header>Set project stratigraphy</Dialog.Header>
 
           <Dialog.CustomContent>
             <form.AppForm>
@@ -500,10 +500,10 @@ export function Stratigraphy({
     <>
       <PageSectionWidthConstrained>
         <PageText>
-          The following is the model stratigraphy stored in the FMU project,
-          this can be a subset or the full RMS stratigraphy. It is only the
-          stored stratigraphy that will be possible to map to official
-          stratigraphic names.
+          The following is the model stratigraphy stored in the project
+          configuration. This can be a subset or the full RMS stratigraphy. It
+          is only the stored stratigraphy that will be possible to map to
+          official stratigraphic names.
         </PageText>
       </PageSectionWidthConstrained>
 
@@ -520,7 +520,8 @@ export function Stratigraphy({
       ) : (
         <PageSectionWidthConstrained>
           <PageCode>
-            No stratigraphy information currently stored in the FMU project.
+            No stratigraphy information is currently stored in the project
+            configuration.
           </PageCode>
         </PageSectionWidthConstrained>
       )}

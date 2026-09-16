@@ -77,7 +77,7 @@ function ProjectNotFound({
 }) {
   const hasText = text !== "";
   const lead = isInvalidProjectConfig
-    ? `FMU project configuration is invalid${hasText ? ":" : "."}`
+    ? `Project configuration is invalid${hasText ? ":" : "."}`
     : `No FMU project selected${hasText ? ":" : "."}`;
 
   return (
@@ -136,7 +136,7 @@ function Content() {
 function RouteComponent() {
   return (
     <>
-      <PageHeader>FMU project</PageHeader>
+      <PageHeader>Project</PageHeader>
 
       <Suspense fallback={<Loading />}>
         <Content />

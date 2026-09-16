@@ -56,11 +56,11 @@ function LockStatusIcon({
     <Tooltip
       title={
         isReadOnly
-          ? "FMU project is read-only" +
+          ? "Project is read-only" +
             (lockInfo
               ? ` and locked by ${lockInfo.user}@${lockInfo.hostname}`
               : "")
-          : "FMU project is editable"
+          : "Project is editable"
       }
     >
       <span>
@@ -113,7 +113,7 @@ function ProjectInfo() {
           />
         </>
       ) : project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT ? (
-        "FMU project configuration is invalid"
+        "Project configuration is invalid"
       ) : (
         "No FMU project selected"
       )}
@@ -234,7 +234,7 @@ function TaskIndicator() {
         trapFocus
       >
         <Popover.Header>
-          <Popover.Title>FMU project setup checklist</Popover.Title>
+          <Popover.Title>Project setup checklist</Popover.Title>
         </Popover.Header>
         <Popover.Content>
           <TasksProgressLabel

@@ -163,7 +163,7 @@ function ConfirmItemsOperationDialog({
           {selectedItems.operation === "addition"
             ? "addition to"
             : "removal from"}{" "}
-          the FMU project.
+          the project configuration.
         </PageText>
 
         {hasAffectedItems && (
@@ -173,7 +173,8 @@ function ConfirmItemsOperationDialog({
               {selectedItems.operation === "addition"
                 ? "added to"
                 : "removed from"}{" "}
-              the FMU project, as they are dependant on this {textItemType}:
+              the project configuration, as they are dependant on this{" "}
+              {textItemType}:
             </PageText>
 
             <PageList>
@@ -682,7 +683,7 @@ export function Edit({
             <form.Subscribe selector={(state) => state.values.field}>
               {(fieldList) => (
                 <FieldsContainer>
-                  <PageHeader $variant="h4">FMU project masterdata</PageHeader>
+                  <PageHeader $variant="h4">Project masterdata</PageHeader>
                   <PageHeader $variant="h4">Available masterdata</PageHeader>
 
                   <form.AppField name="field" mode="array">
@@ -860,10 +861,9 @@ export function Edit({
                             <OrphanTypesContainer>
                               <PageText>
                                 The following discoveries are currently present
-                                in the FMU project masterdata but they belong to
+                                in the project masterdata but they belong to
                                 fields which are not present there. They will be
-                                removed when the FMU project masterdata is
-                                saved.
+                                removed when the project masterdata is saved.
                               </PageText>
                               <PageList>
                                 {(
@@ -911,7 +911,7 @@ export function Edit({
                       }
                       isPending={masterdataMutation.isPending}
                       helperTextDisabled={
-                        projectReadOnly ? "FMU project is read-only" : undefined
+                        projectReadOnly ? "Project is read-only" : undefined
                       }
                     />
 

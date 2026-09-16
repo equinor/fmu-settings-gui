@@ -34,7 +34,7 @@ export function Overview({
         <Info masterdata={projectMasterdata} />
       ) : (
         <PageText>
-          No masterdata is currently stored in the FMU project.
+          No masterdata is currently stored in the project configuration.
         </PageText>
       )}
 
@@ -43,7 +43,7 @@ export function Overview({
           label={projectMasterdata ? "Edit" : "Add"}
           onClick={openEditDialog}
           disabled={projectReadOnly}
-          tooltipText={projectReadOnly ? "FMU project is read-only" : ""}
+          tooltipText={projectReadOnly ? "Project is read-only" : ""}
         />
       )}
 

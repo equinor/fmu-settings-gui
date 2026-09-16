@@ -32,7 +32,7 @@ export function ProjectRecoveryNotification() {
     useMutation<string>({
       mutationFn: async () => {
         if (!latestRevision) {
-          throw new Error("No FMU project snapshots were found in cache.");
+          throw new Error("No project snapshots were found in cache.");
         }
 
         await projectPostCacheRestore({
@@ -44,9 +44,7 @@ export function ProjectRecoveryNotification() {
         return latestRevision;
       },
       onSuccess: (latestRevision) => {
-        toast.info(
-          `FMU project restored from latest snapshot: ${latestRevision}`,
-        );
+        toast.info(`Project restored from latest snapshot: ${latestRevision}`);
         void queryClient.invalidateQueries({
           queryKey: projectGetProjectQueryKey(),
         });
@@ -58,7 +56,7 @@ export function ProjectRecoveryNotification() {
         });
         setIsOpen(false);
       },
-      meta: { errorPrefix: "Error restoring FMU project from latest snapshot" },
+      meta: { errorPrefix: "Error restoring project from latest snapshot" },
     });
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: selectProjectInvalidAttempt intentionally retriggers this effect
@@ -93,21 +91,20 @@ export function ProjectRecoveryNotification() {
       $maxWidth="35em"
     >
       <Dialog.Header>
-        <Dialog.Title>FMU project configuration is invalid</Dialog.Title>
+        <Dialog.Title>Project configuration is invalid</Dialog.Title>
       </Dialog.Header>
 
       <Dialog.CustomContent>
         {latestRevision ? (
           <PageText $marginBottom="0">
-            This FMU project configuration is invalid or corrupted. Do you want
-            to restore it from the latest snapshot?
+            This project configuration is invalid or corrupted. Do you want to
+            restore it from the latest snapshot?
           </PageText>
         ) : (
           <PageText $marginBottom="0">
-            This FMU project configuration is invalid or corrupted and no
-            snapshots were found in cache. You may be able to restore it by
-            finding a backup on the FMU project disk in the{" "}
-            <code>.snapshots</code> folder.
+            This project configuration is invalid or corrupted and no snapshots
+            were found in cache. You may be able to restore it by finding a
+            backup on the project disk in the <code>.snapshots</code> folder.
           </PageText>
         )}
       </Dialog.CustomContent>

@@ -749,7 +749,7 @@ export function SnapshotHistory({
         }
         restoreTooltipText={
           projectReadOnly
-            ? "FMU project is read-only"
+            ? "Project is read-only"
             : diffQuery.data?.length === 0
               ? "No differences to restore"
               : undefined
@@ -771,7 +771,7 @@ export function SnapshotHistory({
           selectedCacheId === null
         }
         restoreTooltipText={
-          projectReadOnly ? "FMU project is read-only" : undefined
+          projectReadOnly ? "Project is read-only" : undefined
         }
         onRestore={restoreSelectedCache}
         onCancel={() => {
@@ -803,8 +803,8 @@ export function SnapshotHistory({
             the snapshot and the current version.{" "}
             {projectReadOnly ? (
               <>
-                The FMU project is currently read-only, so restore of the
-                snapshot is not possible.
+                The project is currently read-only, so restore of the snapshot
+                is not possible.
               </>
             ) : (
               <>
@@ -815,7 +815,7 @@ export function SnapshotHistory({
 
           <PageText>
             Use <strong>Max snapshots</strong> to control how many snapshots are
-            kept on disk for this FMU project.
+            kept on disk for this project.
           </PageText>
 
           <SelectorRow>
@@ -873,7 +873,7 @@ export function SnapshotHistory({
                 }
                 tooltipText={
                   projectReadOnly
-                    ? "FMU project is read-only"
+                    ? "Project is read-only"
                     : maxRevisions === undefined
                       ? "Select a max snapshots value to save"
                       : maxRevisions === cacheMaxRevisions

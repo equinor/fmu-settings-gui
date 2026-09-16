@@ -169,7 +169,7 @@ function ModelEditorForm({
                 }
                 isPending={isPending}
                 helperTextDisabled={
-                  projectReadOnly ? "FMU project is read-only" : undefined
+                  projectReadOnly ? "Project is read-only" : undefined
                 }
               />
             )}
@@ -239,13 +239,15 @@ export function EditableModelInfo({
       {modelData ? (
         <ModelInfo modelData={modelData} />
       ) : (
-        <PageCode>No model information found in the FMU project.</PageCode>
+        <PageCode>
+          No model information found in the project configuration.
+        </PageCode>
       )}
 
       <GeneralButton
         label={modelData ? "Edit" : "Add"}
         disabled={projectReadOnly}
-        tooltipText={projectReadOnly ? "FMU project is read-only" : ""}
+        tooltipText={projectReadOnly ? "Project is read-only" : ""}
         onClick={() => {
           setIsDialogOpen(true);
         }}

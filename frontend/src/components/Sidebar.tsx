@@ -147,7 +147,7 @@ export function Sidebar() {
         />
 
         <SidebarAccordion
-          label="FMU project"
+          label="Project"
           icon={folder}
           path="/project"
           currentPath={currentPath}

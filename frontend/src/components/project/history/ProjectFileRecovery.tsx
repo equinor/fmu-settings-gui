@@ -34,12 +34,12 @@ export function ProjectFileRecovery({
     enabled: showDialog,
     staleTime: 0,
     refetchOnMount: "always",
-    meta: { errorPrefix: "Error checking deleted FMU project files" },
+    meta: { errorPrefix: "Error checking deleted project files" },
   });
 
   const restoreMutation = useMutation({
     ...projectPostRestoreMutation(),
-    meta: { errorPrefix: "Error recovering deleted FMU project files" },
+    meta: { errorPrefix: "Error recovering deleted project files" },
     onSuccess: (data) => {
       void queryClient.invalidateQueries({
         queryKey: projectGetProjectQueryKey(),
@@ -56,7 +56,7 @@ export function ProjectFileRecovery({
           ].includes(key?._id ?? "");
         },
       });
-      toast.info(formatRecoveredFilesMessage(data.files, "FMU project"));
+      toast.info(formatRecoveredFilesMessage(data.files, "project"));
       setIsDialogOpen(false);
     },
   });
@@ -71,16 +71,16 @@ export function ProjectFileRecovery({
     <>
       <DeletedFilesRecoveryDialog
         isOpen={showDialog}
-        title="Recover deleted FMU project files"
+        title="Recover deleted project files"
         files={restorableFiles}
-        emptyMessage="No deleted FMU project files were found."
-        checkErrorMessage="Unable to check for deleted FMU project files."
+        emptyMessage="No deleted project files were found."
+        checkErrorMessage="Unable to check for deleted project files."
         isCheckPending={isCheckingFiles}
         isCheckError={restoreCheckQuery.isError}
         isRecoverPending={restoreMutation.isPending}
         isRecoverDisabled={projectReadOnly || restoreMutation.isPending}
         recoverTooltipText={
-          projectReadOnly ? "FMU project is read-only" : undefined
+          projectReadOnly ? "Project is read-only" : undefined
         }
         onRecover={() => {
           restoreMutation.mutate({});
@@ -90,13 +90,13 @@ export function ProjectFileRecovery({
         }}
       />
 
-      <PageHeader $variant="h3">Recover deleted FMU project files</PageHeader>
+      <PageHeader $variant="h3">Recover deleted project files</PageHeader>
 
       {hasProject ? (
         <>
           <PageText>
-            Deleted FMU project files can be recovered from the current FMU
-            project's .fmu directory.
+            Deleted project files can be recovered from the current project's
+            .fmu directory.
           </PageText>
 
           <PageText>
@@ -115,7 +115,7 @@ export function ProjectFileRecovery({
         </>
       ) : (
         <PageText>
-          FMU project not set. Select an FMU project to check for deleted FMU
+          FMU project not set. Select an FMU project to check for deleted
           project files.
         </PageText>
       )}

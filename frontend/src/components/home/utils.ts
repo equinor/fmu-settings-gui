@@ -1,7 +1,7 @@
 import type { ChangeInfo, ChangeType } from "#client/types.gen";
 
 export const FILE_LABELS: Record<string, string> = {
-  "config.json": "FMU project configuration",
+  "config.json": "Project configuration",
   "mappings.json": "Mappings",
 };
 
