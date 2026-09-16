@@ -170,11 +170,15 @@ function WellboresEditor({
     const previouslyRemovedNames = Object.keys(elementMappings).filter(
       (name) => !currentWellboreNames.includes(name),
     );
+    const currentPlannedNames = projectWellbores
+      .filter((wellbore) => wellbore.planned)
+      .map((wellbore) => wellbore.name);
     // Diff against the current form state, not the stored mappings, so
-    // earlier unsaved removals are not previewed again.
+    // earlier unsaved removals and planned toggles are not previewed again.
     const currentElementMappings = removeElementMappings(
       elementMappings,
       previouslyRemovedNames,
+      { smda: currentPlannedNames },
     ).preserved;
     const removeResults = removeElementMappings(
       currentElementMappings,
@@ -190,6 +194,7 @@ function WellboresEditor({
 
     const multipleItems = removeAll || wellboreNames.length > 1;
     confirmRemoval({
+      action: "remove",
       selection: removeAll ? (
         "All wellbores"
       ) : multipleItems ? (
@@ -222,14 +227,51 @@ function WellboresEditor({
     }
   };
 
-  const toggleWellborePlanned = (wellboreName: string) => {
-    const planned = !(plannedByWellboreName.current.get(wellboreName) ?? false);
+  const setWellborePlanned = (wellboreName: string, planned: boolean) => {
     plannedByWellboreName.current.set(wellboreName, planned);
     setWellbores(
       projectWellbores.map((wellbore) =>
         wellbore.name === wellboreName ? { ...wellbore, planned } : wellbore,
       ),
     );
+  };
+
+  const toggleWellborePlanned = (wellboreName: string) => {
+    const planned = !(plannedByWellboreName.current.get(wellboreName) ?? false);
+    if (!planned) {
+      setWellborePlanned(wellboreName, false);
+
+      return;
+    }
+
+    const removeResults = removeElementMappings(elementMappings, [], {
+      smda: [wellboreName],
+    });
+    const mappingTexts = getRemovedMappingTexts(
+      {},
+      removeResults.targetDataCleared,
+    );
+
+    if (mappingTexts.length === 0) {
+      setWellborePlanned(wellboreName, true);
+
+      return;
+    }
+
+    confirmRemoval({
+      action: "mark-planned",
+      selection: (
+        <>
+          The wellbore <span className="emphasis">{wellboreName}</span>
+        </>
+      ),
+      itemLabel: "wellbore",
+      multipleItems: false,
+      mappingTexts,
+      apply: () => {
+        setWellborePlanned(wellboreName, true);
+      },
+    });
   };
 
   const selectVisibleWellbores = () => {

@@ -200,6 +200,7 @@ function StratigraphyEditor({
 
     if (mappingTexts.length > 0) {
       confirmRemoval({
+        action: "remove",
         ...selection,
         multipleItems: false,
         mappingTexts,
@@ -312,7 +313,7 @@ function StratigraphyEditor({
               `${orphanTypeCounts.join(" and ")} stored in the project ${
                 orphanCount === 1 ? "is" : "are"
               } currently not available in RMS. ` +
-              "Saving will remove the unavailable stratigraphy and its mappings."
+              "Saving will remove this and its mappings."
             }
             listItems={orphanListItems}
           />
