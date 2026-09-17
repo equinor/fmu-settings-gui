@@ -171,8 +171,8 @@ export function LockExpireNotification() {
       <Dialog.Content>
         {isExpired ? (
           <PageText $marginBottom="0">
-            Your lock has expired. Project is now read-only. It can be opened
-            for editing from the project overview page.
+            Your lock has expired. The project is now read-only. It can be
+            opened for editing from the project overview page.
           </PageText>
         ) : (
           <>

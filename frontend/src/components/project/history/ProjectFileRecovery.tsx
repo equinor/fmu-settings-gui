@@ -115,7 +115,8 @@ export function ProjectFileRecovery({
         </>
       ) : (
         <PageText>
-          Project not set. Select a project to check for deleted project files.
+          FMU project not set. Select an FMU project to check for deleted
+          project files.
         </PageText>
       )}
     </>

@@ -20,7 +20,7 @@ function Content() {
       isRmsProjectOpen={!!project.rmsExpiresAt}
     />
   ) : (
-    <PageText>Project not set.</PageText>
+    <PageText>FMU project not set.</PageText>
   );
 }
 

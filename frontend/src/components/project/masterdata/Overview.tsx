@@ -33,7 +33,9 @@ export function Overview({
       {projectMasterdata !== undefined ? (
         <Info masterdata={projectMasterdata} />
       ) : (
-        <PageText>No masterdata is currently stored in the project.</PageText>
+        <PageText>
+          No masterdata is currently stored in the project configuration.
+        </PageText>
       )}
 
       {editMode && smdaHealthStatus && (

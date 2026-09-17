@@ -348,7 +348,9 @@ export function EditableAccessInfo({
       {accessData ? (
         <AccessInfo accessData={accessData} />
       ) : (
-        <PageCode>No access information found in the project</PageCode>
+        <PageCode>
+          No access information found in the project configuration
+        </PageCode>
       )}
 
       <GeneralButton

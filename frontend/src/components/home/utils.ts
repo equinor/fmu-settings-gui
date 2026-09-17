@@ -103,7 +103,7 @@ function formatBriefDescription(change: string) {
 
 export function formatEntryDescription(entry: ChangeInfo): string {
   if (entry.change_type === "init") {
-    return "Initialized FMU settings project";
+    return "Initialized FMU project settings";
   }
 
   const label = getFieldLabel(entry.file, entry.key);

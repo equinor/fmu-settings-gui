@@ -38,7 +38,7 @@ function Content() {
   }
 
   if (!project.status) {
-    return <PageText>Project not set.</PageText>;
+    return <PageText>FMU project not set.</PageText>;
   }
 
   return (

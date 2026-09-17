@@ -916,7 +916,8 @@ export function SnapshotHistory({
         </>
       ) : (
         <PageText>
-          Project not set. Select a project to view and restore snapshots.
+          FMU project not set. Select an FMU project to view and restore
+          snapshots.
         </PageText>
       )}
     </>

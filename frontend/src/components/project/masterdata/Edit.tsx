@@ -163,7 +163,7 @@ function ConfirmItemsOperationDialog({
           {selectedItems.operation === "addition"
             ? "addition to"
             : "removal from"}{" "}
-          the project.
+          the project configuration.
         </PageText>
 
         {hasAffectedItems && (
@@ -173,7 +173,8 @@ function ConfirmItemsOperationDialog({
               {selectedItems.operation === "addition"
                 ? "added to"
                 : "removed from"}{" "}
-              the project, as they are dependant on this {textItemType}:
+              the project configuration, as they are dependant on this{" "}
+              {textItemType}:
             </PageText>
 
             <PageList>

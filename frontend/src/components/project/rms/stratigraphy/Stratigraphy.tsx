@@ -76,8 +76,8 @@ function ConfirmActionDialog({
       <Dialog.CustomContent>
         <PageText>
           {confirmAction === "add"
-            ? "This will add all available stratigraphy to the project."
-            : "This will remove all stratigraphy from the project."}
+            ? "This will add all available stratigraphy to the project configuration."
+            : "This will remove all stratigraphy from the project configuration."}
         </PageText>
 
         <PageText $marginBottom="0">Do you want to continue? </PageText>
@@ -197,7 +197,9 @@ function StratigraphyEditor({
 
         {hasOrphans && (
           <OrphanWarningBox
-            message={`${orphanTypeCounts.join(" and ")} stored in the project ${
+            message={`${orphanTypeCounts.join(
+              " and ",
+            )} stored in the project configuration ${
               orphanCount === 1 ? "is" : "are"
             } currently not available in RMS. ${
               orphanCount === 1 ? "It" : "They"
@@ -451,7 +453,7 @@ function Edit({
                     isPending={rmsStratigraphyMutation.isPending}
                     helperTextDisabled={
                       projectReadOnly
-                        ? "Project is read-only"
+                        ? "FMU project is read-only"
                         : !availableStratigraphyLoaded
                           ? "RMS stratigraphy must be loaded before saving"
                           : "Form can be saved when the values have changed"
@@ -498,10 +500,10 @@ export function Stratigraphy({
     <>
       <PageSectionWidthConstrained>
         <PageText>
-          The following is the model stratigraphy stored in the project, this
-          can be a subset or the full RMS stratigraphy. It is only the stored
-          stratigraphy that will be possible to map to official stratigraphic
-          names.
+          The following is the model stratigraphy stored in the project
+          configuration. This can be a subset or the full RMS stratigraphy. It
+          is only the stored stratigraphy that will be possible to map to
+          official stratigraphic names.
         </PageText>
       </PageSectionWidthConstrained>
 
@@ -518,7 +520,8 @@ export function Stratigraphy({
       ) : (
         <PageSectionWidthConstrained>
           <PageCode>
-            No stratigraphy information currently stored in the project.
+            No stratigraphy information is currently stored in the project
+            configuration.
           </PageCode>
         </PageSectionWidthConstrained>
       )}
@@ -529,7 +532,7 @@ export function Stratigraphy({
           disabled={projectReadOnly || !isRmsProjectOpen}
           tooltipText={
             projectReadOnly
-              ? "Project is read-only"
+              ? "FMU project is read-only"
               : !isRmsProjectOpen
                 ? "RMS project is not ready for access"
                 : undefined
