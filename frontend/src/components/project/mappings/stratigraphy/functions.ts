@@ -14,7 +14,7 @@ import type { ElementMappings } from "#components/project/common/mapping/types";
 import type { StratUnitRelation } from "./types";
 import { getLabelForStratUnitOption } from "./utils";
 
-export const stratigraphyTargetSystems = ["smda"] satisfies DataSystem[];
+const stratigraphyTargetSystems = ["smda"] satisfies DataSystem[];
 
 export function createStratigraphyElementMappings(
   horizons: RmsHorizon[],
