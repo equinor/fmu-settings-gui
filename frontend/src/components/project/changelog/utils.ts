@@ -1,0 +1,321 @@
+import type { ChangeInfo, ChangeType } from "#client/types.gen";
+
+export const FILE_LABELS: Record<string, string> = {
+  "config.json": "Project configuration",
+  "mappings.json": "Mappings",
+};
+
+const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
+  "config.json": {
+    access: "access control",
+    "access.asset": "asset",
+    "access.asset.name": "asset name",
+    "access.classification": "classification",
+    cache_max_revisions: "max snapshots",
+    created_at: "project creation date",
+    created_by: "project creator",
+    masterdata: "masterdata",
+    "masterdata.smda": "SMDA",
+    "masterdata.smda.coordinate_system": "SMDA coordinate system",
+    "masterdata.smda.country": "SMDA countries",
+    "masterdata.smda.discovery": "SMDA discoveries",
+    "masterdata.smda.field": "SMDA fields",
+    "masterdata.smda.stratigraphic_column": "SMDA stratigraphic column",
+    model: "model information",
+    "model.description": "model description",
+    "model.name": "model name",
+    "model.revision": "model revision",
+    rms: "RMS project",
+    "rms.coordinate_system": "RMS coordinate system",
+    "rms.horizons": "RMS horizons",
+    "rms.path": "RMS project path",
+    "rms.version": "RMS version",
+    "rms.wells": "RMS wells",
+    "rms.zones": "RMS stratigraphic zones",
+    updated_at: "last updated date",
+    updated_by: "last updated by",
+  },
+  "mappings.json": {
+    created_at: "mapping creation date",
+    created_by: "mapping creator",
+    stratigraphy: "stratigraphy",
+    updated_at: "last updated date",
+    updated_by: "last updated by",
+    wellbore: "wellbore",
+  },
+};
+
+const SORTED_PATH_LABEL_KEYS: Record<string, string[] | undefined> = {
+  "config.json": Object.keys(PATH_LABELS["config.json"] ?? {}).sort(
+    (a, b) => b.length - a.length,
+  ),
+  "mappings.json": Object.keys(PATH_LABELS["mappings.json"] ?? {}).sort(
+    (a, b) => b.length - a.length,
+  ),
+};
+
+const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
+  add: "Added",
+  copy: "Copied",
+  init: "Initialized",
+  merge: "Merged",
+  remove: "Removed",
+  reset: "Reset",
+  restore: "Restored",
+  update: "Updated",
+};
+
+const TECHNICAL_FIELD_CHANGE_PATTERN =
+  /^(Added|Copied|Initialized|Merged|Removed|Reset|Restored|Updated) field ['"]?([^'"]+)['"]?\.?$/i;
+
+export function getTypeLabel(changeType: ChangeType) {
+  if (changeType === "update") {
+    return "Modified";
+  }
+
+  return CHANGE_TYPE_VERBS[changeType];
+}
+
+function getFieldLabel(file: string, path: string): string | undefined {
+  const labels = PATH_LABELS[file];
+  if (!labels) {
+    return undefined;
+  }
+
+  if (path in labels) {
+    return labels[path];
+  }
+
+  const sortedKeys = SORTED_PATH_LABEL_KEYS[file];
+  if (!sortedKeys) {
+    return undefined;
+  }
+  for (const key of sortedKeys) {
+    if (path.startsWith(`${key}.`) || path.startsWith(`${key}[`)) {
+      return labels[key];
+    }
+  }
+
+  return undefined;
+}
+
+function formatBriefDescription(entry: ChangeInfo) {
+  const change = entry.change;
+  const compact = change.replace(/\s+/g, " ");
+  const withoutDiffPayload = compact.replace(/\. Old value:.*/, "");
+  const technicalFieldChange = TECHNICAL_FIELD_CHANGE_PATTERN.exec(
+    withoutDiffPayload,
+  );
+
+  if (technicalFieldChange) {
+    const verb = technicalFieldChange[1];
+    const field = technicalFieldChange[2];
+    if (verb === undefined || field === undefined) {
+      return withoutDiffPayload;
+    }
+
+    const label = getFieldLabel(entry.file, field) ?? humanizeSettingKey(field);
+
+    return `${verb} ${label}`;
+  }
+
+  const concise = withoutDiffPayload || compact;
+
+  if (concise.length <= 72) {
+    return concise;
+  }
+
+  return `${concise.slice(0, 69)}...`;
+}
+
+export function formatEntryDescription(entry: ChangeInfo): string {
+  if (entry.change_type === "init") {
+    return "Initialized FMU settings project";
+  }
+
+  const label = formatSettingLabel(entry);
+  if (label !== undefined) {
+    const verb = CHANGE_TYPE_VERBS[entry.change_type];
+
+    return `${verb} ${label}`;
+  } else {
+    return formatBriefDescription(entry);
+  }
+}
+
+export function formatSettingLabel(entry: ChangeInfo): string | undefined {
+  if (!entry.key) {
+    return undefined;
+  }
+
+  return getFieldLabel(entry.file, entry.key) ?? humanizeSettingKey(entry.key);
+}
+
+function humanizeSettingKey(key: string): string {
+  const lastSegment = key.split(".").at(-1) ?? key;
+  const withoutArrayIndex = lastSegment.replace(/\[\d+\]/g, "");
+
+  return withoutArrayIndex.replace(/_/g, " ");
+}
+
+export type ParsedChangeDetails = {
+  raw: string;
+  summary?: string;
+  oldValue?: string;
+  newValue?: string;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseSerializedValue(value: string): unknown {
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    // Some changelog payloads may come from Python-style repr strings.
+  }
+
+  try {
+    return JSON.parse(
+      value
+        .replace(/\bNone\b/g, "null")
+        .replace(/\bTrue\b/g, "true")
+        .replace(/\bFalse\b/g, "false")
+        .replace(/'/g, '"'),
+    ) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+function getValueByPath(value: unknown, pathParts: string[]) {
+  let current = value;
+
+  for (const part of pathParts) {
+    if (!isRecord(current) || !(part in current)) {
+      return undefined;
+    }
+
+    current = current[part];
+  }
+
+  return current;
+}
+
+function getNestedChangedValue(value: unknown, fieldPath: string) {
+  const parts = fieldPath.split(".").filter(Boolean);
+
+  for (let index = 0; index < parts.length; index += 1) {
+    const nestedValue = getValueByPath(value, parts.slice(index));
+    if (nestedValue !== undefined) {
+      return nestedValue;
+    }
+  }
+
+  return undefined;
+}
+
+function formatDetailedValue(value: unknown): string {
+  if (value === undefined || value === null || value === "") {
+    return "(empty)";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
+function formatChangeValue(value: string, fieldPath?: string): string {
+  const parsedValue = parseSerializedValue(value);
+
+  if (parsedValue === undefined || !fieldPath) {
+    return value.trim();
+  }
+
+  const nestedValue = getNestedChangedValue(parsedValue, fieldPath);
+
+  return formatDetailedValue(nestedValue ?? parsedValue);
+}
+
+function normalizeChangeValue(value: string): string {
+  return value
+    .replace(/\.\s*$/, "")
+    .replace(/\s*->\s*$/, "")
+    .replace(/^\s*->\s*/, "")
+    .trim();
+}
+
+export function parseChangeDetails(
+  change: string,
+  fieldPath?: string,
+): ParsedChangeDetails {
+  const details = change.trim();
+
+  if (!details) {
+    return { raw: "No detailed change information available." };
+  }
+
+  const oldValueIndex = details.indexOf("Old value:");
+  const newValueIndex = details.indexOf("New value:");
+  const hasOldValue = oldValueIndex !== -1;
+  const hasNewValue = newValueIndex !== -1;
+
+  if (hasOldValue || hasNewValue) {
+    const summaryEndIndexes = [oldValueIndex, newValueIndex].filter(
+      (index) => index !== -1,
+    );
+    const summaryEndIndex = Math.min(...summaryEndIndexes);
+    const oldValueEndIndex = hasNewValue ? newValueIndex : details.length;
+    const parsedDetails: ParsedChangeDetails = {
+      raw: details,
+      summary: details
+        .slice(0, summaryEndIndex)
+        .replace(/\.\s*$/, "")
+        .trim(),
+    };
+
+    if (hasOldValue) {
+      parsedDetails.oldValue = formatChangeValue(
+        normalizeChangeValue(
+          details.slice(oldValueIndex + "Old value:".length, oldValueEndIndex),
+        ),
+        fieldPath,
+      );
+    }
+
+    if (hasNewValue) {
+      parsedDetails.newValue = formatChangeValue(
+        normalizeChangeValue(
+          details.slice(newValueIndex + "New value:".length),
+        ),
+        fieldPath,
+      );
+    }
+
+    return parsedDetails;
+  }
+
+  return { raw: details };
+}
+
+export function formatChangeDetails(
+  change: string,
+  fieldPath?: string,
+): string {
+  const details = parseChangeDetails(change, fieldPath);
+
+  if (details.oldValue !== undefined || details.newValue !== undefined) {
+    return [
+      details.summary,
+      `- ${formatChangeValue(details.oldValue ?? "", fieldPath)}`,
+      `+ ${formatChangeValue(details.newValue ?? "", fieldPath)}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  return details.raw;
+}

@@ -27,6 +27,14 @@ export const ChangeList = styled.div`
   gap: ${tokens.spacings.comfortable.small};
 `;
 
+export const ChangelogHeader = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: ${tokens.spacings.comfortable.small};
+  margin-bottom: ${tokens.spacings.comfortable.small};
+`;
+
 export const ChangeItem = styled.article<{ $changeType: ChangeType }>`
   padding: ${tokens.spacings.comfortable.small} ${tokens.spacings.comfortable.medium};
   border-left: 3px solid ${({ $changeType }) => changeTypeColor($changeType)};
@@ -39,6 +47,7 @@ export const ChangeItemHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${tokens.spacings.comfortable.small};
+  flex-wrap: wrap;
 `;
 
 export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
