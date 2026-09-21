@@ -248,6 +248,7 @@ type AutocompleteFieldProps<T> = Pick<
   | "optionDisabled"
   | "optionLabel"
   | "options"
+  | "placeholder"
 > & {
   emptyValue?: string | undefined;
   helperText?: string | undefined;
@@ -267,6 +268,7 @@ export function AutocompleteField<T>({
   optionLabel,
   optionComponent,
   optionDisabled,
+  placeholder,
 }: AutocompleteFieldProps<T>) {
   const field = useFieldContext<string>();
   const selectedOption =
@@ -297,6 +299,7 @@ export function AutocompleteField<T>({
         id={field.name}
         label={label}
         options={options}
+        {...(placeholder !== undefined && { placeholder })}
         {...(loadingOptions !== undefined && { loading: loadingOptions })}
         selectedOptions={selectedOption ? [selectedOption] : []}
         {...(noOptionsText !== undefined && { noOptionsText })}

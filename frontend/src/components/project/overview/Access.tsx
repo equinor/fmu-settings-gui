@@ -9,7 +9,8 @@ import {
 } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { isAxiosError } from "axios";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import type { FmuProject } from "#client";
@@ -18,6 +19,7 @@ import {
   projectGetProjectQueryKey,
   projectGetSumoAssetsOptions,
   projectPatchAccessMutation,
+  projectPostSumoLoginMutation,
 } from "#client/@tanstack/react-query.gen";
 import type { Access, Classification, SumoAsset } from "#client/types.gen";
 import {
@@ -25,7 +27,7 @@ import {
   GeneralButton,
   SubmitButton,
 } from "#components/form/button";
-import { AutocompleteField, TextField } from "#components/form/field";
+import { AutocompleteField } from "#components/form/field";
 import {
   EditDialog,
   InfoBox,
@@ -34,9 +36,13 @@ import {
   PageList,
   PageSectionSpacer,
   PageText,
+  WarningBox,
 } from "#styles/common";
 import {
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+  HTTP_STATUS_424_FAILED_DEPENDENCY,
+  HTTP_STATUS_502_BAD_GATEWAY,
+  HTTP_STATUS_503_SERVICE_UNAVAILABLE,
   httpValidationErrorToString,
 } from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
@@ -52,7 +58,6 @@ type AccessEditorProps = {
 
 const { useAppForm: useAppFormAccessEditor } = createFormHook({
   fieldComponents: {
-    TextField,
     AutocompleteField,
     Radio,
   },
@@ -64,38 +69,176 @@ const { useAppForm: useAppFormAccessEditor } = createFormHook({
   formContext,
 });
 
+function getErrorDetail(error: Error | null, fallback: string) {
+  const responseData: unknown = isAxiosError(error)
+    ? error.response?.data
+    : undefined;
+
+  if (
+    responseData !== null &&
+    typeof responseData === "object" &&
+    "detail" in responseData
+  ) {
+    return String(responseData.detail);
+  }
+
+  return fallback;
+}
+
+function SumoAssetsInfo({
+  sumoAssetsLoaded,
+  isLoading,
+  loginRequired,
+  errorText,
+  loginPending,
+  loginToSumo,
+  retrySumoAssets,
+}: {
+  sumoAssetsLoaded: boolean;
+  isLoading: boolean;
+  loginRequired: boolean;
+  errorText: string;
+  loginPending: boolean;
+  loginToSumo: () => void;
+  retrySumoAssets: () => void;
+}) {
+  if (sumoAssetsLoaded || isLoading) {
+    return null;
+  }
+
+  return (
+    <>
+      <PageSectionSpacer />
+
+      <WarningBox>
+        <PageText>Required data for Sumo assets is not present:</PageText>
+
+        <PageCode>{errorText}</PageCode>
+
+        {loginRequired ? (
+          <PageText>
+            ⛔ A valid Sumo <strong>access token</strong> is not present, please
+            log in:{" "}
+            <GeneralButton
+              label="Log in"
+              isPending={loginPending}
+              disabled={loginPending}
+              onClick={loginToSumo}
+            />
+          </PageText>
+        ) : (
+          <PageText>
+            Try to load the Sumo assets again:{" "}
+            <GeneralButton label="Retry" onClick={retrySumoAssets} />
+          </PageText>
+        )}
+      </WarningBox>
+    </>
+  );
+}
+
 function AccessEditor({
   accessData,
   projectReadOnly,
   isDialogOpen,
   setIsDialogOpen,
 }: AccessEditorProps) {
-  const { data: sumoAssets } = useQuery({
+  const sumoAssetsQuery = useQuery({
     ...projectGetSumoAssetsOptions(),
     enabled: isDialogOpen,
+    retry: (failureCount, queryError) =>
+      !(
+        isAxiosError(queryError) &&
+        [
+          HTTP_STATUS_424_FAILED_DEPENDENCY,
+          HTTP_STATUS_502_BAD_GATEWAY,
+          HTTP_STATUS_503_SERVICE_UNAVAILABLE,
+        ].includes(queryError.response?.status ?? 0)
+      ) && failureCount < 3,
+    meta: {
+      errorPrefix: "Error getting Sumo assets",
+      preventDefaultErrorHandling: [
+        HTTP_STATUS_424_FAILED_DEPENDENCY,
+        HTTP_STATUS_502_BAD_GATEWAY,
+        HTTP_STATUS_503_SERVICE_UNAVAILABLE,
+      ],
+    },
+  });
+  const sumoLoginMutation = useMutation({
+    ...projectPostSumoLoginMutation(),
+    onSuccess: () => {
+      void sumoAssetsQuery.refetch();
+    },
+    meta: {
+      errorPrefix: "Error logging in to Sumo",
+      preventDefaultErrorHandling: [
+        HTTP_STATUS_424_FAILED_DEPENDENCY,
+        HTTP_STATUS_503_SERVICE_UNAVAILABLE,
+      ],
+    },
   });
 
+  if (!isDialogOpen) {
+    return null;
+  }
+
+  const errorStatus = isAxiosError(sumoAssetsQuery.error)
+    ? sumoAssetsQuery.error.response?.status
+    : undefined;
+  const loginRequired = errorStatus === HTTP_STATUS_424_FAILED_DEPENDENCY;
+  const isLoading = sumoAssetsQuery.isFetching;
+  const sumoAssetsLoaded =
+    sumoAssetsQuery.data !== undefined &&
+    !sumoAssetsQuery.isFetching &&
+    !sumoAssetsQuery.isError;
+  const errorText = sumoLoginMutation.error
+    ? getErrorDetail(sumoLoginMutation.error, "Sumo login failed")
+    : getErrorDetail(sumoAssetsQuery.error, "Unable to get assets from Sumo");
+
   return (
-    sumoAssets && (
-      <AccessEditorForm
-        accessData={accessData}
-        sumoAssets={sumoAssets}
-        projectReadOnly={projectReadOnly}
-        isDialogOpen={isDialogOpen}
-        setIsDialogOpen={setIsDialogOpen}
-      />
-    )
+    <AccessEditorForm
+      accessData={accessData}
+      sumoAssets={sumoAssetsQuery.data ?? []}
+      sumoAssetsLoaded={sumoAssetsLoaded}
+      isLoading={isLoading}
+      loginRequired={loginRequired}
+      errorText={errorText}
+      loginPending={sumoLoginMutation.isPending}
+      loginToSumo={() => {
+        sumoLoginMutation.mutate({});
+      }}
+      retrySumoAssets={() => {
+        void sumoAssetsQuery.refetch();
+      }}
+      projectReadOnly={projectReadOnly}
+      isDialogOpen={isDialogOpen}
+      setIsDialogOpen={setIsDialogOpen}
+    />
   );
 }
 
 function AccessEditorForm({
   accessData,
   sumoAssets,
+  sumoAssetsLoaded,
+  isLoading,
+  loginRequired,
+  errorText,
+  loginPending,
+  loginToSumo,
+  retrySumoAssets,
   projectReadOnly,
   isDialogOpen,
   setIsDialogOpen,
 }: AccessEditorProps & {
   sumoAssets: SumoAsset[];
+  sumoAssetsLoaded: boolean;
+  isLoading: boolean;
+  loginRequired: boolean;
+  errorText: string;
+  loginPending: boolean;
+  loginToSumo: () => void;
+  retrySumoAssets: () => void;
 }) {
   const closeDialog = ({ formReset }: { formReset: () => void }) => {
     formReset();
@@ -126,31 +269,35 @@ function AccessEditorForm({
   });
 
   const assetName = accessData?.asset.name ?? "";
-  const assetInAvailable = sumoAssets.some((asset) => asset.name === assetName);
+  const availableAssetNames = useMemo(
+    () =>
+      sumoAssets.map((asset) => asset.name).sort((a, b) => stringCompare(a, b)),
+    [sumoAssets],
+  );
+  const assetInAvailable = availableAssetNames.includes(assetName);
+  const assetOptions =
+    assetName && !assetInAvailable
+      ? [assetName, ...availableAssetNames]
+      : availableAssetNames;
+  const fieldsDisabled = projectReadOnly || !sumoAssetsLoaded;
+  const assetPlaceholder = sumoAssetsLoaded
+    ? "Select an asset"
+    : isLoading
+      ? "Loading assets..."
+      : loginRequired
+        ? "Log in to load assets"
+        : "Assets unavailable";
 
   const form = useAppFormAccessEditor({
     defaultValues: {
-      assetName: assetInAvailable ? assetName : "",
-      manualAssetName: assetInAvailable ? "" : assetName,
+      assetName,
       classification: accessData?.classification ?? "",
     },
-    validators: {
-      onChange: ({ value }) =>
-        value.manualAssetName.trim() || value.assetName.trim()
-          ? undefined
-          : {
-              fields: {
-                assetName: "Asset name is required",
-              },
-            },
-    },
     onSubmit: ({ value, formApi }) => {
-      const assetName = value.manualAssetName.trim() || value.assetName.trim();
-
       mutate(
         {
           body: {
-            asset: { name: assetName },
+            asset: { name: value.assetName.trim() },
             classification: value.classification as Classification,
           },
         },
@@ -163,6 +310,12 @@ function AccessEditorForm({
       );
     },
   });
+
+  useEffect(() => {
+    if (sumoAssetsLoaded && form.state.values.assetName.trim() !== "") {
+      void form.validateField("assetName", "change");
+    }
+  }, [form, sumoAssetsLoaded]);
 
   return (
     <EditDialog open={isDialogOpen} $minWidth="25em">
@@ -178,37 +331,33 @@ function AccessEditorForm({
         </Dialog.Header>
 
         <Dialog.Content>
-          <form.Subscribe selector={(state) => [state.values]}>
-            {([formValues]) => (
-              <>
-                <form.AppField name="assetName">
-                  {(field) => (
-                    <field.AutocompleteField
-                      label="Select Sumo target asset"
-                      options={sumoAssets
-                        .map((asset) => asset.name)
-                        .sort((a, b) => stringCompare(a, b))}
-                      optionValue={(option) => option}
-                      noOptionsText="No assets found"
-                      disabled={!!formValues?.manualAssetName}
-                      helperText="Newly onboarded assets may not exist in the list yet"
-                    />
-                  )}
-                </form.AppField>
-
-                <PageSectionSpacer />
-
-                <form.AppField name="manualAssetName">
-                  {(field) => (
-                    <field.TextField
-                      label="Alternatively, enter asset manually"
-                      disabled={!!formValues?.assetName}
-                    />
-                  )}
-                </form.AppField>
-              </>
+          <form.AppField
+            name="assetName"
+            validators={{
+              onChange: ({ value }) =>
+                !sumoAssetsLoaded
+                  ? undefined
+                  : value.trim() === ""
+                    ? "Asset name is required"
+                    : !availableAssetNames.includes(value)
+                      ? "You do not currently have write access to this Sumo asset"
+                      : undefined,
+            }}
+          >
+            {(field) => (
+              <field.AutocompleteField
+                label="Select Sumo target asset"
+                options={assetOptions}
+                optionValue={(option) => option}
+                optionDisabled={(option) =>
+                  !availableAssetNames.includes(option)
+                }
+                noOptionsText="No assets found"
+                placeholder={assetPlaceholder}
+                disabled={fieldsDisabled}
+              />
             )}
-          </form.Subscribe>
+          </form.AppField>
 
           <PageSectionSpacer />
 
@@ -238,6 +387,7 @@ function AccessEditorForm({
                       <Radio
                         label={option}
                         checked={field.state.value === option}
+                        disabled={fieldsDisabled}
                         onChange={() => {
                           field.handleChange(option);
                         }}
@@ -248,21 +398,58 @@ function AccessEditorForm({
               </InputWrapper>
             )}
           </form.AppField>
+
+          <SumoAssetsInfo
+            sumoAssetsLoaded={sumoAssetsLoaded}
+            isLoading={isLoading}
+            loginRequired={loginRequired}
+            errorText={errorText}
+            loginPending={loginPending}
+            loginToSumo={loginToSumo}
+            retrySumoAssets={retrySumoAssets}
+          />
         </Dialog.Content>
 
         <Dialog.Actions>
           <form.Subscribe
-            selector={(state) => [state.isDefaultValue, state.canSubmit]}
+            selector={(state) =>
+              [
+                state.isDefaultValue,
+                state.canSubmit,
+                state.values.assetName,
+                state.values.classification,
+              ] as const
+            }
           >
-            {([isDefaultValue, canSubmit]) => (
+            {([
+              isDefaultValue,
+              canSubmit,
+              selectedAssetName,
+              selectedClassification,
+            ]) => (
               <form.SubmitButton
                 label="Save"
                 disabled={
-                  projectReadOnly ? true : isDefaultValue ? true : !canSubmit
+                  projectReadOnly ||
+                  !sumoAssetsLoaded ||
+                  selectedAssetName.trim() === "" ||
+                  selectedClassification === "" ||
+                  isDefaultValue ||
+                  !canSubmit
                 }
                 isPending={isPending}
                 helperTextDisabled={
-                  projectReadOnly ? "Project is read-only" : undefined
+                  projectReadOnly
+                    ? "Project is read-only"
+                    : !sumoAssetsLoaded
+                      ? "Sumo assets must be loaded before saving"
+                      : selectedAssetName.trim() === ""
+                        ? "Select a Sumo target asset before saving"
+                        : selectedClassification === ""
+                          ? "Select a default security classification before saving"
+                          : isDefaultValue
+                            ? "Form can be saved when the values have changed"
+                            : undefined
                 }
               />
             )}
@@ -320,7 +507,8 @@ export function EditableAccessInfo({
       <PageText>
         The <i>asset</i> specifies the target asset in Sumo where data will be
         uploaded. The <i>classification</i> sets the default information
-        classification for the data.
+        classification for the data. You must have <i>WRITE</i> access to select
+        a Sumo target asset.
       </PageText>
 
       <PageList>
