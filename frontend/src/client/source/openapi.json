@@ -380,8 +380,8 @@
         "tags": [
           "project"
         ],
-        "summary": "Returns a list of Sumo assets.",
-        "description": "Returns a list of the assets that have been onboarded to\nthe Sumo platform.",
+        "summary": "Returns Sumo assets with user write access.",
+        "description": "Returns assets to which the current user has write access.",
         "operationId": "project-get_sumo_assets",
         "parameters": [
           {
@@ -436,31 +436,24 @@
               }
             }
           },
-          "404": {
-            "description": "Sumo assets file not found",
+          "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Sumo assets file not found: {error}"
-                    }
-                  ]
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           },
-          "422": {
-            "description": "Invalid file content in Sumo assets file",
+          "424": {
+            "description": "Sumo login required",
             "content": {
               "application/json": {
                 "example": {
                   "examples": [
                     {
-                      "detail": "Sumo assets file contains invalid assets: {errors}"
-                    },
-                    {
-                      "detail": "Sumo assets file is not a valid JSON: {error}"
+                      "detail": "Sumo login is required"
                     }
                   ]
                 }
@@ -478,6 +471,149 @@
                     },
                     {
                       "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Invalid response from Sumo",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Sumo returned an invalid asset response"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sumo unavailable",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Unable to get assets from Sumo"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/project/sumo_login": {
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Logs in to Sumo.",
+        "description": "Starts an interactive Sumo login if no cached token is available.",
+        "operationId": "project-post_sumo_login",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "424": {
+            "description": "Sumo login not completed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Sumo login was not completed"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sumo unavailable",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Unable to connect to Sumo"
                     }
                   ]
                 }
@@ -7907,7 +8043,7 @@
             "type": "string",
             "pattern": "(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)",
             "title": "Version",
-            "default": "1.2.0"
+            "default": "1.4.1"
           }
         },
         "type": "object",
@@ -8234,9 +8370,9 @@
         "properties": {
           "schema_version": {
             "type": "integer",
-            "const": 1,
+            "const": 2,
             "title": "Schema Version",
-            "default": 1
+            "default": 2
           },
           "version": {
             "type": "string",
@@ -9478,27 +9614,15 @@
           "name": {
             "type": "string",
             "title": "Name",
-            "description": "Name of the asset in Sumo."
-          },
-          "code": {
-            "type": "string",
-            "title": "Code",
-            "description": "Code of the asset in Sumo."
-          },
-          "roleprefix": {
-            "type": "string",
-            "title": "Roleprefix",
-            "description": "Roleprefix of the asset in Sumo."
+            "description": "Name of the asset in Sumo the user has write access to."
           }
         },
         "type": "object",
         "required": [
-          "name",
-          "code",
-          "roleprefix"
+          "name"
         ],
         "title": "SumoAsset",
-        "description": "A valid asset in Sumo."
+        "description": "A Sumo asset available to the user."
       },
       "UserAPIKeys": {
         "properties": {
