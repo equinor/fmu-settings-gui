@@ -122,8 +122,8 @@ configured for these subdirectories, which are named prefixed with `#` (ie.
 `#components`). These path aliases are defined in the
 [tsconfig.app.json](tsconfig.app.json) file, and should rarely need to be updated or
 added to. Editors like Visual Studio Code should be able to deal naturally with these
-path aliases. Note that the Vite configuration is set up with a plugin for handling these
-aliases, and that a change in the alias definition list requires a restart of Vite.
+path aliases. The Vite server also handles these aliases, but it requires a restart when
+there are alias changes to the configuration file.
 
 ### Formatting and linting
 
