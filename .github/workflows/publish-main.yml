@@ -2,10 +2,6 @@ name: Publish main wheel
 
 on:
   workflow_dispatch:
-  # TEST ONLY: Remove this pull request trigger before merging.
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
@@ -75,16 +71,7 @@ jobs:
           )
           PY
 
-      - name: Upload test wheel
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: fmu-settings-gui-main-wheel
-          path: dist/fmu_settings_gui-99.0.0-py3-none-any.whl
-          if-no-files-found: error
-
       - name: Upload wheel to bleeding release
-        if: ${{ github.event_name != 'pull_request' }}
         run: >
           gh release upload bleeding
           dist/fmu_settings_gui-99.0.0-py3-none-any.whl
