@@ -1,4 +1,4 @@
-name: Publish main wheel
+name: Publish main wheel to GitHub
 
 on:
   workflow_dispatch:
@@ -7,8 +7,8 @@ on:
       - main
 
 concurrency:
-  group: publish-main-wheel
-  cancel-in-progress: true
+  group: publish-main-wheel-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout commit locally
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Python 3.12
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -38,14 +38,14 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install build dependencies
         run: python -m pip install --upgrade build
 
       - name: Build wheel
         env:
+          # Komodo reads the version from the wheel filename. Use a valid, fixed
+          # version so the bleeding release asset has a stable download URL.
           SETUPTOOLS_SCM_PRETEND_VERSION: "99.0.0"
         run: python -m build --wheel --verbose
 
@@ -55,23 +55,24 @@ jobs:
           wheel-test/bin/python -m pip install --no-deps dist/fmu_settings_gui-99.0.0-py3-none-any.whl
           wheel-test/bin/python - <<'PY'
           from importlib.metadata import version
-          from importlib.resources import files
+
+          from fmu_settings_gui import get_static_directory
 
           assert version("fmu-settings-gui") == "99.0.0"
-          static = files("fmu_settings_gui").joinpath("static")
+          static = get_static_directory()
 
           # Verify the main application and authentication redirect entry points.
-          assert static.joinpath("index.html").is_file()
-          assert static.joinpath("redirect.html").is_file()
+          assert (static / "index.html").is_file()
+          assert (static / "redirect.html").is_file()
 
           # Verify that the wheel contains the compiled application assets.
-          assert any(
-              asset.name.endswith(".js")
-              for asset in static.joinpath("assets").iterdir()
-          )
+          assert any(static.glob("assets/*.js"))
           PY
 
       - name: Upload wheel to bleeding release
+        if: github.ref == 'refs/heads/main'
+        # Replace the wheel after each main build so Komodo gets current code
+        # from the same bleeding release URL.
         run: >
           gh release upload bleeding
           dist/fmu_settings_gui-99.0.0-py3-none-any.whl
