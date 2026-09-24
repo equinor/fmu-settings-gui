@@ -75,7 +75,7 @@ jobs:
         # Replace the wheel after each main build so Komodo gets current code
         # from the same bleeding release URL.
         run: >
-          gh release upload bleeding
+          gh release upload bleeding-main
           dist/fmu_settings_gui-99.0.0-py3-none-any.whl
           --clobber
         env:
