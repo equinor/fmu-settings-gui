@@ -47,7 +47,7 @@ function RmsExpireNotificationContent({
   const rmsRefreshMutation = useMutation({
     mutationFn: async () => {
       // Invalidate an rms query to trigger rms session extension.
-      await queryClient.fetchQuery({
+      await queryClient.query({
         ...rmsGetZonesOptions(),
         staleTime: 0,
       });
@@ -115,7 +115,7 @@ function RmsExpireNotificationContent({
       isCheckingThreshold.current = true;
 
       void queryClient
-        .fetchQuery({
+        .query({
           ...sessionGetSessionOptions(),
           staleTime: 0,
         })

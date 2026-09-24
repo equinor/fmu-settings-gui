@@ -39,7 +39,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
     if (context.hasResponseInterceptor && context.sessionReady) {
       await context.queryClient
-        .fetchQuery({
+        .query({
           ...userGetUserOptions(),
           meta: { errorPrefix: "Error getting initial user data" },
           retry: 3,
