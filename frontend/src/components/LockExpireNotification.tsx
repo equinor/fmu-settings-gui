@@ -123,7 +123,7 @@ export function LockExpireNotification() {
       isCheckingThreshold.current = true;
 
       void queryClient
-        .fetchQuery({
+        .query({
           ...projectGetLockStatusOptions(),
           staleTime: 0,
         })

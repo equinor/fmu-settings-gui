@@ -97,7 +97,6 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
   const queryClient = useQueryClient();
 
   const { data: lockStatus } = useQuery({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     ...queryOptions({
       queryFn: async ({ queryKey, signal }) => {
         const previousLockStatus = queryClient.getQueryData<LockStatus>(
