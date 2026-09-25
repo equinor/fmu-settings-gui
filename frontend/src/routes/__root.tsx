@@ -61,7 +61,7 @@ function NotFoundComponent() {
   return <div>Not found</div>;
 }
 
-function StandardErrorComponent(error: Error) {
+function StandardErrorComponent(error: unknown) {
   const queryErrorResetBoundary = useQueryErrorResetBoundary();
 
   useEffect(() => {
