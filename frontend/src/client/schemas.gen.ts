@@ -707,7 +707,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.2.0'
+            default: '1.4.1'
         }
     },
     type: 'object',
@@ -1046,9 +1046,9 @@ export const ProjectConfigSchema = {
     properties: {
         schema_version: {
             type: 'integer',
-            const: 1,
+            const: 2,
             title: 'Schema Version',
-            default: 1
+            default: 2
         },
         version: {
             type: 'string',
@@ -2318,27 +2318,15 @@ export const SumoAssetSchema = {
         name: {
             type: 'string',
             title: 'Name',
-            description: 'Name of the asset in Sumo.'
-        },
-        code: {
-            type: 'string',
-            title: 'Code',
-            description: 'Code of the asset in Sumo.'
-        },
-        roleprefix: {
-            type: 'string',
-            title: 'Roleprefix',
-            description: 'Roleprefix of the asset in Sumo.'
+            description: 'Name of the asset in Sumo the user has write access to.'
         }
     },
     type: 'object',
     required: [
-        'name',
-        'code',
-        'roleprefix'
+        'name'
     ],
     title: 'SumoAsset',
-    description: 'A valid asset in Sumo.'
+    description: 'A Sumo asset available to the user.'
 } as const;
 
 export const UserAPIKeysSchema = {

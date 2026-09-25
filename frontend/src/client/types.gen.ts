@@ -733,7 +733,7 @@ export type ProjectConfig = {
     /**
      * Schema Version
      */
-    schema_version?: 1;
+    schema_version?: 2;
     /**
      * Version
      */
@@ -1520,27 +1520,15 @@ export type StratigraphicUnit = {
 /**
  * SumoAsset
  *
- * A valid asset in Sumo.
+ * A Sumo asset available to the user.
  */
 export type SumoAsset = {
     /**
      * Name
      *
-     * Name of the asset in Sumo.
+     * Name of the asset in Sumo the user has write access to.
      */
     name: string;
-    /**
-     * Code
-     *
-     * Code of the asset in Sumo.
-     */
-    code: string;
-    /**
-     * Roleprefix
-     *
-     * Roleprefix of the asset in Sumo.
-     */
-    roleprefix: string;
 };
 
 /**
@@ -1807,18 +1795,28 @@ export type ProjectGetSumoAssetsErrors = {
      */
     401: unknown;
     /**
-     * Sumo assets file not found
+     * Validation Error
      */
-    404: unknown;
+    422: HttpValidationError;
     /**
-     * Invalid file content in Sumo assets file
+     * Sumo login required
      */
-    422: unknown;
+    424: unknown;
     /**
      * Something unexpected has happened
      */
     500: unknown;
+    /**
+     * Invalid response from Sumo
+     */
+    502: unknown;
+    /**
+     * Sumo unavailable
+     */
+    503: unknown;
 };
+
+export type ProjectGetSumoAssetsError = ProjectGetSumoAssetsErrors[keyof ProjectGetSumoAssetsErrors];
 
 export type ProjectGetSumoAssetsResponses = {
     /**
@@ -1830,6 +1828,47 @@ export type ProjectGetSumoAssetsResponses = {
 };
 
 export type ProjectGetSumoAssetsResponse = ProjectGetSumoAssetsResponses[keyof ProjectGetSumoAssetsResponses];
+
+export type ProjectPostSumoLoginData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/sumo_login';
+};
+
+export type ProjectPostSumoLoginErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Sumo login not completed
+     */
+    424: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * Sumo unavailable
+     */
+    503: unknown;
+};
+
+export type ProjectPostSumoLoginError = ProjectPostSumoLoginErrors[keyof ProjectPostSumoLoginErrors];
+
+export type ProjectPostSumoLoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ok;
+};
+
+export type ProjectPostSumoLoginResponse = ProjectPostSumoLoginResponses[keyof ProjectPostSumoLoginResponses];
 
 export type ProjectGetGlobalConfigStatusData = {
     body?: never;
