@@ -4,8 +4,8 @@ import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanst
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { healthHealthCheck, healthV1HealthCheck, matchPostMatch, type Options, projectDeleteProjectSession, projectGetCache, projectGetCacheDiff, projectGetCacheRevision, projectGetChangelog, projectGetGlobalConfigStatus, projectGetLockStatus, projectGetMappings, projectGetProject, projectGetRestoreCheck, projectGetRmsProjects, projectGetSumoAssets, projectPatchAccess, projectPatchCacheMaxRevisions, projectPatchMasterdata, projectPatchModel, projectPatchRms, projectPatchRmsCoordinateSystem, projectPatchRmsStratigraphicFramework, projectPatchRmsWells, projectPostCacheRestore, projectPostGlobalConfig, projectPostInitProject, projectPostLockAcquire, projectPostLockRefresh, projectPostLockRelease, projectPostMappingsExportRmsSimulatorRenamingTable, projectPostMappingsImportRmsEclipseCsv, projectPostProject, projectPostRestore, projectPostSumoLogin, projectPostValidateMasterdataSmda, projectPutMappings, rmsDeleteRmsProject, rmsGetCoordinateSystem, rmsGetHorizons, rmsGetWells, rmsGetZones, rmsPostRmsProject, rmsPostValidateRmsProject, sessionGetRestoreCheck, sessionGetSession, sessionPatchAccessToken, sessionPostRestore, sessionPostSession, smdaGetHealth, smdaPostField, smdaPostMasterdata, smdaPostStratUnits, smdaPostWellHeaders, userGetUser, userPatchApiKey } from '../sdk.gen';
-import type { HealthHealthCheckData, HealthHealthCheckResponse, HealthV1HealthCheckData, HealthV1HealthCheckError, HealthV1HealthCheckResponse, MatchPostMatchData, MatchPostMatchResponse, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionError, ProjectDeleteProjectSessionResponse, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffResponse, ProjectGetCacheError, ProjectGetCacheResponse, ProjectGetCacheRevisionData, ProjectGetCacheRevisionResponse, ProjectGetChangelogData, ProjectGetChangelogResponse, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusResponse, ProjectGetLockStatusData, ProjectGetLockStatusError, ProjectGetLockStatusResponse, ProjectGetMappingsData, ProjectGetMappingsResponse, ProjectGetProjectData, ProjectGetProjectError, ProjectGetProjectResponse, ProjectGetRestoreCheckData, ProjectGetRestoreCheckError, ProjectGetRestoreCheckResponse, ProjectGetRmsProjectsData, ProjectGetRmsProjectsError, ProjectGetRmsProjectsResponse, ProjectGetSumoAssetsData, ProjectGetSumoAssetsError, ProjectGetSumoAssetsResponse, ProjectPatchAccessData, ProjectPatchAccessError, ProjectPatchAccessResponse, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsError, ProjectPatchCacheMaxRevisionsResponse, ProjectPatchMasterdataData, ProjectPatchMasterdataError, ProjectPatchMasterdataResponse, ProjectPatchModelData, ProjectPatchModelError, ProjectPatchModelResponse, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemResponse, ProjectPatchRmsData, ProjectPatchRmsError, ProjectPatchRmsResponse, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkResponse, ProjectPatchRmsWellsData, ProjectPatchRmsWellsResponse, ProjectPostCacheRestoreData, ProjectPostCacheRestoreResponse, ProjectPostGlobalConfigData, ProjectPostGlobalConfigResponse, ProjectPostInitProjectData, ProjectPostInitProjectResponse, ProjectPostLockAcquireData, ProjectPostLockAcquireError, ProjectPostLockAcquireResponse, ProjectPostLockRefreshData, ProjectPostLockRefreshError, ProjectPostLockRefreshResponse, ProjectPostLockReleaseData, ProjectPostLockReleaseError, ProjectPostLockReleaseResponse, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableResponse, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvResponse, ProjectPostProjectData, ProjectPostProjectError, ProjectPostProjectResponse, ProjectPostRestoreData, ProjectPostRestoreError, ProjectPostRestoreResponse, ProjectPostSumoLoginData, ProjectPostSumoLoginError, ProjectPostSumoLoginResponse, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaResponse, ProjectPutMappingsData, ProjectPutMappingsResponse, RmsDeleteRmsProjectData, RmsDeleteRmsProjectError, RmsDeleteRmsProjectResponse, RmsGetCoordinateSystemData, RmsGetCoordinateSystemError, RmsGetCoordinateSystemResponse, RmsGetHorizonsData, RmsGetHorizonsError, RmsGetHorizonsResponse, RmsGetWellsData, RmsGetWellsError, RmsGetWellsResponse, RmsGetZonesData, RmsGetZonesError, RmsGetZonesResponse, RmsPostRmsProjectData, RmsPostRmsProjectResponse, RmsPostValidateRmsProjectData, RmsPostValidateRmsProjectResponse, SessionGetRestoreCheckData, SessionGetRestoreCheckError, SessionGetRestoreCheckResponse, SessionGetSessionData, SessionGetSessionError, SessionGetSessionResponse, SessionPatchAccessTokenData, SessionPatchAccessTokenError, SessionPatchAccessTokenResponse, SessionPostRestoreData, SessionPostRestoreError, SessionPostRestoreResponse, SessionPostSessionData, SessionPostSessionError, SessionPostSessionResponse, SmdaGetHealthData, SmdaGetHealthError, SmdaGetHealthResponse, SmdaPostFieldData, SmdaPostFieldError, SmdaPostFieldResponse, SmdaPostMasterdataData, SmdaPostMasterdataResponse, SmdaPostStratUnitsData, SmdaPostStratUnitsResponse, SmdaPostWellHeadersData, SmdaPostWellHeadersResponse, UserGetUserData, UserGetUserError, UserGetUserResponse, UserPatchApiKeyData, UserPatchApiKeyError, UserPatchApiKeyResponse } from '../types.gen';
+import { healthHealthCheck, healthV1HealthCheck, matchPostMatch, type Options, projectDeleteProjectSession, projectGetCache, projectGetCacheDiff, projectGetCacheRevision, projectGetChangelog, projectGetGlobalConfigStatus, projectGetLockStatus, projectGetMappings, projectGetProject, projectGetRestoreCheck, projectGetRmsProjects, projectPatchAccess, projectPatchCacheMaxRevisions, projectPatchMasterdata, projectPatchModel, projectPatchRms, projectPatchRmsCoordinateSystem, projectPatchRmsStratigraphicFramework, projectPatchRmsWells, projectPostCacheRestore, projectPostGlobalConfig, projectPostInitProject, projectPostLockAcquire, projectPostLockRefresh, projectPostLockRelease, projectPostMappingsExportRmsSimulatorRenamingTable, projectPostMappingsImportRmsEclipseCsv, projectPostProject, projectPostRestore, projectPostValidateMasterdataSmda, projectPutMappings, rmsDeleteRmsProject, rmsGetCoordinateSystem, rmsGetHorizons, rmsGetWells, rmsGetZones, rmsPostRmsProject, rmsPostValidateRmsProject, sessionGetRestoreCheck, sessionGetSession, sessionPatchAccessToken, sessionPostRestore, sessionPostSession, smdaGetHealth, smdaPostField, smdaPostMasterdata, smdaPostStratUnits, smdaPostWellHeaders, sumoGetAssets, sumoPostLogin, userGetUser, userPatchApiKey } from '../sdk.gen';
+import type { HealthHealthCheckData, HealthHealthCheckResponse, HealthV1HealthCheckData, HealthV1HealthCheckError, HealthV1HealthCheckResponse, MatchPostMatchData, MatchPostMatchResponse, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionError, ProjectDeleteProjectSessionResponse, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffResponse, ProjectGetCacheError, ProjectGetCacheResponse, ProjectGetCacheRevisionData, ProjectGetCacheRevisionResponse, ProjectGetChangelogData, ProjectGetChangelogResponse, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusResponse, ProjectGetLockStatusData, ProjectGetLockStatusError, ProjectGetLockStatusResponse, ProjectGetMappingsData, ProjectGetMappingsResponse, ProjectGetProjectData, ProjectGetProjectError, ProjectGetProjectResponse, ProjectGetRestoreCheckData, ProjectGetRestoreCheckError, ProjectGetRestoreCheckResponse, ProjectGetRmsProjectsData, ProjectGetRmsProjectsError, ProjectGetRmsProjectsResponse, ProjectPatchAccessData, ProjectPatchAccessError, ProjectPatchAccessResponse, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsError, ProjectPatchCacheMaxRevisionsResponse, ProjectPatchMasterdataData, ProjectPatchMasterdataError, ProjectPatchMasterdataResponse, ProjectPatchModelData, ProjectPatchModelError, ProjectPatchModelResponse, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemResponse, ProjectPatchRmsData, ProjectPatchRmsError, ProjectPatchRmsResponse, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkResponse, ProjectPatchRmsWellsData, ProjectPatchRmsWellsResponse, ProjectPostCacheRestoreData, ProjectPostCacheRestoreResponse, ProjectPostGlobalConfigData, ProjectPostGlobalConfigResponse, ProjectPostInitProjectData, ProjectPostInitProjectResponse, ProjectPostLockAcquireData, ProjectPostLockAcquireError, ProjectPostLockAcquireResponse, ProjectPostLockRefreshData, ProjectPostLockRefreshError, ProjectPostLockRefreshResponse, ProjectPostLockReleaseData, ProjectPostLockReleaseError, ProjectPostLockReleaseResponse, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableResponse, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvResponse, ProjectPostProjectData, ProjectPostProjectError, ProjectPostProjectResponse, ProjectPostRestoreData, ProjectPostRestoreError, ProjectPostRestoreResponse, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaResponse, ProjectPutMappingsData, ProjectPutMappingsResponse, RmsDeleteRmsProjectData, RmsDeleteRmsProjectError, RmsDeleteRmsProjectResponse, RmsGetCoordinateSystemData, RmsGetCoordinateSystemError, RmsGetCoordinateSystemResponse, RmsGetHorizonsData, RmsGetHorizonsError, RmsGetHorizonsResponse, RmsGetWellsData, RmsGetWellsError, RmsGetWellsResponse, RmsGetZonesData, RmsGetZonesError, RmsGetZonesResponse, RmsPostRmsProjectData, RmsPostRmsProjectResponse, RmsPostValidateRmsProjectData, RmsPostValidateRmsProjectResponse, SessionGetRestoreCheckData, SessionGetRestoreCheckError, SessionGetRestoreCheckResponse, SessionGetSessionData, SessionGetSessionError, SessionGetSessionResponse, SessionPatchAccessTokenData, SessionPatchAccessTokenError, SessionPatchAccessTokenResponse, SessionPostRestoreData, SessionPostRestoreError, SessionPostRestoreResponse, SessionPostSessionData, SessionPostSessionError, SessionPostSessionResponse, SmdaGetHealthData, SmdaGetHealthError, SmdaGetHealthResponse, SmdaPostFieldData, SmdaPostFieldError, SmdaPostFieldResponse, SmdaPostMasterdataData, SmdaPostMasterdataResponse, SmdaPostStratUnitsData, SmdaPostStratUnitsResponse, SmdaPostWellHeadersData, SmdaPostWellHeadersResponse, SumoGetAssetsData, SumoGetAssetsError, SumoGetAssetsResponse, SumoPostLoginData, SumoPostLoginError, SumoPostLoginResponse, UserGetUserData, UserGetUserError, UserGetUserResponse, UserPatchApiKeyData, UserPatchApiKeyError, UserPatchApiKeyResponse } from '../types.gen';
 
 /**
  * Removes a project .fmu directory from a session
@@ -94,45 +94,6 @@ export const projectPostProjectMutation = (options?: Partial<Options<ProjectPost
     const mutationOptions: UseMutationOptions<ProjectPostProjectResponse, AxiosError<ProjectPostProjectError>, Options<ProjectPostProjectData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await projectPostProject({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const projectGetSumoAssetsQueryKey = (options?: Options<ProjectGetSumoAssetsData>) => createQueryKey('projectGetSumoAssets', options);
-
-/**
- * Returns Sumo assets with user write access.
- *
- * Returns assets to which the current user has write access.
- */
-export const projectGetSumoAssetsOptions = (options?: Options<ProjectGetSumoAssetsData>) => queryOptions<ProjectGetSumoAssetsResponse, AxiosError<ProjectGetSumoAssetsError>, ProjectGetSumoAssetsResponse, ReturnType<typeof projectGetSumoAssetsQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await projectGetSumoAssets({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: projectGetSumoAssetsQueryKey(options)
-});
-
-/**
- * Logs in to Sumo.
- *
- * Starts an interactive Sumo login if no cached token is available.
- */
-export const projectPostSumoLoginMutation = (options?: Partial<Options<ProjectPostSumoLoginData>>): UseMutationOptions<ProjectPostSumoLoginResponse, AxiosError<ProjectPostSumoLoginError>, Options<ProjectPostSumoLoginData>> => {
-    const mutationOptions: UseMutationOptions<ProjectPostSumoLoginResponse, AxiosError<ProjectPostSumoLoginError>, Options<ProjectPostSumoLoginData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await projectPostSumoLogin({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1079,6 +1040,45 @@ export const rmsGetCoordinateSystemOptions = (options?: Options<RmsGetCoordinate
     },
     queryKey: rmsGetCoordinateSystemQueryKey(options)
 });
+
+export const sumoGetAssetsQueryKey = (options?: Options<SumoGetAssetsData>) => createQueryKey('sumoGetAssets', options);
+
+/**
+ * Returns Sumo assets with user write access.
+ *
+ * Returns assets to which the current user has write access.
+ */
+export const sumoGetAssetsOptions = (options?: Options<SumoGetAssetsData>) => queryOptions<SumoGetAssetsResponse, AxiosError<SumoGetAssetsError>, SumoGetAssetsResponse, ReturnType<typeof sumoGetAssetsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await sumoGetAssets({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: sumoGetAssetsQueryKey(options)
+});
+
+/**
+ * Logs in to Sumo.
+ *
+ * Starts an interactive Sumo login if no cached token is available.
+ */
+export const sumoPostLoginMutation = (options?: Partial<Options<SumoPostLoginData>>): UseMutationOptions<SumoPostLoginResponse, AxiosError<SumoPostLoginError>, Options<SumoPostLoginData>> => {
+    const mutationOptions: UseMutationOptions<SumoPostLoginResponse, AxiosError<SumoPostLoginError>, Options<SumoPostLoginData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await sumoPostLogin({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const smdaGetHealthQueryKey = (options?: Options<SmdaGetHealthData>) => createQueryKey('smdaGetHealth', options);
 

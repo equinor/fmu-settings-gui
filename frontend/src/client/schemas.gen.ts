@@ -2318,7 +2318,7 @@ export const SumoAssetSchema = {
         name: {
             type: 'string',
             title: 'Name',
-            description: 'Name of the asset in Sumo the user has write access to.'
+            description: 'Name of the asset in Sumo.'
         }
     },
     type: 'object',

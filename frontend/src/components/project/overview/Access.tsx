@@ -17,9 +17,9 @@ import type { FmuProject } from "#client";
 import {
   projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
-  projectGetSumoAssetsOptions,
   projectPatchAccessMutation,
-  projectPostSumoLoginMutation,
+  sumoGetAssetsOptions,
+  sumoPostLoginMutation,
 } from "#client/@tanstack/react-query.gen";
 import type { Access, Classification, SumoAsset } from "#client/types.gen";
 import {
@@ -144,7 +144,7 @@ function AccessEditor({
   setIsDialogOpen,
 }: AccessEditorProps) {
   const sumoAssetsQuery = useQuery({
-    ...projectGetSumoAssetsOptions(),
+    ...sumoGetAssetsOptions(),
     enabled: isDialogOpen,
     retry: (failureCount, queryError) =>
       !(
@@ -165,7 +165,7 @@ function AccessEditor({
     },
   });
   const sumoLoginMutation = useMutation({
-    ...projectPostSumoLoginMutation(),
+    ...sumoPostLoginMutation(),
     onSuccess: () => {
       void sumoAssetsQuery.refetch();
     },

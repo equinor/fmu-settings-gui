@@ -1526,7 +1526,7 @@ export type SumoAsset = {
     /**
      * Name
      *
-     * Name of the asset in Sumo the user has write access to.
+     * Name of the asset in Sumo.
      */
     name: string;
 };
@@ -1781,94 +1781,6 @@ export type ProjectPostProjectResponses = {
 };
 
 export type ProjectPostProjectResponse = ProjectPostProjectResponses[keyof ProjectPostProjectResponses];
-
-export type ProjectGetSumoAssetsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/project/sumo_assets';
-};
-
-export type ProjectGetSumoAssetsErrors = {
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-    /**
-     * Sumo login required
-     */
-    424: unknown;
-    /**
-     * Something unexpected has happened
-     */
-    500: unknown;
-    /**
-     * Invalid response from Sumo
-     */
-    502: unknown;
-    /**
-     * Sumo unavailable
-     */
-    503: unknown;
-};
-
-export type ProjectGetSumoAssetsError = ProjectGetSumoAssetsErrors[keyof ProjectGetSumoAssetsErrors];
-
-export type ProjectGetSumoAssetsResponses = {
-    /**
-     * Response Project-Get Sumo Assets
-     *
-     * Successful Response
-     */
-    200: Array<SumoAsset>;
-};
-
-export type ProjectGetSumoAssetsResponse = ProjectGetSumoAssetsResponses[keyof ProjectGetSumoAssetsResponses];
-
-export type ProjectPostSumoLoginData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/project/sumo_login';
-};
-
-export type ProjectPostSumoLoginErrors = {
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-    /**
-     * Sumo login not completed
-     */
-    424: unknown;
-    /**
-     * Something unexpected has happened
-     */
-    500: unknown;
-    /**
-     * Sumo unavailable
-     */
-    503: unknown;
-};
-
-export type ProjectPostSumoLoginError = ProjectPostSumoLoginErrors[keyof ProjectPostSumoLoginErrors];
-
-export type ProjectPostSumoLoginResponses = {
-    /**
-     * Successful Response
-     */
-    200: Ok;
-};
-
-export type ProjectPostSumoLoginResponse = ProjectPostSumoLoginResponses[keyof ProjectPostSumoLoginResponses];
 
 export type ProjectGetGlobalConfigStatusData = {
     body?: never;
@@ -3590,6 +3502,10 @@ export type RmsPostRmsProjectErrors = {
      * Something unexpected has happened
      */
     500: unknown;
+    /**
+     * Opening the RMS project timed out.
+     */
+    504: unknown;
 };
 
 export type RmsPostRmsProjectResponses = {
@@ -3822,6 +3738,94 @@ export type RmsGetCoordinateSystemResponses = {
 };
 
 export type RmsGetCoordinateSystemResponse = RmsGetCoordinateSystemResponses[keyof RmsGetCoordinateSystemResponses];
+
+export type SumoGetAssetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/sumo/assets';
+};
+
+export type SumoGetAssetsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Sumo login required
+     */
+    424: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * Invalid response from Sumo
+     */
+    502: unknown;
+    /**
+     * Sumo unavailable
+     */
+    503: unknown;
+};
+
+export type SumoGetAssetsError = SumoGetAssetsErrors[keyof SumoGetAssetsErrors];
+
+export type SumoGetAssetsResponses = {
+    /**
+     * Response Sumo-Get Assets
+     *
+     * Successful Response
+     */
+    200: Array<SumoAsset>;
+};
+
+export type SumoGetAssetsResponse = SumoGetAssetsResponses[keyof SumoGetAssetsResponses];
+
+export type SumoPostLoginData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/sumo/login';
+};
+
+export type SumoPostLoginErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Sumo login not completed
+     */
+    424: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * Sumo unavailable
+     */
+    503: unknown;
+};
+
+export type SumoPostLoginError = SumoPostLoginErrors[keyof SumoPostLoginErrors];
+
+export type SumoPostLoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ok;
+};
+
+export type SumoPostLoginResponse = SumoPostLoginResponses[keyof SumoPostLoginResponses];
 
 export type SmdaGetHealthData = {
     body?: never;

@@ -375,254 +375,6 @@
         }
       }
     },
-    "/api/v1/project/sumo_assets": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "summary": "Returns Sumo assets with user write access.",
-        "description": "Returns assets to which the current user has write access.",
-        "operationId": "project-get_sumo_assets",
-        "parameters": [
-          {
-            "name": "fmu_settings_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Fmu Settings Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SumoAsset"
-                  },
-                  "title": "Response Project-Get Sumo Assets"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "No active or valid session was found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "No active session found"
-                    },
-                    {
-                      "detail": "Invalid or expired session"
-                    },
-                    {
-                      "detail": "No FMU project directory open"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          },
-          "424": {
-            "description": "Sumo login required",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Sumo login is required"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Something unexpected has happened",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Session error: {string content of exception}"
-                    },
-                    {
-                      "detail": "{string content of exception}"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "Invalid response from Sumo",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Sumo returned an invalid asset response"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Sumo unavailable",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Unable to get assets from Sumo"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/project/sumo_login": {
-      "post": {
-        "tags": [
-          "project"
-        ],
-        "summary": "Logs in to Sumo.",
-        "description": "Starts an interactive Sumo login if no cached token is available.",
-        "operationId": "project-post_sumo_login",
-        "parameters": [
-          {
-            "name": "fmu_settings_session",
-            "in": "cookie",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Fmu Settings Session"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Ok"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "No active or valid session was found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "No active session found"
-                    },
-                    {
-                      "detail": "Invalid or expired session"
-                    },
-                    {
-                      "detail": "No FMU project directory open"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          },
-          "424": {
-            "description": "Sumo login not completed",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Sumo login was not completed"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Something unexpected has happened",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Session error: {string content of exception}"
-                    },
-                    {
-                      "detail": "{string content of exception}"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Sumo unavailable",
-            "content": {
-              "application/json": {
-                "example": {
-                  "examples": [
-                    {
-                      "detail": "Unable to connect to Sumo"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/project/global_config_status": {
       "get": {
         "tags": [
@@ -5783,6 +5535,20 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Opening the RMS project timed out.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Opening the RMS project timed out. Please try again."
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       },
@@ -6492,6 +6258,254 @@
         }
       }
     },
+    "/api/v1/sumo/assets": {
+      "get": {
+        "tags": [
+          "sumo"
+        ],
+        "summary": "Returns Sumo assets with user write access.",
+        "description": "Returns assets to which the current user has write access.",
+        "operationId": "sumo-get_assets",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SumoAsset"
+                  },
+                  "title": "Response Sumo-Get Assets"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "424": {
+            "description": "Sumo login required",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Sumo login is required"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Invalid response from Sumo",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Sumo returned an invalid asset response"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sumo unavailable",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Unable to get assets from Sumo"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sumo/login": {
+      "post": {
+        "tags": [
+          "sumo"
+        ],
+        "summary": "Logs in to Sumo.",
+        "description": "Starts an interactive Sumo login if no cached token is available.",
+        "operationId": "sumo-post_login",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "424": {
+            "description": "Sumo login not completed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Sumo login was not completed"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sumo unavailable",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Unable to connect to Sumo"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/smda/health": {
       "get": {
         "tags": [
@@ -6582,6 +6596,12 @@
               "application/json": {
                 "example": {
                   "examples": [
+                    {
+                      "detail": "SMDA API request timed out. Please try again later."
+                    },
+                    {
+                      "detail": "Could not connect to SMDA. There may be a network or proxy problem. Please try again later."
+                    },
                     {
                       "detail": "SMDA error requesting {url}"
                     }
@@ -9614,7 +9634,7 @@
           "name": {
             "type": "string",
             "title": "Name",
-            "description": "Name of the asset in Sumo the user has write access to."
+            "description": "Name of the asset in Sumo."
           }
         },
         "type": "object",
