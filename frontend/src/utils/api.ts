@@ -1,4 +1,4 @@
-import type { AxiosError } from "axios";
+import { type AxiosError, isAxiosError } from "axios";
 
 import type { ValidationError } from "#client";
 
@@ -10,6 +10,22 @@ export const HTTP_STATUS_422_UNPROCESSABLE_CONTENT = 422;
 export const HTTP_STATUS_424_FAILED_DEPENDENCY = 424;
 export const HTTP_STATUS_502_BAD_GATEWAY = 502;
 export const HTTP_STATUS_503_SERVICE_UNAVAILABLE = 503;
+
+export function getHttpErrorDetail(error: Error | null, fallback: string) {
+  const responseData: unknown = isAxiosError(error)
+    ? error.response?.data
+    : undefined;
+
+  if (
+    responseData !== null &&
+    typeof responseData === "object" &&
+    "detail" in responseData
+  ) {
+    return String(responseData.detail);
+  }
+
+  return fallback;
+}
 
 export function httpValidationErrorToString(
   error: AxiosError,

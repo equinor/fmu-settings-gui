@@ -39,6 +39,7 @@ import {
   WarningBox,
 } from "#styles/common";
 import {
+  getHttpErrorDetail,
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   HTTP_STATUS_424_FAILED_DEPENDENCY,
   HTTP_STATUS_502_BAD_GATEWAY,
@@ -68,22 +69,6 @@ const { useAppForm: useAppFormAccessEditor } = createFormHook({
   fieldContext,
   formContext,
 });
-
-function getErrorDetail(error: Error | null, fallback: string) {
-  const responseData: unknown = isAxiosError(error)
-    ? error.response?.data
-    : undefined;
-
-  if (
-    responseData !== null &&
-    typeof responseData === "object" &&
-    "detail" in responseData
-  ) {
-    return String(responseData.detail);
-  }
-
-  return fallback;
-}
 
 function SumoAssetsInfo({
   sumoAssetsLoaded,
@@ -192,8 +177,11 @@ function AccessEditor({
     !sumoAssetsQuery.isFetching &&
     !sumoAssetsQuery.isError;
   const errorText = sumoLoginMutation.error
-    ? getErrorDetail(sumoLoginMutation.error, "Sumo login failed")
-    : getErrorDetail(sumoAssetsQuery.error, "Unable to get assets from Sumo");
+    ? getHttpErrorDetail(sumoLoginMutation.error, "Sumo login failed")
+    : getHttpErrorDetail(
+        sumoAssetsQuery.error,
+        "Unable to get assets from Sumo",
+      );
 
   return (
     <AccessEditorForm
