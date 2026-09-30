@@ -1,4 +1,4 @@
-import { Dialog } from "@equinor/eds-core-react";
+import { Dialog, Tooltip } from "@equinor/eds-core-react";
 import {
   type ColumnDef,
   EdsDataGrid,
@@ -21,9 +21,11 @@ import type { SmdaFieldReference } from "./types";
 
 function FieldResults({
   data,
+  disabledFields,
   setSelectedFields,
 }: {
   data?: SmdaFieldSearchResult | undefined;
+  disabledFields: ReadonlyMap<string, string>;
   setSelectedFields: Dispatch<SetStateAction<Array<SmdaFieldReference>>>;
 }) {
   const [selectedRows, setSelectedRows] = useState<RowSelectionState>({});
@@ -88,14 +90,35 @@ function FieldResults({
           stickyHeader
           rows={rows}
           columns={columns}
+          defaultColumn={{
+            cell: ({ row, getValue }) => {
+              const disabledReason = disabledFields.get(row.id);
+
+              return disabledReason ? (
+                <Tooltip title={disabledReason}>
+                  <span className="disabled-cell">{String(getValue())}</span>
+                </Tooltip>
+              ) : (
+                String(getValue())
+              );
+            },
+          }}
           getRowId={(row) => row.uuid}
-          rowClass={(row) => (selectedRows[row.id] ? "selected-row" : "")}
-          enableRowSelection
+          rowClass={(row) =>
+            disabledFields.has(row.id)
+              ? "disabled-row"
+              : selectedRows[row.id]
+                ? "selected-row"
+                : ""
+          }
+          enableRowSelection={(row) => !disabledFields.has(row.id)}
           enableMultiRowSelection
           rowSelectionState={selectedRows}
           onRowSelectionChange={setSelectedRows}
           onRowClick={(row) => {
-            row.toggleSelected();
+            if (row.getCanSelect()) {
+              row.toggleSelected();
+            }
           }}
         ></EdsDataGrid>
       </SearchResultsContainer>
@@ -104,12 +127,16 @@ function FieldResults({
 }
 
 export function FieldSearch({
+  title = "Field search",
   isOpen,
   addFields,
+  disabledFields,
   closeDialog,
 }: {
+  title?: string;
   isOpen: boolean;
   addFields: (fields: Array<SmdaFieldReference>) => void;
+  disabledFields: ReadonlyMap<string, string>;
   closeDialog: () => void;
 }) {
   const [searchValue, setSearchValue] = useState("");
@@ -138,7 +165,7 @@ export function FieldSearch({
       onClose={handleClose}
       $maxWidth="200em"
     >
-      <Dialog.Header>Field search</Dialog.Header>
+      <Dialog.Header>{title}</Dialog.Header>
 
       <Dialog.CustomContent>
         <SearchFormContainer>
@@ -150,7 +177,11 @@ export function FieldSearch({
           />
         </SearchFormContainer>
 
-        <FieldResults data={data} setSelectedFields={setSelectedFields} />
+        <FieldResults
+          data={data}
+          disabledFields={disabledFields}
+          setSelectedFields={setSelectedFields}
+        />
       </Dialog.CustomContent>
 
       <Dialog.Actions>

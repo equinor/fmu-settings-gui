@@ -4,7 +4,6 @@ import type {
   InternalWellboreMappings,
   MatchResult,
   RmsWell,
-  SmdaWellHeader,
 } from "#client";
 import {
   createElementMappings,
@@ -20,6 +19,7 @@ import {
   emptyElementMappingTarget,
   emptyElementMappingTargetUpdate,
 } from "#components/project/common/mapping/utils";
+import type { SmdaWellHeaderWithField } from "#services/smda";
 import type { AutomaticMatchProposal, PendingImport } from "./types";
 
 export const wellboreTargetSystems = [
@@ -150,9 +150,20 @@ export function removeSmdaMappings(elementMappings: ElementMappings) {
   return removeTargetMappings(elementMappings, "smda");
 }
 
+export function smdaWellboreLabel(
+  header: SmdaWellHeaderWithField,
+  fieldCount: number,
+) {
+  return (
+    header.unique_wellbore_identifier +
+    (fieldCount > 1 ? ` [${header.field.identifier}]` : "")
+  );
+}
+
 export function createAutomaticMatchProposals(
   matchResults: MatchResult[],
-  smdaHeaders: SmdaWellHeader[],
+  smdaHeaders: SmdaWellHeaderWithField[],
+  fieldCount: number,
 ): AutomaticMatchProposal[] {
   const headersByIdentifier = new Map(
     smdaHeaders.map((header) => [header.unique_wellbore_identifier, header]),
@@ -172,6 +183,7 @@ export function createAutomaticMatchProposals(
       return {
         rmsWellboreName: result.source,
         smdaName: header.unique_wellbore_identifier,
+        smdaLabel: smdaWellboreLabel(header, fieldCount),
         smdaUuid: header.wellbore_uuid,
         candidate,
         selected: candidate.score === 100,

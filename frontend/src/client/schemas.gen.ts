@@ -707,7 +707,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.4.1'
+            default: '1.5.0'
         }
     },
     type: 'object',
@@ -1096,6 +1096,13 @@ export const ProjectConfigSchema = {
                     type: 'null'
                 }
             ]
+        },
+        associated_fields: {
+            items: {
+                $ref: '#/components/schemas/FieldItem'
+            },
+            type: 'array',
+            title: 'Associated Fields'
         },
         model: {
             anyOf: [
