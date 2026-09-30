@@ -20,5 +20,14 @@ export const SearchResultsContainer = styled.div`
     .selected-row {
       background-color: ${tokens.colors.interactive.table__cell__fill_activated.hex};
     }
+
+    .disabled-row td {
+      color: ${tokens.colors.interactive.disabled__text.hex};
+      cursor: not-allowed;
+    }
+
+    .disabled-cell {
+      display: block;
+    }
   }
 `;

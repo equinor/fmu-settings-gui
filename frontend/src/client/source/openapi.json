@@ -1356,6 +1356,167 @@
         }
       }
     },
+    "/api/v1/project/associated_fields": {
+      "patch": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Saves associated SMDA fields to the project .fmu directory",
+        "description": "Saves associated SMDA fields to the project .fmu directory.\nAssociated fields are used to find SMDA wellbores. They are not part\nof the project masterdata. Existing associated fields are replaced.",
+        "operationId": "project-patch_associated_fields",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FieldItem"
+                },
+                "title": "Associated Fields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The OS returned a permissions error while locating or creating .fmu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied locating .fmu"
+                    },
+                    {
+                      "detail": "Permission denied accessing .fmu at {path}"
+                    },
+                    {
+                      "detail": "Permission denied creating .fmu at {path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "\nThe .fmu directory was unable to be found at or above a given path, or\nthe requested path to create a project .fmu directory at does not exist.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No .fmu directory found from {path}"
+                    },
+                    {
+                      "detail": "No .fmu directory found at {path}"
+                    },
+                    {
+                      "detail": "Path {path} does not exist"
+                    },
+                    {
+                      "detail": "Project .fmu directory not found. It may have been deleted."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "\nThe project is locked by another process and cannot be modified.\nThe project can still be read but write operations are blocked.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Project lock conflict: {error_message}"
+                    },
+                    {
+                      "detail": "Project is read-only. Cannot write to project that is locked by another process."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/project/validate/masterdata/smda": {
       "post": {
         "tags": [
@@ -8063,7 +8224,7 @@
             "type": "string",
             "pattern": "(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)",
             "title": "Version",
-            "default": "1.4.1"
+            "default": "1.5.0"
           }
         },
         "type": "object",
@@ -8440,6 +8601,13 @@
                 "type": "null"
               }
             ]
+          },
+          "associated_fields": {
+            "items": {
+              "$ref": "#/components/schemas/FieldItem"
+            },
+            "type": "array",
+            "title": "Associated Fields"
           },
           "model": {
             "anyOf": [

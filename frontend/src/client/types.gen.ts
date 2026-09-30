@@ -755,6 +755,10 @@ export type ProjectConfig = {
      */
     last_modified_by?: string | null;
     masterdata?: Masterdata | null;
+    /**
+     * Associated Fields
+     */
+    associated_fields?: Array<FieldItem>;
     model?: Model | null;
     access?: Access | null;
     /**
@@ -2126,6 +2130,60 @@ export type ProjectPatchMasterdataResponses = {
 };
 
 export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
+
+export type ProjectPatchAssociatedFieldsData = {
+    /**
+     * Associated Fields
+     */
+    body: Array<FieldItem>;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/associated_fields';
+};
+
+export type ProjectPatchAssociatedFieldsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchAssociatedFieldsError = ProjectPatchAssociatedFieldsErrors[keyof ProjectPatchAssociatedFieldsErrors];
+
+export type ProjectPatchAssociatedFieldsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchAssociatedFieldsResponse = ProjectPatchAssociatedFieldsResponses[keyof ProjectPatchAssociatedFieldsResponses];
 
 export type ProjectPostValidateMasterdataSmdaData = {
     body?: never;

@@ -1,19 +1,21 @@
 import { useState } from "react";
 
-import type { Smda } from "#client";
+import type { FieldItem, Smda } from "#client";
 import { GeneralButton } from "#components/form/button";
 import { Info } from "#components/project/masterdata/Info";
-import { PageText } from "#styles/common";
+import { PageCode, PageText } from "#styles/common";
 import { emptyMasterdata } from "#utils/model";
 import { Edit } from "./Edit";
 
 export function Overview({
   projectMasterdata,
+  associatedFields,
   smdaHealthStatus,
   projectReadOnly,
   editMode,
 }: {
   projectMasterdata: Smda | undefined;
+  associatedFields: Array<FieldItem>;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   editMode: boolean;
@@ -30,10 +32,14 @@ export function Overview({
 
   return (
     <>
+      <PageText>
+        The following is the SMDA masterdata stored in the project.
+      </PageText>
+
       {projectMasterdata !== undefined ? (
         <Info masterdata={projectMasterdata} />
       ) : (
-        <PageText>No masterdata is currently stored in the project.</PageText>
+        <PageCode>No masterdata is currently stored in the project.</PageCode>
       )}
 
       {editMode && smdaHealthStatus && (
@@ -47,6 +53,7 @@ export function Overview({
 
       <Edit
         projectMasterdata={projectMasterdata ?? emptyMasterdata()}
+        associatedFields={associatedFields}
         projectReadOnly={projectReadOnly}
         isOpen={editDialogOpen}
         closeDialog={closeEditDialog}

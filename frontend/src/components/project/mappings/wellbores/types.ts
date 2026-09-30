@@ -6,6 +6,7 @@ export type DisplayedMatchQuality = "Exact" | "High" | "Medium" | "Low";
 export type AutomaticMatchProposal = {
   rmsWellboreName: string;
   smdaName: string;
+  smdaLabel: string;
   smdaUuid: string;
   candidate: MatchCandidate;
   selected: boolean;
