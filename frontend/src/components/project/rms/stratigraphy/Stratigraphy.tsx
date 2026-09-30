@@ -708,7 +708,7 @@ export function Stratigraphy({
       ) : (
         <PageSectionWidthConstrained>
           <PageCode>
-            No stratigraphy information currently stored in the project.
+            No stratigraphy information is currently stored in the project.
           </PageCode>
         </PageSectionWidthConstrained>
       )}
