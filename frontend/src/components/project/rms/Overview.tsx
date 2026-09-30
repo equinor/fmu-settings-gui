@@ -373,7 +373,9 @@ export function Overview({
       {rmsData ? (
         <RmsInfo rmsData={rmsData} />
       ) : (
-        <PageCode>No RMS project information found in the project.</PageCode>
+        <PageCode>
+          No RMS project information is currently stored in the project.
+        </PageCode>
       )}
 
       <RmsProjectActions

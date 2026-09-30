@@ -239,7 +239,9 @@ export function EditableModelInfo({
       {modelData ? (
         <ModelInfo modelData={modelData} />
       ) : (
-        <PageCode>No model information found in the project.</PageCode>
+        <PageCode>
+          No model information is currently stored in the project.
+        </PageCode>
       )}
 
       <GeneralButton
