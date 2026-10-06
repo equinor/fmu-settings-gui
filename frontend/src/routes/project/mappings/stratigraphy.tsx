@@ -59,17 +59,15 @@ function Content() {
     <>
       {project.data?.config.rms !== undefined &&
       project.data.config.rms !== null ? (
-        <>
-          <Overview
-            rmsProject={project.data.config.rms}
-            stratigraphicColumn={
-              project.data.config.masterdata?.smda.stratigraphic_column
-            }
-            smdaHealthStatus={healthCheck.status}
-            projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
-            editMode={editMode}
-          />
-
+        <Overview
+          rmsProject={project.data.config.rms}
+          stratigraphicColumn={
+            project.data.config.masterdata?.smda.stratigraphic_column
+          }
+          smdaHealthStatus={healthCheck.status}
+          projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+          editMode={editMode}
+        >
           <PageSectionWidthConstrained>
             {editMode ? (
               <SmdaHealthCheckInfo
@@ -81,7 +79,6 @@ function Content() {
               />
             ) : (
               <PageText>
-                {" "}
                 💡 To manage mappings,{" "}
                 <Typography onClick={toggleEditMode} link>
                   enable editing mode.
@@ -89,7 +86,7 @@ function Content() {
               </PageText>
             )}
           </PageSectionWidthConstrained>
-        </>
+        </Overview>
       ) : (
         <PageSectionWidthConstrained>
           <PageText>No RMS project is selected.</PageText>
