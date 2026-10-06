@@ -5,6 +5,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
   type Dispatch,
+  type ReactNode,
   type SetStateAction,
   useCallback,
   useEffect,
@@ -552,12 +553,14 @@ export function Overview({
   stratigraphicColumn,
   projectReadOnly,
   editMode,
+  children,
 }: {
   rmsProject: RmsProject;
   stratigraphicColumn?: StratigraphicColumn | undefined;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   editMode: boolean;
+  children?: ReactNode;
 }) {
   const { data: projectMappings } = useSuspenseQuery(
     projectGetMappingsOptions({
@@ -656,20 +659,13 @@ export function Overview({
         </PageText>
       </PageSectionWidthConstrained>
 
+      {children}
+
       {rmsProject.horizons !== undefined &&
       rmsProject.horizons !== null &&
       rmsProject.zones !== undefined &&
       rmsProject.zones !== null ? (
         <MappingDataContext value={mappingData}>
-          <StratigraphicFramework
-            horizons={rmsProject.horizons}
-            zones={rmsProject.zones}
-            enableWidthExpansion={true}
-          >
-            <Elements elementType="horizon" />
-            <Elements elementType="zone" />
-          </StratigraphicFramework>
-
           {editMode && !projectReadOnly && smdaHealthStatus && (
             <PageSectionWidthConstrained>
               {stratigraphicColumn ? (
@@ -689,6 +685,15 @@ export function Overview({
               )}
             </PageSectionWidthConstrained>
           )}
+
+          <StratigraphicFramework
+            horizons={rmsProject.horizons}
+            zones={rmsProject.zones}
+            enableWidthExpansion={true}
+          >
+            <Elements elementType="horizon" />
+            <Elements elementType="zone" />
+          </StratigraphicFramework>
         </MappingDataContext>
       ) : (
         <PageSectionWidthConstrained>
