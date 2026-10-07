@@ -34,6 +34,7 @@ function Content() {
 
   const project = useProject();
   const { data: healthCheck } = useSmdaHealthCheck();
+  const projectReadOnly = !(project.lockStatus?.is_lock_acquired ?? false);
 
   function toggleEditMode() {
     setEditMode((prevMode) => {
@@ -65,11 +66,15 @@ function Content() {
             project.data.config.masterdata?.smda.stratigraphic_column
           }
           smdaHealthStatus={healthCheck.status}
-          projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+          projectReadOnly={projectReadOnly}
           editMode={editMode}
         >
           <PageSectionWidthConstrained>
-            {editMode ? (
+            {projectReadOnly ? (
+              <PageText>
+                💡 The project is read-only, so the mappings are not editable.
+              </PageText>
+            ) : editMode ? (
               <SmdaHealthCheckInfo
                 feature="editing mappings"
                 healthCheck={healthCheck}
