@@ -304,7 +304,7 @@ function RmsProjectActions({
           }
           tooltipText={
             projectIsReadOnly
-              ? "FMU project is read-only"
+              ? "Project is read-only"
               : isRmsProjectOpen
                 ? "Close the RMS project to select a new one"
                 : ""
@@ -374,8 +374,7 @@ export function Overview({
         <RmsInfo rmsData={rmsData} />
       ) : (
         <PageCode>
-          No RMS project information is currently stored in the project
-          configuration.
+          No RMS project information is currently stored in the FMU project.
         </PageCode>
       )}
 

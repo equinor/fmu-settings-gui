@@ -525,8 +525,7 @@ export function EditableAccessInfo({
         <AccessInfo accessData={accessData} />
       ) : (
         <PageCode>
-          No access information is currently stored in the project
-          configuration.
+          No access information is currently stored in the FMU project.
         </PageCode>
       )}
 

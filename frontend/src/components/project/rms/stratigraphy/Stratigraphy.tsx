@@ -636,7 +636,7 @@ function Edit({
                     isPending={savePending}
                     helperTextDisabled={
                       projectReadOnly
-                        ? "FMU project is read-only"
+                        ? "Project is read-only"
                         : !availableStratigraphyLoaded
                           ? "RMS stratigraphy must be loaded before saving"
                           : stratigraphyMappingsQuery.isPending
@@ -707,8 +707,7 @@ export function Stratigraphy({
       ) : (
         <PageSectionWidthConstrained>
           <PageCode>
-            No stratigraphy information is currently stored in the project
-            configuration.
+            No stratigraphy information is currently stored in the FMU project.
           </PageCode>
         </PageSectionWidthConstrained>
       )}
@@ -719,7 +718,7 @@ export function Stratigraphy({
           disabled={projectReadOnly || !isRmsProjectOpen}
           tooltipText={
             projectReadOnly
-              ? "FMU project is read-only"
+              ? "Project is read-only"
               : !isRmsProjectOpen
                 ? "RMS project is not ready for access"
                 : undefined

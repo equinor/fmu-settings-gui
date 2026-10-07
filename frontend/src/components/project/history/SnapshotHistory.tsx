@@ -815,7 +815,7 @@ export function SnapshotHistory({
 
           <PageText>
             Use <strong>Max snapshots</strong> to control how many snapshots are
-            kept on disk for this project.
+            stored for the project.
           </PageText>
 
           <SelectorRow>

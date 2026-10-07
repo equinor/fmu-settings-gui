@@ -19,19 +19,16 @@ import {
 } from "#utils/query";
 
 export function ProjectFileRecovery({
-  hasProject,
   projectReadOnly,
 }: {
-  hasProject: boolean;
   projectReadOnly: boolean;
 }) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const showDialog = hasProject && isDialogOpen;
 
   const restoreCheckQuery = useQuery({
     ...projectGetRestoreCheckOptions(),
-    enabled: showDialog,
+    enabled: isDialogOpen,
     staleTime: 0,
     refetchOnMount: "always",
     meta: { errorPrefix: "Error checking deleted project files" },
@@ -62,7 +59,8 @@ export function ProjectFileRecovery({
   });
 
   const isCheckingFiles =
-    showDialog && (restoreCheckQuery.isPending || restoreCheckQuery.isFetching);
+    isDialogOpen &&
+    (restoreCheckQuery.isPending || restoreCheckQuery.isFetching);
   const restorableFiles = isCheckingFiles
     ? []
     : (restoreCheckQuery.data?.files ?? []);
@@ -70,7 +68,7 @@ export function ProjectFileRecovery({
   return (
     <>
       <DeletedFilesRecoveryDialog
-        isOpen={showDialog}
+        isOpen={isDialogOpen}
         title="Recover deleted project files"
         files={restorableFiles}
         emptyMessage="No deleted project files were found."
@@ -92,33 +90,23 @@ export function ProjectFileRecovery({
 
       <PageHeader $variant="h3">Recover deleted project files</PageHeader>
 
-      {hasProject ? (
-        <>
-          <PageText>
-            Deleted project files can be recovered from the current project's
-            .fmu directory.
-          </PageText>
+      <PageText>
+        Deleted project files can be recovered from the current project's .fmu
+        directory.
+      </PageText>
 
-          <PageText>
-            Files can only be recovered if they were deleted while the
-            application was running. Files that were not deleted will not be
-            affected.
-          </PageText>
+      <PageText>
+        Files can only be recovered if they were deleted while the application
+        was running. Files that were not deleted will not be affected.
+      </PageText>
 
-          <GeneralButton
-            label="Check for deleted files"
-            isPending={restoreMutation.isPending}
-            onClick={() => {
-              setIsDialogOpen(true);
-            }}
-          />
-        </>
-      ) : (
-        <PageText>
-          FMU project not set. Select an FMU project to check for deleted
-          project files.
-        </PageText>
-      )}
+      <GeneralButton
+        label="Check for deleted files"
+        isPending={restoreMutation.isPending}
+        onClick={() => {
+          setIsDialogOpen(true);
+        }}
+      />
     </>
   );
 }

@@ -774,7 +774,7 @@ function Edit({
                     isPending={savePending}
                     helperTextDisabled={
                       projectReadOnly
-                        ? "FMU project is read-only"
+                        ? "Project is read-only"
                         : !availableWellboresLoaded
                           ? "RMS wellbores must be loaded before saving"
                           : wellboreMappingsQuery.isPending
@@ -834,7 +834,7 @@ export function Wellbores({
           <PageText>
             <span className="emphasis">{projectWellbores.length}</span>{" "}
             {projectWellbores.length === 1 ? "wellbore is" : "wellbores are"}{" "}
-            included in the project configuration.
+            stored in the project configuration.
           </PageText>
 
           <WellboresContainer>
@@ -862,7 +862,7 @@ export function Wellbores({
         disabled={projectReadOnly || !isRmsProjectOpen}
         tooltipText={
           projectReadOnly
-            ? "FMU project is read-only"
+            ? "Project is read-only"
             : !isRmsProjectOpen
               ? "RMS project is not ready for access"
               : undefined

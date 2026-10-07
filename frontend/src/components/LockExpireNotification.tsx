@@ -182,7 +182,7 @@ export function LockExpireNotification() {
             </PageText>
 
             <PageText $marginBottom="0">
-              Do you want to continue editing this project?
+              Do you want to continue editing the project?
             </PageText>
           </>
         )}

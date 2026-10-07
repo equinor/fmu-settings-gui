@@ -55,8 +55,8 @@ function Content() {
     <>
       <PageText>
         {latestChanges.length === 1
-          ? "Showing the most recent change to this project's settings."
-          : `Showing the ${latestChanges.length} most recent changes to this project's settings.`}
+          ? "Showing the most recent change to the project."
+          : `Showing the ${latestChanges.length} most recent changes to the project.`}
       </PageText>
 
       <ChangeList>
@@ -103,7 +103,7 @@ export function Changelog() {
       <QueryErrorBoundary
         statusCodeHandling={{
           [HTTP_STATUS_404_NOT_FOUND]: {
-            message: "No changelog found for this project.",
+            message: "No changelog found for the project.",
             enableRetry: false,
           },
           [HTTP_STATUS_422_UNPROCESSABLE_CONTENT]: {
