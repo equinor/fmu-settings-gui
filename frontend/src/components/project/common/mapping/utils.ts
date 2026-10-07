@@ -12,7 +12,7 @@ export const emptyName = "(not set)";
 
 export const specialOptions: Record<SpecialOptionId, OptionProps> = {
   empty: { value: "_empty", label: emptyName },
-  divider: { value: "_divider", label: "------------------------------" },
+  divider: { value: "_divider", label: "" },
   unmappableHorizon: {
     value: "_unmappableHorizon",
     label: "Horizon doesn't exist in SMDA",

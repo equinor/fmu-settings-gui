@@ -29,9 +29,3 @@ export const MappingEditFields = styled.div`
   display: grid;
   gap: ${tokens.spacings.comfortable.medium};
 `;
-
-export const SmdaOptionDivider = styled.hr`
-  width: 100%;
-  border: none;
-  border-top: dashed 1px currentColor;
-`;

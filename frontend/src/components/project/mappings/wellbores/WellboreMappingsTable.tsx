@@ -17,6 +17,7 @@ import {
   handleErrorUnknownInitialValue,
   updatedElementMapping,
 } from "#components/project/common/mapping/functions";
+import { SmdaOptionDivider } from "#components/project/common/mapping/mapping.style";
 import type {
   ElementMapping,
   ElementMappings,
@@ -39,7 +40,6 @@ import { useConfirmClose } from "#utils/ui";
 import { smdaWellboreLabel } from "./functions";
 import {
   MappingEditFields,
-  SmdaOptionDivider,
   WellboreMappingsContainer,
 } from "./WellboreMappingsTable.style";
 

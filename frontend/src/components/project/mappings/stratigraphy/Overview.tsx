@@ -28,8 +28,8 @@ import { CancelButton, SubmitButton } from "#components/form/button";
 import {
   ArrayTextAddItem,
   ArrayTextField,
+  AutocompleteField,
   type OptionProps,
-  Select,
 } from "#components/form/field";
 import {
   ArrayTextFieldContainer,
@@ -63,12 +63,13 @@ import {
   useMappingData,
 } from "../../common/mapping/functions";
 import { MappingDataContext } from "../../common/mapping/MappingData";
+import { SmdaOptionDivider } from "../../common/mapping/mapping.style";
 import {
   createSpecialOptions,
   emptyElementMappingTargetUpdate,
   getElementMappingTargetName,
   getElementMappingTargetNameOptionsInitialValue,
-  getUnmappableOption,
+  specialOptions,
 } from "../../common/mapping/utils";
 import {
   getHorizonLineStyle,
@@ -90,7 +91,6 @@ import {
   HorizonItem,
   ZoneItem,
 } from "./Overview.style";
-import { validateSelectValue } from "./utils";
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -98,7 +98,7 @@ const { useAppForm } = createFormHook({
   fieldComponents: {
     ArrayTextAddItem,
     ArrayTextField,
-    Select,
+    AutocompleteField,
   },
   formComponents: { CancelButton, SubmitButton },
 });
@@ -125,16 +125,18 @@ function Edit({
   const form = useAppForm({
     defaultValues: {
       ...elementMapping,
-      ...(elementMapping?.elementType &&
-        elementMapping.targets.smda?.unmappable && {
-          targets: {
-            ...elementMapping.targets,
-            smda: {
-              ...elementMapping.targets.smda,
-              uuid: getUnmappableOption(elementMapping.elementType).value,
-            },
+      ...(elementMapping?.targets.smda && {
+        targets: {
+          ...elementMapping.targets,
+          smda: {
+            ...elementMapping.targets.smda,
+            uuid: getElementMappingTargetNameOptionsInitialValue(
+              elementMapping,
+              "smda",
+            ).value,
           },
-        }),
+        },
+      }),
     } as ElementMapping,
     onSubmit: ({ formApi, value }) => {
       if (!mappingData.projectReadOnly) {
@@ -146,6 +148,22 @@ function Edit({
       }
     },
   });
+
+  const mappedTargetUuids = useMemo(
+    () =>
+      new Set(
+        Object.values(mappingData.elementMappings).flatMap((mapping) => {
+          const target = mapping.targets.smda;
+
+          return mapping.name !== elementMapping?.name &&
+            target !== undefined &&
+            target.uuid !== ""
+            ? [target.uuid]
+            : [];
+        }),
+      ),
+    [mappingData.elementMappings, elementMapping?.name],
+  );
 
   useEffect(() => {
     handleErrorUnknownInitialValue(
@@ -189,6 +207,7 @@ function Edit({
         open={isOpen}
         isDismissable={true}
         onClose={confirmClose.handleCloseRequest}
+        $minWidth="30em"
       >
         <form
           onSubmit={(e) => {
@@ -205,19 +224,28 @@ function Edit({
             <form.AppField
               name="targets.smda.uuid"
               validators={{
-                onChange: ({ value }) =>
-                  validateSelectValue(value as unknown as string),
+                onChange:
+                  undefined /* Resets errors set by setFieldMeta after the user selects an option */,
               }}
             >
               {(field) => (
-                <field.Select
+                <field.AutocompleteField
                   label="SMDA name"
-                  value={field.state.value as unknown as string}
                   options={smdaNameOptions}
                   loadingOptions={optionsIsPending}
-                  onChange={(value) => {
-                    field.handleChange(value);
-                  }}
+                  optionValue={(option) => option.value}
+                  optionLabel={(option) => option.label}
+                  emptyValue={specialOptions.empty.value}
+                  optionComponent={(option) =>
+                    option.value === specialOptions.divider.value ? (
+                      <SmdaOptionDivider />
+                    ) : undefined
+                  }
+                  optionDisabled={(option) =>
+                    option.value === specialOptions.divider.value ||
+                    mappedTargetUuids.has(option.value)
+                  }
+                  noOptionsText="No SMDA names found"
                 />
               )}
             </form.AppField>
