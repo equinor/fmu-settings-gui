@@ -11,6 +11,7 @@ import {
   type Options,
   type SmdaGetHealthData,
   type SmdaWellHeader,
+  type SmdaWellHeadersResult,
   smdaGetHealth,
 } from "#client";
 import {
@@ -57,11 +58,13 @@ export function useSmdaHealthCheck(options?: Options<SmdaGetHealthData>) {
   );
 }
 
+export type SmdaWellHeaderWithField = SmdaWellHeader & { field: FieldItem };
+
 export type SmdaWellHeaders = {
-  smdaHeaders: SmdaWellHeader[];
+  smdaHeaders: SmdaWellHeaderWithField[];
   isLoading: boolean;
   isError: boolean;
-  hasFields: boolean;
+  fieldCount: number;
 };
 
 export function useSmdaWellHeaders({
@@ -71,25 +74,34 @@ export function useSmdaWellHeaders({
   fields: FieldItem[];
   enabled: boolean;
 }): SmdaWellHeaders {
-  const fieldsByUuid = useMemo(
-    () => new Map(fields.map((field) => [field.uuid, field])),
+  const uniqueFields = useMemo(
+    () => [...new Map(fields.map((field) => [field.uuid, field])).values()],
     [fields],
   );
+  const queries = useMemo(
+    () =>
+      uniqueFields.map((field) => ({
+        ...smdaPostWellHeadersOptions({
+          body: { identifier: field.identifier, uuid: field.uuid },
+        }),
+        enabled,
+        select: (data: SmdaWellHeadersResult) =>
+          data.well_headers.map((header) => ({ ...header, field })),
+        meta: {
+          errorPrefix: `Could not load SMDA wellbore names for ${field.identifier}`,
+        },
+      })),
+    [uniqueFields, enabled],
+  );
   const { smdaHeaders, isLoading, isError } = useQueries({
-    queries: [...fieldsByUuid.values()].map((field) => ({
-      ...smdaPostWellHeadersOptions({
-        body: { identifier: field.identifier, uuid: field.uuid },
-      }),
-      enabled,
-      meta: {
-        errorPrefix: `Could not load SMDA wellbore names for ${field.identifier}`,
-      },
-    })),
+    queries,
     combine: (results) => {
-      const headersByUuid = new Map<string, SmdaWellHeader>();
+      const headersByUuid = new Map<string, SmdaWellHeaderWithField>();
       results.forEach((result) => {
-        result.data?.well_headers.forEach((header) => {
-          headersByUuid.set(header.wellbore_uuid, header);
+        result.data?.forEach((header) => {
+          if (!headersByUuid.has(header.wellbore_uuid)) {
+            headersByUuid.set(header.wellbore_uuid, header);
+          }
         });
       });
 
@@ -105,6 +117,6 @@ export function useSmdaWellHeaders({
     smdaHeaders,
     isLoading,
     isError,
-    hasFields: fieldsByUuid.size > 0,
+    fieldCount: uniqueFields.length,
   };
 }

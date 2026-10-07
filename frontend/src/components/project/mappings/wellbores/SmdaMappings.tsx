@@ -299,7 +299,7 @@ function AutomaticMappingDialog({
         accessorKey: "smdaName",
         header: "Suggested SMDA",
         enableColumnFilter: false,
-        cell: ({ row }) => row.original.smdaName || emptyName,
+        cell: ({ row }) => row.original.smdaLabel || emptyName,
       },
       {
         id: "nameSimilarity",
@@ -558,7 +558,7 @@ function suggestionsBlockedReason({
   if (!rmsWellboreNamesMissingSmda.length) {
     return "All non-planned RMS wellbores already have an SMDA mapping";
   }
-  if (!wellHeaders.hasFields) {
+  if (wellHeaders.fieldCount === 0) {
     return "Project masterdata must contain a field";
   }
   if (!smdaHealthStatus) {
@@ -716,6 +716,7 @@ export function SmdaMappings({
           const proposals = createAutomaticMatchProposals(
             results,
             wellHeaders.smdaHeaders,
+            wellHeaders.fieldCount,
           );
           setReviewPrefixes(prefixes);
           setAutomaticMappingProposals(

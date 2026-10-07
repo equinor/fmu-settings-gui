@@ -4,10 +4,7 @@ import { createFormHook } from "@tanstack/react-form";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
-import type {
-  InternalWellboreIdentifierMapping,
-  SmdaWellHeader,
-} from "#client";
+import type { InternalWellboreIdentifierMapping } from "#client";
 import { ConfirmCloseDialog } from "#components/common";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import {
@@ -33,11 +30,13 @@ import {
   specialOptions,
 } from "#components/project/common/mapping/utils";
 import type { SaveWellboreMappings } from "#services/mappings";
+import type { SmdaWellHeaderWithField } from "#services/smda";
 import { EditDialog, PageCode, PageList, PageText } from "#styles/common";
 import { dataGridHeight } from "#styles/dataGrid";
 import { fieldContext, formContext } from "#utils/form";
 import { stringCompare } from "#utils/string";
 import { useConfirmClose } from "#utils/ui";
+import { smdaWellboreLabel } from "./functions";
 import {
   MappingEditFields,
   SmdaOptionDivider,
@@ -83,7 +82,8 @@ function matchesColumnFilters(
 }
 
 function smdaOptions(
-  headers: SmdaWellHeader[],
+  headers: SmdaWellHeaderWithField[],
+  fieldCount: number,
   inaccessibleSmdaData: InaccessibleSmdaData | undefined,
 ): OptionProps[] {
   const options = createSpecialOptions("wellbore", headers.length > 0);
@@ -100,7 +100,7 @@ function smdaOptions(
     ...headers
       .map((header) => ({
         value: header.wellbore_uuid,
-        label: header.unique_wellbore_identifier,
+        label: smdaWellboreLabel(header, fieldCount),
       }))
       .sort((a, b) => stringCompare(a.label, b.label)),
   ];
@@ -110,6 +110,7 @@ function EditMappingDialog({
   row,
   elementMappings,
   smdaHeaders,
+  smdaFieldCount,
   inaccessibleSmdaData,
   smdaHealthStatus,
   projectReadOnly,
@@ -119,7 +120,8 @@ function EditMappingDialog({
 }: {
   row: ElementMapping;
   elementMappings: ElementMappings;
-  smdaHeaders: SmdaWellHeader[];
+  smdaHeaders: SmdaWellHeaderWithField[];
+  smdaFieldCount: number;
   inaccessibleSmdaData: InaccessibleSmdaData | undefined;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
@@ -157,8 +159,8 @@ function EditMappingDialog({
     },
   });
   const options = useMemo(
-    () => smdaOptions(smdaHeaders, inaccessibleSmdaData),
-    [inaccessibleSmdaData, smdaHeaders],
+    () => smdaOptions(smdaHeaders, smdaFieldCount, inaccessibleSmdaData),
+    [inaccessibleSmdaData, smdaFieldCount, smdaHeaders],
   );
 
   useEffect(() => {
@@ -355,6 +357,7 @@ export function WellboreMappingsTable({
   elementMappings,
   smdaHeaders,
   smdaHeadersError,
+  smdaFieldCount,
   smdaHealthStatus,
   projectReadOnly,
   editMode,
@@ -362,8 +365,9 @@ export function WellboreMappingsTable({
   saveMappings,
 }: {
   elementMappings: ElementMappings;
-  smdaHeaders: SmdaWellHeader[];
+  smdaHeaders: SmdaWellHeaderWithField[];
   smdaHeadersError: boolean;
+  smdaFieldCount: number;
   smdaHealthStatus: boolean;
   projectReadOnly: boolean;
   editMode: boolean;
@@ -444,6 +448,7 @@ export function WellboreMappingsTable({
           row={activeRow}
           elementMappings={elementMappings}
           smdaHeaders={smdaHeaders}
+          smdaFieldCount={smdaFieldCount}
           inaccessibleSmdaData={inaccessibleSmdaData}
           smdaHealthStatus={smdaHealthStatus}
           projectReadOnly={projectReadOnly}

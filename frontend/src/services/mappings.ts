@@ -6,14 +6,14 @@ import {
 import { useMemo } from "react";
 import { toast } from "react-toastify";
 
-import type { InternalWellboreMappings } from "#client";
+import type { InternalWellboreMappings, ProjectPutMappingsData } from "#client";
 import {
   projectGetChangelogQueryKey,
   projectGetMappingsOptions,
   projectGetMappingsQueryKey,
   projectPutMappingsMutation,
 } from "#client/@tanstack/react-query.gen";
-import { mappingsPaths } from "#services/project";
+import { type MappingsPathOptions, mappingsPaths } from "#services/project";
 import {
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
@@ -29,22 +29,16 @@ export type SaveWellboreMappings = (
   options: SaveWellboreMappingsOptions,
 ) => void;
 
-export function useWellboreMappings() {
+export function useMappingsMutation(
+  path: MappingsPathOptions,
+  errorPrefix: string,
+) {
   const queryClient = useQueryClient();
-  const { data: projectMappings } = useSuspenseQuery(
-    projectGetMappingsOptions({ path: mappingsPaths.wellboreRms }),
-  );
-  const mappings = useMemo(
-    () => projectMappings.wellbore ?? [],
-    [projectMappings.wellbore],
-  );
   const mutation = useMutation({
     ...projectPutMappingsMutation(),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.wellboreRms,
-        }),
+        queryKey: projectGetMappingsQueryKey({ path }),
       });
       void queryClient.invalidateQueries({
         queryKey: projectGetChangelogQueryKey(),
@@ -58,24 +52,46 @@ export function useWellboreMappings() {
       }
     },
     meta: {
-      errorPrefix: "Could not save wellbore mappings",
+      errorPrefix,
       preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
     },
   });
+  const mutateMappings = (
+    body: ProjectPutMappingsData["body"],
+    options?: Parameters<typeof mutation.mutate>[1],
+  ) => {
+    mutation.mutate({ path, body }, options);
+  };
+
+  return {
+    mutateMappings,
+    isPending: mutation.isPending,
+  };
+}
+
+export function useWellboreMappings() {
+  const { data: projectMappings } = useSuspenseQuery(
+    projectGetMappingsOptions({ path: mappingsPaths.wellboreRms }),
+  );
+  const mappings = useMemo(
+    () => projectMappings.wellbore ?? [],
+    [projectMappings.wellbore],
+  );
+  const mutation = useMappingsMutation(
+    mappingsPaths.wellboreRms,
+    "Could not save wellbore mappings",
+  );
 
   const saveMappings: SaveWellboreMappings = (
     updatedMappings,
     { successMessage, onSuccess },
   ) => {
-    mutation.mutate(
-      { path: mappingsPaths.wellboreRms, body: updatedMappings },
-      {
-        onSuccess: () => {
-          toast.info(successMessage);
-          onSuccess?.();
-        },
+    mutation.mutateMappings(updatedMappings, {
+      onSuccess: () => {
+        toast.info(successMessage);
+        onSuccess?.();
       },
-    );
+    });
   };
 
   return {

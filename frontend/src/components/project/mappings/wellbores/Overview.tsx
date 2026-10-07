@@ -78,7 +78,7 @@ export function Overview({
       )}
 
       {editMode &&
-        !wellHeaders.hasFields &&
+        wellHeaders.fieldCount === 0 &&
         nonPlannedRmsWellboreNames.length > 0 && (
           <WarningBox>
             <PageText $marginBottom="0">
@@ -102,6 +102,7 @@ export function Overview({
         elementMappings={elementMappings}
         smdaHeaders={wellHeaders.smdaHeaders}
         smdaHeadersError={wellHeaders.isError}
+        smdaFieldCount={wellHeaders.fieldCount}
         smdaHealthStatus={smdaHealthStatus}
         projectReadOnly={projectReadOnly}
         editMode={editMode}

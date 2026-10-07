@@ -122,8 +122,8 @@ configured for these subdirectories, which are named prefixed with `#` (ie.
 `#components`). These path aliases are defined in the
 [tsconfig.app.json](tsconfig.app.json) file, and should rarely need to be updated or
 added to. Editors like Visual Studio Code should be able to deal naturally with these
-path aliases. Note that the Vite configuration is set up with a plugin for handling these
-aliases, and that a change in the alias definition list requires a restart of Vite.
+path aliases. The Vite server also handles these aliases, but it requires a restart when
+there are alias changes to the configuration file.
 
 ### Formatting and linting
 
@@ -144,17 +144,7 @@ pnpm lint
 When a pull request is created, the CI workflow checks for formatting and linting issues,
 so any such issues should be dealt with before code is commited.
 
-The ESLint plugin (currently at version 3.0.10) in Visual Studio Code will sometimes
+The ESLint plugin (currently at version 3.0.34) in Visual Studio Code will sometimes
 produce false positives, marking code as having type errors when in fact the code is
 correct, as seen when checking the code with the `pnpm lint` command. This is a known
 error, and after a restart of the plugin the code will not be marked as having errors.
-This error has been observed when using the `*Options` functions from the Hey API
-openapi-ts generated code, such as this:
-
-```typescript
-queryClient.fetchQuery(userGetUserOptions());
-```
-
-In this example, `userGetUserOptions()` would be marked with the errors
-`@typescript-eslint/no-unsafe-argument` and `@typescript-eslint/no-unsafe-call`. This is
-a false positive, as running the command `pnpm lint` will indicate.

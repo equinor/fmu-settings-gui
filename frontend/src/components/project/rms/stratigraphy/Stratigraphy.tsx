@@ -1,10 +1,11 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { type AnyFormApi, createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import type {
+  InternalStratigraphyIdentifierMapping,
   RmsHorizon,
   RmsProject,
   RmsStratigraphicFramework,
@@ -12,6 +13,7 @@ import type {
 } from "#client";
 import {
   projectGetChangelogQueryKey,
+  projectGetMappingsOptions,
   projectGetProjectQueryKey,
   projectPatchRmsStratigraphicFrameworkMutation,
   rmsGetHorizonsOptions,
@@ -28,6 +30,14 @@ import type {
   MutationCallbackProps,
 } from "#components/form/form.tsx";
 import {
+  createMutationValue,
+  removeElementMappings,
+} from "#components/project/common/mapping/functions";
+import type { ElementMappings } from "#components/project/common/mapping/types";
+import { createStratigraphyElementMappings } from "#components/project/mappings/stratigraphy/functions";
+import { useMappingsMutation } from "#services/mappings";
+import { mappingsPaths } from "#services/project";
+import {
   ActionButtonsContainer,
   EditDialog,
   GenericDialog,
@@ -43,6 +53,11 @@ import {
 import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui.ts";
 import { StratigraphicFramework } from "../../common/stratigraphicFramework/StratigraphicFramework.tsx";
+import {
+  ConfirmMappingRemovalDialog,
+  type PendingMappingRemoval,
+} from "../ConfirmMappingRemovalDialog";
+import { getRemovedMappingTexts } from "../functions";
 import { Horizons, Zones } from "./StratigraphicFramework";
 import { StratigraphyEditorContainer } from "./Stratigraphy.style";
 import { namesNotInReference, useItemHandlers } from "./utils.ts";
@@ -70,7 +85,12 @@ function ConfirmActionDialog({
   };
 
   return (
-    <GenericDialog open={!!confirmAction} $minWidth="25em">
+    <GenericDialog
+      open={!!confirmAction}
+      isDismissable={true}
+      onClose={resetConfirmAction}
+      $minWidth="25em"
+    >
       <Dialog.Header>Confirm action</Dialog.Header>
 
       <Dialog.CustomContent>
@@ -85,7 +105,7 @@ function ConfirmActionDialog({
 
       <Dialog.Actions>
         <GeneralButton
-          label="Ok"
+          label="OK"
           onClick={() => {
             onConfirm();
             resetConfirmAction();
@@ -100,12 +120,19 @@ function ConfirmActionDialog({
 function StratigraphyEditor({
   availableHorizons,
   availableZones,
+  elementMappings,
+  confirmRemoval,
+  confirmAction,
+  setConfirmAction,
 }: {
   availableHorizons: RmsHorizon[];
   availableZones: RmsStratigraphicZone[];
+  elementMappings: ElementMappings;
+  confirmRemoval: (removal: PendingMappingRemoval) => void;
+  confirmAction: ConfirmAction;
+  setConfirmAction: Dispatch<SetStateAction<ConfirmAction>>;
 }) {
   const form: AnyFormApi = useFormContext();
-  const [confirmAction, setConfirmAction] = useState<ConfirmAction>("");
 
   const projectHorizons = form.getFieldValue("horizons") as RmsHorizon[];
   const projectZones = form.getFieldValue("zones") as RmsStratigraphicZone[];
@@ -132,20 +159,105 @@ function StratigraphyEditor({
     addItems("horizons", [zone.top_horizon_name, zone.base_horizon_name]);
   };
 
+  const applyRemoval = (horizonNames: string[], zoneNames: string[]) => {
+    removeItems("horizons", horizonNames);
+    removeItems("zones", zoneNames);
+  };
+
+  // Only mappings for the selected items are previewed.
+  const requestRemoval = (
+    selection: Pick<PendingMappingRemoval, "selection" | "itemLabel">,
+    horizonNames: string[],
+    zoneNames: string[],
+    {
+      dependentZoneNames = [],
+      confirmWithoutMappings = false,
+    }: {
+      dependentZoneNames?: string[];
+      confirmWithoutMappings?: boolean;
+    } = {},
+  ) => {
+    const currentNames = [...projectHorizons, ...projectZones].map(
+      (item) => item.name,
+    );
+    const previouslyRemovedNames = Object.keys(elementMappings).filter(
+      (name) => !currentNames.includes(name),
+    );
+    // Diff against the current form state, not the stored mappings, so
+    // earlier unsaved removals are not previewed again.
+    const currentElementMappings = removeElementMappings(
+      elementMappings,
+      previouslyRemovedNames,
+    ).preserved;
+    const removeResults = removeElementMappings(currentElementMappings, [
+      ...horizonNames,
+      ...zoneNames,
+    ]);
+    const mappingTexts = getRemovedMappingTexts(removeResults.removed);
+    const apply = () => {
+      applyRemoval(horizonNames, [...zoneNames, ...dependentZoneNames]);
+    };
+
+    if (mappingTexts.length > 0) {
+      confirmRemoval({
+        action: "remove",
+        ...selection,
+        multipleItems: false,
+        mappingTexts,
+        apply,
+      });
+    } else if (confirmWithoutMappings) {
+      setConfirmAction("remove");
+    } else {
+      apply();
+    }
+  };
+
   const removeHorizon = (horizon: RmsHorizon) => {
-    removeItems("horizons", [horizon.name]);
-    const zonesUsingHorizon = projectZones
+    const dependentZoneNames = projectZones
       .filter(
-        (z) =>
-          z.top_horizon_name === horizon.name ||
-          z.base_horizon_name === horizon.name,
+        (zone) =>
+          zone.top_horizon_name === horizon.name ||
+          zone.base_horizon_name === horizon.name,
       )
-      .map((z) => z.name);
-    removeItems("zones", zonesUsingHorizon);
+      .map((zone) => zone.name);
+    requestRemoval(
+      {
+        selection: (
+          <>
+            The horizon <span className="emphasis">{horizon.name}</span>
+          </>
+        ),
+        itemLabel: "horizon",
+      },
+      [horizon.name],
+      [],
+      { dependentZoneNames },
+    );
   };
 
   const removeZone = (zone: RmsStratigraphicZone) => {
-    removeItems("zones", [zone.name]);
+    requestRemoval(
+      {
+        selection: (
+          <>
+            The zone <span className="emphasis">{zone.name}</span>
+          </>
+        ),
+        itemLabel: "zone",
+      },
+      [],
+      [zone.name],
+    );
+  };
+
+  const removeAllStratigraphy = () => {
+    requestRemoval(
+      { selection: "All stratigraphy", itemLabel: "stratigraphy" },
+      projectHorizons.map((horizon) => horizon.name),
+      projectZones.map((zone) => zone.name),
+      { confirmWithoutMappings: true },
+    );
   };
 
   const orphanZoneNames = namesNotInReference(projectZones, availableZones);
@@ -197,13 +309,11 @@ function StratigraphyEditor({
 
         {hasOrphans && (
           <OrphanWarningBox
-            message={`${orphanTypeCounts.join(
-              " and ",
-            )} stored in the project configuration ${
+            message={`${orphanTypeCounts.join(" and ")} stored in the project configuration ${
               orphanCount === 1 ? "is" : "are"
             } currently not available in RMS. ${
               orphanCount === 1 ? "It" : "They"
-            } will be removed when you save.`}
+            } and ${orphanCount === 1 ? "its" : "their"} mappings will be removed when you save.`}
             listItems={orphanListItems}
           />
         )}
@@ -213,9 +323,7 @@ function StratigraphyEditor({
             label="Remove all"
             variant="outlined"
             disabled={!projectHorizons.length && !projectZones.length}
-            onClick={() => {
-              setConfirmAction("remove");
-            }}
+            onClick={removeAllStratigraphy}
           />
         </ActionButtonsContainer>
       </div>
@@ -293,8 +401,27 @@ function Edit({
     ...rmsGetZonesOptions(),
     enabled: isRmsProjectOpen,
   });
+  const stratigraphyMappingsQuery = useQuery({
+    ...projectGetMappingsOptions({ path: mappingsPaths.stratigraphyRms }),
+    enabled: isDialogOpen,
+  });
+  const elementMappings = useMemo(
+    () =>
+      createStratigraphyElementMappings(
+        projectHorizons,
+        projectZones,
+        stratigraphyMappingsQuery.data?.stratigraphy ?? [],
+      ),
+    [
+      projectHorizons,
+      projectZones,
+      stratigraphyMappingsQuery.data?.stratigraphy,
+    ],
+  );
   const availableStratigraphyLoaded =
     availableHorizonsLoaded && availableZonesLoaded;
+  const [pendingRemoval, setPendingRemoval] = useState<PendingMappingRemoval>();
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>("");
 
   const queryClient = useQueryClient();
 
@@ -320,6 +447,13 @@ function Edit({
       preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
     },
   });
+
+  const mappingsMutation = useMappingsMutation(
+    mappingsPaths.stratigraphyRms,
+    "Could not save updated stratigraphy mappings",
+  );
+  const savePending =
+    rmsStratigraphyMutation.isPending || mappingsMutation.isPending;
 
   const form = useAppForm({
     defaultValues: {
@@ -348,22 +482,49 @@ function Edit({
     const availableZoneNames = new Set(
       availableZones?.map((zone) => zone.name),
     );
+    const savedFramework = {
+      horizons: formValue.horizons.filter((horizon) =>
+        availableHorizonNames.has(horizon.name),
+      ),
+      zones: formValue.zones.filter((zone) =>
+        availableZoneNames.has(zone.name),
+      ),
+    };
+    const savedNames = [
+      ...savedFramework.horizons.map((horizon) => horizon.name),
+      ...savedFramework.zones.map((zone) => zone.name),
+    ];
+    const removedMappingNames = Object.keys(elementMappings).filter(
+      (name) => !savedNames.includes(name),
+    );
+    const removeResults = removeElementMappings(
+      elementMappings,
+      removedMappingNames,
+    );
 
     rmsStratigraphyMutation.mutate(
-      {
-        body: {
-          horizons: formValue.horizons.filter((horizon) =>
-            availableHorizonNames.has(horizon.name),
-          ),
-          zones: formValue.zones.filter((zone) =>
-            availableZoneNames.has(zone.name),
-          ),
-        },
-      },
+      { body: savedFramework },
       {
         onSuccess: (data) => {
-          formSubmitCallback({ message: data.message, formReset });
-          closeDialog();
+          const finishSave = () => {
+            formSubmitCallback({ message: data.message, formReset });
+            closeDialog();
+          };
+
+          if (removedMappingNames.length === 0) {
+            finishSave();
+          } else {
+            mappingsMutation.mutateMappings(
+              createMutationValue<InternalStratigraphyIdentifierMapping>(
+                "stratigraphy",
+                "rms",
+                removeResults.preserved,
+              ),
+              {
+                onSuccess: finishSave,
+              },
+            );
+          }
         },
       },
     );
@@ -394,9 +555,18 @@ function Edit({
         handleConfirmCloseDecision={confirmClose.handleDecision}
       />
 
+      {pendingRemoval && (
+        <ConfirmMappingRemovalDialog
+          removal={pendingRemoval}
+          close={() => {
+            setPendingRemoval(undefined);
+          }}
+        />
+      )}
+
       <EditDialog
         open={isDialogOpen}
-        isDismissable={true}
+        isDismissable={pendingRemoval === undefined && !confirmAction}
         onClose={confirmClose.handleCloseRequest}
         $minWidth="60em"
         $maxWidth=""
@@ -417,6 +587,10 @@ function Edit({
                   <form.StratigraphyEditor
                     availableHorizons={availableHorizons ?? []}
                     availableZones={availableZones ?? []}
+                    elementMappings={elementMappings}
+                    confirmRemoval={setPendingRemoval}
+                    confirmAction={confirmAction}
+                    setConfirmAction={setConfirmAction}
                   />
                 )}
               </form.Subscribe>
@@ -440,6 +614,12 @@ function Edit({
                   (namesNotInReference(horizons, availableHorizons).length >
                     0 ||
                     namesNotInReference(zones, availableZones).length > 0);
+                const requiresMappingPruning =
+                  hasOrphans ||
+                  namesNotInReference(projectHorizons, horizons).length > 0 ||
+                  namesNotInReference(projectZones, zones).length > 0;
+                const mappingsBlockSave =
+                  stratigraphyMappingsQuery.isError && requiresMappingPruning;
 
                 return (
                   <form.SubmitButton
@@ -448,15 +628,22 @@ function Edit({
                       projectReadOnly ||
                       (isDefaultValue && !hasOrphans) ||
                       !canSubmit ||
-                      !availableStratigraphyLoaded
+                      !availableStratigraphyLoaded ||
+                      stratigraphyMappingsQuery.isPending ||
+                      mappingsBlockSave ||
+                      savePending
                     }
-                    isPending={rmsStratigraphyMutation.isPending}
+                    isPending={savePending}
                     helperTextDisabled={
                       projectReadOnly
                         ? "FMU project is read-only"
                         : !availableStratigraphyLoaded
                           ? "RMS stratigraphy must be loaded before saving"
-                          : "Form can be saved when the values have changed"
+                          : stratigraphyMappingsQuery.isPending
+                            ? "Stratigraphy mappings must be loaded before saving"
+                            : mappingsBlockSave
+                              ? "Stored mappings must be fixed before removing stratigraphy"
+                              : "Form can be saved when the values have changed"
                     }
                   />
                 );

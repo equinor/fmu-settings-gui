@@ -20,5 +20,3 @@ export const sessionRmsExpireNotificationThreshold = 120; // 2 minutes
 export const projectLockStatusRefetchInterval = 60; // 1 minute
 
 export const projectLockExpireNotificationThreshold = 120; // 2 minutes
-
-export const rmsMinimumVersion = "15.0.1.0"; // Minimum version to use when opening RMS projects

@@ -19,7 +19,7 @@ import {
 } from "react";
 import { toast } from "react-toastify";
 
-import type { Smda } from "#client";
+import type { FieldItem, Smda } from "#client";
 import {
   projectGetChangelogQueryKey,
   projectGetProjectQueryKey,
@@ -145,7 +145,7 @@ function ConfirmItemsOperationDialog({
 
   let textItemsDescription = "selected";
   if (hasAffectedItems) {
-    textItemsDescription += " and dependant";
+    textItemsDescription += " and dependent";
   }
 
   return (
@@ -173,7 +173,7 @@ function ConfirmItemsOperationDialog({
               {selectedItems.operation === "addition"
                 ? "added to"
                 : "removed from"}{" "}
-              the project configuration, as they are dependant on this{" "}
+              the project configuration, as they are dependent on this{" "}
               {textItemType}:
             </PageText>
 
@@ -279,11 +279,13 @@ function Items({
                 .map<React.ReactNode>((item) => {
                   const contents = [];
                   if (operation === "addition") {
-                    contents.push(<Icon name="arrow_back" />);
+                    contents.push(<Icon key="arrow_back" name="arrow_back" />);
                   }
                   contents.push(getNameFromNameUuidValue(item));
                   if (operation === "removal") {
-                    contents.push(<Icon name="arrow_forward" />);
+                    contents.push(
+                      <Icon key="arrow_forward" name="arrow_forward" />,
+                    );
                   }
 
                   return (
@@ -314,11 +316,13 @@ function Items({
 
 export function Edit({
   projectMasterdata,
+  associatedFields,
   projectReadOnly,
   isOpen,
   closeDialog,
 }: {
   projectMasterdata: Smda;
+  associatedFields: Array<FieldItem>;
   projectReadOnly: boolean;
   isOpen: boolean;
   closeDialog: () => void;
@@ -647,6 +651,14 @@ export function Edit({
       <FieldSearch
         isOpen={searchDialogOpen}
         addFields={addFields}
+        disabledFields={
+          new Map(
+            associatedFields.map((field) => [
+              field.uuid,
+              "Already stored as an associated field",
+            ]),
+          )
+        }
         closeDialog={closeSearchDialog}
       />
 
@@ -907,11 +919,16 @@ export function Edit({
                       disabled={
                         !canSubmit ||
                         smdaMasterdata.isPending ||
-                        projectReadOnly
+                        projectReadOnly ||
+                        masterdataMutation.isPending
                       }
                       isPending={masterdataMutation.isPending}
                       helperTextDisabled={
-                        projectReadOnly ? "Project is read-only" : undefined
+                        masterdataMutation.isPending
+                          ? "Masterdata is being saved"
+                          : projectReadOnly
+                            ? "Project is read-only"
+                            : undefined
                       }
                     />
 

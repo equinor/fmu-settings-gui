@@ -1,12 +1,7 @@
 import { Dialog, Icon, Typography } from "@equinor/eds-core-react";
 import { edit, link } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
   type Dispatch,
@@ -19,16 +14,12 @@ import {
 import { toast } from "react-toastify";
 
 import type {
-  DataSystem,
   InternalStratigraphyIdentifierMapping,
   RmsProject,
   StratigraphicColumn,
 } from "#client";
 import {
-  projectGetChangelogQueryKey,
   projectGetMappingsOptions,
-  projectGetMappingsQueryKey,
-  projectPutMappingsMutation,
   smdaPostStratUnitsOptions,
 } from "#client/@tanstack/react-query.gen";
 import { ConfirmCloseDialog } from "#components/common";
@@ -53,6 +44,7 @@ import type {
   ElementMappingTargetUpdates,
   ElementType,
 } from "#components/project/common/mapping/types";
+import { useMappingsMutation } from "#services/mappings";
 import { mappingsPaths } from "#services/project";
 import {
   EditDialog,
@@ -61,16 +53,10 @@ import {
   PageText,
   WarningBox,
 } from "#styles/common";
-import {
-  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
-  httpValidationErrorToString,
-} from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui";
 import {
-  createElementMappings,
   createMutationValue,
-  createProjectMappingsLookup,
   handleErrorUnknownInitialValue,
   updatedElementMapping,
   useMappingData,
@@ -88,7 +74,11 @@ import {
   useFrameworkData,
 } from "../../common/stratigraphicFramework/functions";
 import { StratigraphicFramework } from "../../common/stratigraphicFramework/StratigraphicFramework";
-import { createHorizonOptions, createStratUnitOptions } from "./functions";
+import {
+  createHorizonOptions,
+  createStratigraphyElementMappings,
+  createStratUnitOptions,
+} from "./functions";
 import {
   ElementActions,
   ElementInfo,
@@ -100,8 +90,6 @@ import {
   ZoneItem,
 } from "./Overview.style";
 import { validateSelectValue } from "./utils";
-
-const supportedTargets: DataSystem[] = ["smda"] as const;
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -383,7 +371,6 @@ function Elements({ elementType }: { elementType: ElementType }) {
     ElementMapping | undefined
   >();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
   const frameworkData = useFrameworkData();
   const mappingData = useMappingData();
 
@@ -398,30 +385,10 @@ function Elements({ elementType }: { elementType: ElementType }) {
       enabled: mappingData.canEdit,
     });
 
-  const mappingsMutation = useMutation({
-    ...projectPutMappingsMutation(),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRms,
-        }),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: projectGetChangelogQueryKey(),
-      });
-    },
-    onError: (error) => {
-      if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
-        const message = httpValidationErrorToString(error);
-        console.error(message);
-        toast.error(message, { autoClose: false });
-      }
-    },
-    meta: {
-      errorPrefix: "Error saving stratigraphy mapping",
-      preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
-    },
-  });
+  const mappingsMutation = useMappingsMutation(
+    mappingsPaths.stratigraphyRms,
+    "Error saving stratigraphy mapping",
+  );
 
   const horizonOptionsData = useMemo(() => {
     if (elementType !== "horizon" || stratigraphicUnits === undefined) {
@@ -512,22 +479,16 @@ function Elements({ elementType }: { elementType: ElementType }) {
         },
       );
 
-    mappingsMutation.mutate(
-      {
-        path: mappingsPaths.stratigraphyRms,
-        body: mutationValue,
+    mappingsMutation.mutateMappings(mutationValue, {
+      onSuccess: (data) => {
+        mappingData.setElementMappings((elementMappings) => ({
+          ...elementMappings,
+          [formValue.name]: updated,
+        }));
+        formSubmitCallback({ message: data.message, formReset });
+        closeEditDialog();
       },
-      {
-        onSuccess: (data) => {
-          mappingData.setElementMappings((elementMappings) => ({
-            ...elementMappings,
-            [formValue.name]: updated,
-          }));
-          formSubmitCallback({ message: data.message, formReset });
-          closeEditDialog();
-        },
-      },
-    );
+    });
   };
 
   return (
@@ -604,29 +565,15 @@ export function Overview({
     }),
   );
 
-  const baseElementMappings = useMemo(() => {
-    const lookup = createProjectMappingsLookup(
-      "stratigraphy",
-      "rms",
-      supportedTargets,
-      projectMappings,
-    );
-
-    return {
-      ...createElementMappings(
-        "horizon",
-        supportedTargets,
+  const baseElementMappings = useMemo(
+    () =>
+      createStratigraphyElementMappings(
         rmsProject.horizons ?? [],
-        lookup,
-      ),
-      ...createElementMappings(
-        "zone",
-        supportedTargets,
         rmsProject.zones ?? [],
-        lookup,
+        projectMappings.stratigraphy ?? [],
       ),
-    };
-  }, [projectMappings, rmsProject.horizons, rmsProject.zones]);
+    [projectMappings.stratigraphy, rmsProject.horizons, rmsProject.zones],
+  );
 
   const [elementMappingsState, setElementMappingsState] = useState(() => ({
     base: baseElementMappings,

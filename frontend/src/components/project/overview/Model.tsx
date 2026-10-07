@@ -240,7 +240,7 @@ export function EditableModelInfo({
         <ModelInfo modelData={modelData} />
       ) : (
         <PageCode>
-          No model information found in the project configuration.
+          No model information is currently stored in the project configuration.
         </PageCode>
       )}
 

@@ -1,6 +1,6 @@
 import { Typography } from "@equinor/eds-core-react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 import type { FieldItem, RmsProject } from "#client";
 import { Loading, SmdaHealthCheckInfo } from "#components/common";
@@ -85,6 +85,15 @@ function RmsProjectContent({
 
 function Content() {
   const project = useProject();
+  const projectFields = project.data?.config.masterdata?.smda.field;
+  const associatedFields = project.data?.config.associated_fields;
+  const fields = useMemo(
+    () =>
+      projectFields?.length
+        ? [...projectFields, ...(associatedFields ?? [])]
+        : [],
+    [projectFields, associatedFields],
+  );
 
   if (!project.status) {
     return <PageText>FMU project not set.</PageText>;
@@ -98,7 +107,7 @@ function Content() {
   return (
     <RmsProjectContent
       rmsProject={rmsProject}
-      fields={project.data?.config.masterdata?.smda.field ?? []}
+      fields={fields}
       projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
     />
   );
