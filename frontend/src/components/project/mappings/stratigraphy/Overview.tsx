@@ -1,12 +1,7 @@
 import { Dialog, Icon, Typography } from "@equinor/eds-core-react";
 import { edit, link } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
   type Dispatch,
@@ -18,12 +13,13 @@ import {
 } from "react";
 import { toast } from "react-toastify";
 
-import type { RmsProject, StratigraphicColumn } from "#client";
+import type {
+  InternalStratigraphyIdentifierMapping,
+  RmsProject,
+  StratigraphicColumn,
+} from "#client";
 import {
-  projectGetChangelogQueryKey,
   projectGetMappingsOptions,
-  projectGetMappingsQueryKey,
-  projectPutMappingsMutation,
   smdaPostStratUnitsOptions,
 } from "#client/@tanstack/react-query.gen";
 import { ConfirmCloseDialog } from "#components/common";
@@ -42,6 +38,13 @@ import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form";
+import type {
+  ElementMapping,
+  ElementMappings,
+  ElementMappingTargetUpdates,
+  ElementType,
+} from "#components/project/common/mapping/types";
+import { useMappingsMutation } from "#services/mappings";
 import { mappingsPaths } from "#services/project";
 import {
   EditDialog,
@@ -50,16 +53,10 @@ import {
   PageText,
   WarningBox,
 } from "#styles/common";
-import {
-  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
-  httpValidationErrorToString,
-} from "#utils/api";
 import { fieldContext, formContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui";
 import {
-  createElementMappings,
   createMutationValue,
-  createProjectMappingsLookup,
   handleErrorUnknownInitialValue,
   updatedElementMapping,
   useMappingData,
@@ -67,16 +64,21 @@ import {
 import { MappingDataContext } from "../../common/mapping/MappingData";
 import {
   createSpecialOptions,
-  getElementMappingSmdaName,
-  getElementMappingSmdaNameOptionsInitialValue,
-  specialOptions,
+  emptyElementMappingTargetUpdate,
+  getElementMappingTargetName,
+  getElementMappingTargetNameOptionsInitialValue,
+  getUnmappableOption,
 } from "../../common/mapping/utils";
 import {
   getHorizonLineStyle,
   useFrameworkData,
 } from "../../common/stratigraphicFramework/functions";
 import { StratigraphicFramework } from "../../common/stratigraphicFramework/StratigraphicFramework";
-import { createHorizonOptions, createStratUnitOptions } from "./functions";
+import {
+  createHorizonOptions,
+  createStratigraphyElementMappings,
+  createStratUnitOptions,
+} from "./functions";
 import {
   ElementActions,
   ElementInfo,
@@ -87,7 +89,6 @@ import {
   HorizonItem,
   ZoneItem,
 } from "./Overview.style";
-import type { ElementMapping, ElementMappings, ElementType } from "./types";
 import { validateSelectValue } from "./utils";
 
 const { useAppForm } = createFormHook({
@@ -123,12 +124,16 @@ function Edit({
   const form = useAppForm({
     defaultValues: {
       ...elementMapping,
-      ...(elementMapping?.unmappable && {
-        smdaUuid:
-          elementMapping.elementType === "horizon"
-            ? specialOptions.unmappableHorizon.value
-            : specialOptions.unmappableZone.value,
-      }),
+      ...(elementMapping?.elementType &&
+        elementMapping.targets.smda?.unmappable && {
+          targets: {
+            ...elementMapping.targets,
+            smda: {
+              ...elementMapping.targets.smda,
+              uuid: getUnmappableOption(elementMapping.elementType).value,
+            },
+          },
+        }),
     } as ElementMapping,
     onSubmit: ({ formApi, value }) => {
       if (!mappingData.projectReadOnly) {
@@ -144,9 +149,9 @@ function Edit({
   useEffect(() => {
     handleErrorUnknownInitialValue(
       form.setFieldMeta,
-      "smdaUuid",
+      "targets.smda.uuid",
       smdaNameOptions,
-      getElementMappingSmdaNameOptionsInitialValue(elementMapping),
+      getElementMappingTargetNameOptionsInitialValue(elementMapping, "smda"),
     );
   }, [form.setFieldMeta, smdaNameOptions, elementMapping]);
 
@@ -192,20 +197,21 @@ function Edit({
           }}
         >
           <Dialog.Header>
-            Edit {elementMapping.elementType}: {elementMapping.rmsName}
+            Edit {elementMapping.elementType}: {elementMapping.name}
           </Dialog.Header>
 
           <Dialog.CustomContent>
             <form.AppField
-              name="smdaUuid"
+              name="targets.smda.uuid"
               validators={{
-                onChange: ({ value }) => validateSelectValue(value),
+                onChange: ({ value }) =>
+                  validateSelectValue(value as unknown as string),
               }}
             >
               {(field) => (
                 <field.Select
                   label="SMDA name"
-                  value={field.state.value}
+                  value={field.state.value as unknown as string}
                   options={smdaNameOptions}
                   loadingOptions={optionsIsPending}
                   onChange={(value) => {
@@ -299,7 +305,8 @@ function Element({
   const mappingData = useMappingData();
 
   const isMissingValue =
-    elementMapping.smdaName === "" && !elementMapping.unmappable;
+    elementMapping.targets.smda?.name === "" &&
+    !elementMapping.targets.smda.unmappable;
   const aliasCount = elementMapping.aliases.length;
 
   return (
@@ -311,7 +318,7 @@ function Element({
               RMS
             </ElementSystemName>
             <ElementName>
-              {elementMapping.rmsName}
+              {elementMapping.name}
               {aliasCount > 0 && (
                 <Icon
                   className="aliases"
@@ -334,10 +341,10 @@ function Element({
             </ElementSystemName>
             <ElementName
               $isTargetSystem={true}
-              $isUnmappable={elementMapping.unmappable}
+              $isUnmappable={Boolean(elementMapping.targets.smda?.unmappable)}
               $isMissingvalue={isMissingValue}
             >
-              {getElementMappingSmdaName(elementMapping)}
+              {getElementMappingTargetName(elementMapping, "smda")}
             </ElementName>
           </ElementInfo>
         </ElementSystem>
@@ -364,7 +371,6 @@ function Elements({ elementType }: { elementType: ElementType }) {
     ElementMapping | undefined
   >();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
   const frameworkData = useFrameworkData();
   const mappingData = useMappingData();
 
@@ -379,30 +385,10 @@ function Elements({ elementType }: { elementType: ElementType }) {
       enabled: mappingData.canEdit,
     });
 
-  const mappingsMutation = useMutation({
-    ...projectPutMappingsMutation(),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: projectGetMappingsQueryKey({
-          path: mappingsPaths.stratigraphyRms,
-        }),
-      });
-      void queryClient.invalidateQueries({
-        queryKey: projectGetChangelogQueryKey(),
-      });
-    },
-    onError: (error) => {
-      if (error.response?.status === HTTP_STATUS_422_UNPROCESSABLE_CONTENT) {
-        const message = httpValidationErrorToString(error);
-        console.error(message);
-        toast.error(message, { autoClose: false });
-      }
-    },
-    meta: {
-      errorPrefix: "Error saving stratigraphy mapping",
-      preventDefaultErrorHandling: [HTTP_STATUS_422_UNPROCESSABLE_CONTENT],
-    },
-  });
+  const mappingsMutation = useMappingsMutation(
+    mappingsPaths.stratigraphyRms,
+    "Error saving stratigraphy mapping",
+  );
 
   const horizonOptionsData = useMemo(() => {
     if (elementType !== "horizon" || stratigraphicUnits === undefined) {
@@ -410,7 +396,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
     }
 
     return createHorizonOptions(
-      activeElementMapping?.rmsName ?? "",
+      activeElementMapping?.name ?? "",
       frameworkData.zones,
       mappingData.elementMappings,
       stratigraphicUnits.stratigraphic_units,
@@ -418,7 +404,7 @@ function Elements({ elementType }: { elementType: ElementType }) {
   }, [
     elementType,
     stratigraphicUnits,
-    activeElementMapping?.rmsName,
+    activeElementMapping?.name,
     frameworkData.zones,
     mappingData.elementMappings,
   ]);
@@ -464,36 +450,45 @@ function Elements({ elementType }: { elementType: ElementType }) {
     formSubmitCallback,
     formReset,
   }: MutationCallbackProps<ElementMapping>) => {
-    const smdaName =
-      formValue.elementType === "horizon"
-        ? (horizonOptionsData.horizonNamesByUuid[formValue.smdaUuid] ?? "")
-        : (stratigraphicUnits?.stratigraphic_units.find(
-            (unit) => unit.uuid === formValue.smdaUuid,
-          )?.identifier ?? "");
+    const targetUpdates: ElementMappingTargetUpdates = {
+      smda:
+        "smda" in formValue.targets
+          ? {
+              name:
+                formValue.elementType === "horizon"
+                  ? (horizonOptionsData.horizonNamesByUuid[
+                      formValue.targets.smda.uuid
+                    ] ?? "")
+                  : (stratigraphicUnits?.stratigraphic_units.find(
+                      (unit) => unit.uuid === formValue.targets.smda?.uuid,
+                    )?.identifier ?? ""),
+              uuid: formValue.targets.smda.uuid,
+            }
+          : emptyElementMappingTargetUpdate(),
+    };
 
-    const updated = updatedElementMapping(formValue, smdaName);
+    const updated = updatedElementMapping(formValue, targetUpdates);
 
-    const mutationValue = createMutationValue({
-      ...mappingData.elementMappings,
-      ...(updated && { [formValue.rmsName]: updated }),
-    });
-
-    mappingsMutation.mutate(
-      {
-        path: mappingsPaths.stratigraphyRms,
-        body: mutationValue,
-      },
-      {
-        onSuccess: (data) => {
-          mappingData.setElementMappings((elementMappings) => ({
-            ...elementMappings,
-            ...(updated && { [formValue.rmsName]: updated }),
-          }));
-          formSubmitCallback({ message: data.message, formReset });
-          closeEditDialog();
+    const mutationValue =
+      createMutationValue<InternalStratigraphyIdentifierMapping>(
+        "stratigraphy",
+        "rms",
+        {
+          ...mappingData.elementMappings,
+          [formValue.name]: updated,
         },
+      );
+
+    mappingsMutation.mutateMappings(mutationValue, {
+      onSuccess: (data) => {
+        mappingData.setElementMappings((elementMappings) => ({
+          ...elementMappings,
+          [formValue.name]: updated,
+        }));
+        formSubmitCallback({ message: data.message, formReset });
+        closeEditDialog();
       },
-    );
+    });
   };
 
   return (
@@ -570,14 +565,15 @@ export function Overview({
     }),
   );
 
-  const baseElementMappings = useMemo(() => {
-    const lookup = createProjectMappingsLookup("stratigraphy", projectMappings);
-
-    return {
-      ...createElementMappings("horizon", rmsProject.horizons ?? [], lookup),
-      ...createElementMappings("zone", rmsProject.zones ?? [], lookup),
-    };
-  }, [projectMappings, rmsProject.horizons, rmsProject.zones]);
+  const baseElementMappings = useMemo(
+    () =>
+      createStratigraphyElementMappings(
+        rmsProject.horizons ?? [],
+        rmsProject.zones ?? [],
+        projectMappings.stratigraphy ?? [],
+      ),
+    [projectMappings.stratigraphy, rmsProject.horizons, rmsProject.zones],
+  );
 
   const [elementMappingsState, setElementMappingsState] = useState(() => ({
     base: baseElementMappings,
@@ -632,8 +628,17 @@ export function Overview({
       <PageSectionWidthConstrained>
         <PageText>
           The following are the mappings for horizons and zones, showing the
-          names in RMS and SMDA.
+          names in RMS and SMDA. In SMDA, zones are stratigraphic units, while
+          horizons define the tops and bases of those units.
         </PageText>
+
+        {stratigraphicColumn && (
+          <PageText>
+            The selected SMDA stratigraphic column is{" "}
+            {stratigraphicColumn.identifier}, as set on the{" "}
+            <Link to="/project/masterdata">masterdata</Link> page.
+          </PageText>
+        )}
 
         <PageText>
           SMDA (Subsurface Master Data) is the storage system for masterdata in

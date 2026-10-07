@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
 
 import { Loading, SmdaHealthCheckInfo } from "#components/common";
+import { AssociatedFields } from "#components/project/masterdata/AssociatedFields";
 import { Overview } from "#components/project/masterdata/Overview";
 import { useProject } from "#services/project";
 import { useSmdaHealthCheck } from "#services/smda";
@@ -41,24 +42,43 @@ function Content() {
     return <PageText>Project not set.</PageText>;
   }
 
+  const projectFields = project.data?.config.masterdata?.smda.field ?? [];
+  const hasProjectFields = projectFields.length > 0;
+
   return (
     <>
       <Overview
         projectMasterdata={project.data?.config.masterdata?.smda ?? undefined}
+        associatedFields={project.data?.config.associated_fields ?? []}
         smdaHealthStatus={healthCheck.status}
         projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
         editMode={editMode}
       />
 
+      {hasProjectFields && (
+        <AssociatedFields
+          projectFields={projectFields}
+          associatedFields={project.data?.config.associated_fields ?? []}
+          smdaHealthStatus={healthCheck.status}
+          projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
+          editMode={editMode}
+        />
+      )}
+
       {editMode ? (
         <SmdaHealthCheckInfo
-          feature="editing masterdata"
+          feature={
+            hasProjectFields
+              ? "editing masterdata and associated fields"
+              : "editing masterdata"
+          }
           healthCheck={healthCheck}
           setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
         />
       ) : (
         <PageText>
-          💡 To manage masterdata,{" "}
+          💡 To manage masterdata
+          {hasProjectFields ? " and associated fields" : ""},{" "}
           <Typography onClick={toggleEditMode} link>
             enable editing mode.
           </Typography>

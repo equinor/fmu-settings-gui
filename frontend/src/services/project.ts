@@ -35,11 +35,15 @@ type GetProject = QueryServiceBase<FmuProject> & {
   rmsExpiresAt?: string | null;
 };
 
-type MappingsPathsKeys = "stratigraphyRms";
+type MappingsPathsKeys = "stratigraphyRms" | "wellboreRms";
 
 export const mappingsPaths: Record<MappingsPathsKeys, MappingsPathOptions> = {
   stratigraphyRms: {
     mapping_type: "stratigraphy",
+    source_system: "rms",
+  },
+  wellboreRms: {
+    mapping_type: "wellbore",
     source_system: "rms",
   },
 } as const;
@@ -93,7 +97,6 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
   const queryClient = useQueryClient();
 
   const { data: lockStatus } = useQuery({
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     ...queryOptions({
       queryFn: async ({ queryKey, signal }) => {
         const previousLockStatus = queryClient.getQueryData<LockStatus>(

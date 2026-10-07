@@ -644,6 +644,12 @@ export type MatchRequest = {
      * Optional normalized token sequence replacements to apply before matching.
      */
     replacements?: Array<MatchReplacementRule>;
+    /**
+     * Prefixes To Remove
+     *
+     * Prefixes to remove from the text before the first digit.
+     */
+    prefixes_to_remove?: Array<string>;
 };
 
 /**
@@ -727,7 +733,7 @@ export type ProjectConfig = {
     /**
      * Schema Version
      */
-    schema_version?: 1;
+    schema_version?: 2;
     /**
      * Version
      */
@@ -749,6 +755,10 @@ export type ProjectConfig = {
      */
     last_modified_by?: string | null;
     masterdata?: Masterdata | null;
+    /**
+     * Associated Fields
+     */
+    associated_fields?: Array<FieldItem>;
     model?: Model | null;
     access?: Access | null;
     /**
@@ -869,17 +879,37 @@ export type RmsProjectPathsResult = {
 };
 
 /**
- * RmsSimulatorMappingFilePath
+ * RmsSimulatorMappingExportRequest
  *
- * A path to an RMS-to-simulator mapping import or export file.
+ * Options for exporting RMS-to-simulator mappings.
  */
-export type RmsSimulatorMappingFilePath = {
+export type RmsSimulatorMappingExportRequest = {
     /**
      * Relative Path
      *
-     * Relative path in the project to an RMS-to-simulator mapping file.
+     * Output path relative to the project root, or the default path if omitted.
      */
-    relative_path: string;
+    relative_path?: string | null;
+    /**
+     * Overwrite
+     *
+     * Whether an existing export file may be overwritten.
+     */
+    overwrite?: boolean;
+};
+
+/**
+ * RmsSimulatorMappingImportRequest
+ *
+ * Options for importing RMS-to-simulator mappings.
+ */
+export type RmsSimulatorMappingImportRequest = {
+    /**
+     * Relative Path
+     *
+     * Input path relative to the project root, or the default path if omitted.
+     */
+    relative_path?: string | null;
 };
 
 /**
@@ -954,6 +984,22 @@ export type RmsWell = {
      * Planned
      */
     planned?: boolean;
+    /**
+     * Unique Well Identifier
+     */
+    unique_well_identifier?: string | null;
+    /**
+     * Easting
+     */
+    easting?: number | null;
+    /**
+     * Northing
+     */
+    northing?: number | null;
+    /**
+     * Rkb
+     */
+    rkb?: number | null;
 };
 
 /**
@@ -1152,7 +1198,7 @@ export type SmdaMasterdataResult = {
 /**
  * SmdaSelectedField
  *
- * A selected field for masterdata lookup.
+ * A selected SMDA field.
  */
 export type SmdaSelectedField = {
     /**
@@ -1478,7 +1524,7 @@ export type StratigraphicUnit = {
 /**
  * SumoAsset
  *
- * A valid asset in Sumo.
+ * A Sumo asset available to the user.
  */
 export type SumoAsset = {
     /**
@@ -1487,18 +1533,6 @@ export type SumoAsset = {
      * Name of the asset in Sumo.
      */
     name: string;
-    /**
-     * Code
-     *
-     * Code of the asset in Sumo.
-     */
-    code: string;
-    /**
-     * Roleprefix
-     *
-     * Roleprefix of the asset in Sumo.
-     */
-    roleprefix: string;
 };
 
 /**
@@ -1751,43 +1785,6 @@ export type ProjectPostProjectResponses = {
 };
 
 export type ProjectPostProjectResponse = ProjectPostProjectResponses[keyof ProjectPostProjectResponses];
-
-export type ProjectGetSumoAssetsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/project/sumo_assets';
-};
-
-export type ProjectGetSumoAssetsErrors = {
-    /**
-     * No active or valid session was found
-     */
-    401: unknown;
-    /**
-     * Sumo assets file not found
-     */
-    404: unknown;
-    /**
-     * Invalid file content in Sumo assets file
-     */
-    422: unknown;
-    /**
-     * Something unexpected has happened
-     */
-    500: unknown;
-};
-
-export type ProjectGetSumoAssetsResponses = {
-    /**
-     * Response Project-Get Sumo Assets
-     *
-     * Successful Response
-     */
-    200: Array<SumoAsset>;
-};
-
-export type ProjectGetSumoAssetsResponse = ProjectGetSumoAssetsResponses[keyof ProjectGetSumoAssetsResponses];
 
 export type ProjectGetGlobalConfigStatusData = {
     body?: never;
@@ -2133,6 +2130,60 @@ export type ProjectPatchMasterdataResponses = {
 };
 
 export type ProjectPatchMasterdataResponse = ProjectPatchMasterdataResponses[keyof ProjectPatchMasterdataResponses];
+
+export type ProjectPatchAssociatedFieldsData = {
+    /**
+     * Associated Fields
+     */
+    body: Array<FieldItem>;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/associated_fields';
+};
+
+export type ProjectPatchAssociatedFieldsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPatchAssociatedFieldsError = ProjectPatchAssociatedFieldsErrors[keyof ProjectPatchAssociatedFieldsErrors];
+
+export type ProjectPatchAssociatedFieldsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPatchAssociatedFieldsResponse = ProjectPatchAssociatedFieldsResponses[keyof ProjectPatchAssociatedFieldsResponses];
 
 export type ProjectPostValidateMasterdataSmdaData = {
     body?: never;
@@ -2991,9 +3042,9 @@ export type ProjectPutMappingsResponse = ProjectPutMappingsResponses[keyof Proje
 
 export type ProjectPostMappingsImportRmsEclipseCsvData = {
     /**
-     * Path
+     * Import Request
      */
-    body?: RmsSimulatorMappingFilePath | null;
+    body?: RmsSimulatorMappingImportRequest | null;
     path?: never;
     query?: never;
     url: '/api/v1/project/mappings/import/rms_eclipse_csv';
@@ -3005,7 +3056,7 @@ export type ProjectPostMappingsImportRmsEclipseCsvErrors = {
      */
     401: unknown;
     /**
-     * The RMS-to-simulator wellbore mapping file could not be read or written
+     * The RMS-to-simulator wellbore mapping file could not be read
      */
     403: unknown;
     /**
@@ -3013,10 +3064,7 @@ export type ProjectPostMappingsImportRmsEclipseCsvErrors = {
      */
     404: unknown;
     /**
-     *
-     * The RMS-to-simulator wellbore mapping file contains invalid content,
-     * or no mappings can be exported.
-     *
+     * The RMS-to-simulator wellbore mapping file contains invalid content
      */
     422: unknown;
     /**
@@ -3036,9 +3084,9 @@ export type ProjectPostMappingsImportRmsEclipseCsvResponse = ProjectPostMappings
 
 export type ProjectPostMappingsExportRmsSimulatorRenamingTableData = {
     /**
-     * Path
+     * Export Request
      */
-    body?: RmsSimulatorMappingFilePath | null;
+    body?: RmsSimulatorMappingExportRequest | null;
     path?: never;
     query?: never;
     url: '/api/v1/project/mappings/export/rms_simulator_renaming_table';
@@ -3050,17 +3098,21 @@ export type ProjectPostMappingsExportRmsSimulatorRenamingTableErrors = {
      */
     401: unknown;
     /**
-     * The RMS-to-simulator wellbore mapping file could not be read or written
+     * The RMS-to-simulator wellbore mapping file could not be written
      */
     403: unknown;
     /**
-     * The RMS-to-simulator wellbore mapping file could not be found
+     * The saved project mappings could not be found
      */
     404: unknown;
     /**
+     * The export file already exists and overwrite was not authorized
+     */
+    409: unknown;
+    /**
      *
-     * The RMS-to-simulator wellbore mapping file contains invalid content,
-     * or no mappings can be exported.
+     * The export path or saved mappings are invalid, or no mappings can
+     * be exported.
      *
      */
     422: unknown;
@@ -3508,6 +3560,10 @@ export type RmsPostRmsProjectErrors = {
      * Something unexpected has happened
      */
     500: unknown;
+    /**
+     * Opening the RMS project timed out.
+     */
+    504: unknown;
 };
 
 export type RmsPostRmsProjectResponses = {
@@ -3518,6 +3574,62 @@ export type RmsPostRmsProjectResponses = {
 };
 
 export type RmsPostRmsProjectResponse = RmsPostRmsProjectResponses[keyof RmsPostRmsProjectResponses];
+
+export type RmsPostValidateRmsProjectData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/rms/validate';
+};
+
+export type RmsPostValidateRmsProjectErrors = {
+    /**
+     *
+     * RMS project path is not configured in the project config file,
+     * or no RMS project is currently open in the session.
+     *
+     */
+    400: unknown;
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The project configuration cannot be accessed for writing.
+     */
+    403: unknown;
+    /**
+     *
+     * The RMS project saved in the FMU project or its .master file could not
+     * be accessed while determining its version.
+     *
+     */
+    404: unknown;
+    /**
+     *
+     * The FMU project has no saved RMS settings, the saved settings do not
+     * match the open RMS project, or the RMS version cannot be used.
+     *
+     */
+    422: unknown;
+    /**
+     * The project is not locked for writing by the current session.
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type RmsPostValidateRmsProjectResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type RmsPostValidateRmsProjectResponse = RmsPostValidateRmsProjectResponses[keyof RmsPostValidateRmsProjectResponses];
 
 export type RmsGetZonesData = {
     body?: never;
@@ -3684,6 +3796,94 @@ export type RmsGetCoordinateSystemResponses = {
 };
 
 export type RmsGetCoordinateSystemResponse = RmsGetCoordinateSystemResponses[keyof RmsGetCoordinateSystemResponses];
+
+export type SumoGetAssetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/sumo/assets';
+};
+
+export type SumoGetAssetsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Sumo login required
+     */
+    424: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * Invalid response from Sumo
+     */
+    502: unknown;
+    /**
+     * Sumo unavailable
+     */
+    503: unknown;
+};
+
+export type SumoGetAssetsError = SumoGetAssetsErrors[keyof SumoGetAssetsErrors];
+
+export type SumoGetAssetsResponses = {
+    /**
+     * Response Sumo-Get Assets
+     *
+     * Successful Response
+     */
+    200: Array<SumoAsset>;
+};
+
+export type SumoGetAssetsResponse = SumoGetAssetsResponses[keyof SumoGetAssetsResponses];
+
+export type SumoPostLoginData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/sumo/login';
+};
+
+export type SumoPostLoginErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Sumo login not completed
+     */
+    424: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * Sumo unavailable
+     */
+    503: unknown;
+};
+
+export type SumoPostLoginError = SumoPostLoginErrors[keyof SumoPostLoginErrors];
+
+export type SumoPostLoginResponses = {
+    /**
+     * Successful Response
+     */
+    200: Ok;
+};
+
+export type SumoPostLoginResponse = SumoPostLoginResponses[keyof SumoPostLoginResponses];
 
 export type SmdaGetHealthData = {
     body?: never;
@@ -3865,7 +4065,7 @@ export type SmdaPostStratUnitsResponses = {
 export type SmdaPostStratUnitsResponse = SmdaPostStratUnitsResponses[keyof SmdaPostStratUnitsResponses];
 
 export type SmdaPostWellHeadersData = {
-    body: SmdaField;
+    body: SmdaSelectedField;
     path?: never;
     query?: never;
     url: '/api/v1/smda/well_headers';

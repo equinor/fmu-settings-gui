@@ -1,7 +1,43 @@
-import type { RmsStratigraphicZone, StratigraphicUnit } from "#client";
+import type {
+  DataSystem,
+  InternalStratigraphyMappings,
+  RmsHorizon,
+  RmsStratigraphicZone,
+  StratigraphicUnit,
+} from "#client";
 import type { OptionProps } from "#components/form/field";
-import type { ElementMappings, StratUnitRelation } from "./types";
+import {
+  createElementMappings,
+  createProjectMappingsLookup,
+} from "#components/project/common/mapping/functions";
+import type { ElementMappings } from "#components/project/common/mapping/types";
+import type { StratUnitRelation } from "./types";
 import { getLabelForStratUnitOption } from "./utils";
+
+const stratigraphyTargetSystems = ["smda"] satisfies DataSystem[];
+
+export function createStratigraphyElementMappings(
+  horizons: RmsHorizon[],
+  zones: RmsStratigraphicZone[],
+  mappings: InternalStratigraphyMappings,
+) {
+  const lookup = createProjectMappingsLookup(
+    "stratigraphy",
+    "rms",
+    stratigraphyTargetSystems,
+    { stratigraphy: mappings },
+  );
+
+  return {
+    ...createElementMappings(
+      "horizon",
+      stratigraphyTargetSystems,
+      horizons,
+      lookup,
+    ),
+    ...createElementMappings("zone", stratigraphyTargetSystems, zones, lookup),
+  };
+}
 
 function getOptionPropsForChildren(
   stratUnits: StratUnitRelation[],
@@ -67,15 +103,18 @@ export function createHorizonOptions(
     )
     .forEach((zone) => {
       const zoneMapping = elementMappings[zone.name];
-      if (zoneMapping === undefined) {
+      if (zoneMapping === undefined || !("smda" in zoneMapping.targets)) {
         return;
       }
-      if (zoneMapping.unmappable || zoneMapping.smdaUuid === "") {
+      if (
+        zoneMapping.targets.smda.unmappable ||
+        zoneMapping.targets.smda.uuid === ""
+      ) {
         return;
       }
 
       const mappedUnit = stratigraphicUnits.find(
-        (unit) => unit.uuid === zoneMapping.smdaUuid,
+        (unit) => unit.uuid === zoneMapping.targets.smda?.uuid,
       );
       // The relevant suggestion is the zone boundary that coincides with the
       // edited horizon: the base of a zone above, the top of a zone below.

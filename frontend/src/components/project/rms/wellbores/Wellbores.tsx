@@ -5,9 +5,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-import type { RmsProject, RmsWell } from "#client";
+import type {
+  InternalWellboreIdentifierMapping,
+  RmsProject,
+  RmsWell,
+} from "#client";
 import {
   projectGetChangelogQueryKey,
+  projectGetMappingsOptions,
   projectGetProjectQueryKey,
   projectPatchRmsWellsMutation,
   rmsGetWellsOptions,
@@ -22,7 +27,15 @@ import type {
   FormSubmitCallbackProps,
   MutationCallbackProps,
 } from "#components/form/form.tsx";
+import {
+  createMutationValue,
+  removeElementMappings,
+} from "#components/project/common/mapping/functions";
+import type { ElementMappings } from "#components/project/common/mapping/types";
+import { createWellboreElementMappings } from "#components/project/mappings/wellbores/functions";
 import { applicationLocale } from "#config";
+import { useMappingsMutation } from "#services/mappings";
+import { mappingsPaths } from "#services/project";
 import {
   ActionButtonsContainer,
   EditDialog,
@@ -31,16 +44,22 @@ import {
   PageText,
 } from "#styles/common";
 import {
+  DataGridFilterContainer,
+  DataGridSearch,
+  dataGridHeight,
+} from "#styles/dataGrid";
+import {
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
   httpValidationErrorToString,
 } from "#utils/api.ts";
 import { fieldContext, formContext, useFormContext } from "#utils/form";
 import { useConfirmClose } from "#utils/ui.ts";
 import {
-  WellboreFilterContainer,
-  WellboreSearch,
-  WellboresContainer,
-} from "./Wellbores.style";
+  ConfirmMappingRemovalDialog,
+  type PendingMappingRemoval,
+} from "../ConfirmMappingRemovalDialog";
+import { getRemovedMappingTexts } from "../functions";
+import { WellboresContainer } from "./Wellbores.style";
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -64,19 +83,6 @@ function sortWellboresByAvailableOrder(
   );
 }
 
-// The grid header and each row are 48px high at the EDS comfortable density.
-// Firefox also uses this fixed estimate because EDS disables dynamic row
-// measurement there.
-const GRID_ROW_HEIGHT = 48;
-
-// Keep short grids only as tall as their header and rows. Cap long grids at
-// maxHeight so they scroll and virtualize instead of expanding the page.
-function gridHeight(rowCount: number, maxHeight: number): number {
-  const bodyRowCount = Math.max(rowCount, 1);
-
-  return Math.min((bodyRowCount + 1) * GRID_ROW_HEIGHT, maxHeight);
-}
-
 const storedWellboreColumns: ColumnDef<RmsWell>[] = [
   {
     accessorKey: "name",
@@ -93,8 +99,12 @@ const storedWellboreColumns: ColumnDef<RmsWell>[] = [
 
 function WellboresEditor({
   availableWellbores,
+  elementMappings,
+  confirmRemoval,
 }: {
   availableWellbores: RmsWell[];
+  elementMappings: ElementMappings;
+  confirmRemoval: (removal: PendingMappingRemoval) => void;
 }) {
   const form: AnyFormApi = useFormContext();
   const projectWellbores = form.getFieldValue("wells") as RmsWell[];
@@ -149,11 +159,63 @@ function WellboresEditor({
     );
   };
 
+  const removeWellbores = (wellboreNames: string[], removeAll = false) => {
+    const removedWellboreNames = new Set(wellboreNames);
+    const remainingWellbores = projectWellbores.filter(
+      (wellbore) => !removedWellboreNames.has(wellbore.name),
+    );
+    const currentWellboreNames = projectWellbores.map(
+      (wellbore) => wellbore.name,
+    );
+    const previouslyRemovedNames = Object.keys(elementMappings).filter(
+      (name) => !currentWellboreNames.includes(name),
+    );
+    const currentPlannedNames = projectWellbores
+      .filter((wellbore) => wellbore.planned)
+      .map((wellbore) => wellbore.name);
+    // Diff against the current form state, not the stored mappings, so
+    // earlier unsaved removals and planned toggles are not previewed again.
+    const currentElementMappings = removeElementMappings(
+      elementMappings,
+      previouslyRemovedNames,
+      { smda: currentPlannedNames },
+    ).preserved;
+    const removeResults = removeElementMappings(
+      currentElementMappings,
+      wellboreNames,
+    );
+    const mappingTexts = getRemovedMappingTexts(removeResults.removed);
+
+    if (mappingTexts.length === 0) {
+      setWellbores(remainingWellbores);
+
+      return;
+    }
+
+    const multipleItems = removeAll || wellboreNames.length > 1;
+    confirmRemoval({
+      action: "remove",
+      selection: removeAll ? (
+        "All wellbores"
+      ) : multipleItems ? (
+        `${wellboreNames.length} wellbores`
+      ) : (
+        <>
+          The wellbore <span className="emphasis">{wellboreNames[0]}</span>
+        </>
+      ),
+      itemLabel: multipleItems ? "wellbores" : "wellbore",
+      multipleItems,
+      mappingTexts,
+      apply: () => {
+        setWellbores(remainingWellbores);
+      },
+    });
+  };
+
   const toggleWellboreSelected = (wellboreName: string) => {
     if (selectedWellboreNames.has(wellboreName)) {
-      setWellbores(
-        projectWellbores.filter((wellbore) => wellbore.name !== wellboreName),
-      );
+      removeWellbores([wellboreName]);
     } else {
       setWellbores([
         ...projectWellbores,
@@ -165,14 +227,51 @@ function WellboresEditor({
     }
   };
 
-  const toggleWellborePlanned = (wellboreName: string) => {
-    const planned = !(plannedByWellboreName.current.get(wellboreName) ?? false);
+  const setWellborePlanned = (wellboreName: string, planned: boolean) => {
     plannedByWellboreName.current.set(wellboreName, planned);
     setWellbores(
       projectWellbores.map((wellbore) =>
         wellbore.name === wellboreName ? { ...wellbore, planned } : wellbore,
       ),
     );
+  };
+
+  const toggleWellborePlanned = (wellboreName: string) => {
+    const planned = !(plannedByWellboreName.current.get(wellboreName) ?? false);
+    if (!planned) {
+      setWellborePlanned(wellboreName, false);
+
+      return;
+    }
+
+    const removeResults = removeElementMappings(elementMappings, [], {
+      smda: [wellboreName],
+    });
+    const mappingTexts = getRemovedMappingTexts(
+      {},
+      removeResults.targetDataCleared,
+    );
+
+    if (mappingTexts.length === 0) {
+      setWellborePlanned(wellboreName, true);
+
+      return;
+    }
+
+    confirmRemoval({
+      action: "mark-planned",
+      selection: (
+        <>
+          The wellbore <span className="emphasis">{wellboreName}</span>
+        </>
+      ),
+      itemLabel: "wellbore",
+      multipleItems: false,
+      mappingTexts,
+      apply: () => {
+        setWellborePlanned(wellboreName, true);
+      },
+    });
   };
 
   const selectVisibleWellbores = () => {
@@ -188,10 +287,11 @@ function WellboresEditor({
   };
 
   const deselectVisibleWellbores = () => {
-    setWellbores(
-      projectWellbores.filter(
-        (wellbore) => !visibleWellboreNames.has(wellbore.name),
-      ),
+    removeWellbores(
+      projectWellbores
+        .filter((wellbore) => visibleWellboreNames.has(wellbore.name))
+        .map((wellbore) => wellbore.name),
+      !normalizedWellboreFilter,
     );
   };
 
@@ -261,8 +361,8 @@ function WellboresEditor({
         {includedWellboreCount === 1 ? "is" : "are"} included.
       </PageText>
 
-      <WellboreFilterContainer>
-        <WellboreSearch
+      <DataGridFilterContainer>
+        <DataGridSearch
           placeholder="Filter wellbores"
           value={wellboreFilter}
           onChange={(event) => {
@@ -276,13 +376,13 @@ function WellboresEditor({
             {availableWellbores.length} wellbores.
           </PageText>
         )}
-      </WellboreFilterContainer>
+      </DataGridFilterContainer>
 
       <WellboresContainer>
         <EdsDataGrid
           stickyHeader
           enableVirtual
-          height={gridHeight(visibleWellbores.length, 391)}
+          height={dataGridHeight(visibleWellbores.length, 391)}
           rows={visibleWellbores}
           columns={wellboreColumns}
           getRowId={(row) => row.name}
@@ -331,9 +431,11 @@ function WellboresEditor({
               : "wellbores stored"
           } in the project ${
             orphanWellboreNames.length === 1 ? "is" : "are"
-          } currently not available in RMS. ${
-            orphanWellboreNames.length === 1 ? "It" : "They"
-          } will be removed when you save.`}
+          } currently not available in RMS. Saving will remove ${
+            orphanWellboreNames.length === 1
+              ? "this wellbore and its mappings"
+              : "these wellbores and their mappings"
+          }.`}
           listItems={orphanWellboreNames}
         />
       )}
@@ -378,8 +480,21 @@ function Edit({
     ...rmsGetWellsOptions(),
     enabled: isRmsProjectOpen,
   });
+  const wellboreMappingsQuery = useQuery({
+    ...projectGetMappingsOptions({ path: mappingsPaths.wellboreRms }),
+    enabled: isDialogOpen,
+  });
+  const elementMappings = useMemo(
+    () =>
+      createWellboreElementMappings(
+        projectWellbores,
+        wellboreMappingsQuery.data?.wellbore ?? [],
+      ),
+    [projectWellbores, wellboreMappingsQuery.data?.wellbore],
+  );
   const isInitialized = useRef(false);
   const availableWellboresLoaded = availableWellboresQuery.isSuccess;
+  const [pendingRemoval, setPendingRemoval] = useState<PendingMappingRemoval>();
 
   const queryClient = useQueryClient();
 
@@ -406,6 +521,13 @@ function Edit({
     },
   });
 
+  const mappingsMutation = useMappingsMutation(
+    mappingsPaths.wellboreRms,
+    "Could not save updated wellbore mappings",
+  );
+  const savePending =
+    rmsWellboresMutation.isPending || mappingsMutation.isPending;
+
   const form = useAppForm({
     defaultValues: {
       wells: projectWellbores,
@@ -429,17 +551,51 @@ function Edit({
     const availableWellboreNames = new Set(
       availableWellboresQuery.data?.map((wellbore) => wellbore.name),
     );
+    const savedWellbores = formValue.wells.filter((wellbore) =>
+      availableWellboreNames.has(wellbore.name),
+    );
+    const savedNames = savedWellbores.map((wellbore) => wellbore.name);
+    const savedPlannedNames = savedWellbores
+      .filter((wellbore) => wellbore.planned)
+      .map((wellbore) => wellbore.name);
+    const removedMappingNames = Object.keys(elementMappings).filter(
+      (name) => !savedNames.includes(name),
+    );
+    const clearSmdaTargetData = Object.keys(elementMappings).filter((name) =>
+      savedPlannedNames.includes(name),
+    );
+    const removeResults = removeElementMappings(
+      elementMappings,
+      removedMappingNames,
+      { smda: clearSmdaTargetData },
+    );
 
     rmsWellboresMutation.mutate(
-      {
-        body: formValue.wells.filter((wellbore) =>
-          availableWellboreNames.has(wellbore.name),
-        ),
-      },
+      { body: savedWellbores },
       {
         onSuccess: (data) => {
-          formSubmitCallback({ message: data.message, formReset });
-          closeDialog();
+          const finishSave = () => {
+            formSubmitCallback({ message: data.message, formReset });
+            closeDialog();
+          };
+
+          if (
+            removedMappingNames.length === 0 &&
+            Object.keys(removeResults.targetDataCleared).length === 0
+          ) {
+            finishSave();
+          } else {
+            mappingsMutation.mutateMappings(
+              createMutationValue<InternalWellboreIdentifierMapping>(
+                "wellbore",
+                "rms",
+                removeResults.preserved,
+              ),
+              {
+                onSuccess: finishSave,
+              },
+            );
+          }
         },
       },
     );
@@ -502,9 +658,18 @@ function Edit({
         handleConfirmCloseDecision={confirmClose.handleDecision}
       />
 
+      {pendingRemoval && (
+        <ConfirmMappingRemovalDialog
+          removal={pendingRemoval}
+          close={() => {
+            setPendingRemoval(undefined);
+          }}
+        />
+      )}
+
       <EditDialog
         open={isDialogOpen}
-        isDismissable={true}
+        isDismissable={pendingRemoval === undefined}
         onClose={confirmClose.handleCloseRequest}
         $width="36em"
       >
@@ -535,6 +700,8 @@ function Edit({
                       <form.WellboresEditor
                         key={isDialogOpen ? "open" : "closed"}
                         availableWellbores={availableWellboresQuery.data}
+                        elementMappings={elementMappings}
+                        confirmRemoval={setPendingRemoval}
                       />
                     )}
                   </form.Subscribe>
@@ -576,6 +743,21 @@ function Edit({
                 const hasOrphans = wellbores.some(
                   (wellbore) => !availableWellboreNames.has(wellbore.name),
                 );
+                const wellboresByName = new Map(
+                  wellbores.map((wellbore) => [wellbore.name, wellbore]),
+                );
+                const requiresMappingPruning =
+                  hasOrphans ||
+                  projectWellbores.some((projectWellbore) => {
+                    const wellbore = wellboresByName.get(projectWellbore.name);
+
+                    return (
+                      wellbore === undefined ||
+                      (!projectWellbore.planned && wellbore.planned)
+                    );
+                  });
+                const mappingsBlockSave =
+                  wellboreMappingsQuery.isError && requiresMappingPruning;
 
                 return (
                   <form.SubmitButton
@@ -585,15 +767,22 @@ function Edit({
                       !canSubmit ||
                       projectReadOnly ||
                       !availableWellboresLoaded ||
-                      rmsWellboresMutation.isPending
+                      wellboreMappingsQuery.isPending ||
+                      mappingsBlockSave ||
+                      savePending
                     }
-                    isPending={rmsWellboresMutation.isPending}
+                    isPending={savePending}
                     helperTextDisabled={
                       projectReadOnly
                         ? "Project is read-only"
                         : !availableWellboresLoaded
                           ? "RMS wellbores must be loaded before saving"
-                          : "Form can be saved when the values have changed"
+                          : wellboreMappingsQuery.isPending
+                            ? "Wellbore mappings must be loaded before saving"
+                            : mappingsBlockSave
+                              ? "Stored mappings must be fixed before removing " +
+                                "wellbores or marking them as planned"
+                              : "Form can be saved when the values have changed"
                     }
                   />
                 );
@@ -645,14 +834,14 @@ export function Wellbores({
           <PageText>
             <span className="emphasis">{projectWellbores.length}</span>{" "}
             {projectWellbores.length === 1 ? "wellbore is" : "wellbores are"}{" "}
-            included in the project.
+            stored in the project.
           </PageText>
 
           <WellboresContainer>
             <EdsDataGrid
               stickyHeader
               enableVirtual
-              height={gridHeight(projectWellbores.length, 576)}
+              height={dataGridHeight(projectWellbores.length, 576)}
               rows={projectWellbores}
               columns={storedWellboreColumns}
               getRowId={(row) => row.name}

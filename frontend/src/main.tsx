@@ -4,6 +4,7 @@ import {
   type EventMessage,
   EventType,
   InteractionRequiredAuthError,
+  InteractionStatus,
   InteractionType,
   PublicClientApplication,
 } from "@azure/msal-browser";
@@ -185,7 +186,8 @@ const router = createRouter({
 });
 
 export function App() {
-  const { instance: msalInstance } = useMsal();
+  const { instance: msalInstance, inProgress: msalInteractionStatus } =
+    useMsal();
   const [apiToken, setApiToken] = useState("");
   const [apiTokenStatus, setApiTokenStatus] = useState<TokenStatus>({});
   const [selectProjectInvalidAttempt, setSelectProjectInvalidAttempt] =
@@ -300,6 +302,7 @@ export function App() {
     }
 
     if (
+      msalInteractionStatus === InteractionStatus.None &&
       hasResponseInterceptor &&
       !sessionReady &&
       !sessionCreationFailed &&
@@ -314,6 +317,7 @@ export function App() {
     apiToken,
     hasResponseInterceptor,
     isCreatingSession,
+    msalInteractionStatus,
     requestSessionCreation,
     sessionCreationFailed,
     sessionReady,
@@ -324,7 +328,13 @@ export function App() {
       await createSessionAsync(createSessionMutateAsync, apiToken);
     }
 
-    if (requestSessionCreation && !isCreatingSession) {
+    // MSAL may navigate away while handling a redirect. Do not let the API rotate
+    // the session cookie until the redirect response has been fully processed.
+    if (
+      msalInteractionStatus === InteractionStatus.None &&
+      requestSessionCreation &&
+      !isCreatingSession
+    ) {
       void Promise.resolve().then(() => {
         setIsCreatingSession(true);
         setSessionCreationFailed(false);
@@ -358,6 +368,7 @@ export function App() {
     apiToken,
     createSessionMutateAsync,
     isCreatingSession,
+    msalInteractionStatus,
     patchAccessTokenMutate,
     requestSessionCreation,
   ]);

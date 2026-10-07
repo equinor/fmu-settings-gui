@@ -7,7 +7,7 @@ export const msalConfig: Configuration = {
     clientId: "a97989e5-5477-4e8c-b2e4-b6bfda581331",
     authority:
       "https://login.microsoftonline.com/3aa4a235-b6e2-48d5-9195-7fcf05b459b0",
-    redirectUri: "/",
+    redirectUri: "/redirect.html",
   },
 };
 
@@ -20,5 +20,3 @@ export const sessionRmsExpireNotificationThreshold = 120; // 2 minutes
 export const projectLockStatusRefetchInterval = 60; // 1 minute
 
 export const projectLockExpireNotificationThreshold = 120; // 2 minutes
-
-export const rmsMinimumVersion = "15.0.1.0"; // Minimum version to use when opening RMS projects
