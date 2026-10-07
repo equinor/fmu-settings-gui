@@ -32,6 +32,7 @@ const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
     "rms.version": "RMS version",
     "rms.wells": "RMS wells",
     "rms.zones": "RMS stratigraphic zones",
+    "validation.rms_project": "RMS project validation",
     updated_at: "last updated date",
     updated_by: "last updated by",
   },
@@ -68,12 +69,12 @@ const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
 const TECHNICAL_FIELD_CHANGE_PATTERN =
   /^(Added|Copied|Initialized|Merged|Removed|Reset|Restored|Updated) field ['"]?([^'"]+)['"]?\.?$/i;
 
-export function getTypeLabel(changeType: ChangeType) {
-  if (changeType === "update") {
-    return "Modified";
-  }
+export function getChangeTypeLabel(changeType: ChangeType) {
+  return CHANGE_TYPE_VERBS[changeType] || changeType;
+}
 
-  return CHANGE_TYPE_VERBS[changeType];
+export function getEntryKey(entry: ChangeInfo, index: number) {
+  return [entry.timestamp ?? "no-time", index].join(":");
 }
 
 function getFieldLabel(file: string, path: string): string | undefined {
@@ -103,9 +104,8 @@ function formatBriefDescription(entry: ChangeInfo) {
   const change = entry.change;
   const compact = change.replace(/\s+/g, " ");
   const withoutDiffPayload = compact.replace(/\. Old value:.*/, "");
-  const technicalFieldChange = TECHNICAL_FIELD_CHANGE_PATTERN.exec(
-    withoutDiffPayload,
-  );
+  const technicalFieldChange =
+    TECHNICAL_FIELD_CHANGE_PATTERN.exec(withoutDiffPayload);
 
   if (technicalFieldChange) {
     const verb = technicalFieldChange[1];
@@ -130,7 +130,7 @@ function formatBriefDescription(entry: ChangeInfo) {
 
 export function formatEntryDescription(entry: ChangeInfo): string {
   if (entry.change_type === "init") {
-    return "Initialized FMU settings project";
+    return "Initialized FMU Settings project";
   }
 
   const label = formatSettingLabel(entry);

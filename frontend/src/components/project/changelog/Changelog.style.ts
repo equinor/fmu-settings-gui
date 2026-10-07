@@ -3,21 +3,20 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 import type { ChangeType } from "#client/types.gen";
+import { GenericBox } from "#styles/common";
 
 function changeTypeColor(changeType: ChangeType) {
-  if (changeType === "add" || changeType === "copy") {
-    return tokens.colors.interactive.success__resting.hex;
+  switch (changeType) {
+    case "add":
+    case "copy":
+      return tokens.colors.interactive.success__resting.hex;
+    case "remove":
+      return tokens.colors.interactive.danger__resting.hex;
+    case "reset":
+      return tokens.colors.interactive.warning__resting.hex;
+    default:
+      return tokens.colors.interactive.primary__resting.hex;
   }
-
-  if (changeType === "remove") {
-    return tokens.colors.interactive.danger__resting.hex;
-  }
-
-  if (changeType === "reset") {
-    return tokens.colors.interactive.warning__resting.hex;
-  }
-
-  return tokens.colors.interactive.primary__resting.hex;
 }
 
 export const ChangelogTableContainer = styled.div`
@@ -34,6 +33,16 @@ export const ChangelogTableContainer = styled.div`
   }
 `;
 
+export const ChangelogDateTime = styled.span`
+  display: inline-flex;
+  flex-wrap: wrap;
+  column-gap: ${tokens.spacings.comfortable.x_small};
+
+  span {
+    white-space: nowrap;
+  }
+`;
+
 export const ChangelogFilterBar = styled.div`
   display: flex;
   align-items: flex-end;
@@ -43,7 +52,7 @@ export const ChangelogFilterBar = styled.div`
 `;
 
 export const ChangelogFilterField = styled.div`
-  min-width: 12rem;
+  min-width: 12em;
 `;
 
 export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
@@ -55,11 +64,8 @@ export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
   border: 0;
 `;
 
-export const ChangeDetails = styled.div`
-  margin-top: ${tokens.spacings.comfortable.small};
-  padding: ${tokens.spacings.comfortable.small};
-  border: 1px solid ${tokens.colors.ui.background__medium.hex};
-  border-radius: ${tokens.shape.corners.borderRadius};
+export const ChangeDetails = styled(GenericBox)`
+  margin-bottom: 0;
   background: ${tokens.colors.ui.background__default.hex};
 `;
 
@@ -74,11 +80,6 @@ export const ChangeDetailsHeader = styled.div`
   justify-content: space-between;
   gap: ${tokens.spacings.comfortable.small};
   margin-bottom: ${tokens.spacings.comfortable.small};
-`;
-
-export const ChangeDetailsSummary = styled.div`
-  margin-bottom: ${tokens.spacings.comfortable.small};
-  color: ${tokens.colors.text.static_icons__secondary.hex};
 `;
 
 export const ChangeDetailsValueGrid = styled.div`

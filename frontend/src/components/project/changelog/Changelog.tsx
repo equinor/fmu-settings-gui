@@ -6,23 +6,28 @@ import { type ChangeEvent, Suspense, useState } from "react";
 import { projectGetChangelogOptions } from "#client/@tanstack/react-query.gen";
 import type { ChangeType, ProjectGetChangelogData } from "#client/types.gen";
 import { Loading, QueryErrorBoundary } from "#components/common";
-import { PageContainerNotWidthConstrained, PageText } from "#styles/common";
+import { PageText } from "#styles/common";
 import {
   HTTP_STATUS_404_NOT_FOUND,
   HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
 } from "#utils/api";
 import { ChangelogFilterBar, ChangelogFilterField } from "./Changelog.style";
 import { ChangelogTable } from "./ChangelogTable";
-import { getTypeLabel } from "./utils";
+import { getChangeTypeLabel } from "./utils";
 
 type EntryLimit = "all" | "10" | "25" | "50" | "100";
 type SettingsTypeFilter = "all" | "config.json" | "mappings.json";
 
-type ChangelogFilters = {
+export type ChangelogFilters = {
   changeType: "all" | ChangeType;
   settingsType: SettingsTypeFilter;
-  entryLimit: EntryLimit;
+  entryLimit: EntryLimit | number;
 };
+
+const httpStatusSpecialHandling = [
+  HTTP_STATUS_404_NOT_FOUND,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+];
 
 const CHANGE_TYPE_OPTIONS: ("all" | ChangeType)[] = [
   "all",
@@ -50,7 +55,7 @@ const SETTINGS_TYPE_LABELS: Record<SettingsTypeFilter, string> = {
   "mappings.json": "Mappings",
 };
 
-const DEFAULT_CHANGELOG_FILTERS: ChangelogFilters = {
+export const DEFAULT_CHANGELOG_FILTERS: ChangelogFilters = {
   changeType: "all",
   settingsType: "all",
   entryLimit: "25",
@@ -77,26 +82,17 @@ function getChangelogQuery(filters: ChangelogFilters) {
   return query;
 }
 
-function useChangelogEntries(filters: ChangelogFilters) {
+export function useChangelogEntries(filters: ChangelogFilters) {
   const { data } = useSuspenseQuery({
     ...projectGetChangelogOptions({ query: getChangelogQuery(filters) }),
     meta: {
-      preventDefaultErrorHandling: [
-        HTTP_STATUS_404_NOT_FOUND,
-        HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
-      ],
-      resetQueryOnError: [
-        HTTP_STATUS_404_NOT_FOUND,
-        HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
-      ],
+      preventDefaultErrorHandling: httpStatusSpecialHandling,
+      resetQueryOnError: httpStatusSpecialHandling,
     },
     retry: (failureCount, queryError) =>
       !(
         isAxiosError(queryError) &&
-        [
-          HTTP_STATUS_404_NOT_FOUND,
-          HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
-        ].includes(queryError.response?.status ?? 0)
+        httpStatusSpecialHandling.includes(queryError.response?.status ?? 0)
       ) && failureCount < 3,
   });
 
@@ -110,7 +106,7 @@ function getChangeTypeOptionLabel(changeType: "all" | ChangeType) {
     return "All changes";
   }
 
-  return getTypeLabel(changeType);
+  return getChangeTypeLabel(changeType);
 }
 
 function ChangelogFilterControls({
@@ -190,19 +186,21 @@ function Content() {
   const changes = useChangelogEntries(filters);
 
   return (
-    <PageContainerNotWidthConstrained>
+    <>
       <ChangelogFilterControls filters={filters} onChange={setFilters} />
       {changes.length === 0 ? (
         <PageText>No changelog entries match the selected filters.</PageText>
       ) : (
         <>
           <PageText>
-            Showing {changes.length} changes to this project's settings.
+            {changes.length === 1
+              ? "Showing the most recent change to the project's settings."
+              : `Showing the ${changes.length} most recent changes to the project's settings.`}
           </PageText>
           <ChangelogTable entries={changes} />
         </>
       )}
-    </PageContainerNotWidthConstrained>
+    </>
   );
 }
 
@@ -211,7 +209,7 @@ export function Changelog() {
     <QueryErrorBoundary
       statusCodeHandling={{
         [HTTP_STATUS_404_NOT_FOUND]: {
-          message: "No changelog found for this project.",
+          message: "No changelog found for the project.",
           enableRetry: false,
         },
         [HTTP_STATUS_422_UNPROCESSABLE_CONTENT]: {

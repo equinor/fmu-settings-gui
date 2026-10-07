@@ -3,20 +3,28 @@ import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { useState } from "react";
 
 import type { ChangeInfo } from "#client/types.gen";
-import { displayDateTime } from "#utils/datetime";
-import { ChangelogTableContainer } from "./Changelog.style";
+import { ChangelogDateTime, ChangelogTableContainer } from "./Changelog.style";
 import { ChangelogDetailsDialog } from "./ChangelogDetailsDialog";
-import { FILE_LABELS, formatEntryDescription } from "./utils";
+import { FILE_LABELS, formatEntryDescription, getEntryKey } from "./utils";
 
-function getEntryKey(entry: ChangeInfo, index: number) {
-  return [
-    entry.timestamp ?? "no-time",
-    entry.user,
-    entry.file,
-    entry.key || "no-field",
-    entry.change_type,
-    index,
-  ].join(":");
+function DateTimeCell({ timestamp }: { timestamp: string | null | undefined }) {
+  const parsedTimestamp = Date.parse(timestamp ?? "");
+  if (!parsedTimestamp) {
+    return "(unknown date)";
+  }
+
+  const dateTime = new Date(parsedTimestamp);
+
+  return (
+    <ChangelogDateTime>
+      <span>
+        {dateTime.toLocaleDateString(undefined, { dateStyle: "medium" })}
+      </span>
+      <span>
+        {dateTime.toLocaleTimeString(undefined, { timeStyle: "medium" })}
+      </span>
+    </ChangelogDateTime>
+  );
 }
 
 export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
@@ -25,20 +33,19 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
     {
       accessorKey: "timestamp",
       header: "Date",
-      cell: ({ row }) =>
-        row.original.timestamp
-          ? displayDateTime(row.original.timestamp)
-          : "(unknown date)",
-    },
-    {
-      id: "description",
-      header: "Change",
-      accessorFn: (entry) => formatEntryDescription(entry),
+      size: 200,
+      cell: ({ row }) => <DateTimeCell timestamp={row.original.timestamp} />,
     },
     {
       accessorKey: "file",
       header: "Settings type",
       cell: ({ row }) => FILE_LABELS[row.original.file] ?? row.original.file,
+    },
+    {
+      id: "description",
+      header: "Change",
+      accessorFn: (entry) => formatEntryDescription(entry),
+      cell: ({ getValue }) => getValue(),
     },
     {
       accessorKey: "user",

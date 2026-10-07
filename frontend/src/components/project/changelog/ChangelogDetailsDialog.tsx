@@ -1,14 +1,13 @@
 import { Button, Dialog } from "@equinor/eds-core-react";
 
 import type { ChangeInfo } from "#client/types.gen";
-import { GenericDialog, PageText } from "#styles/common";
+import { GenericDialog, PageCode, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import {
   ChangeDetails,
   ChangeDetailsContent,
   ChangeDetailsDialogContent,
   ChangeDetailsHeader,
-  ChangeDetailsSummary,
   ChangeDetailsValueGrid,
   ChangeDetailsValueHeader,
   ChangeDetailsValuePanel,
@@ -19,15 +18,40 @@ import {
   formatChangeDetails,
   formatEntryDescription,
   formatSettingLabel,
-  getTypeLabel,
+  getChangeTypeLabel,
   parseChangeDetails,
 } from "./utils";
+
+export function ChangelogEntryHeader({ entry }: { entry: ChangeInfo }) {
+  return (
+    <ChangeDetailsHeader>
+      <PageText $marginBottom="0">
+        <span className="emphasis">{formatEntryDescription(entry)}</span>
+        {entry.change_type !== "init" && (
+          <> in {FILE_LABELS[entry.file] ?? entry.file}</>
+        )}
+        {entry.key && (
+          <>
+            <br />
+            Changed setting: {formatSettingLabel(entry)}
+          </>
+        )}
+        <br />
+        {entry.timestamp ? displayDateTime(entry.timestamp) : "(unknown date)"}{" "}
+        by {entry.user}
+      </PageText>
+      <ChangeTypeChip $changeType={entry.change_type}>
+        {getChangeTypeLabel(entry.change_type)}
+      </ChangeTypeChip>
+    </ChangeDetailsHeader>
+  );
+}
 
 export function ChangelogDetailsDialog({
   entry,
   onClose,
 }: {
-  entry?: ChangeInfo;
+  entry?: ChangeInfo | undefined;
   onClose: () => void;
 }) {
   const fieldPath = entry?.key ?? undefined;
@@ -38,7 +62,12 @@ export function ChangelogDetailsDialog({
     details?.oldValue !== undefined || details?.newValue !== undefined;
 
   return (
-    <GenericDialog open={entry !== undefined} $maxWidth="56em">
+    <GenericDialog
+      open={entry !== undefined}
+      isDismissable={true}
+      onClose={onClose}
+      $width="56em"
+    >
       <Dialog.Header>
         <Dialog.Title>Changelog details</Dialog.Title>
       </Dialog.Header>
@@ -47,38 +76,11 @@ export function ChangelogDetailsDialog({
         <ChangeDetailsDialogContent>
           {entry && (
             <ChangeDetails>
-              <ChangeDetailsHeader>
-                <PageText $marginBottom="0">
-                  <span className="emphasis">
-                    {formatEntryDescription(entry)}
-                  </span>
-                  {entry.change_type !== "init" && (
-                    <> in {FILE_LABELS[entry.file] ?? entry.file}</>
-                  )}
-                  {entry.key && (
-                    <>
-                      <br />
-                      Changed setting: {formatSettingLabel(entry)}
-                    </>
-                  )}
-                  <br />
-                  {entry.timestamp
-                    ? displayDateTime(entry.timestamp)
-                    : "(unknown date)"}{" "}
-                  by {entry.user}
-                </PageText>
-                <ChangeTypeChip $changeType={entry.change_type}>
-                  {getTypeLabel(entry.change_type)}
-                </ChangeTypeChip>
-              </ChangeDetailsHeader>
+              <ChangelogEntryHeader entry={entry} />
 
               {hasValueDiff ? (
                 <>
-                  {details.summary && (
-                    <ChangeDetailsSummary>
-                      {details.summary}
-                    </ChangeDetailsSummary>
-                  )}
+                  {details.summary && <PageText>{details.summary}</PageText>}
                   <ChangeDetailsValueGrid>
                     <ChangeDetailsValuePanel $kind="before">
                       <ChangeDetailsValueHeader>
@@ -100,13 +102,13 @@ export function ChangelogDetailsDialog({
                 </>
               ) : (
                 <>
-                  <ChangeDetailsSummary>
+                  <PageText>
                     Detailed before and after values were not recorded for this
-                    changelog entry.
-                  </ChangeDetailsSummary>
-                  <ChangeDetailsContent>
+                    change.
+                  </PageText>
+                  <PageCode $leftRightMargin="0">
                     {formatChangeDetails(entry.change, fieldPath)}
-                  </ChangeDetailsContent>
+                  </PageCode>
                 </>
               )}
             </ChangeDetails>
@@ -115,9 +117,7 @@ export function ChangelogDetailsDialog({
       </Dialog.CustomContent>
 
       <Dialog.Actions>
-        <Button variant="outlined" onClick={onClose}>
-          Close
-        </Button>
+        <Button onClick={onClose}>Close</Button>
       </Dialog.Actions>
     </GenericDialog>
   );

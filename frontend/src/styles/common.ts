@@ -45,8 +45,11 @@ export const PageText = styled(Typography).attrs<{
   }
 `;
 
-export const PageCode = styled(Typography)`
-  margin: ${tokens.spacings.comfortable.medium};
+export const PageCode = styled(Typography)<{
+  $leftRightMargin?: string;
+}>`
+  margin: ${tokens.spacings.comfortable.medium}
+    ${({ $leftRightMargin = tokens.spacings.comfortable.medium }) => $leftRightMargin};
   margin-top: 0;
   padding: ${tokens.spacings.comfortable.medium};
   border: solid 1px ${tokens.colors.text.static_icons__default.hex};
