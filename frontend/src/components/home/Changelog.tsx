@@ -4,11 +4,11 @@ import { Suspense } from "react";
 
 import type { ChangeInfo } from "#client/types.gen";
 import { Loading, QueryErrorBoundary } from "#components/common";
+import { ChangelogEntryHeader } from "#components/project/changelog/ChangeDetailsDialog";
 import {
   DEFAULT_CHANGELOG_FILTERS,
   useChangelogEntries,
 } from "#components/project/changelog/Changelog";
-import { ChangelogEntryHeader } from "#components/project/changelog/ChangelogDetailsDialog";
 import { getEntryKey } from "#components/project/changelog/utils";
 import { PageHeader, PageText } from "#styles/common";
 import {

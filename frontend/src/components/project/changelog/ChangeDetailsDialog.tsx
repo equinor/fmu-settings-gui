@@ -17,7 +17,6 @@ import {
   FILE_LABELS,
   formatChangeDetails,
   formatEntryDescription,
-  formatSettingLabel,
   getChangeTypeLabel,
   parseChangeDetails,
 } from "./utils";
@@ -28,12 +27,11 @@ export function ChangelogEntryHeader({ entry }: { entry: ChangeInfo }) {
       <PageText $marginBottom="0">
         <span className="emphasis">{formatEntryDescription(entry)}</span>
         {entry.change_type !== "init" && (
-          <> in {FILE_LABELS[entry.file] ?? entry.file}</>
-        )}
-        {entry.key && (
           <>
-            <br />
-            Changed setting: {formatSettingLabel(entry)}
+            {" in "}
+            <span className="emphasis">
+              {FILE_LABELS[entry.file] ?? entry.file}
+            </span>
           </>
         )}
         <br />
@@ -47,7 +45,7 @@ export function ChangelogEntryHeader({ entry }: { entry: ChangeInfo }) {
   );
 }
 
-export function ChangelogDetailsDialog({
+export function ChangeDetailsDialog({
   entry,
   onClose,
 }: {
@@ -69,7 +67,7 @@ export function ChangelogDetailsDialog({
       $width="56em"
     >
       <Dialog.Header>
-        <Dialog.Title>Changelog details</Dialog.Title>
+        <Dialog.Title>Change details</Dialog.Title>
       </Dialog.Header>
 
       <Dialog.CustomContent>

@@ -127,23 +127,6 @@ function ChangelogFilterControls({
     <ChangelogFilterBar>
       <ChangelogFilterField>
         <NativeSelect
-          id="changelog-change-type"
-          label="Filter changes by"
-          value={filters.changeType}
-          onChange={(event) => {
-            handleChange("changeType", event);
-          }}
-        >
-          {CHANGE_TYPE_OPTIONS.map((changeType) => (
-            <option key={changeType} value={changeType}>
-              {getChangeTypeOptionLabel(changeType)}
-            </option>
-          ))}
-        </NativeSelect>
-      </ChangelogFilterField>
-
-      <ChangelogFilterField>
-        <NativeSelect
           id="changelog-settings-type"
           label="Settings type"
           value={filters.settingsType}
@@ -154,6 +137,23 @@ function ChangelogFilterControls({
           {SETTINGS_TYPE_OPTIONS.map((settingsType) => (
             <option key={settingsType} value={settingsType}>
               {SETTINGS_TYPE_LABELS[settingsType]}
+            </option>
+          ))}
+        </NativeSelect>
+      </ChangelogFilterField>
+
+      <ChangelogFilterField>
+        <NativeSelect
+          id="changelog-change-type"
+          label="Filter changes by"
+          value={filters.changeType}
+          onChange={(event) => {
+            handleChange("changeType", event);
+          }}
+        >
+          {CHANGE_TYPE_OPTIONS.map((changeType) => (
+            <option key={changeType} value={changeType}>
+              {getChangeTypeOptionLabel(changeType)}
             </option>
           ))}
         </NativeSelect>

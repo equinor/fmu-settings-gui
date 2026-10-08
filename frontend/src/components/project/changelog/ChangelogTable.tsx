@@ -3,8 +3,12 @@ import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { useState } from "react";
 
 import type { ChangeInfo } from "#client/types.gen";
-import { ChangelogDateTime, ChangelogTableContainer } from "./Changelog.style";
-import { ChangelogDetailsDialog } from "./ChangelogDetailsDialog";
+import { ChangeDetailsDialog } from "./ChangeDetailsDialog";
+import {
+  ChangelogChangeDescription,
+  ChangelogDateTime,
+  ChangelogTableContainer,
+} from "./Changelog.style";
 import { FILE_LABELS, formatEntryDescription, getEntryKey } from "./utils";
 
 function DateTimeCell({ timestamp }: { timestamp: string | null | undefined }) {
@@ -34,26 +38,38 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
       accessorKey: "timestamp",
       header: "Date",
       size: 200,
+      enableColumnFilter: false,
       cell: ({ row }) => <DateTimeCell timestamp={row.original.timestamp} />,
     },
     {
       accessorKey: "file",
       header: "Settings type",
+      size: 170,
+      enableColumnFilter: false,
       cell: ({ row }) => FILE_LABELS[row.original.file] ?? row.original.file,
     },
     {
       id: "description",
       header: "Change",
+      size: 220,
+      enableColumnFilter: false,
       accessorFn: (entry) => formatEntryDescription(entry),
-      cell: ({ getValue }) => getValue(),
+      cell: ({ getValue }) => (
+        <ChangelogChangeDescription>
+          {getValue<string>()}
+        </ChangelogChangeDescription>
+      ),
     },
     {
       accessorKey: "user",
       header: "Changed by",
+      size: 110,
+      enableColumnFilter: true,
     },
     {
       id: "details",
       header: "Details",
+      size: 140,
       cell: ({ row }) => (
         <Button
           variant="outlined"
@@ -69,7 +85,7 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
 
   return (
     <>
-      <ChangelogDetailsDialog
+      <ChangeDetailsDialog
         entry={selectedEntry}
         onClose={() => {
           setSelectedEntry(undefined);
@@ -79,9 +95,13 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
       <ChangelogTableContainer>
         <EdsDataGrid
           stickyHeader
+          enableVirtual
+          height={600}
           rows={entries}
           columns={columns}
-          getRowId={(row) => getEntryKey(row, entries.indexOf(row))}
+          getRowId={(row, index) => getEntryKey(row, index)}
+          enableSorting
+          enableColumnFiltering
         ></EdsDataGrid>
       </ChangelogTableContainer>
     </>

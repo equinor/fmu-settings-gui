@@ -20,14 +20,6 @@ function changeTypeColor(changeType: ChangeType) {
 }
 
 export const ChangelogTableContainer = styled.div`
-  height: 70vh;
-  min-height: 30rem;
-  overflow: auto;
-
-  .table-wrapper {
-    height: 100%;
-  }
-
   table {
     width: 100% !important;
   }
@@ -41,6 +33,10 @@ export const ChangelogDateTime = styled.span`
   span {
     white-space: nowrap;
   }
+`;
+
+export const ChangelogChangeDescription = styled.span`
+  white-space: nowrap;
 `;
 
 export const ChangelogFilterBar = styled.div`
@@ -79,7 +75,6 @@ export const ChangeDetailsHeader = styled.div`
   align-items: flex-start;
   justify-content: space-between;
   gap: ${tokens.spacings.comfortable.small};
-  margin-bottom: ${tokens.spacings.comfortable.small};
 `;
 
 export const ChangeDetailsValueGrid = styled.div`
