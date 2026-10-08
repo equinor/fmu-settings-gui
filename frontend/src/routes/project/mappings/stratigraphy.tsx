@@ -34,6 +34,7 @@ function Content() {
 
   const project = useProject();
   const { data: healthCheck } = useSmdaHealthCheck();
+  const projectReadOnly = !(project.lockStatus?.is_lock_acquired ?? false);
 
   function toggleEditMode() {
     setEditMode((prevMode) => {
@@ -59,19 +60,21 @@ function Content() {
     <>
       {project.data?.config.rms !== undefined &&
       project.data.config.rms !== null ? (
-        <>
-          <Overview
-            rmsProject={project.data.config.rms}
-            stratigraphicColumn={
-              project.data.config.masterdata?.smda.stratigraphic_column
-            }
-            smdaHealthStatus={healthCheck.status}
-            projectReadOnly={!(project.lockStatus?.is_lock_acquired ?? false)}
-            editMode={editMode}
-          />
-
+        <Overview
+          rmsProject={project.data.config.rms}
+          stratigraphicColumn={
+            project.data.config.masterdata?.smda.stratigraphic_column
+          }
+          smdaHealthStatus={healthCheck.status}
+          projectReadOnly={projectReadOnly}
+          editMode={editMode}
+        >
           <PageSectionWidthConstrained>
-            {editMode ? (
+            {projectReadOnly ? (
+              <PageText>
+                💡 The project is read-only, so the mappings are not editable.
+              </PageText>
+            ) : editMode ? (
               <SmdaHealthCheckInfo
                 feature="editing mappings"
                 healthCheck={healthCheck}
@@ -81,7 +84,6 @@ function Content() {
               />
             ) : (
               <PageText>
-                {" "}
                 💡 To manage mappings,{" "}
                 <Typography onClick={toggleEditMode} link>
                   enable editing mode.
@@ -89,7 +91,7 @@ function Content() {
               </PageText>
             )}
           </PageSectionWidthConstrained>
-        </>
+        </Overview>
       ) : (
         <PageSectionWidthConstrained>
           <PageText>No RMS project is selected.</PageText>

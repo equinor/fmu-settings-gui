@@ -1,6 +1,7 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { type AnyFormApi, createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { type Dispatch, type SetStateAction, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -693,6 +694,17 @@ export function Stratigraphy({
           stratigraphy that will be possible to map to official stratigraphic
           names.
         </PageText>
+
+        {projectHorizons.length > 0 && (
+          <PageText>
+            💡 To change which horizons and zones are included in the project,
+            use the{" "}
+            <Link to="/project/rms/stratigraphy" hash="stratigraphy-edit">
+              Edit button below
+            </Link>
+            .
+          </PageText>
+        )}
       </PageSectionWidthConstrained>
 
       {projectHorizons.length ? (
@@ -713,7 +725,7 @@ export function Stratigraphy({
         </PageSectionWidthConstrained>
       )}
 
-      <PageSectionWidthConstrained>
+      <PageSectionWidthConstrained id="stratigraphy-edit">
         <GeneralButton
           label={projectHorizons.length ? "Edit" : "Add"}
           disabled={projectReadOnly || !isRmsProjectOpen}
