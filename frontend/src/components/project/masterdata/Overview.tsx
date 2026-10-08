@@ -33,7 +33,8 @@ export function Overview({
   return (
     <>
       <PageText>
-        The following is the SMDA masterdata stored in the project.
+        The following is the SMDA masterdata stored in the project
+        configuration.
       </PageText>
 
       {projectMasterdata !== undefined ? (

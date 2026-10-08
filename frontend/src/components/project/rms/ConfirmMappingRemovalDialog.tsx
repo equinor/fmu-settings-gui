@@ -45,20 +45,19 @@ export function ConfirmMappingRemovalDialog({
           <>
             <PageText>{selection} will be marked as planned.</PageText>
             <PageText>
-              The following SMDA mapping will be removed from the project
-              because planned wellbores cannot have SMDA mappings:
+              The following SMDA mapping will be removed because planned
+              wellbores cannot have SMDA mappings:
             </PageText>
           </>
         ) : (
           <>
             <PageText>
               {selection} {multipleItems ? "have" : "has"} been selected for
-              removal from the project.
+              removal from the project configuration.
             </PageText>
             <PageText>
-              The following mappings will also be removed from the project, as
-              they are dependent on {multipleItems ? "these" : "this"}{" "}
-              {itemLabel}:
+              The following mappings will also be removed, as they are dependent
+              on {multipleItems ? "these" : "this"} {itemLabel}:
             </PageText>
           </>
         )}

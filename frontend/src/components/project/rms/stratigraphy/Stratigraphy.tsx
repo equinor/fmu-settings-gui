@@ -688,9 +688,8 @@ export function Stratigraphy({
       <PageSectionWidthConstrained>
         <PageText>
           The following is the model stratigraphy stored in the project
-          configuration. This can be a subset or the full RMS stratigraphy. It
-          is only the stored stratigraphy that will be possible to map to
-          official stratigraphic names.
+          configuration. This can be a subset or the full RMS stratigraphy. Only
+          the stored stratigraphy can be mapped to SMDA names.
         </PageText>
       </PageSectionWidthConstrained>
 
@@ -707,7 +706,8 @@ export function Stratigraphy({
       ) : (
         <PageSectionWidthConstrained>
           <PageCode>
-            No stratigraphy information is currently stored in the FMU project.
+            No stratigraphy information is currently stored in the project
+            configuration.
           </PageCode>
         </PageSectionWidthConstrained>
       )}
