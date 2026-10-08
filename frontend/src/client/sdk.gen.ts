@@ -182,8 +182,10 @@ export const projectPatchMasterdata = <ThrowOnError extends boolean = false>(opt
  * Saves associated SMDA fields to the project .fmu directory
  *
  * Saves associated SMDA fields to the project .fmu directory.
- * Associated fields are used to find SMDA wellbores. They are not part
- * of the project masterdata. Existing associated fields are replaced.
+ * Associated fields are used to find SMDA wellbores outside the project fields.
+ * They are not part of the project masterdata.
+ * Existing associated fields are replaced with the supplied list.
+ * An empty list removes all associated fields.
  */
 export const projectPatchAssociatedFields = <ThrowOnError extends boolean = false>(options: Options<ProjectPatchAssociatedFieldsData, ThrowOnError>): RequestResult<ProjectPatchAssociatedFieldsResponses, ProjectPatchAssociatedFieldsErrors, ThrowOnError> => (options.client ?? client).patch<ProjectPatchAssociatedFieldsResponses, ProjectPatchAssociatedFieldsErrors, ThrowOnError>({
     responseType: 'json',

@@ -127,6 +127,10 @@ export type ChangeInfo = {
      */
     change: string;
     /**
+     * Structured Diff
+     */
+    structured_diff?: Array<ScalarFieldDiff | ListFieldDiff> | null;
+    /**
      * Hostname
      */
     hostname: string;
@@ -440,7 +444,7 @@ export type ListFieldDiff = {
 /**
  * ListUpdatedEntry
  *
- * Before and after values for an updated list item.
+ * Before and after values of the changed fields in an updated list item.
  */
 export type ListUpdatedEntry = {
     /**

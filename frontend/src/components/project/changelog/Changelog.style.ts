@@ -3,7 +3,23 @@ import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
 import type { ChangeType } from "#client/types.gen";
-import { GenericBox } from "#styles/common";
+import { GenericBox, GenericInnerBox } from "#styles/common";
+import type { DiffKind } from "./utils";
+
+const diffPalette: Record<DiffKind, { background: string; color: string }> = {
+  added: {
+    background: tokens.colors.interactive.success__highlight.hex,
+    color: tokens.colors.interactive.success__resting.hex,
+  },
+  removed: {
+    background: tokens.colors.ui.background__danger.hex,
+    color: tokens.colors.interactive.danger__resting.hex,
+  },
+  updated: {
+    background: tokens.colors.ui.background__info.hex,
+    color: tokens.colors.interactive.primary__resting.hex,
+  },
+};
 
 function changeTypeColor(changeType: ChangeType) {
   switch (changeType) {
@@ -87,33 +103,37 @@ export const ChangeDetailsValueGrid = styled.div`
   }
 `;
 
-export const ChangeDetailsValuePanel = styled.div<{
-  $kind: "before" | "after";
-}>`
-  padding: ${tokens.spacings.comfortable.small};
-  border: 1px solid
-    ${({ $kind }) =>
-      $kind === "before"
-        ? tokens.colors.interactive.danger__resting.hex
-        : tokens.colors.interactive.success__resting.hex};
-  border-radius: ${tokens.shape.corners.borderRadius};
-  background: ${({ $kind }) =>
-    $kind === "before"
-      ? tokens.colors.ui.background__danger.hex
-      : tokens.colors.interactive.success__highlight.hex};
-`;
-
-export const ChangeDetailsValueHeader = styled.div`
+export const ChangeDetailsFieldHeader = styled.div`
   margin-bottom: ${tokens.spacings.comfortable.small};
-  font-weight: 500;
 `;
 
-export const ChangeDetailsContent = styled.pre`
-  margin: 0;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  color: ${tokens.colors.text.static_icons__default.hex};
-  font-size: 0.875rem;
-  line-height: 1.4;
+export const ChangeDetailsDiffStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${tokens.spacings.comfortable.small};
+`;
+
+export const ChangeDetailsDiffGroup = styled.div<{ $kind: DiffKind }>`
+  border: 1px solid ${({ $kind }) => diffPalette[$kind].color};
+  background: ${({ $kind }) => diffPalette[$kind].background};
+  border-radius: ${tokens.shape.corners.borderRadius};
+  padding: ${tokens.spacings.comfortable.small};
+`;
+
+export const ChangeDetailsValuePanel = styled(GenericInnerBox)`
+  th {
+    text-align: left;
+    vertical-align: top;
+    padding-right: ${tokens.spacings.comfortable.small};
+    white-space: nowrap;
+  }
+
+  td {
+    vertical-align: top;
+    word-break: break-word;
+  }
+
+  p {
+    margin-top: 0;
+  }
 `;

@@ -1,4 +1,12 @@
-import type { ChangeInfo, ChangeType } from "#client/types.gen";
+import type {
+  ChangeInfo,
+  ChangeType,
+  ListFieldDiff,
+  ScalarFieldDiff,
+} from "#client/types.gen";
+
+export type DiffKind = "added" | "removed" | "updated";
+export type StructuredDiffEntry = ScalarFieldDiff | ListFieldDiff;
 
 export const FILE_LABELS: Record<string, string> = {
   "config.json": "Project configuration",
@@ -103,7 +111,10 @@ function getFieldLabel(file: string, path: string): string | undefined {
 function formatBriefDescription(entry: ChangeInfo) {
   const change = entry.change;
   const compact = change.replace(/\s+/g, " ");
-  const withoutDiffPayload = compact.replace(/\. Old value:.*/, "");
+  const withoutDiffPayload = compact.replace(
+    /\. (?:Old value|New value):.*/,
+    "",
+  );
   const technicalFieldChange =
     TECHNICAL_FIELD_CHANGE_PATTERN.exec(withoutDiffPayload);
 
@@ -133,6 +144,11 @@ export function formatEntryDescription(entry: ChangeInfo): string {
     return "Initialized FMU Settings project";
   }
 
+  const structuredDescription = formatStructuredDescription(entry);
+  if (structuredDescription !== undefined) {
+    return structuredDescription;
+  }
+
   const label = formatSettingLabel(entry);
   if (label !== undefined) {
     const verb = CHANGE_TYPE_VERBS[entry.change_type];
@@ -158,164 +174,128 @@ function humanizeSettingKey(key: string): string {
   return withoutArrayIndex.replace(/_/g, " ");
 }
 
-export type ParsedChangeDetails = {
-  raw: string;
-  summary?: string;
-  oldValue?: string;
-  newValue?: string;
-};
+export function isListFieldDiff(
+  diff: StructuredDiffEntry,
+): diff is ListFieldDiff {
+  return "added" in diff && "removed" in diff && "updated" in diff;
+}
+
+export function formatFieldPath(path: string): string {
+  return path.split(".").join(" > ");
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseSerializedValue(value: string): unknown {
-  try {
-    return JSON.parse(value) as unknown;
-  } catch {
-    // Some changelog payloads may come from Python-style repr strings.
+export function formatInlineValue(value: unknown): string {
+  if (value === null) return "null";
+  if (value === undefined) return "(missing)";
+  if (typeof value === "string") return value === "" ? "(empty string)" : value;
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
   }
-
-  try {
-    return JSON.parse(
-      value
-        .replace(/\bNone\b/g, "null")
-        .replace(/\bTrue\b/g, "true")
-        .replace(/\bFalse\b/g, "false")
-        .replace(/'/g, '"'),
-    ) as unknown;
-  } catch {
-    return undefined;
+  if (Array.isArray(value)) {
+    return value.length === 0
+      ? "(empty list)"
+      : `${String(value.length)} values`;
   }
-}
-
-function getValueByPath(value: unknown, pathParts: string[]) {
-  let current = value;
-
-  for (const part of pathParts) {
-    if (!isRecord(current) || !(part in current)) {
-      return undefined;
+  if (isRecord(value)) {
+    const preferred = [
+      "identifier",
+      "source_id",
+      "target_id",
+      "name",
+      "uuid",
+      "id",
+    ].find((key) => key in value);
+    if (preferred !== undefined) {
+      return `${preferred}: ${formatInlineValue(value[preferred])}`;
     }
 
-    current = current[part];
+    return `(${String(Object.keys(value).length)} fields)`;
   }
 
-  return current;
+  return "(unavailable)";
 }
 
-function getNestedChangedValue(value: unknown, fieldPath: string) {
-  const parts = fieldPath.split(".").filter(Boolean);
-
-  for (let index = 0; index < parts.length; index += 1) {
-    const nestedValue = getValueByPath(value, parts.slice(index));
-    if (nestedValue !== undefined) {
-      return nestedValue;
-    }
-  }
-
-  return undefined;
+export function getListItemKey(item: Record<string, unknown>): string {
+  return Object.entries(item)
+    .map(([key, value]) => `${key}:${formatInlineValue(value)}`)
+    .join("|");
 }
 
-function formatDetailedValue(value: unknown): string {
-  if (value === undefined || value === null || value === "") {
-    return "(empty)";
+export function formatUpdatedItemLabel(key: unknown): string {
+  if (Array.isArray(key) && key.length === 4) {
+    const [mappingType, sourceSystem, targetSystem, sourceId] =
+      key.map(formatInlineValue);
+    const formattedMappingType =
+      mappingType === undefined ? "Mapping" : capitalize(mappingType);
+
+    return `${formattedMappingType} mapping: ${sourceId} (${sourceSystem} to ${targetSystem})`;
   }
 
-  if (typeof value === "string") {
-    return value;
-  }
-
-  return JSON.stringify(value, null, 2);
+  return `Item: ${formatInlineValue(key)}`;
 }
 
-function formatChangeValue(value: string, fieldPath?: string): string {
-  const parsedValue = parseSerializedValue(value);
+export function getScalarDiffKind(diff: ScalarFieldDiff): DiffKind {
+  const beforeMissing = diff.before === null || diff.before === undefined;
+  const afterMissing = diff.after === null || diff.after === undefined;
 
-  if (parsedValue === undefined || !fieldPath) {
-    return value.trim();
-  }
+  if (beforeMissing && !afterMissing) return "added";
+  if (!beforeMissing && afterMissing) return "removed";
 
-  const nestedValue = getNestedChangedValue(parsedValue, fieldPath);
-
-  return formatDetailedValue(nestedValue ?? parsedValue);
+  return "updated";
 }
 
-function normalizeChangeValue(value: string): string {
-  return value
-    .replace(/\.\s*$/, "")
-    .replace(/\s*->\s*$/, "")
-    .replace(/^\s*->\s*/, "")
-    .trim();
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export function parseChangeDetails(
-  change: string,
-  fieldPath?: string,
-): ParsedChangeDetails {
-  const details = change.trim();
+function formatStructuredDescription(entry: ChangeInfo): string | undefined {
+  const diffs = entry.structured_diff;
+  const label = formatSettingLabel(entry);
+  if (!diffs?.length || label === undefined) return undefined;
 
-  if (!details) {
-    return { raw: "No detailed change information available." };
-  }
-
-  const oldValueIndex = details.indexOf("Old value:");
-  const newValueIndex = details.indexOf("New value:");
-  const hasOldValue = oldValueIndex !== -1;
-  const hasNewValue = newValueIndex !== -1;
-
-  if (hasOldValue || hasNewValue) {
-    const summaryEndIndexes = [oldValueIndex, newValueIndex].filter(
-      (index) => index !== -1,
+  const listDiffs = diffs.filter(isListFieldDiff);
+  if (listDiffs.length === diffs.length) {
+    const counts = listDiffs.reduce(
+      (total, diff) => ({
+        added: total.added + diff.added.length,
+        removed: total.removed + diff.removed.length,
+        updated: total.updated + diff.updated.length,
+      }),
+      { added: 0, removed: 0, updated: 0 },
     );
-    const summaryEndIndex = Math.min(...summaryEndIndexes);
-    const oldValueEndIndex = hasNewValue ? newValueIndex : details.length;
-    const parsedDetails: ParsedChangeDetails = {
-      raw: details,
-      summary: details
-        .slice(0, summaryEndIndex)
-        .replace(/\.\s*$/, "")
-        .trim(),
-    };
-
-    if (hasOldValue) {
-      parsedDetails.oldValue = formatChangeValue(
-        normalizeChangeValue(
-          details.slice(oldValueIndex + "Old value:".length, oldValueEndIndex),
-        ),
-        fieldPath,
-      );
-    }
-
-    if (hasNewValue) {
-      parsedDetails.newValue = formatChangeValue(
-        normalizeChangeValue(
-          details.slice(newValueIndex + "New value:".length),
-        ),
-        fieldPath,
-      );
-    }
-
-    return parsedDetails;
-  }
-
-  return { raw: details };
-}
-
-export function formatChangeDetails(
-  change: string,
-  fieldPath?: string,
-): string {
-  const details = parseChangeDetails(change, fieldPath);
-
-  if (details.oldValue !== undefined || details.newValue !== undefined) {
-    return [
-      details.summary,
-      `- ${formatChangeValue(details.oldValue ?? "", fieldPath)}`,
-      `+ ${formatChangeValue(details.newValue ?? "", fieldPath)}`,
+    const summary = [
+      counts.added > 0 ? `${String(counts.added)} added` : undefined,
+      counts.removed > 0 ? `${String(counts.removed)} removed` : undefined,
+      counts.updated > 0 ? `${String(counts.updated)} updated` : undefined,
     ]
-      .filter(Boolean)
-      .join("\n");
+      .filter((part): part is string => part !== undefined)
+      .join(", ");
+
+    if (summary) {
+      const subject =
+        entry.file === "mappings.json" && !label.endsWith("mappings")
+          ? `${label} mappings`
+          : label;
+
+      return `${capitalize(subject)}: ${summary}`;
+    }
   }
 
-  return details.raw;
+  const scalarDiffs = diffs.filter(
+    (diff): diff is ScalarFieldDiff => !isListFieldDiff(diff),
+  );
+  if (scalarDiffs.length === diffs.length) {
+    if (scalarDiffs.every((diff) => diff.before === null)) {
+      return `Set ${label}`;
+    }
+    if (scalarDiffs.every((diff) => diff.after === null)) {
+      return `Cleared ${label}`;
+    }
+  }
+
+  return `Updated ${label}`;
 }

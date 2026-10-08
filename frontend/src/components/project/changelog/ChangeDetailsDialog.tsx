@@ -1,24 +1,19 @@
 import { Button, Dialog } from "@equinor/eds-core-react";
 
 import type { ChangeInfo } from "#client/types.gen";
-import { GenericDialog, PageCode, PageText } from "#styles/common";
+import { GenericDialog, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import {
   ChangeDetails,
-  ChangeDetailsContent,
   ChangeDetailsDialogContent,
   ChangeDetailsHeader,
-  ChangeDetailsValueGrid,
-  ChangeDetailsValueHeader,
-  ChangeDetailsValuePanel,
   ChangeTypeChip,
 } from "./Changelog.style";
+import { StructuredDiff } from "./StructuredDiff";
 import {
   FILE_LABELS,
-  formatChangeDetails,
   formatEntryDescription,
   getChangeTypeLabel,
-  parseChangeDetails,
 } from "./utils";
 
 export function ChangelogEntryHeader({ entry }: { entry: ChangeInfo }) {
@@ -52,12 +47,7 @@ export function ChangeDetailsDialog({
   entry?: ChangeInfo | undefined;
   onClose: () => void;
 }) {
-  const fieldPath = entry?.key ?? undefined;
-  const details = entry
-    ? parseChangeDetails(entry.change, fieldPath)
-    : undefined;
-  const hasValueDiff =
-    details?.oldValue !== undefined || details?.newValue !== undefined;
+  const structuredDiff = entry?.structured_diff ?? [];
 
   return (
     <GenericDialog
@@ -76,38 +66,12 @@ export function ChangeDetailsDialog({
             <ChangeDetails>
               <ChangelogEntryHeader entry={entry} />
 
-              {hasValueDiff ? (
-                <>
-                  {details.summary && <PageText>{details.summary}</PageText>}
-                  <ChangeDetailsValueGrid>
-                    <ChangeDetailsValuePanel $kind="before">
-                      <ChangeDetailsValueHeader>
-                        Before change
-                      </ChangeDetailsValueHeader>
-                      <ChangeDetailsContent>
-                        {details.oldValue ?? "(empty)"}
-                      </ChangeDetailsContent>
-                    </ChangeDetailsValuePanel>
-                    <ChangeDetailsValuePanel $kind="after">
-                      <ChangeDetailsValueHeader>
-                        After change
-                      </ChangeDetailsValueHeader>
-                      <ChangeDetailsContent>
-                        {details.newValue ?? "(empty)"}
-                      </ChangeDetailsContent>
-                    </ChangeDetailsValuePanel>
-                  </ChangeDetailsValueGrid>
-                </>
+              {structuredDiff.length > 0 ? (
+                <StructuredDiff entries={structuredDiff} />
               ) : (
-                <>
-                  <PageText>
-                    Detailed before and after values were not recorded for this
-                    change.
-                  </PageText>
-                  <PageCode $leftRightMargin="0">
-                    {formatChangeDetails(entry.change, fieldPath)}
-                  </PageCode>
-                </>
+                <PageText $marginBottom="0">
+                  Detailed change information is not available for this entry.
+                </PageText>
               )}
             </ChangeDetails>
           )}
