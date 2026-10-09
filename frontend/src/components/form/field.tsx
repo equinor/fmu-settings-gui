@@ -305,7 +305,11 @@ export function AutocompleteField<T>({
         {...(noOptionsText !== undefined && { noOptionsText })}
         {...(optionLabel !== undefined && { optionLabel })}
         {...(optionComponent !== undefined && { optionComponent })}
-        {...(optionDisabled !== undefined && { optionDisabled })}
+        {...(optionDisabled !== undefined && {
+          // EDS passes undefined on ArrowDown when the search shows no selectable option.
+          optionDisabled: (option: T) =>
+            option != null && optionDisabled(option),
+        })}
         itemToKey={(option) => (option === null ? null : optionValue(option))}
         onOptionsChange={({ selectedItems }) => {
           field.handleChange(
