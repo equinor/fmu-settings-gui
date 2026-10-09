@@ -78,7 +78,7 @@ function ProjectNotFound({
   const hasText = text !== "";
   const lead = isInvalidProjectConfig
     ? `Project configuration is invalid${hasText ? ":" : "."}`
-    : `No project selected${hasText ? ":" : "."}`;
+    : `No FMU project selected${hasText ? ":" : "."}`;
 
   return (
     <>

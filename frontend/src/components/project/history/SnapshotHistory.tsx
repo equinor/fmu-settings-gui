@@ -815,7 +815,7 @@ export function SnapshotHistory({
 
           <PageText>
             Use <strong>Max snapshots</strong> to control how many snapshots are
-            kept on disk for this project.
+            stored for the project.
           </PageText>
 
           <SelectorRow>
@@ -916,7 +916,8 @@ export function SnapshotHistory({
         </>
       ) : (
         <PageText>
-          Project not set. Select a project to view and restore snapshots.
+          FMU project not set. Select an FMU project to view and restore
+          snapshots.
         </PageText>
       )}
     </>

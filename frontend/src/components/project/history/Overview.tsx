@@ -19,12 +19,12 @@ export function Overview({
         cacheMaxRevisions={cacheMaxRevisions}
       />
 
-      <PageSectionSpacer />
-
-      <ProjectFileRecovery
-        hasProject={hasProject}
-        projectReadOnly={projectReadOnly}
-      />
+      {hasProject && (
+        <>
+          <PageSectionSpacer />
+          <ProjectFileRecovery projectReadOnly={projectReadOnly} />
+        </>
+      )}
     </>
   );
 }

@@ -158,12 +158,12 @@ function RmsEditorForm({
                 availableRmsProjects.length === 0
                   ? "Could not detect any RMS projects in the rms/model directory"
                   : rmsData && !isProjectInAvailable(rmsData.path)
-                    ? "Selected project does not exist"
+                    ? "Selected RMS project does not exist"
                     : undefined,
 
               onChange: ({ value }) =>
                 !isProjectInAvailable(value)
-                  ? "Selected project does not exist"
+                  ? "Selected RMS project does not exist"
                   : undefined,
             }}
           >
@@ -214,7 +214,7 @@ function RmsInfo({ rmsData }: { rmsData: RmsProject }) {
       <table>
         <tbody>
           <tr>
-            <th>Project</th>
+            <th>RMS project</th>
             <td>{getRmsProjectName(rmsData.path)}</td>
           </tr>
           <tr>
@@ -374,7 +374,8 @@ export function Overview({
         <RmsInfo rmsData={rmsData} />
       ) : (
         <PageCode>
-          No RMS project information is currently stored in the project.
+          No RMS project information is currently stored in the project
+          configuration.
         </PageCode>
       )}
 

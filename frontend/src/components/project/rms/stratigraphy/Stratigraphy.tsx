@@ -97,8 +97,8 @@ function ConfirmActionDialog({
       <Dialog.CustomContent>
         <PageText>
           {confirmAction === "add"
-            ? "This will add all available stratigraphy to the project."
-            : "This will remove all stratigraphy from the project."}
+            ? "This will add all available stratigraphy to the project configuration."
+            : "This will remove all stratigraphy from the project configuration."}
         </PageText>
 
         <PageText $marginBottom="0">Do you want to continue? </PageText>
@@ -310,12 +310,11 @@ function StratigraphyEditor({
 
         {hasOrphans && (
           <OrphanWarningBox
-            message={
-              `${orphanTypeCounts.join(" and ")} stored in the project ${
-                orphanCount === 1 ? "is" : "are"
-              } currently not available in RMS. ` +
-              "Saving will remove this and its mappings."
-            }
+            message={`${orphanTypeCounts.join(" and ")} stored in the project configuration ${
+              orphanCount === 1 ? "is" : "are"
+            } currently not available in RMS. ${
+              orphanCount === 1 ? "It" : "They"
+            } and ${orphanCount === 1 ? "its" : "their"} mappings will be removed when you save.`}
             listItems={orphanListItems}
           />
         )}
@@ -689,16 +688,15 @@ export function Stratigraphy({
     <>
       <PageSectionWidthConstrained>
         <PageText>
-          The following is the model stratigraphy stored in the project, this
-          can be a subset or the full RMS stratigraphy. It is only the stored
-          stratigraphy that will be possible to map to official stratigraphic
-          names.
+          The following is the model stratigraphy stored in the project
+          configuration. This can be a subset or the full RMS stratigraphy. Only
+          the stored stratigraphy can be mapped to SMDA names.
         </PageText>
 
         {projectHorizons.length > 0 && (
           <PageText>
-            💡 To change which horizons and zones are included in the project,
-            use the{" "}
+            💡 To change which horizons and zones are stored in the project
+            configuration, use the{" "}
             <Link to="/project/rms/stratigraphy" hash="stratigraphy-edit">
               Edit button below
             </Link>
@@ -720,7 +718,8 @@ export function Stratigraphy({
       ) : (
         <PageSectionWidthConstrained>
           <PageCode>
-            No stratigraphy information is currently stored in the project.
+            No stratigraphy information is currently stored in the project
+            configuration.
           </PageCode>
         </PageSectionWidthConstrained>
       )}

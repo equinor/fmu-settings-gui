@@ -471,7 +471,7 @@ export function WellboreMappingsTable({
         <>
           <PageText>
             <span className="emphasis">{rows.length}</span> wellbores are stored
-            in the project.
+            in the project configuration.
             <br />
             <span className="emphasis">{manualSmdaMappingCount}</span> wellbores
             need SMDA mapping.
