@@ -419,7 +419,7 @@ function ConfirmInitProjectDialog({
       <Dialog.CustomContent>
         <PageText bold={true}> {projectPath} </PageText>
         <PageText>
-          This project needs to be initialized to use FMU settings.
+          This project needs to be initialized to use FMU Settings.
           <br />
           Would you like to initialize?
         </PageText>

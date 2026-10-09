@@ -156,6 +156,27 @@ export const ChangeInfoSchema = {
             type: 'string',
             title: 'Change'
         },
+        structured_diff: {
+            anyOf: [
+                {
+                    items: {
+                        anyOf: [
+                            {
+                                $ref: '#/components/schemas/ScalarFieldDiff'
+                            },
+                            {
+                                $ref: '#/components/schemas/ListFieldDiff'
+                            }
+                        ]
+                    },
+                    type: 'array'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Structured Diff'
+        },
         hostname: {
             type: 'string',
             title: 'Hostname'
@@ -678,7 +699,7 @@ export const ListUpdatedEntrySchema = {
         'after'
     ],
     title: 'ListUpdatedEntry',
-    description: 'Before and after values for an updated list item.'
+    description: 'Before and after values of the changed fields in an updated list item.'
 } as const;
 
 export const LockInfoSchema = {
@@ -707,7 +728,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.5.0'
+            default: '1.5.1.dev1+gfb1c88195'
         }
     },
     type: 'object',

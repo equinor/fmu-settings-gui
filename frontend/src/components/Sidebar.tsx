@@ -132,6 +132,7 @@ export function Sidebar() {
         { label: "Wellbores", to: "/project/mappings/wellbores" },
       ],
     });
+    ProjectSubItems.push({ label: "Changelog", to: "/project/changelog" });
     ProjectSubItems.push({ label: "History", to: "/project/history" });
   }
 
