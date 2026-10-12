@@ -1,6 +1,8 @@
 import { Button, Dialog } from "@equinor/eds-core-react";
 
 import type { ChangeInfo } from "#client/types.gen";
+import { StructuredDiff } from "#components/project/diff/StructuredDiff";
+import { RESOURCE_LABELS } from "#components/project/diff/utils";
 import { GenericDialog, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import {
@@ -9,12 +11,7 @@ import {
   ChangeDetailsHeader,
   ChangeTypeChip,
 } from "./Changelog.style";
-import { StructuredDiff } from "./StructuredDiff";
-import {
-  FILE_LABELS,
-  formatEntryDescription,
-  getChangeTypeLabel,
-} from "./utils";
+import { formatEntryDescription, getChangeTypeLabel } from "./utils";
 
 export function ChangelogEntryHeader({ entry }: { entry: ChangeInfo }) {
   return (
@@ -25,7 +22,7 @@ export function ChangelogEntryHeader({ entry }: { entry: ChangeInfo }) {
           <>
             {" in "}
             <span className="emphasis">
-              {FILE_LABELS[entry.file] ?? entry.file}
+              {RESOURCE_LABELS[entry.file] ?? entry.file}
             </span>
           </>
         )}
@@ -67,7 +64,12 @@ export function ChangeDetailsDialog({
               <ChangelogEntryHeader entry={entry} />
 
               {structuredDiff.length > 0 ? (
-                <StructuredDiff entries={structuredDiff} />
+                <StructuredDiff
+                  entries={structuredDiff}
+                  beforeLabel="Before change"
+                  afterLabel="After change"
+                  resource={entry.file}
+                />
               ) : (
                 <PageText $marginBottom="0">
                   Detailed change information is not available for this entry.

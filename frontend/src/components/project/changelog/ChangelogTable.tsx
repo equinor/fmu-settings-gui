@@ -3,13 +3,10 @@ import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { useState } from "react";
 
 import type { ChangeInfo } from "#client/types.gen";
+import { RESOURCE_LABELS } from "#components/project/diff/utils";
 import { ChangeDetailsDialog } from "./ChangeDetailsDialog";
-import {
-  ChangelogChangeDescription,
-  ChangelogDateTime,
-  ChangelogTableContainer,
-} from "./Changelog.style";
-import { FILE_LABELS, formatEntryDescription, getEntryKey } from "./utils";
+import { ChangelogDateTime, ChangelogTableContainer } from "./Changelog.style";
+import { formatEntryDescription, getEntryKey } from "./utils";
 
 function DateTimeCell({ timestamp }: { timestamp: string | null | undefined }) {
   const parsedTimestamp = Date.parse(timestamp ?? "");
@@ -46,19 +43,16 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
       header: "Settings type",
       size: 170,
       enableColumnFilter: false,
-      cell: ({ row }) => FILE_LABELS[row.original.file] ?? row.original.file,
+      cell: ({ row }) =>
+        RESOURCE_LABELS[row.original.file] ?? row.original.file,
     },
     {
       id: "description",
       header: "Change",
-      size: 220,
+      size: 240,
       enableColumnFilter: false,
       accessorFn: (entry) => formatEntryDescription(entry),
-      cell: ({ getValue }) => (
-        <ChangelogChangeDescription>
-          {getValue<string>()}
-        </ChangelogChangeDescription>
-      ),
+      cell: ({ getValue }) => getValue<string>(),
     },
     {
       accessorKey: "user",
@@ -96,7 +90,7 @@ export function ChangelogTable({ entries }: { entries: ChangeInfo[] }) {
         <EdsDataGrid
           stickyHeader
           enableVirtual
-          height={600}
+          height={576}
           rows={entries}
           columns={columns}
           getRowId={(row, index) => getEntryKey(row, index)}

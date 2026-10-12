@@ -8,7 +8,7 @@ import {
 import { tokens } from "@equinor/eds-tokens";
 import styled from "styled-components";
 
-const WidthConstraint = "55em";
+const WidthConstraint = "60em";
 const NotWidthConstrainedName = "notWidthConstrained";
 
 export const PageContainer = styled.div`

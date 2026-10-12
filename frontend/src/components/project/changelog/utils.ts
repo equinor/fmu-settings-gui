@@ -1,67 +1,14 @@
 import type {
   ChangeInfo,
   ChangeType,
-  ListFieldDiff,
   ScalarFieldDiff,
 } from "#client/types.gen";
-
-export type DiffKind = "added" | "removed" | "updated";
-export type StructuredDiffEntry = ScalarFieldDiff | ListFieldDiff;
-
-export const FILE_LABELS: Record<string, string> = {
-  "config.json": "Project configuration",
-  "mappings.json": "Mappings",
-};
-
-const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
-  "config.json": {
-    access: "access control",
-    "access.asset": "asset",
-    "access.asset.name": "asset name",
-    "access.classification": "classification",
-    cache_max_revisions: "max snapshots",
-    created_at: "project creation date",
-    created_by: "project creator",
-    masterdata: "masterdata",
-    "masterdata.smda": "SMDA",
-    "masterdata.smda.coordinate_system": "SMDA coordinate system",
-    "masterdata.smda.country": "SMDA countries",
-    "masterdata.smda.discovery": "SMDA discoveries",
-    "masterdata.smda.field": "SMDA fields",
-    "masterdata.smda.stratigraphic_column": "SMDA stratigraphic column",
-    model: "model information",
-    "model.description": "model description",
-    "model.name": "model name",
-    "model.revision": "model revision",
-    rms: "RMS project",
-    "rms.coordinate_system": "RMS coordinate system",
-    "rms.horizons": "RMS horizons",
-    "rms.path": "RMS project path",
-    "rms.version": "RMS version",
-    "rms.wells": "RMS wells",
-    "rms.zones": "RMS stratigraphic zones",
-    "validation.rms_project": "RMS project validation",
-    updated_at: "last updated date",
-    updated_by: "last updated by",
-  },
-  "mappings.json": {
-    created_at: "mapping creation date",
-    created_by: "mapping creator",
-    stratigraphy: "stratigraphy",
-    updated_at: "last updated date",
-    updated_by: "last updated by",
-    wellbore: "wellbore",
-  },
-};
-
-const SORTED_PATH_LABEL_KEYS: Record<string, string[] | undefined> = {
-  "config.json": Object.keys(PATH_LABELS["config.json"] ?? {}).sort(
-    (a, b) => b.length - a.length,
-  ),
-  "mappings.json": Object.keys(PATH_LABELS["mappings.json"] ?? {}).sort(
-    (a, b) => b.length - a.length,
-  ),
-};
+import {
+  getFieldLabel,
+  getScalarDiffKind,
+  getVisibleListFieldDiff,
+  isListFieldDiff,
+} from "#components/project/diff/utils";
 
 const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   add: "Added",
@@ -83,29 +30,6 @@ export function getChangeTypeLabel(changeType: ChangeType) {
 
 export function getEntryKey(entry: ChangeInfo, index: number) {
   return [entry.timestamp ?? "no-time", index].join(":");
-}
-
-function getFieldLabel(file: string, path: string): string | undefined {
-  const labels = PATH_LABELS[file];
-  if (!labels) {
-    return undefined;
-  }
-
-  if (path in labels) {
-    return labels[path];
-  }
-
-  const sortedKeys = SORTED_PATH_LABEL_KEYS[file];
-  if (!sortedKeys) {
-    return undefined;
-  }
-  for (const key of sortedKeys) {
-    if (path.startsWith(`${key}.`) || path.startsWith(`${key}[`)) {
-      return labels[key];
-    }
-  }
-
-  return undefined;
 }
 
 function formatBriefDescription(entry: ChangeInfo) {
@@ -174,80 +98,6 @@ function humanizeSettingKey(key: string): string {
   return withoutArrayIndex.replace(/_/g, " ");
 }
 
-export function isListFieldDiff(
-  diff: StructuredDiffEntry,
-): diff is ListFieldDiff {
-  return "added" in diff && "removed" in diff && "updated" in diff;
-}
-
-export function formatFieldPath(path: string): string {
-  return path.split(".").join(" > ");
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export function formatInlineValue(value: unknown): string {
-  if (value === null) return "null";
-  if (value === undefined) return "(missing)";
-  if (typeof value === "string") return value === "" ? "(empty string)" : value;
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  if (Array.isArray(value)) {
-    return value.length === 0
-      ? "(empty list)"
-      : `${String(value.length)} values`;
-  }
-  if (isRecord(value)) {
-    const preferred = [
-      "identifier",
-      "source_id",
-      "target_id",
-      "name",
-      "uuid",
-      "id",
-    ].find((key) => key in value);
-    if (preferred !== undefined) {
-      return `${preferred}: ${formatInlineValue(value[preferred])}`;
-    }
-
-    return `(${String(Object.keys(value).length)} fields)`;
-  }
-
-  return "(unavailable)";
-}
-
-export function getListItemKey(item: Record<string, unknown>): string {
-  return Object.entries(item)
-    .map(([key, value]) => `${key}:${formatInlineValue(value)}`)
-    .join("|");
-}
-
-export function formatUpdatedItemLabel(key: unknown): string {
-  if (Array.isArray(key) && key.length === 4) {
-    const [mappingType, sourceSystem, targetSystem, sourceId] =
-      key.map(formatInlineValue);
-    const formattedMappingType =
-      mappingType === undefined ? "Mapping" : capitalize(mappingType);
-
-    return `${formattedMappingType} mapping: ${sourceId} (${sourceSystem} to ${targetSystem})`;
-  }
-
-  return `Item: ${formatInlineValue(key)}`;
-}
-
-export function getScalarDiffKind(diff: ScalarFieldDiff): DiffKind {
-  const beforeMissing = diff.before === null || diff.before === undefined;
-  const afterMissing = diff.after === null || diff.after === undefined;
-
-  if (beforeMissing && !afterMissing) return "added";
-  if (!beforeMissing && afterMissing) return "removed";
-
-  return "updated";
-}
-
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
@@ -259,7 +109,7 @@ function formatStructuredDescription(entry: ChangeInfo): string | undefined {
 
   const listDiffs = diffs.filter(isListFieldDiff);
   if (listDiffs.length === diffs.length) {
-    const counts = listDiffs.reduce(
+    const counts = listDiffs.map(getVisibleListFieldDiff).reduce(
       (total, diff) => ({
         added: total.added + diff.added.length,
         removed: total.removed + diff.removed.length,
@@ -289,10 +139,10 @@ function formatStructuredDescription(entry: ChangeInfo): string | undefined {
     (diff): diff is ScalarFieldDiff => !isListFieldDiff(diff),
   );
   if (scalarDiffs.length === diffs.length) {
-    if (scalarDiffs.every((diff) => diff.before === null)) {
+    if (scalarDiffs.every((diff) => getScalarDiffKind(diff) === "added")) {
       return `Set ${label}`;
     }
-    if (scalarDiffs.every((diff) => diff.after === null)) {
+    if (scalarDiffs.every((diff) => getScalarDiffKind(diff) === "removed")) {
       return `Cleared ${label}`;
     }
   }

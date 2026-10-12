@@ -7,8 +7,6 @@ export type CacheEntry = {
   isAutoBackup: boolean;
 };
 
-export type DiffKind = "added" | "removed" | "updated";
-
 export type SnapshotDeletionImpact = {
   resource: CacheResource;
   label: string;
