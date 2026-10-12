@@ -51,7 +51,8 @@ export function ChangeDetailsDialog({
       open={entry !== undefined}
       isDismissable={true}
       onClose={onClose}
-      $width="56em"
+      $width="fit-content"
+      $maxWidth="min(64em, calc(100vw - 2em))"
     >
       <Dialog.Header>
         <Dialog.Title>Change details</Dialog.Title>

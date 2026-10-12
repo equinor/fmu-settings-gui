@@ -85,4 +85,8 @@ export const ChangeDetailsHeader = styled.div`
   align-items: flex-start;
   justify-content: space-between;
   gap: ${tokens.spacings.comfortable.small};
+
+  ${ChangeDetails} & {
+    margin-bottom: ${tokens.spacings.comfortable.small};
+  }
 `;

@@ -114,7 +114,11 @@ function DiffDetailsDialog({
   onClose: () => void;
 }) {
   return (
-    <GenericDialog open={isOpen} $maxWidth="56em">
+    <GenericDialog
+      open={isOpen}
+      $width="fit-content"
+      $maxWidth="min(64em, calc(100vw - 2em))"
+    >
       <Dialog.Header>
         <Dialog.Title>
           {resourceLabel} -{" "}

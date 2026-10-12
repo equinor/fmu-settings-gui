@@ -46,6 +46,10 @@ export const DiffValueGrid = styled.div`
   }
 `;
 
+export const DiffMultilineValue = styled.p`
+  white-space: pre-wrap;
+`;
+
 export const DiffValuePanel = styled(GenericInnerBox)`
   th {
     text-align: left;
@@ -61,5 +65,9 @@ export const DiffValuePanel = styled(GenericInnerBox)`
 
   p {
     margin-top: 0;
+  }
+
+  td > p {
+    margin: 0;
   }
 `;

@@ -1,8 +1,10 @@
 import type { ListUpdatedEntry } from "#client/types.gen";
 import { GenericInnerBox } from "#styles/common";
+import { displayDateTime } from "#utils/datetime";
 import {
   DiffFieldHeader,
   DiffGroup,
+  DiffMultilineValue,
   DiffStack,
   DiffValueGrid,
   DiffValuePanel,
@@ -37,6 +39,13 @@ function ReadableValue({
   itemKey?: unknown;
 }) {
   if (Array.isArray(value)) {
+    if (
+      value.length > 0 &&
+      value.every((item): item is string => typeof item === "string")
+    ) {
+      return <DiffMultilineValue>{value.join("\n")}</DiffMultilineValue>;
+    }
+
     return value.length === 0 ? (
       <p>(empty list)</p>
     ) : (
@@ -115,6 +124,7 @@ function ListFieldGroup({
           {title} ({String(values.length)})
         </strong>
       </DiffFieldHeader>
+
       <DiffStack>
         {values.map((item, index) => (
           <DiffValuePanel
@@ -144,6 +154,7 @@ function UpdatedFieldGroup({
       <DiffFieldHeader>
         <strong>Updated ({String(updated.length)})</strong>
       </DiffFieldHeader>
+
       <DiffStack>
         {updated.map((item, index) => (
           <GenericInnerBox
@@ -152,6 +163,7 @@ function UpdatedFieldGroup({
             <DiffFieldHeader>
               <strong>{formatUpdatedItemLabel(item.key)}</strong>
             </DiffFieldHeader>
+
             <DiffValueGrid>
               <DiffValuePanel>
                 <strong>{beforeLabel}</strong>
@@ -205,6 +217,7 @@ function DiffEntryCard({
         <DiffFieldHeader>
           <strong>{formatFieldPath(resource, diff.field_path)}</strong>
         </DiffFieldHeader>
+
         <DiffStack>
           <ListFieldGroup
             kind="added"
@@ -227,31 +240,41 @@ function DiffEntryCard({
   }
 
   const kind = getScalarDiffKind(diff);
+  const isDateTimeField =
+    diff.field_path.split(".").at(-1) === "last_validated_at";
+  const formatValue = (value: unknown): unknown =>
+    isDateTimeField && typeof value === "string"
+      ? displayDateTime(value)
+      : value;
+  const beforeValue = formatValue(diff.before);
+  const afterValue = formatValue(diff.after);
 
   return (
     <GenericInnerBox>
       <DiffFieldHeader>
         <strong>{formatFieldPath(resource, diff.field_path)}</strong>
       </DiffFieldHeader>
+
       <DiffGroup $kind={kind}>
         <DiffFieldHeader>
           <strong>{kind.charAt(0).toUpperCase() + kind.slice(1)} (1)</strong>
         </DiffFieldHeader>
+
         <DiffValueGrid>
           <DiffValuePanel>
             <strong>{beforeLabel}</strong>
             <ReadableValue
-              value={diff.before}
+              value={beforeValue}
               kind="before"
-              counterpart={diff.after}
+              counterpart={afterValue}
             />
           </DiffValuePanel>
           <DiffValuePanel>
             <strong>{afterLabel}</strong>
             <ReadableValue
-              value={diff.after}
+              value={afterValue}
               kind="after"
-              counterpart={diff.before}
+              counterpart={beforeValue}
             />
           </DiffValuePanel>
         </DiffValueGrid>
