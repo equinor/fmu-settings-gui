@@ -145,6 +145,21 @@ export function createOptions(
       };
     });
 
+  const stratigraphicColumns = Object.entries(smdaMasterdataGrouped).reduce<
+    Array<StratigraphicColumn>
+  >((acc, fieldData) => {
+    const [fieldUuid, masterdata] = fieldData;
+    if (projectFields.find((f) => f.uuid === fieldUuid)) {
+      masterdata.stratigraphic_columns.forEach((column) => {
+        if (!acc.find((c) => c.uuid === column.uuid)) {
+          acc.push(column);
+        }
+      });
+    }
+
+    return acc;
+  }, []);
+
   return {
     // The list of coordinate systems is the same for all SMDA fields
     coordinateSystems:
@@ -160,33 +175,28 @@ export function createOptions(
               .sort((a, b) => stringCompare(a.identifier, b.identifier)) ?? [],
           )
         : [],
-    stratigraphicColumns: Object.entries(smdaMasterdataGrouped).reduce<
-      Array<StratigraphicColumn>
-    >((acc, fieldData) => {
-      const [fieldUuid, masterdata] = fieldData;
-      if (projectFields.find((f) => f.uuid === fieldUuid)) {
-        acc.push(...masterdata.stratigraphic_columns);
-      }
-
-      return acc;
-    }, []),
-    stratigraphicColumnsOptions: Object.entries(smdaMasterdataGrouped)
-      .reduce<Array<StratigraphicColumn>>((acc, fieldData) => {
-        const [fieldUuid, masterdata] = fieldData;
-        const field = projectFields.find((f) => f.uuid === fieldUuid);
-        if (field) {
-          acc.push(
-            ...masterdata.stratigraphic_columns.map((value) => ({
-              ...value,
-              identifier:
-                value.identifier +
-                (fieldCount > 1 ? ` [${field.identifier}]` : ""),
-            })),
-          );
+    stratigraphicColumns,
+    stratigraphicColumnsOptions: stratigraphicColumns
+      .map((column) => {
+        if (fieldCount < 2) {
+          return column;
         }
 
-        return acc;
-      }, [])
+        const fieldNames = projectFields
+          .filter((f) =>
+            smdaMasterdataGrouped[f.uuid]?.stratigraphic_columns.some(
+              (c) => c.uuid === column.uuid,
+            ),
+          )
+          .map((f) => f.identifier)
+          .sort(stringCompare)
+          .join(", ");
+
+        return {
+          ...column,
+          identifier: `${column.identifier} [${fieldNames}]`,
+        };
+      })
       .sort((a, b) => stringCompare(a.identifier, b.identifier)),
   };
 }
