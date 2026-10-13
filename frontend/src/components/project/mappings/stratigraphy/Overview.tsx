@@ -207,7 +207,6 @@ function Edit({
         open={isOpen}
         isDismissable={true}
         onClose={confirmClose.handleCloseRequest}
-        $minWidth="30em"
       >
         <form
           onSubmit={(e) => {
