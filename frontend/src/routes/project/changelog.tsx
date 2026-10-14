@@ -27,7 +27,7 @@ function RouteComponent() {
 
       <PageText>
         This page displays the full changelog for the project. Use the filters
-        to narrow the list by change type, settings type, or how many changes to
+        to narrow the list by settings type, change type, or how many changes to
         show.
       </PageText>
 

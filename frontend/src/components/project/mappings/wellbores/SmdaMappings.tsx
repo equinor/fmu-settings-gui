@@ -8,7 +8,6 @@ import { matchPostMatchMutation } from "#client/@tanstack/react-query.gen";
 import { ConfirmCloseDialog } from "#components/common";
 import { CancelButton, GeneralButton } from "#components/form/button";
 import type { ElementMappings } from "#components/project/common/mapping/types";
-import { emptyName } from "#components/project/common/mapping/utils";
 import { applicationLocale } from "#config";
 import type { SaveWellboreMappings } from "#services/mappings";
 import type { SmdaWellHeaders } from "#services/smda";
@@ -18,7 +17,7 @@ import {
   DataGridSearch,
   dataGridHeight,
 } from "#styles/dataGrid";
-import { useConfirmClose } from "#utils/ui";
+import { emptyName, useConfirmClose } from "#utils/ui";
 import {
   applyAutomaticMatchProposals,
   createAutomaticMatchProposals,

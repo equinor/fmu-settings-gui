@@ -1,5 +1,6 @@
 import type { DataSystem } from "#client";
 import type { OptionProps } from "#components/form/field";
+import { emptyName } from "#utils/ui";
 import type {
   ElementMapping,
   ElementMappingTarget,
@@ -7,8 +8,6 @@ import type {
   ElementType,
   SpecialOptionId,
 } from "./types";
-
-export const emptyName = "(not set)";
 
 export const specialOptions: Record<SpecialOptionId, OptionProps> = {
   empty: { value: "_empty", label: emptyName },

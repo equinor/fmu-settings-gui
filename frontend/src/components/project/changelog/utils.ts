@@ -8,7 +8,7 @@ import {
   getScalarDiffKind,
   getVisibleListFieldDiff,
   isListFieldDiff,
-} from "#components/project/diff/utils";
+} from "#components/project/common/structuredDiff/utils";
 
 const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   add: "Added",
@@ -21,46 +21,12 @@ const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   update: "Updated",
 };
 
-const TECHNICAL_FIELD_CHANGE_PATTERN =
-  /^(Added|Copied|Initialized|Merged|Removed|Reset|Restored|Updated) field ['"]?([^'"]+)['"]?\.?$/i;
-
 export function getChangeTypeLabel(changeType: ChangeType) {
   return CHANGE_TYPE_VERBS[changeType] || changeType;
 }
 
 export function getEntryKey(entry: ChangeInfo, index: number) {
   return [entry.timestamp ?? "no-time", index].join(":");
-}
-
-function formatBriefDescription(entry: ChangeInfo) {
-  const change = entry.change;
-  const compact = change.replace(/\s+/g, " ");
-  const withoutDiffPayload = compact.replace(
-    /\. (?:Old value|New value):.*/,
-    "",
-  );
-  const technicalFieldChange =
-    TECHNICAL_FIELD_CHANGE_PATTERN.exec(withoutDiffPayload);
-
-  if (technicalFieldChange) {
-    const verb = technicalFieldChange[1];
-    const field = technicalFieldChange[2];
-    if (verb === undefined || field === undefined) {
-      return withoutDiffPayload;
-    }
-
-    const label = getFieldLabel(entry.file, field) ?? humanizeSettingKey(field);
-
-    return `${verb} ${label}`;
-  }
-
-  const concise = withoutDiffPayload || compact;
-
-  if (concise.length <= 72) {
-    return concise;
-  }
-
-  return `${concise.slice(0, 69)}...`;
 }
 
 export function formatEntryDescription(entry: ChangeInfo): string {
@@ -79,7 +45,7 @@ export function formatEntryDescription(entry: ChangeInfo): string {
 
     return `${verb} ${label}`;
   } else {
-    return formatBriefDescription(entry);
+    return entry.change;
   }
 }
 

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+export const emptyName = "(not set)";
+
 export function useConfirmClose({
   enable,
   determineRequiresConfirmation,

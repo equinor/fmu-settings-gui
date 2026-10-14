@@ -28,8 +28,8 @@ import type {
   ScalarFieldDiff,
 } from "#client/types.gen";
 import { CancelButton, GeneralButton } from "#components/form/button";
-import { StructuredDiff } from "#components/project/diff/StructuredDiff";
-import { RESOURCE_LABELS } from "#components/project/diff/utils";
+import { StructuredDiff } from "#components/project/common/structuredDiff/StructuredDiff";
+import { RESOURCE_LABELS } from "#components/project/common/structuredDiff/utils";
 import {
   GenericDialog,
   GenericInnerBox,

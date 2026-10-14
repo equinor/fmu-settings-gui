@@ -6,7 +6,7 @@ import type { ChangeType } from "#client/types.gen";
 import { GenericBox } from "#styles/common";
 import { dataGridHeader } from "#styles/dataGrid";
 
-function changeTypeColor(changeType: ChangeType) {
+export function changeTypeColor(changeType: ChangeType) {
   switch (changeType) {
     case "add":
     case "copy":
@@ -67,7 +67,7 @@ export const ChangeTypeChip = styled(Chip)<{ $changeType: ChangeType }>`
   font-size: 0.75rem;
   color: ${({ $changeType }) => changeTypeColor($changeType)};
   background: ${tokens.colors.ui.background__light.hex};
-  border: 0;
+  border: solid 1px ${tokens.colors.ui.background__medium.hex};
 `;
 
 export const ChangeDetails = styled(GenericBox)`

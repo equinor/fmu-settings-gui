@@ -3,7 +3,7 @@ import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
 import { useState } from "react";
 
 import type { ChangeInfo } from "#client/types.gen";
-import { RESOURCE_LABELS } from "#components/project/diff/utils";
+import { RESOURCE_LABELS } from "#components/project/common/structuredDiff/utils";
 import { ChangeDetailsDialog } from "./ChangeDetailsDialog";
 import { ChangelogDateTime, ChangelogTableContainer } from "./Changelog.style";
 import { formatEntryDescription, getEntryKey } from "./utils";

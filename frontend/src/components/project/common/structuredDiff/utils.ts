@@ -3,6 +3,7 @@ import type {
   ListFieldDiff,
   ScalarFieldDiff,
 } from "#client/types.gen";
+import { emptyName } from "#utils/ui";
 
 export type DiffKind = "added" | "removed" | "updated";
 export type StructuredDiffEntry = ScalarFieldDiff | ListFieldDiff;
@@ -40,6 +41,7 @@ const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
     "rms.version": "RMS version",
     "rms.wells": "RMS wells",
     "rms.zones": "RMS stratigraphic zones",
+    "validation.masterdata_smda": "SMDA masterdata validation",
     "validation.rms_project": "RMS project validation",
     updated_at: "last updated date",
     updated_by: "last updated by",
@@ -52,6 +54,10 @@ const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
     updated_by: "last updated by",
     wellbore: "wellbore",
   },
+};
+
+const GROUPED_FIELD_PATHS: Record<string, string[] | undefined> = {
+  "config.json": ["masterdata.smda.stratigraphic_column"],
 };
 
 const SORTED_PATH_LABEL_KEYS = Object.fromEntries(
@@ -98,6 +104,57 @@ export function isListFieldDiff(
   return "added" in diff && "removed" in diff && "updated" in diff;
 }
 
+export function groupStructuredDiffEntries(
+  resource: string,
+  entries: StructuredDiffEntry[],
+): StructuredDiffEntry[] {
+  const groupedPaths = GROUPED_FIELD_PATHS[resource] ?? [];
+  const groupedEntries = new Map<string, ScalarFieldDiff[]>();
+
+  for (const entry of entries) {
+    if (isListFieldDiff(entry)) continue;
+
+    const groupedPath = groupedPaths.find((path) =>
+      entry.field_path.startsWith(`${path}.`),
+    );
+    if (groupedPath === undefined) continue;
+
+    const group = groupedEntries.get(groupedPath) ?? [];
+    group.push(entry);
+    groupedEntries.set(groupedPath, group);
+  }
+
+  const emittedGroups = new Set<string>();
+
+  return entries.flatMap<StructuredDiffEntry>((entry) => {
+    if (isListFieldDiff(entry)) return [entry];
+
+    const groupedPath = groupedPaths.find((path) =>
+      entry.field_path.startsWith(`${path}.`),
+    );
+    if (groupedPath === undefined) return [entry];
+    if (emittedGroups.has(groupedPath)) return [];
+
+    emittedGroups.add(groupedPath);
+    const group = groupedEntries.get(groupedPath) ?? [];
+    const values = (side: "before" | "after") =>
+      Object.fromEntries(
+        group.map((groupEntry) => [
+          groupEntry.field_path.slice(groupedPath.length + 1),
+          groupEntry[side],
+        ]),
+      );
+
+    return [
+      {
+        field_path: groupedPath,
+        before: values("before"),
+        after: values("after"),
+      },
+    ];
+  });
+}
+
 export function getFieldLabel(
   resource: string,
   path: string,
@@ -127,7 +184,7 @@ export function formatFieldPath(resource: string, path: string): string {
 }
 
 export function formatInlineValue(value: unknown): string {
-  if (value === null) return "Not set";
+  if (value === null) return emptyName;
   if (value === undefined) return "(missing)";
   if (typeof value === "string") return value === "" ? "(empty string)" : value;
   if (typeof value === "number" || typeof value === "boolean") {
@@ -152,6 +209,14 @@ export function formatInlineValue(value: unknown): string {
   }
 
   return "(unavailable)";
+}
+
+export function isSpecialInlineValue(value: unknown): boolean {
+  if (value === null || value === undefined || value === "") return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (isRecord(value)) return Object.keys(value).length === 0;
+
+  return typeof value === "function";
 }
 
 export function getListItemKey(item: Record<string, unknown>): string {

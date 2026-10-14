@@ -5,8 +5,10 @@ import {
   DiffFieldHeader,
   DiffGroup,
   DiffMultilineValue,
+  DiffSpecialValue,
   DiffStack,
   DiffValueGrid,
+  DiffValueHeader,
   DiffValuePanel,
 } from "./StructuredDiff.style";
 import {
@@ -20,8 +22,10 @@ import {
   getScalarDiffKind,
   getVisibleListFieldDiff,
   getVisibleRecordEntries,
+  groupStructuredDiffEntries,
   isListFieldDiff,
   isRecord,
+  isSpecialInlineValue,
   type StructuredDiffEntry,
 } from "./utils";
 
@@ -47,7 +51,7 @@ function ReadableValue({
     }
 
     return value.length === 0 ? (
-      <p>(empty list)</p>
+      <DiffSpecialValue>{formatInlineValue(value)}</DiffSpecialValue>
     ) : (
       <ul>
         {value.map((item: unknown, index) => (
@@ -69,7 +73,7 @@ function ReadableValue({
     });
 
     return entries.length === 0 ? (
-      <p>(empty object)</p>
+      <DiffSpecialValue>(empty object)</DiffSpecialValue>
     ) : (
       <table>
         <tbody>
@@ -103,7 +107,13 @@ function ReadableValue({
     );
   }
 
-  return <p>{formatInlineValue(value)}</p>;
+  const formattedValue = formatInlineValue(value);
+
+  return isSpecialInlineValue(value) ? (
+    <DiffSpecialValue>{formattedValue}</DiffSpecialValue>
+  ) : (
+    <p>{formattedValue}</p>
+  );
 }
 
 function ListFieldGroup({
@@ -166,7 +176,7 @@ function UpdatedFieldGroup({
 
             <DiffValueGrid>
               <DiffValuePanel>
-                <strong>{beforeLabel}</strong>
+                <DiffValueHeader>{beforeLabel}</DiffValueHeader>
                 <ReadableValue
                   value={item.before}
                   kind="before"
@@ -175,7 +185,7 @@ function UpdatedFieldGroup({
                 />
               </DiffValuePanel>
               <DiffValuePanel>
-                <strong>{afterLabel}</strong>
+                <DiffValueHeader>{afterLabel}</DiffValueHeader>
                 <ReadableValue
                   value={item.after}
                   kind="after"
@@ -262,7 +272,7 @@ function DiffEntryCard({
 
         <DiffValueGrid>
           <DiffValuePanel>
-            <strong>{beforeLabel}</strong>
+            <DiffValueHeader>{beforeLabel}</DiffValueHeader>
             <ReadableValue
               value={beforeValue}
               kind="before"
@@ -270,7 +280,7 @@ function DiffEntryCard({
             />
           </DiffValuePanel>
           <DiffValuePanel>
-            <strong>{afterLabel}</strong>
+            <DiffValueHeader>{afterLabel}</DiffValueHeader>
             <ReadableValue
               value={afterValue}
               kind="after"
@@ -294,9 +304,11 @@ export function StructuredDiff({
   afterLabel: string;
   resource: string;
 }) {
+  const groupedEntries = groupStructuredDiffEntries(resource, entries);
+
   return (
     <DiffStack>
-      {entries.map((diff, index) => (
+      {groupedEntries.map((diff, index) => (
         <DiffEntryCard
           key={`${diff.field_path}-${String(index)}-${isListFieldDiff(diff) ? "list" : "scalar"}`}
           diff={diff}

@@ -31,14 +31,14 @@ const httpStatusSpecialHandling = [
 
 const CHANGE_TYPE_OPTIONS: ("all" | ChangeType)[] = [
   "all",
-  "init",
   "add",
   "update",
-  "remove",
   "reset",
-  "restore",
-  "merge",
+  "remove",
+  "init",
   "copy",
+  "merge",
+  "restore",
 ];
 
 const ENTRY_LIMIT_OPTIONS: EntryLimit[] = ["all", "10", "25", "50", "100"];
@@ -193,9 +193,11 @@ function Content() {
       ) : (
         <>
           <PageText>
-            {changes.length === 1
-              ? "Showing the most recent change to the project's settings."
-              : `Showing the ${changes.length} most recent changes to the project's settings.`}
+            {filters.entryLimit === "all"
+              ? `Showing all ${changes.length} changes to the project's settings.`
+              : changes.length === 1
+                ? "Showing the most recent change to the project's settings."
+                : `Showing the ${changes.length} most recent changes to the project's settings.`}
           </PageText>
           <ChangelogTable entries={changes} />
         </>

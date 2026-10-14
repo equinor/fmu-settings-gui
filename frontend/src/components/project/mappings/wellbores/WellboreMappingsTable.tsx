@@ -25,7 +25,6 @@ import type {
 } from "#components/project/common/mapping/types";
 import {
   createSpecialOptions,
-  emptyName,
   getElementMappingTargetName,
   getElementMappingTargetNameOptionsInitialValue,
   specialOptions,
@@ -36,7 +35,7 @@ import { EditDialog, PageCode, PageList, PageText } from "#styles/common";
 import { dataGridHeight } from "#styles/dataGrid";
 import { fieldContext, formContext } from "#utils/form";
 import { stringCompare } from "#utils/string";
-import { useConfirmClose } from "#utils/ui";
+import { emptyName, useConfirmClose } from "#utils/ui";
 import { smdaWellboreLabel } from "./functions";
 import {
   MappingEditFields,

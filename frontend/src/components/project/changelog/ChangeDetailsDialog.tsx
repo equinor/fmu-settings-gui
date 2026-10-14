@@ -1,8 +1,8 @@
 import { Button, Dialog } from "@equinor/eds-core-react";
 
 import type { ChangeInfo } from "#client/types.gen";
-import { StructuredDiff } from "#components/project/diff/StructuredDiff";
-import { RESOURCE_LABELS } from "#components/project/diff/utils";
+import { StructuredDiff } from "#components/project/common/structuredDiff/StructuredDiff";
+import { RESOURCE_LABELS } from "#components/project/common/structuredDiff/utils";
 import { GenericDialog, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
 import {

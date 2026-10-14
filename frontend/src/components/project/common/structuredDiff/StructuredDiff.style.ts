@@ -50,12 +50,28 @@ export const DiffMultilineValue = styled.p`
   white-space: pre-wrap;
 `;
 
+export const DiffSpecialValue = styled.p`
+  color: ${tokens.colors.text.static_icons__tertiary.hex};
+  font-style: italic;
+`;
+
+export const DiffValueHeader = styled.div`
+  margin-bottom: ${tokens.spacings.comfortable.small};
+  padding-bottom: ${tokens.spacings.comfortable.x_small};
+  border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+  font-weight: 700;
+`;
+
 export const DiffValuePanel = styled(GenericInnerBox)`
   th {
-    text-align: left;
-    vertical-align: top;
     padding-right: ${tokens.spacings.comfortable.small};
+    vertical-align: top;
+    text-align: left;
     white-space: nowrap;
+  }
+
+  th::after {
+    content: ":";
   }
 
   td {
