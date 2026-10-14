@@ -97,12 +97,12 @@ export function ProjectRecoveryNotification() {
       <Dialog.CustomContent>
         {latestRevision ? (
           <PageText $marginBottom="0">
-            This project configuration is invalid or corrupted. Do you want to
+            The project configuration is invalid or corrupted. Do you want to
             restore it from the latest snapshot?
           </PageText>
         ) : (
           <PageText $marginBottom="0">
-            This project configuration is invalid or corrupted and no snapshots
+            The project configuration is invalid or corrupted and no snapshots
             were found in cache. You may be able to restore it by finding a
             backup on the project disk in the <code>.snapshots</code> folder.
           </PageText>

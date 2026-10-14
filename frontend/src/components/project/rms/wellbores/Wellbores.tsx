@@ -429,7 +429,7 @@ function WellboresEditor({
             orphanWellboreNames.length === 1
               ? "wellbore stored"
               : "wellbores stored"
-          } in the project ${
+          } in the project configuration ${
             orphanWellboreNames.length === 1 ? "is" : "are"
           } currently not available in RMS. Saving will remove ${
             orphanWellboreNames.length === 1
@@ -443,8 +443,8 @@ function WellboresEditor({
       <PageText $marginBottom="0">💡 Tips:</PageText>
       <PageList $marginBottom="0">
         <List.Item>
-          When there are no wellbores stored in the project, all available RMS
-          wellbores in the list are initially selected
+          When there are no wellbores stored in the project configuration, all
+          available RMS wellbores in the list are initially selected
         </List.Item>
         <List.Item>
           The list can be filtered by wellbore name, and <i>Select</i> and{" "}
@@ -452,11 +452,11 @@ function WellboresEditor({
         </List.Item>
         <List.Item>
           Use the <i>Include</i> checkboxes to select individual wellbores for
-          storing to the project
+          storing in the project configuration
         </List.Item>
         <List.Item>
-          Mark a wellbore as planned to store it in the project without making
-          it available for wellbore mapping
+          Mark a wellbore as planned to store it in the project configuration
+          without making it available for wellbore mapping
         </List.Item>
       </PageList>
     </>
@@ -824,9 +824,9 @@ export function Wellbores({
   return (
     <>
       <PageText>
-        The following wellbores are stored in the project. Planned wellbores are
-        excluded from wellbore mapping. All other stored wellbores are available
-        for mapping.
+        The following wellbores are stored in the project configuration. Planned
+        wellbores are excluded from wellbore mapping. All other stored wellbores
+        are available for mapping.
       </PageText>
 
       {projectWellbores.length ? (
@@ -834,7 +834,7 @@ export function Wellbores({
           <PageText>
             <span className="emphasis">{projectWellbores.length}</span>{" "}
             {projectWellbores.length === 1 ? "wellbore is" : "wellbores are"}{" "}
-            stored in the project.
+            stored in the project configuration.
           </PageText>
 
           <WellboresContainer>
@@ -852,7 +852,9 @@ export function Wellbores({
           </WellboresContainer>
         </>
       ) : (
-        <PageCode>No wellbores are currently stored in the project.</PageCode>
+        <PageCode>
+          No wellbores are currently stored in the project configuration.
+        </PageCode>
       )}
 
       <GeneralButton

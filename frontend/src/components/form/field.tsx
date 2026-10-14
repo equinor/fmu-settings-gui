@@ -17,7 +17,11 @@ import type z from "zod";
 
 import { useFieldContext } from "#utils/form";
 import type { ValidatorProps } from "#utils/validator";
-import { CommonInputWrapper, SearchFieldInput } from "./field.style";
+import {
+  AutocompleteWidthSizer,
+  CommonInputWrapper,
+  SearchFieldInput,
+} from "./field.style";
 
 Icon.add({ add_circle_filled, error_filled, info_circle, remove });
 
@@ -274,6 +278,12 @@ export function AutocompleteField<T>({
   const selectedOption =
     options.find((option) => optionValue(option) === field.state.value) ??
     options.find((option) => optionValue(option) === emptyValue);
+  const getLabel = optionLabel ?? String;
+  const widestLabel = options.reduce((widest, option) => {
+    const label = getLabel(option);
+
+    return label.length > widest.length ? label : widest;
+  }, placeholder ?? "");
 
   return (
     <CommonInputWrapper
@@ -305,7 +315,11 @@ export function AutocompleteField<T>({
         {...(noOptionsText !== undefined && { noOptionsText })}
         {...(optionLabel !== undefined && { optionLabel })}
         {...(optionComponent !== undefined && { optionComponent })}
-        {...(optionDisabled !== undefined && { optionDisabled })}
+        {...(optionDisabled !== undefined && {
+          // EDS passes undefined on ArrowDown when the search shows no selectable option.
+          optionDisabled: (option: T) =>
+            option != null && optionDisabled(option),
+        })}
         itemToKey={(option) => (option === null ? null : optionValue(option))}
         onOptionsChange={({ selectedItems }) => {
           field.handleChange(
@@ -320,6 +334,8 @@ export function AutocompleteField<T>({
         {...(disabled !== undefined && { disabled })}
         {...(!field.state.meta.isValid && { variant: "error" })}
       />
+      {/* Widens the field to fit the longest option, like a native select. */}
+      <AutocompleteWidthSizer aria-hidden>{widestLabel}</AutocompleteWidthSizer>
     </CommonInputWrapper>
   );
 }

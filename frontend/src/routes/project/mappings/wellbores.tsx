@@ -96,7 +96,7 @@ function Content() {
   );
 
   if (!project.status) {
-    return <PageText>Project not set.</PageText>;
+    return <PageText>FMU project not set.</PageText>;
   }
 
   const rmsProject = project.data?.config.rms;

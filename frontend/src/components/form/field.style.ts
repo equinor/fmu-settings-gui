@@ -39,6 +39,19 @@ export const ArrayTextFieldContainer = styled.div`
 
 `;
 
+export const AutocompleteWidthSizer = styled.div`
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  white-space: pre;
+  /* EDS Autocomplete input padding, incl. clear and toggle buttons */
+  padding: 0 64px 0 ${tokens.spacings.comfortable.small};
+  font-family: ${tokens.typography.input.text.fontFamily};
+  font-size: ${tokens.typography.input.text.fontSize};
+  font-weight: ${tokens.typography.input.text.fontWeight};
+  letter-spacing: ${tokens.typography.input.text.letterSpacing};
+`;
+
 export const SearchFieldInput = styled(Search)`
   width: 100%;
 `;

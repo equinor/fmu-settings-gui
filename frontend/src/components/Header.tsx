@@ -115,7 +115,7 @@ function ProjectInfo() {
       ) : project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT ? (
         "Project configuration is invalid"
       ) : (
-        "No project selected"
+        "No FMU project selected"
       )}
     </ProjectInfoContainer>
   );
