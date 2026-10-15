@@ -88,8 +88,6 @@ function RouteComponent() {
           <ProjectSelector />
         </>
       )}
-
-      <PageSectionSpacer />
     </>
   );
 }

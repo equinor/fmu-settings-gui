@@ -57,7 +57,10 @@ const PATH_LABELS: Record<string, Record<string, string> | undefined> = {
 };
 
 const GROUPED_FIELD_PATHS: Record<string, string[] | undefined> = {
-  "config.json": ["masterdata.smda.stratigraphic_column"],
+  "config.json": [
+    "masterdata.smda.coordinate_system",
+    "masterdata.smda.stratigraphic_column",
+  ],
 };
 
 const SORTED_PATH_LABEL_KEYS = Object.fromEntries(
@@ -183,50 +186,64 @@ export function formatFieldPath(resource: string, path: string): string {
     .join(" > ");
 }
 
-export function formatInlineValue(value: unknown): string {
-  if (value === null) return emptyName;
-  if (value === undefined) return "(missing)";
-  if (typeof value === "string") return value === "" ? "(empty string)" : value;
+type InlineValueResult = {
+  text: string;
+  isSpecialValue: boolean;
+};
+
+export function formatInlineValue(value: unknown): InlineValueResult {
+  if (value === null) return { text: emptyName, isSpecialValue: true };
+  if (value === undefined) return { text: "(missing)", isSpecialValue: true };
+  if (typeof value === "string") {
+    return value === ""
+      ? { text: "(empty string)", isSpecialValue: true }
+      : { text: value, isSpecialValue: false };
+  }
   if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
+    return { text: String(value), isSpecialValue: false };
   }
   if (Array.isArray(value)) {
     return value.length === 0
-      ? "(empty list)"
-      : `${String(value.length)} values`;
+      ? { text: "(empty list)", isSpecialValue: true }
+      : { text: `${String(value.length)} values`, isSpecialValue: false };
   }
   if (isRecord(value)) {
     const preferred = ITEM_NAME_KEYS.find((key) => key in value);
     if (preferred !== undefined) {
-      return `${preferred}: ${formatInlineValue(value[preferred])}`;
+      return {
+        text: `${preferred}: ${formatInlineValue(value[preferred]).text}`,
+        isSpecialValue: false,
+      };
     }
 
-    return `(${String(Object.keys(value).length)} fields)`;
+    const fieldCount = Object.keys(value).length;
+
+    return {
+      text: `(${String(fieldCount)} fields)`,
+      isSpecialValue: fieldCount === 0,
+    };
   }
-  if (typeof value === "bigint") return value.toString();
+  if (typeof value === "bigint") {
+    return { text: value.toString(), isSpecialValue: false };
+  }
   if (typeof value === "symbol") {
-    return value.description ? `symbol(${value.description})` : "symbol";
+    return {
+      text: value.description ? `symbol(${value.description})` : "symbol",
+      isSpecialValue: false,
+    };
   }
 
-  return "(unavailable)";
-}
-
-export function isSpecialInlineValue(value: unknown): boolean {
-  if (value === null || value === undefined || value === "") return true;
-  if (Array.isArray(value)) return value.length === 0;
-  if (isRecord(value)) return Object.keys(value).length === 0;
-
-  return typeof value === "function";
+  return { text: "(unavailable)", isSpecialValue: true };
 }
 
 export function getListItemKey(item: Record<string, unknown>): string {
   const preferred = ITEM_NAME_KEYS.find((key) => key in item);
   if (preferred !== undefined) {
-    return `${preferred}-${formatInlineValue(item[preferred])}`;
+    return `${preferred}-${formatInlineValue(item[preferred]).text}`;
   }
 
   const pairs = Object.entries(item).map(
-    ([key, value]) => `${key}:${formatInlineValue(value)}`,
+    ([key, value]) => `${key}:${formatInlineValue(value).text}`,
   );
 
   return pairs.join("|") || "empty-item";
@@ -236,10 +253,10 @@ export function formatUpdatedItemLabel(key: unknown): string {
   if (Array.isArray(key) && key.length === 4) {
     const [, sourceSystem, targetSystem, sourceId] = key as unknown[];
 
-    return `${formatInlineValue(sourceId)} (${formatSystemLabel(sourceSystem)} → ${formatSystemLabel(targetSystem)})`;
+    return `${formatInlineValue(sourceId).text} (${formatSystemLabel(sourceSystem)} → ${formatSystemLabel(targetSystem)})`;
   }
 
-  return `Item: ${formatInlineValue(key)}`;
+  return `Item: ${formatInlineValue(key).text}`;
 }
 
 type ValuePanelKind = "added" | "removed" | "before" | "after";

@@ -2,6 +2,7 @@ import { Button, Dialog } from "@equinor/eds-core-react";
 
 import type { ChangeInfo } from "#client/types.gen";
 import { StructuredDiff } from "#components/project/common/structuredDiff/StructuredDiff";
+import { DiffSpecialValue } from "#components/project/common/structuredDiff/StructuredDiff.style";
 import { RESOURCE_LABELS } from "#components/project/common/structuredDiff/utils";
 import { GenericDialog, PageText } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
@@ -72,9 +73,9 @@ export function ChangeDetailsDialog({
                   resource={entry.file}
                 />
               ) : (
-                <PageText $marginBottom="0">
+                <DiffSpecialValue style={{ margin: 0 }}>
                   Detailed change information is not available for this entry.
-                </PageText>
+                </DiffSpecialValue>
               )}
             </ChangeDetails>
           )}

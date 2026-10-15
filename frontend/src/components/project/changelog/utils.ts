@@ -41,7 +41,7 @@ export function formatEntryDescription(entry: ChangeInfo): string {
 
   const label = formatSettingLabel(entry);
   if (label !== undefined) {
-    const verb = CHANGE_TYPE_VERBS[entry.change_type];
+    const verb = getChangeTypeLabel(entry.change_type);
 
     return `${verb} ${label}`;
   } else {

@@ -138,15 +138,15 @@ function DiffDetailsDialog({
               <PageList>
                 <ListItem>
                   <strong>Added:</strong> Values that will be added to the
-                  current resource
+                  current {resourceLabel.toLowerCase()}
                 </ListItem>
                 <ListItem>
                   <strong>Removed:</strong> Values that will be removed from the
-                  current resource
+                  current {resourceLabel.toLowerCase()}
                 </ListItem>
                 <ListItem>
                   <strong>Updated:</strong> Values that will be replaced in the
-                  current resource
+                  current {resourceLabel.toLowerCase()}
                 </ListItem>
               </PageList>
             </DiffLegend>

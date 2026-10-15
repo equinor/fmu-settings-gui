@@ -25,7 +25,6 @@ import {
   groupStructuredDiffEntries,
   isListFieldDiff,
   isRecord,
-  isSpecialInlineValue,
   type StructuredDiffEntry,
 } from "./utils";
 
@@ -51,11 +50,11 @@ function ReadableValue({
     }
 
     return value.length === 0 ? (
-      <DiffSpecialValue>{formatInlineValue(value)}</DiffSpecialValue>
+      <DiffSpecialValue>{formatInlineValue(value).text}</DiffSpecialValue>
     ) : (
       <ul>
         {value.map((item: unknown, index) => (
-          <li key={`${String(index)}-${formatInlineValue(item)}`}>
+          <li key={`${String(index)}-${formatInlineValue(item).text}`}>
             <ReadableValue value={item} kind={kind} />
           </li>
         ))}
@@ -107,12 +106,12 @@ function ReadableValue({
     );
   }
 
-  const formattedValue = formatInlineValue(value);
+  const { text, isSpecialValue } = formatInlineValue(value);
 
-  return isSpecialInlineValue(value) ? (
-    <DiffSpecialValue>{formattedValue}</DiffSpecialValue>
+  return isSpecialValue ? (
+    <DiffSpecialValue>{text}</DiffSpecialValue>
   ) : (
-    <p>{formattedValue}</p>
+    <p>{text}</p>
   );
 }
 
@@ -168,7 +167,7 @@ function UpdatedFieldGroup({
       <DiffStack>
         {updated.map((item, index) => (
           <GenericInnerBox
-            key={`updated-${String(index)}-${formatInlineValue(item.key)}`}
+            key={`updated-${String(index)}-${formatInlineValue(item.key).text}`}
           >
             <DiffFieldHeader>
               <strong>{formatUpdatedItemLabel(item.key)}</strong>
