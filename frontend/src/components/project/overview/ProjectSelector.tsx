@@ -89,6 +89,7 @@ function ProjectSelectorForm({
     setHelperTextRecentProjects("");
     setHelperTextProjectPath("");
     setValueSource("");
+    setSubmitDisabled(true);
     formReset();
     closeDialog();
   };
@@ -236,7 +237,6 @@ function ProjectSelectorForm({
               },
               onChange: () => {
                 setValueSource("recentProjectPath");
-                void form.handleSubmit();
               },
             }}
           >
@@ -244,6 +244,7 @@ function ProjectSelectorForm({
               <field.RecentProjectSelect
                 recentProjects={userData.recent_project_directories}
                 helperText={helperTextRecentProjects}
+                setSubmitDisabled={setSubmitDisabled}
               />
             )}
           </form.AppField>
@@ -313,9 +314,11 @@ function ProjectSelectorForm({
 function RecentProjectSelect({
   recentProjects,
   helperText,
+  setSubmitDisabled,
 }: {
   recentProjects: string[];
   helperText: string;
+  setSubmitDisabled: (disabled: boolean) => void;
 }) {
   const field = useFieldContext<string>();
   const disabledSelect = recentProjects.length === 0;
@@ -336,6 +339,7 @@ function RecentProjectSelect({
         value={disabledSelect ? [] : [field.state.value]}
         onChange={(e: ChangeEvent<HTMLSelectElement>) => {
           field.handleChange(e.target.value);
+          setSubmitDisabled(e.target.value.length === 0);
         }}
         onBlur={() => {
           field.handleBlur();
