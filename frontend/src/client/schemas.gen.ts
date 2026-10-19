@@ -728,7 +728,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.5.1.dev1+gfb1c88195'
+            default: '1.7.0'
         }
     },
     type: 'object',
@@ -1007,6 +1007,47 @@ export const MessageSchema = {
     ],
     title: 'Message',
     description: 'A generic message to return to the GUI.'
+} as const;
+
+export const MigrationBackupStatusSchema = {
+    properties: {
+        available: {
+            type: 'boolean',
+            title: 'Available',
+            description: 'Whether a backup compatible with the installed schema exists.'
+        },
+        last_modified_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Modified At',
+            description: 'When the config in the backup was last modified.'
+        },
+        last_modified_by: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Modified By',
+            description: 'Who last modified the config in the backup.'
+        }
+    },
+    type: 'object',
+    required: [
+        'available'
+    ],
+    title: 'MigrationBackupStatus',
+    description: 'Availability of a restorable project config migration backup.'
 } as const;
 
 export const ModelSchema = {

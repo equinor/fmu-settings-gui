@@ -15,7 +15,10 @@ import {
   PageSectionSpacer,
   PageText,
 } from "#styles/common";
-import { HTTP_STATUS_422_UNPROCESSABLE_CONTENT } from "#utils/api";
+import {
+  API_ERROR_CODE_NEWER_SCHEMA_VERSION,
+  HTTP_STATUS_422_UNPROCESSABLE_CONTENT,
+} from "#utils/api";
 import { displayDateTime } from "#utils/datetime";
 
 export const Route = createFileRoute("/project/")({
@@ -71,14 +74,18 @@ function ProjectInfo({
 function ProjectNotFound({
   text,
   isInvalidProjectConfig,
+  isNewerSchemaVersion,
 }: {
   text: string;
   isInvalidProjectConfig: boolean;
+  isNewerSchemaVersion: boolean;
 }) {
   const hasText = text !== "";
-  const lead = isInvalidProjectConfig
-    ? `Project configuration is invalid${hasText ? ":" : "."}`
-    : `No FMU project selected${hasText ? ":" : "."}`;
+  const lead = isNewerSchemaVersion
+    ? `Project configuration was saved by a newer version of FMU Settings${hasText ? ":" : "."}`
+    : isInvalidProjectConfig
+      ? `Project configuration is invalid${hasText ? ":" : "."}`
+      : `No FMU project selected${hasText ? ":" : "."}`;
 
   return (
     <>
@@ -94,6 +101,8 @@ function Content() {
   const projectReadOnly = !(project.lockStatus?.is_lock_acquired ?? false);
   const isInvalidProjectConfig =
     project.errorStatus === HTTP_STATUS_422_UNPROCESSABLE_CONTENT;
+  const isNewerSchemaVersion =
+    project.errorCode === API_ERROR_CODE_NEWER_SCHEMA_VERSION;
 
   return (
     <>
@@ -124,6 +133,7 @@ function Content() {
           <ProjectNotFound
             text={project.text ?? ""}
             isInvalidProjectConfig={isInvalidProjectConfig}
+            isNewerSchemaVersion={isNewerSchemaVersion}
           />
 
           <ProjectSelector />

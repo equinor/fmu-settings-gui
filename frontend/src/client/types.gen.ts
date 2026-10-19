@@ -689,6 +689,32 @@ export type Message = {
 };
 
 /**
+ * MigrationBackupStatus
+ *
+ * Availability of a restorable project config migration backup.
+ */
+export type MigrationBackupStatus = {
+    /**
+     * Available
+     *
+     * Whether a backup compatible with the installed schema exists.
+     */
+    available: boolean;
+    /**
+     * Last Modified At
+     *
+     * When the config in the backup was last modified.
+     */
+    last_modified_at?: string | null;
+    /**
+     * Last Modified By
+     *
+     * Who last modified the config in the backup.
+     */
+    last_modified_by?: string | null;
+};
+
+/**
  * Model
  *
  * The ``fmu.model`` block contains information about the model used.
@@ -2842,6 +2868,98 @@ export type ProjectPostCacheRestoreResponses = {
 };
 
 export type ProjectPostCacheRestoreResponse = ProjectPostCacheRestoreResponses[keyof ProjectPostCacheRestoreResponses];
+
+export type ProjectGetMigrationBackupCheckData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/migration_backup/check';
+};
+
+export type ProjectGetMigrationBackupCheckErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectGetMigrationBackupCheckError = ProjectGetMigrationBackupCheckErrors[keyof ProjectGetMigrationBackupCheckErrors];
+
+export type ProjectGetMigrationBackupCheckResponses = {
+    /**
+     * Successful Response
+     */
+    200: MigrationBackupStatus;
+};
+
+export type ProjectGetMigrationBackupCheckResponse = ProjectGetMigrationBackupCheckResponses[keyof ProjectGetMigrationBackupCheckResponses];
+
+export type ProjectPostMigrationBackupRestoreData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/migration_backup/restore';
+};
+
+export type ProjectPostMigrationBackupRestoreErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * Project .fmu directory not found, or no compatible config migration backup exists
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ProjectPostMigrationBackupRestoreError = ProjectPostMigrationBackupRestoreErrors[keyof ProjectPostMigrationBackupRestoreErrors];
+
+export type ProjectPostMigrationBackupRestoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ProjectPostMigrationBackupRestoreResponse = ProjectPostMigrationBackupRestoreResponses[keyof ProjectPostMigrationBackupRestoreResponses];
 
 export type ProjectGetRestoreCheckData = {
     body?: never;

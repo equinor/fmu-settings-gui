@@ -11,6 +11,8 @@ export const HTTP_STATUS_424_FAILED_DEPENDENCY = 424;
 export const HTTP_STATUS_502_BAD_GATEWAY = 502;
 export const HTTP_STATUS_503_SERVICE_UNAVAILABLE = 503;
 
+export const API_ERROR_CODE_NEWER_SCHEMA_VERSION = "newer_schema_version";
+
 export function getHttpErrorDetail(error: Error | null, fallback: string) {
   const responseData: unknown = isAxiosError(error)
     ? error.response?.data

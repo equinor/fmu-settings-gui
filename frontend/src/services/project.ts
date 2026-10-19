@@ -31,6 +31,7 @@ import type { QueryServiceBase } from "#utils/query";
 export type MappingsPathOptions = ProjectGetMappingsData["path"];
 
 type GetProject = QueryServiceBase<FmuProject> & {
+  errorCode?: string;
   lockStatus?: LockStatus;
   rmsExpiresAt?: string | null;
 };
@@ -78,11 +79,17 @@ export function useProject(options?: Options<ProjectGetProjectData>) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 text = String(error.response.data.detail);
               }
+              let errorCode: string | undefined;
+              if (error.response?.data && "code" in error.response.data) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                errorCode = String(error.response.data.code);
+              }
 
               return {
                 status: false,
                 text,
                 errorStatus,
+                errorCode,
               };
             }
           }
