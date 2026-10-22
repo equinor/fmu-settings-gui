@@ -6,14 +6,10 @@ import { CancelButton, GeneralButton } from "#components/form/button";
 import { getUnmappableOption } from "#components/project/common/mapping/utils";
 import type { SaveWellboreMappings } from "#services/mappings";
 import { GenericDialog, PageText } from "#styles/common";
+import { DataSystemNames } from "#utils/model";
 import type { wellboreTargetSystems } from "./functions";
 
 type WellboreTargetSystem = (typeof wellboreTargetSystems)[number];
-
-const mappingNames: Record<WellboreTargetSystem, string> = {
-  simulator: "simulator",
-  smda: "SMDA",
-};
 
 export function RemoveMappingsAction({
   targetSystem,
@@ -29,7 +25,7 @@ export function RemoveMappingsAction({
   saveMappings: SaveWellboreMappings;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const label = mappingNames[targetSystem];
+  const label = DataSystemNames[targetSystem];
 
   const removeMappings = () => {
     saveMappings(mappingsAfterRemoval(), {

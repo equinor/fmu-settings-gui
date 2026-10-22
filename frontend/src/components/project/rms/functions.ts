@@ -4,26 +4,21 @@ import type {
   ElementMappingsTargetDataCleared,
   ElementMappingTarget,
 } from "#components/project/common/mapping/types";
-
-const dataSystemLabels: Record<DataSystem, string> = {
-  rms: "RMS",
-  smda: "SMDA",
-  simulator: "Simulator",
-  pdm: "PDM",
-};
+import { DataSystemNames } from "#utils/model";
+import { capitalize } from "#utils/string";
 
 function getTargetMappingText(
   sourceName: string,
   targetSystem: DataSystem,
   targetData: ElementMappingTarget,
 ) {
-  const source = `${dataSystemLabels.rms}: ${sourceName}`;
-  const targetLabel = dataSystemLabels[targetSystem];
+  const source = `${DataSystemNames.rms}: ${sourceName}`;
+  const targetLabel = DataSystemNames[targetSystem];
   if (targetData.unmappable) {
-    return `${source} -> Does not exist in ${targetLabel}`;
+    return `${capitalize(source)} -> Does not exist in ${targetLabel}`;
   }
 
-  return `${source} -> ${targetLabel}: ${targetData.name || "(not set)"}`;
+  return `${capitalize(source)} -> ${capitalize(targetLabel)}: ${targetData.name || "(not set)"}`;
 }
 
 export function getRemovedMappingTexts(

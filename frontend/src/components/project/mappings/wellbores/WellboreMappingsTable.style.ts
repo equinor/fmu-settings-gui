@@ -21,7 +21,7 @@ export const WellboreMappingsContainer = styled.div`
   }
 
   tbody tr.planned-row td {
-    background: ${tokens.colors.ui.background__info.hex};
+    background: ${tokens.colors.infographic.primary__moss_green_34.hex};
   }
 `;
 

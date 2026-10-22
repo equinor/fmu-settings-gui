@@ -53,7 +53,7 @@ export function Overview({
     <>
       <PageText>
         The following mappings show wellbore names in RMS, simulator files, and
-        SMDA. Blue rows are planned wellbores.
+        SMDA. Light green rows are planned wellbores.
       </PageText>
 
       {editMode && rmsWellbores.length > 0 && (

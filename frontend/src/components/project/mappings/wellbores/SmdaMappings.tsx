@@ -1,11 +1,12 @@
 import { Autocomplete, Checkbox, Dialog } from "@equinor/eds-core-react";
 import { type ColumnDef, EdsDataGrid } from "@equinor/eds-data-grid-react";
+import { tokens } from "@equinor/eds-tokens";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { matchPostMatchMutation } from "#client/@tanstack/react-query.gen";
-import { ConfirmCloseDialog } from "#components/common";
+import { ConfirmCloseDialog, ElementName } from "#components/common";
 import { CancelButton, GeneralButton } from "#components/form/button";
 import type { ElementMappings } from "#components/project/common/mapping/types";
 import { applicationLocale } from "#config";
@@ -171,11 +172,20 @@ function AutomaticMappingParameters({
           add your own.
         </PageText>
 
-        <PageText>
+        <PageText
+          $hasDivContent
+          $marginTop={`-${tokens.spacings.comfortable.medium}`}
+        >
           For example, ignoring RFT and NO lets{" "}
-          <span className="emphasis">RFT_55_33-A-2</span> match{" "}
-          <span className="emphasis">NO 55/33-A-2</span>. Only the comparison is
-          affected. The complete SMDA name is still saved.
+          <ElementName system="rms" showSystemName>
+            RFT_55_33-A-2
+          </ElementName>{" "}
+          match{" "}
+          <ElementName system="smda" showSystemName>
+            NO 55/33-A-2
+          </ElementName>
+          . Only the comparison is affected. The complete SMDA name is still
+          saved.
         </PageText>
 
         <PageText>
@@ -293,12 +303,22 @@ function AutomaticMappingDialog({
         accessorKey: "rmsWellboreName",
         header: "RMS",
         enableColumnFilter: false,
+        cell: ({ getValue }) => (
+          <ElementName system="rms">{getValue<string>()}</ElementName>
+        ),
       },
       {
         accessorKey: "smdaName",
         header: "Suggested SMDA",
         enableColumnFilter: false,
-        cell: ({ row }) => row.original.smdaLabel || emptyName,
+        cell: ({ row }) => (
+          <ElementName
+            system="smda"
+            isNoElement={!row.original.smdaLabel ? "info" : undefined}
+          >
+            {row.original.smdaLabel || emptyName}
+          </ElementName>
+        ),
       },
       {
         id: "nameSimilarity",

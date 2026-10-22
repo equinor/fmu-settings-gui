@@ -1,6 +1,7 @@
 import type {
   CoordinateSystem,
   CountryItem,
+  DataSystem,
   DiscoveryItem,
   FieldItem,
   Smda,
@@ -14,6 +15,13 @@ export type IdentifierUuidType =
   | StratigraphicColumn;
 
 export type NameUuidType = IdentifierUuidType | DiscoveryItem;
+
+export const DataSystemNames: Record<DataSystem, string> = {
+  pdm: "PDM",
+  rms: "RMS",
+  simulator: "simulator",
+  smda: "SMDA",
+};
 
 export function getNameFromNameUuidValue(value: NameUuidType) {
   return "short_identifier" in value

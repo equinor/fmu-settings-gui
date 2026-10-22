@@ -9,6 +9,7 @@ import {
   getVisibleListFieldDiff,
   isListFieldDiff,
 } from "#components/project/common/structuredDiff/utils";
+import { capitalize } from "#utils/string";
 
 const CHANGE_TYPE_VERBS: Record<ChangeType, string> = {
   add: "Added",
@@ -62,10 +63,6 @@ function humanizeSettingKey(key: string): string {
   const withoutArrayIndex = lastSegment.replace(/\[\d+\]/g, "");
 
   return withoutArrayIndex.replace(/_/g, " ");
-}
-
-function capitalize(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function formatStructuredDescription(entry: ChangeInfo): string | undefined {

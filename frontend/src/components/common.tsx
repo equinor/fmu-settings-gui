@@ -1,5 +1,6 @@
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { Dialog, List } from "@equinor/eds-core-react";
+import { Dialog, Icon, List } from "@equinor/eds-core-react";
+import { link } from "@equinor/eds-icons";
 import {
   QueryErrorResetBoundary,
   useSuspenseQuery,
@@ -13,6 +14,7 @@ import {
   getErrorMessage,
 } from "react-error-boundary";
 
+import type { DataSystem } from "#client";
 import { userGetUserOptions } from "#client/@tanstack/react-query.gen";
 import { GeneralButton } from "#components/form/button";
 import type { HealthCheck } from "#services/smda";
@@ -26,6 +28,13 @@ import {
   WarningBox,
 } from "#styles/common";
 import { handleSsoLogin } from "#utils/authentication";
+import { DataSystemNames } from "#utils/model";
+import {
+  ElementInfo,
+  ElementNameDisplay,
+  ElementSystem,
+  ElementSystemName,
+} from "./common.style";
 
 type StatusCodeHandlingProps = {
   message?: string | undefined;
@@ -36,6 +45,8 @@ type ErrorFallbackProps = {
   header?: string | undefined;
   statusCodeHandling?: Record<number, StatusCodeHandlingProps> | undefined;
 };
+
+export type ElementNameIsNoElement = "warning" | "info" | undefined;
 
 export function Loading() {
   return <PageText>Loading...</PageText>;
@@ -299,5 +310,51 @@ export function SmdaHealthCheckInfo({
         setRequestAcquireSsoAccessToken={setRequestAcquireSsoAccessToken}
       />
     </WarningBox>
+  );
+}
+
+export function ElementName({
+  system,
+  aliases = [],
+  isNoElement,
+  showSystemName = false,
+  noSystemNameBorder = false,
+  children,
+}: {
+  system: DataSystem;
+  aliases?: string[];
+  isNoElement?: ElementNameIsNoElement;
+  showSystemName?: boolean;
+  noSystemNameBorder?: boolean;
+  children?: ReactNode;
+}) {
+  return (
+    <ElementSystem $systemNameShown={showSystemName}>
+      <ElementInfo>
+        {showSystemName && (
+          <ElementSystemName
+            $isNoElement={isNoElement}
+            $showBorder={!noSystemNameBorder}
+          >
+            {DataSystemNames[system]}
+          </ElementSystemName>
+        )}
+        <ElementNameDisplay
+          $system={system}
+          $isNoElement={isNoElement}
+          $systemNameShown={showSystemName}
+        >
+          {children}
+          {aliases.length > 0 && (
+            <Icon
+              className="aliases"
+              data={link}
+              title={`${aliases.length === 1 ? "Alias" : "Aliases"}: ${aliases.join(", ")}`}
+              size={16}
+            />
+          )}
+        </ElementNameDisplay>
+      </ElementInfo>
+    </ElementSystem>
   );
 }

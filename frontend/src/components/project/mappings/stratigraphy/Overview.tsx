@@ -1,5 +1,5 @@
 import { Dialog, Icon, Typography } from "@equinor/eds-core-react";
-import { edit, link } from "@equinor/eds-icons";
+import { edit } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -23,7 +23,7 @@ import {
   projectGetMappingsOptions,
   smdaPostStratUnitsOptions,
 } from "#client/@tanstack/react-query.gen";
-import { ConfirmCloseDialog } from "#components/common";
+import { ConfirmCloseDialog, ElementName } from "#components/common";
 import { CancelButton, SubmitButton } from "#components/form/button";
 import {
   ArrayTextAddItem,
@@ -83,10 +83,6 @@ import {
 } from "./functions";
 import {
   ElementActions,
-  ElementInfo,
-  ElementName,
-  ElementSystem,
-  ElementSystemName,
   ElementSystems,
   HorizonItem,
   ZoneItem,
@@ -332,50 +328,32 @@ function Element({
 }) {
   const mappingData = useMappingData();
 
-  const isMissingValue =
-    elementMapping.targets.smda?.name === "" &&
-    !elementMapping.targets.smda.unmappable;
-  const aliasCount = elementMapping.aliases.length;
-
   return (
     <>
       <ElementSystems>
-        <ElementSystem>
-          <ElementInfo>
-            <ElementSystemName $elementType={elementMapping.elementType}>
-              RMS
-            </ElementSystemName>
-            <ElementName>
-              {elementMapping.name}
-              {aliasCount > 0 && (
-                <Icon
-                  className="aliases"
-                  data={link}
-                  title={`${aliasCount === 1 ? "Alias" : "Aliases"}: ${elementMapping.aliases.join(", ")}`}
-                  size={16}
-                />
-              )}
-            </ElementName>
-          </ElementInfo>
-        </ElementSystem>
+        <ElementName
+          system="rms"
+          aliases={elementMapping.aliases}
+          showSystemName
+          noSystemNameBorder={elementMapping.elementType === "zone"}
+        >
+          {elementMapping.name}
+        </ElementName>
 
-        <ElementSystem>
-          <ElementInfo $isTargetSystem={true}>
-            <ElementSystemName
-              $elementType={elementMapping.elementType}
-              $isMissingvalue={isMissingValue}
-            >
-              SMDA
-            </ElementSystemName>
-            <ElementName
-              $isTargetSystem={true}
-              $isUnmappable={Boolean(elementMapping.targets.smda?.unmappable)}
-              $isMissingvalue={isMissingValue}
-            >
-              {getElementMappingTargetName(elementMapping, "smda")}
-            </ElementName>
-          </ElementInfo>
-        </ElementSystem>
+        <ElementName
+          system="smda"
+          isNoElement={
+            elementMapping.targets.smda?.unmappable
+              ? "warning"
+              : elementMapping.targets.smda?.name === ""
+                ? "info"
+                : undefined
+          }
+          showSystemName
+          noSystemNameBorder={elementMapping.elementType === "zone"}
+        >
+          {getElementMappingTargetName(elementMapping, "smda")}
+        </ElementName>
       </ElementSystems>
 
       {mappingData.canEdit && (

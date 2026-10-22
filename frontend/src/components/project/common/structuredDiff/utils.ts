@@ -1,8 +1,11 @@
 import type {
   CacheResource,
+  DataSystem,
   ListFieldDiff,
   ScalarFieldDiff,
 } from "#client/types.gen";
+import { DataSystemNames } from "#utils/model";
+import { capitalize } from "#utils/string";
 import { emptyName } from "#utils/ui";
 
 export type DiffKind = "added" | "removed" | "updated";
@@ -69,12 +72,6 @@ const SORTED_PATH_LABEL_KEYS = Object.fromEntries(
     Object.keys(labels ?? {}).sort((a, b) => b.length - a.length),
   ]),
 ) as Record<string, string[] | undefined>;
-
-const SYSTEM_LABELS: Record<string, string> = {
-  rms: "RMS",
-  smda: "SMDA",
-  simulator: "Simulator",
-};
 
 const MAPPING_METADATA_KEYS = new Set([
   "mapping_type",
@@ -253,7 +250,7 @@ export function formatUpdatedItemLabel(key: unknown): string {
   if (Array.isArray(key) && key.length === 4) {
     const [, sourceSystem, targetSystem, sourceId] = key as unknown[];
 
-    return `${formatInlineValue(sourceId).text} (${formatSystemLabel(sourceSystem)} → ${formatSystemLabel(targetSystem)})`;
+    return `${formatInlineValue(sourceId).text} (${capitalize(formatSystemLabel(sourceSystem))} → ${capitalize(formatSystemLabel(targetSystem))})`;
   }
 
   return `Item: ${formatInlineValue(key).text}`;
@@ -341,15 +338,15 @@ export function formatPropertyLabel({
 
   switch (key) {
     case "source_id":
-      return `${sourceSystem} ${mappingType} name`;
+      return capitalize(`${sourceSystem} ${mappingType} name`);
     case "source_uuid":
-      return `${sourceSystem} UUID`;
+      return capitalize(`${sourceSystem} UUID`);
     case "target_id":
       return relationType === "alias"
         ? "Alias of"
-        : `${targetSystem} ${mappingType} name`;
+        : capitalize(`${targetSystem} ${mappingType} name`);
     case "target_uuid":
-      return `${targetSystem} UUID`;
+      return capitalize(`${targetSystem} UUID`);
     case "relation_type":
       return "Status";
     default:
@@ -421,10 +418,6 @@ export function getScalarDiffKind(diff: ScalarFieldDiff): DiffKind {
   return "updated";
 }
 
-function capitalize(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
 function humanize(value: string): string {
   const withoutArrayIndex = value.replace(/\[\d+\]/g, "");
   const text = withoutArrayIndex.replace(/_/g, " ");
@@ -435,5 +428,9 @@ function humanize(value: string): string {
 function formatSystemLabel(value: unknown): string {
   if (typeof value !== "string") return "target system";
 
-  return SYSTEM_LABELS[value.toLowerCase()] ?? capitalize(value);
+  const dataSystem = value.toLowerCase();
+
+  return dataSystem in DataSystemNames
+    ? DataSystemNames[dataSystem as DataSystem]
+    : capitalize(value);
 }
