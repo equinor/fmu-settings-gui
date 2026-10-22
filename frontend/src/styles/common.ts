@@ -78,8 +78,10 @@ export const ActionButtonsContainer = styled.div`
   }
 `;
 
-export const GenericBox = styled.div`
-  margin-bottom: ${tokens.spacings.comfortable.medium};
+export const GenericBox = styled.div<{
+  $marginBottom?: string;
+}>`
+  margin-bottom: ${({ $marginBottom = tokens.spacings.comfortable.medium }) => $marginBottom};
   padding: ${tokens.spacings.comfortable.small};
   border: solid 1px ${tokens.colors.ui.background__medium.hex};
   border-radius: ${tokens.shape.corners.borderRadius};

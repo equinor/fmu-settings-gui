@@ -165,23 +165,23 @@ export function ProjectRecoveryNotification() {
           recoverySource.backupStatus === null ? (
             <PageText $marginBottom="0">
               The project configuration was saved by a newer version of FMU
-              Settings, and this version can't open it. Checking for a
-              compatible project configuration failed. Try opening the project
-              again.
+              Settings. The version you are currently running cannot open it.
+              The application failed to check for a compatible backup. Switch to
+              a newer Komodo version to open this project.
             </PageText>
           ) : recoverySource.backupStatus.available ? (
             <>
               <PageText>
                 The project configuration was saved by a newer version of FMU
-                Settings, and this version can't open it.
+                Settings. The version you are currently running cannot open it.
               </PageText>
               <PageText>
                 Use <span className="emphasis">Cancel</span> and switch to a
                 newer Komodo version to open the project.
               </PageText>
               <PageText>
-                Or use <span className="emphasis">Restore</span> to return to
-                the latest compatible configuration
+                Alternatively, use <span className="emphasis">Restore</span> to
+                return to the latest compatible configuration
                 {recoverySource.backupStatus.last_modified_at ? (
                   <>
                     , last changed on{" "}
@@ -203,18 +203,19 @@ export function ProjectRecoveryNotification() {
                 ) : null}
                 .
               </PageText>
-              <WarningBox style={{ marginBottom: 0 }}>
+              <WarningBox $marginBottom="0">
                 <PageText $marginBottom="0">
-                  Any changes made after this date will be lost if you restore.
+                  Any changes that have been made after this date will be lost
+                  if you restore.
                 </PageText>
               </WarningBox>
             </>
           ) : (
             <PageText $marginBottom="0">
               The project configuration was saved by a newer version of FMU
-              Settings, and this version can't open it. No compatible project
-              configuration was found. Use a newer version of FMU Settings to
-              open this project.
+              Settings. The version you are currently running cannot open it. No
+              compatible project configuration was found. Switch to a newer
+              Komodo version to open this project.
             </PageText>
           )
         ) : latestRevision ? (
