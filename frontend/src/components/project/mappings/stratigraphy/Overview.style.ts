@@ -46,13 +46,12 @@ export const ElementSystems = styled.div`
 
 	display: flex;
 	gap: ${tokens.spacings.comfortable.small};
+  justify-content: space-between;
+  align-items: center;
 
+  
   & > div {
-    flex: 1;
-  }
-
-  & > div:last-child > div {
-    justify-self: right;
+    cursor: default;
   }
 `;
 

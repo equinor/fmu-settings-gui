@@ -46,15 +46,8 @@ function getColors(
 export const ElementSystem = styled.div<{
   $systemNameShown?: boolean;
 }>`
-  display: inline grid;
-  vertical-align: ${(props) => (props.$systemNameShown ? "82%" : undefined)} ;
+  display: inline flow-root;
   border-radius: ${tokens.shape.corners.borderRadius};
-
-  align-items: center;
-`;
-
-export const ElementInfo = styled.div`
-	cursor: default;
 `;
 
 export const ElementSystemName = styled.div<{
