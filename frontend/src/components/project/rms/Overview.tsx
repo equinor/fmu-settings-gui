@@ -1,7 +1,7 @@
 import { Dialog } from "@equinor/eds-core-react";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 import type { RmsProject } from "#client";
@@ -123,6 +123,21 @@ function RmsEditorForm({
   });
 
   const availableRmsProjects = RmsProjectOptions?.results ?? [];
+  const singleRmsProjectPath =
+    availableRmsProjects.length === 1
+      ? availableRmsProjects[0]?.path
+      : undefined;
+
+  useEffect(() => {
+    if (
+      isDialogOpen &&
+      !rmsData &&
+      singleRmsProjectPath !== undefined &&
+      form.getFieldValue("rmsPath") === ""
+    ) {
+      form.setFieldValue("rmsPath", singleRmsProjectPath);
+    }
+  }, [form, isDialogOpen, rmsData, singleRmsProjectPath]);
 
   function isProjectInAvailable(path: string) {
     return availableRmsProjects.some((option) => option.path === path);

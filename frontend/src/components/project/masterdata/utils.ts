@@ -13,6 +13,7 @@ function emptyOptionsData(): OptionsData {
   return {
     coordinateSystems: [],
     coordinateSystemsOptions: [],
+    defaultCoordinateSystem: undefined,
     stratigraphicColumns: [],
     stratigraphicColumnsOptions: [],
   };
