@@ -911,35 +911,62 @@ export function Edit({
 
           <Dialog.Actions>
             <form.AppForm>
-              <form.Subscribe selector={(state) => state.canSubmit}>
-                {(canSubmit) => (
-                  <>
-                    <form.SubmitButton
-                      label="Save"
-                      disabled={
-                        !canSubmit ||
-                        smdaMasterdata.isPending ||
-                        projectReadOnly ||
-                        masterdataMutation.isPending
-                      }
-                      isPending={masterdataMutation.isPending}
-                      helperTextDisabled={
-                        masterdataMutation.isPending
-                          ? "Masterdata is being saved"
-                          : projectReadOnly
-                            ? "Project is read-only"
-                            : undefined
-                      }
-                    />
+              <form.Subscribe
+                selector={(state) =>
+                  [state.isDefaultValue, state.canSubmit, state.values] as const
+                }
+              >
+                {([isDefaultValue, canSubmit, values]) => {
+                  const emptyUuid = emptyIdentifierUuid().uuid;
+                  const missing = [
+                    values.field.length === 0 && "a field",
+                    values.country.length === 0 && "a country",
+                    values.coordinate_system.uuid === emptyUuid &&
+                      "a coordinate system",
+                    values.stratigraphic_column.uuid === emptyUuid &&
+                      "a stratigraphic column",
+                  ].filter((item) => item !== false);
+                  // Saving removes orphan discoveries, so allow it without other changes
+                  const hasOrphans =
+                    (orphanData.discovery[DUMMYGROUP_NAME] ?? []).length > 0;
 
-                    <form.CancelButton
-                      onClick={(e) => {
-                        e.preventDefault();
-                        confirmClose.handleCloseRequest();
-                      }}
-                    />
-                  </>
-                )}
+                  return (
+                    <>
+                      <form.SubmitButton
+                        label="Save"
+                        disabled={
+                          (isDefaultValue && !hasOrphans) ||
+                          missing.length > 0 ||
+                          !canSubmit ||
+                          smdaMasterdata.isPending ||
+                          projectReadOnly ||
+                          masterdataMutation.isPending
+                        }
+                        isPending={masterdataMutation.isPending}
+                        helperTextDisabled={
+                          masterdataMutation.isPending
+                            ? "Masterdata is being saved"
+                            : projectReadOnly
+                              ? "Project is read-only"
+                              : smdaMasterdata.isPending
+                                ? "Masterdata is being loaded"
+                                : missing.length > 0
+                                  ? `Select ${new Intl.ListFormat("en").format(missing)} before saving`
+                                  : isDefaultValue && !hasOrphans
+                                    ? "Masterdata can be saved when it has been changed"
+                                    : undefined
+                        }
+                      />
+
+                      <form.CancelButton
+                        onClick={(e) => {
+                          e.preventDefault();
+                          confirmClose.handleCloseRequest();
+                        }}
+                      />
+                    </>
+                  );
+                }}
               </form.Subscribe>
             </form.AppForm>
           </Dialog.Actions>
