@@ -7,6 +7,7 @@ import { getUnmappableOption } from "#components/project/common/mapping/utils";
 import type { SaveWellboreMappings } from "#services/mappings";
 import { GenericDialog, PageText } from "#styles/common";
 import { DataSystemNames } from "#utils/model";
+import { capitalize } from "#utils/string";
 import type { wellboreTargetSystems } from "./functions";
 
 type WellboreTargetSystem = (typeof wellboreTargetSystems)[number];
@@ -29,7 +30,7 @@ export function RemoveMappingsAction({
 
   const removeMappings = () => {
     saveMappings(mappingsAfterRemoval(), {
-      successMessage: `${label.charAt(0).toUpperCase()}${label.slice(1)} names cleared`,
+      successMessage: `${capitalize(label)} names cleared`,
       onSuccess: () => {
         setDialogOpen(false);
       },

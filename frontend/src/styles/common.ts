@@ -48,7 +48,7 @@ export const PageText = styled(Typography).attrs<{
     };
   }
 })`
-  margin-top: ${({ $marginTop }) => $marginTop ?? undefined};
+  margin-top: ${({ $marginTop }) => $marginTop};
   margin-bottom: ${({ $marginBottom = tokens.spacings.comfortable.medium }) => $marginBottom};
 
   .emphasis {
