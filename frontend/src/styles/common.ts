@@ -39,15 +39,10 @@ export const PageText = styled(Typography).attrs<{
   $marginTop?: string;
   $marginBottom?: string;
   $hasDivContent?: boolean;
-}>(({ $variant = "body_short", $hasDivContent }) => {
-  if ($hasDivContent) {
-    return { as: "div" };
-  } else {
-    return {
-      variant: $variant,
-    };
-  }
-})`
+}>(({ $variant = "body_short", $hasDivContent }) => ({
+  variant: $variant,
+  ...($hasDivContent && { forwardedAs: "div" }),
+}))`
   margin-top: ${({ $marginTop }) => $marginTop};
   margin-bottom: ${({ $marginBottom = tokens.spacings.comfortable.medium }) => $marginBottom};
 

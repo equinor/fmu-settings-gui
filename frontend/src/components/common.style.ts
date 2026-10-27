@@ -57,14 +57,14 @@ export const ElementSystemName = styled.div<{
 	width: fit-content;
 	padding: 0 ${tokens.spacings.comfortable.small} 0 ${tokens.spacings.comfortable.small};
 	padding-top: ${(props) => (props.$showBorder ? "1px" : undefined)};
-	border: ${(props) => (props.$showBorder ? "solid 1px #cccccc" : undefined)};
+	border: ${(props) => (props.$showBorder ? `solid 1px ${tokens.colors.ui.background__medium.hex}` : undefined)};
 	border-bottom: ${(props) => (props.$isNoElement === "info" ? undefined : "none")};
 	border-radius: ${tokens.shape.corners.borderRadius};
 	border-bottom-left-radius: ${(props) => (props.$isNoElement === "info" ? undefined : "0%")};
 	border-bottom-right-radius: ${(props) => (props.$isNoElement === "info" ? undefined : "0%")};
 	background: ${tokens.colors.ui.background__default.hex};
 
-	color: black;
+  color: ${tokens.colors.text.static_icons__default.hex};
 	font-size: 10px;
 	line-height: ${tokens.typography.navigation.button.lineHeight};
 	text-transform: uppercase;
