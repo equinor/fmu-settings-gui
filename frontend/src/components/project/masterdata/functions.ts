@@ -66,6 +66,17 @@ export function handlePrepareEditData(
     formApi.getFieldValue("field") as Array<FieldItem>,
   );
 
+  if (
+    optionsData.defaultCoordinateSystem !== undefined &&
+    (formApi.getFieldValue("coordinate_system") as CoordinateSystem).uuid ===
+      emptyIdentifierUuid().uuid
+  ) {
+    formApi.setFieldValue(
+      "coordinate_system",
+      optionsData.defaultCoordinateSystem,
+    );
+  }
+
   handleErrorUnknownInitialValue(
     formApi.setFieldMeta,
     "coordinate_system",
@@ -175,6 +186,10 @@ export function createOptions(
               .sort((a, b) => stringCompare(a.identifier, b.identifier)) ?? [],
           )
         : [],
+    defaultCoordinateSystem:
+      dcsCount === 1
+        ? Object.values(defaultCoordinateSystems).at(0)?.coordinateSystem
+        : undefined,
     stratigraphicColumns,
     stratigraphicColumnsOptions: stratigraphicColumns
       .map((column) => {

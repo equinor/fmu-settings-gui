@@ -26,6 +26,7 @@ export type ItemListGrouped<T> = Record<string, Array<T>>;
 export type OptionsData = {
   coordinateSystems: Array<CoordinateSystem>;
   coordinateSystemsOptions: Array<CoordinateSystem>;
+  defaultCoordinateSystem: CoordinateSystem | undefined;
   stratigraphicColumns: Array<StratigraphicColumn>;
   stratigraphicColumnsOptions: Array<StratigraphicColumn>;
 };
