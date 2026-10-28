@@ -30,7 +30,6 @@ import {
 import { handleSsoLogin } from "#utils/authentication";
 import { DataSystemNames } from "#utils/model";
 import {
-  ElementInfo,
   ElementNameDisplay,
   ElementSystem,
   ElementSystemName,
@@ -329,32 +328,30 @@ export function ElementName({
   children?: ReactNode;
 }) {
   return (
-    <ElementSystem $systemNameShown={showSystemName}>
-      <ElementInfo>
-        {showSystemName && (
-          <ElementSystemName
-            $isNoElement={isNoElement}
-            $showBorder={!noSystemNameBorder}
-          >
-            {DataSystemNames[system]}
-          </ElementSystemName>
-        )}
-        <ElementNameDisplay
-          $system={system}
+    <ElementSystem>
+      {showSystemName && (
+        <ElementSystemName
           $isNoElement={isNoElement}
-          $systemNameShown={showSystemName}
+          $showBorder={!noSystemNameBorder}
         >
-          {children}
-          {aliases.length > 0 && (
-            <Icon
-              className="aliases"
-              data={link}
-              title={`${aliases.length === 1 ? "Alias" : "Aliases"}: ${aliases.join(", ")}`}
-              size={16}
-            />
-          )}
-        </ElementNameDisplay>
-      </ElementInfo>
+          {DataSystemNames[system]}
+        </ElementSystemName>
+      )}
+      <ElementNameDisplay
+        $system={system}
+        $isNoElement={isNoElement}
+        $systemNameShown={showSystemName}
+      >
+        {children}
+        {aliases.length > 0 && (
+          <Icon
+            className="aliases"
+            data={link}
+            title={`${aliases.length === 1 ? "Alias" : "Aliases"}: ${aliases.join(", ")}`}
+            size={16}
+          />
+        )}
+      </ElementNameDisplay>
     </ElementSystem>
   );
 }

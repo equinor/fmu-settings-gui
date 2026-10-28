@@ -15,13 +15,13 @@ export const HorizonItem = styled.div<{
   align-self: center;
 
   margin: ${tokens.spacings.comfortable.x_small};
-	border: 1px #999999;
-	border-style: ${({ $lineStyle }) => $lineStyle};
-	border-radius: ${tokens.shape.corners.borderRadius};
-	background: ${tokens.colors.ui.background__default.hex};
+  border: 1px #999999;
+  border-style: ${({ $lineStyle }) => $lineStyle};
+  border-radius: ${tokens.shape.corners.borderRadius};
+  background: ${tokens.colors.ui.background__default.hex};
 
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const ZoneItem = styled.div.attrs<{ $zoneGrid: ZonePlacementInfo }>(
@@ -33,35 +33,33 @@ export const ZoneItem = styled.div.attrs<{ $zoneGrid: ZonePlacementInfo }>(
   }),
 )`
   margin: ${tokens.spacings.comfortable.x_small};
-	border-radius: ${tokens.shape.corners.borderRadius};
+  border-radius: ${tokens.shape.corners.borderRadius};
   background: ${tokens.colors.infographic.primary__moss_green_21.hex};
 
   display: flex;
-	flex-direction: column;
+  flex-direction: column;
 `;
 
 export const ElementSystems = styled.div`
-	flex: 1;
+  flex: 1;
   padding: ${tokens.spacings.comfortable.small};
 
-	display: flex;
-	gap: ${tokens.spacings.comfortable.small};
-
+  display: flex;
+  gap: ${tokens.spacings.comfortable.small};
+  justify-content: space-between;
+  align-items: center;
+  
   & > div {
-    flex: 1;
-  }
-
-  & > div:last-child > div {
-    justify-self: right;
+    cursor: default;
   }
 `;
 
 export const ElementActions = styled.div`
-	flex-shrink: 0;
-	height: 20px;
-	cursor: pointer;
+  flex-shrink: 0;
+  height: 20px;
+  cursor: pointer;
 
-	display: flex;
-	justify-content: center;
-	align-items: start;
+  display: flex;
+  justify-content: center;
+  align-items: start;
 `;

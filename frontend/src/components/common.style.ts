@@ -38,43 +38,34 @@ function getColors(
   }
 
   return css`
-		background-color: ${backgroundColor};
-		color: ${color};
-	`;
+    background-color: ${backgroundColor};
+    color: ${color};
+  `;
 }
 
-export const ElementSystem = styled.div<{
-  $systemNameShown?: boolean;
-}>`
-  display: inline grid;
-  vertical-align: ${(props) => (props.$systemNameShown ? "82%" : undefined)} ;
+export const ElementSystem = styled.div`
+  display: inline flow-root;
   border-radius: ${tokens.shape.corners.borderRadius};
-
-  align-items: center;
-`;
-
-export const ElementInfo = styled.div`
-	cursor: default;
 `;
 
 export const ElementSystemName = styled.div<{
   $isNoElement?: ElementNameIsNoElement;
   $showBorder?: boolean;
 }>`
-	width: fit-content;
-	padding: 0 ${tokens.spacings.comfortable.small} 0 ${tokens.spacings.comfortable.small};
-	padding-top: ${(props) => (props.$showBorder ? "1px" : undefined)};
-	border: ${(props) => (props.$showBorder ? "solid 1px #cccccc" : undefined)};
-	border-bottom: ${(props) => (props.$isNoElement === "info" ? undefined : "none")};
-	border-radius: ${tokens.shape.corners.borderRadius};
-	border-bottom-left-radius: ${(props) => (props.$isNoElement === "info" ? undefined : "0%")};
-	border-bottom-right-radius: ${(props) => (props.$isNoElement === "info" ? undefined : "0%")};
-	background: ${tokens.colors.ui.background__default.hex};
+  width: fit-content;
+  padding: 0 ${tokens.spacings.comfortable.small} 0 ${tokens.spacings.comfortable.small};
+  padding-top: ${(props) => (props.$showBorder ? "1px" : undefined)};
+  border: ${(props) => (props.$showBorder ? `solid 1px ${tokens.colors.ui.background__medium.hex}` : undefined)};
+  border-bottom: ${(props) => (props.$isNoElement === "info" ? undefined : "none")};
+  border-radius: ${tokens.shape.corners.borderRadius};
+  border-bottom-left-radius: ${(props) => (props.$isNoElement === "info" ? undefined : "0%")};
+  border-bottom-right-radius: ${(props) => (props.$isNoElement === "info" ? undefined : "0%")};
+  background: ${tokens.colors.ui.background__default.hex};
 
-	color: black;
-	font-size: 10px;
-	line-height: ${tokens.typography.navigation.button.lineHeight};
-	text-transform: uppercase;
+  color: ${tokens.colors.text.static_icons__default.hex};
+  font-size: 10px;
+  line-height: ${tokens.typography.navigation.button.lineHeight};
+  text-transform: uppercase;
 `;
 
 export const ElementNameDisplay = styled.div<{
@@ -82,24 +73,24 @@ export const ElementNameDisplay = styled.div<{
   $isNoElement?: ElementNameIsNoElement;
   $systemNameShown?: boolean;
 }>`
-	width: fit-content;
-	padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
-	padding-left: ${(props) => (props.$isNoElement === "info" ? "0" : undefined)};
-	border-radius: ${tokens.shape.corners.borderRadius};
-	border-top-left-radius: ${(props) => (props.$systemNameShown ? "0%" : undefined)};
+  width: fit-content;
+  padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
+  padding-left: ${(props) => (props.$isNoElement === "info" ? "0" : undefined)};
+  border-radius: ${tokens.shape.corners.borderRadius};
+  border-top-left-radius: ${(props) => (props.$systemNameShown ? "0%" : undefined)};
 
-	display: flex;
-	gap: ${tokens.spacings.comfortable.small};
+  display: flex;
+  gap: ${tokens.spacings.comfortable.small};
 
-	font-size: ${tokens.typography.navigation.button.fontSize};
-	font-weight: ${tokens.typography.navigation.button.fontWeight};
-	font-style: ${(props) => (props.$isNoElement ? "italic" : "normal")};
-	line-height: ${tokens.typography.navigation.button.lineHeight};
-	white-space: nowrap;
+  font-size: ${tokens.typography.navigation.button.fontSize};
+  font-weight: ${tokens.typography.navigation.button.fontWeight};
+  font-style: ${(props) => (props.$isNoElement ? "italic" : "normal")};
+  line-height: ${tokens.typography.navigation.button.lineHeight};
+  white-space: nowrap;
 
   ${(props) => getColors(props.$system, props.$isNoElement)}
 
-	.aliases {
-		color: ${tokens.colors.infographic.substitute__purple_berry.hex}
-	}
+  .aliases {
+    color: ${tokens.colors.infographic.substitute__purple_berry.hex}
+  }
 `;

@@ -1,6 +1,7 @@
 import type { ListUpdatedEntry } from "#client/types.gen";
 import { GenericInnerBox } from "#styles/common";
 import { displayDateTime } from "#utils/datetime";
+import { capitalize } from "#utils/string";
 import {
   DiffFieldHeader,
   DiffGroup,
@@ -266,7 +267,7 @@ function DiffEntryCard({
 
       <DiffGroup $kind={kind}>
         <DiffFieldHeader>
-          <strong>{kind.charAt(0).toUpperCase() + kind.slice(1)} (1)</strong>
+          <strong>{capitalize(kind)} (1)</strong>
         </DiffFieldHeader>
 
         <DiffValueGrid>
