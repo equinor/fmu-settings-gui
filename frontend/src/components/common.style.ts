@@ -43,9 +43,7 @@ function getColors(
 	`;
 }
 
-export const ElementSystem = styled.div<{
-  $systemNameShown?: boolean;
-}>`
+export const ElementSystem = styled.div`
   display: inline flow-root;
   border-radius: ${tokens.shape.corners.borderRadius};
 `;

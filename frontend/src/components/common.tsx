@@ -328,7 +328,7 @@ export function ElementName({
   children?: ReactNode;
 }) {
   return (
-    <ElementSystem $systemNameShown={showSystemName}>
+    <ElementSystem>
       {showSystemName && (
         <ElementSystemName
           $isNoElement={isNoElement}
