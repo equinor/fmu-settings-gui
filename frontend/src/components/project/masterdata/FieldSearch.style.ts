@@ -17,6 +17,10 @@ export const SearchResultsContainer = styled.div`
   table {
     width: 100% !important;
 
+    tbody tr:not(.disabled-row) {
+      cursor: pointer;
+    }
+
     .selected-row {
       background-color: ${tokens.colors.interactive.table__cell__fill_activated.hex};
     }
