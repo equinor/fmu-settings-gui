@@ -34,7 +34,6 @@ import {
   MappingParametersRow,
   MappingSummary,
   MatchingResultsContainer,
-  PrefixSelector,
 } from "./SmdaMappings.style";
 import type { AutomaticMatchProposal, DisplayedMatchQuality } from "./types";
 
@@ -55,6 +54,22 @@ const coverageFormatter = new Intl.NumberFormat(applicationLocale, {
 const COUNTRY_PREFIX_OPTION = "Country prefixes";
 const COUNTRY_PREFIXES = ["NO", "BR", "CA", "US", "GB"];
 const KNOWN_PREFIX_OPTIONS = [COUNTRY_PREFIX_OPTION, "RFT", "MLW"];
+
+// Matches the API name normalization, so equivalent rules become one option.
+function normalizeMatchRule(value: string) {
+  return value
+    .replace(/[_.\-/]/g, " ")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toUpperCase();
+}
+
+function rulesChanged(selected: string[], applied: string[]) {
+  return (
+    selected.length !== applied.length ||
+    selected.some((rule) => !applied.includes(rule))
+  );
+}
 
 function displayedMatchQuality(
   proposal: AutomaticMatchProposal,
@@ -101,6 +116,10 @@ function AutomaticMappingParameters({
   selectedPrefixes,
   setSelectedPrefixes,
   addPrefix,
+  suffixOptions,
+  selectedSuffixes,
+  setSelectedSuffixes,
+  addSuffix,
   hasSuggestions,
 }: {
   projectReadOnly: boolean;
@@ -111,6 +130,10 @@ function AutomaticMappingParameters({
   selectedPrefixes: string[];
   setSelectedPrefixes: (value: string[]) => void;
   addPrefix: (value: string) => void;
+  suffixOptions: string[];
+  selectedSuffixes: string[];
+  setSelectedSuffixes: (value: string[]) => void;
+  addSuffix: (value: string) => void;
   hasSuggestions: boolean;
 }) {
   const disabled = projectReadOnly || isSaving || isGenerating;
@@ -118,33 +141,44 @@ function AutomaticMappingParameters({
   return (
     <ParametersBox>
       <MappingParametersRow>
-        <PrefixSelector>
-          <Autocomplete
-            multiple
-            autoWidth
-            label="Prefixes to ignore"
-            placeholder="Select or enter a prefix"
-            options={prefixOptions}
-            selectedOptions={selectedPrefixes}
-            disabled={disabled}
-            onOptionsChange={({ selectedItems }) => {
-              setSelectedPrefixes(
-                selectedItems.includes(COUNTRY_PREFIX_OPTION)
-                  ? selectedItems.filter(
-                      (item) => !COUNTRY_PREFIXES.includes(item.toUpperCase()),
-                    )
-                  : selectedItems,
-              );
-            }}
-            onAddNewOption={addPrefix}
-            optionComponent={(option) =>
-              option === COUNTRY_PREFIX_OPTION
-                ? `${option} (${COUNTRY_PREFIXES.join(", ")})`
-                : option
-            }
-            helperText="Country prefixes are selected by default"
-          />
-        </PrefixSelector>
+        <Autocomplete
+          multiple
+          autoWidth
+          label="Prefixes to ignore"
+          placeholder="Select or enter a prefix"
+          options={prefixOptions}
+          selectedOptions={selectedPrefixes}
+          disabled={disabled}
+          onOptionsChange={({ selectedItems }) => {
+            setSelectedPrefixes(
+              selectedItems.includes(COUNTRY_PREFIX_OPTION)
+                ? selectedItems.filter(
+                    (item) => !COUNTRY_PREFIXES.includes(item.toUpperCase()),
+                  )
+                : selectedItems,
+            );
+          }}
+          onAddNewOption={addPrefix}
+          optionComponent={(option) =>
+            option === COUNTRY_PREFIX_OPTION
+              ? `${option} (${COUNTRY_PREFIXES.join(", ")})`
+              : option
+          }
+          helperText="Country prefixes are selected by default"
+        />
+        <Autocomplete
+          multiple
+          autoWidth
+          label="Suffixes to ignore"
+          placeholder="Enter a suffix"
+          options={suffixOptions}
+          selectedOptions={selectedSuffixes}
+          disabled={disabled}
+          onOptionsChange={({ selectedItems }) => {
+            setSelectedSuffixes(selectedItems);
+          }}
+          onAddNewOption={addSuffix}
+        />
         <GeneralButton
           label={hasSuggestions ? "Update suggestions" : "Generate suggestions"}
           disabled={disabled}
@@ -164,21 +198,20 @@ function AutomaticMappingParameters({
       </MappingParametersRow>
 
       <MappingHelp>
-        <summary>About prefix rules</summary>
+        <summary>About prefix and suffix rules</summary>
 
         <PageText>
-          RMS and SMDA can use different prefixes for the same wellbore, so
-          ignoring them can help find similar names. Select known prefixes or
-          add your own.
+          RMS and SMDA can use different prefixes or suffixes for the same
+          wellbore. Ignoring them in both names can help find similar names.
         </PageText>
 
         <PageText
           $hasDivContent
           $marginTop={`-${tokens.spacings.comfortable.medium}`}
         >
-          For example, ignoring RFT and NO lets{" "}
+          For example, ignoring the prefixes RFT and NO and the suffix GL lets{" "}
           <ElementName system="rms" showSystemName>
-            RFT_55_33-A-2
+            RFT_55_33-A-2_GL
           </ElementName>{" "}
           match{" "}
           <ElementName system="smda" showSystemName>
@@ -213,6 +246,11 @@ function AutomaticMappingDialog({
   setSelectedPrefixes,
   addPrefix,
   ignoredPrefixes,
+  suffixOptions,
+  selectedSuffixes,
+  setSelectedSuffixes,
+  addSuffix,
+  ignoredSuffixes,
 }: {
   mappingProposals: AutomaticMatchProposal[] | null;
   unmappedRmsWellboreCount: number;
@@ -229,14 +267,19 @@ function AutomaticMappingDialog({
   setSelectedPrefixes: (value: string[]) => void;
   addPrefix: (value: string) => void;
   ignoredPrefixes: string[];
+  suffixOptions: string[];
+  selectedSuffixes: string[];
+  setSelectedSuffixes: (value: string[]) => void;
+  addSuffix: (value: string) => void;
+  ignoredSuffixes: string[];
 }) {
   const proposals = useMemo(() => mappingProposals ?? [], [mappingProposals]);
   const hasSuggestions = mappingProposals !== null;
   const isBusy = isSaving || isGenerating;
-  const prefixesChanged =
+  const matchRulesChanged =
     hasSuggestions &&
-    (selectedPrefixes.length !== ignoredPrefixes.length ||
-      selectedPrefixes.some((prefix) => !ignoredPrefixes.includes(prefix)));
+    (rulesChanged(selectedPrefixes, ignoredPrefixes) ||
+      rulesChanged(selectedSuffixes, ignoredSuffixes));
   const formatCoverage = (count: number) =>
     coverageFormatter.format(
       unmappedRmsWellboreCount === 0 ? 0 : count / unmappedRmsWellboreCount,
@@ -392,10 +435,14 @@ function AutomaticMappingDialog({
             selectedPrefixes={selectedPrefixes}
             setSelectedPrefixes={setSelectedPrefixes}
             addPrefix={addPrefix}
+            suffixOptions={suffixOptions}
+            selectedSuffixes={selectedSuffixes}
+            setSelectedSuffixes={setSelectedSuffixes}
+            addSuffix={addSuffix}
             hasSuggestions={hasSuggestions}
           />
 
-          <PageText>
+          <PageText $marginBottom="0">
             Review each suggestion before saving. Name similarity does not
             verify that the RMS and SMDA names refer to the same wellbore.
           </PageText>
@@ -405,18 +452,18 @@ function AutomaticMappingDialog({
 
             <PageText>
               <span className="emphasis">Exact</span> means a 100&nbsp;% name
-              match after normalization and any selected prefix removal. Exact
-              matches are selected automatically unless you previously
-              deselected that match. The same SMDA name can be selected for more
-              than one RMS wellbore.
+              match after normalization and any selected prefix or suffix
+              removal. Exact matches are selected automatically unless you
+              previously deselected that match. The same SMDA name can be
+              selected for more than one RMS wellbore.
             </PageText>
           </MappingHelp>
 
-          {prefixesChanged && !isGenerating && (
+          {matchRulesChanged && !isGenerating && (
             <WarningBox>
               <PageText $marginBottom="0">
-                Prefix rules changed. Click <i>Update suggestions</i> to apply
-                them.
+                Prefix or suffix rules changed. Click <i>Update suggestions</i>{" "}
+                to apply them.
               </PageText>
             </WarningBox>
           )}
@@ -442,6 +489,12 @@ function AutomaticMappingDialog({
                   <tr>
                     <th scope="row">Ignored prefixes</th>
                     <td>{ignoredPrefixes.join(", ") || "None"}</td>
+                  </tr>
+                )}
+                {hasSuggestions && (
+                  <tr>
+                    <th scope="row">Ignored suffixes</th>
+                    <td>{ignoredSuffixes.join(", ") || "None"}</td>
                   </tr>
                 )}
                 <tr>
@@ -622,6 +675,9 @@ export function SmdaMappings({
   ]);
   const [prefixOptions, setPrefixOptions] = useState(KNOWN_PREFIX_OPTIONS);
   const [reviewPrefixes, setReviewPrefixes] = useState<string[]>([]);
+  const [selectedSuffixes, setSelectedSuffixes] = useState<string[]>([]);
+  const [suffixOptions, setSuffixOptions] = useState<string[]>([]);
+  const [reviewSuffixes, setReviewSuffixes] = useState<string[]>([]);
   const reviewChoices = useRef(new Map<string, boolean>());
   const matchMutation = useMutation({
     ...matchPostMatchMutation(),
@@ -663,14 +719,11 @@ export function SmdaMappings({
     setAutomaticMappingOpen(false);
     setAutomaticMappingProposals(null);
     setReviewPrefixes([]);
+    setReviewSuffixes([]);
   };
 
   const addPrefix = (value: string) => {
-    const prefix = value
-      .replace(/[_.\-/]/g, " ")
-      .trim()
-      .replace(/\s+/g, " ")
-      .toUpperCase();
+    const prefix = normalizeMatchRule(value);
     if (!prefix) {
       return;
     }
@@ -704,6 +757,20 @@ export function SmdaMappings({
     setSelectedPrefixes(prefixes);
   };
 
+  const addSuffix = (value: string) => {
+    const suffix = normalizeMatchRule(value);
+    if (!suffix) {
+      return;
+    }
+
+    setSuffixOptions((options) =>
+      options.includes(suffix) ? options : [...options, suffix],
+    );
+    setSelectedSuffixes((options) =>
+      options.includes(suffix) ? options : [...options, suffix],
+    );
+  };
+
   const startAutomaticMapping = () => {
     if (suggestionsBlocked || matchMutation.isPending || isSaving) {
       return;
@@ -711,6 +778,9 @@ export function SmdaMappings({
 
     const prefixes = prefixOptions.filter((prefix) =>
       selectedPrefixes.includes(prefix),
+    );
+    const suffixes = suffixOptions.filter((suffix) =>
+      selectedSuffixes.includes(suffix),
     );
     const smdaWellboreNames = wellHeaders.smdaHeaders.map(
       (header) => header.unique_wellbore_identifier,
@@ -728,6 +798,7 @@ export function SmdaMappings({
               ),
             ),
           ],
+          suffixes_to_remove: suffixes,
         },
       },
       {
@@ -738,6 +809,7 @@ export function SmdaMappings({
             wellHeaders.fieldCount,
           );
           setReviewPrefixes(prefixes);
+          setReviewSuffixes(suffixes);
           setAutomaticMappingProposals(
             proposals.map((proposal) => ({
               ...proposal,
@@ -810,6 +882,11 @@ export function SmdaMappings({
           setSelectedPrefixes={updateSelectedPrefixes}
           addPrefix={addPrefix}
           ignoredPrefixes={reviewPrefixes}
+          suffixOptions={suffixOptions}
+          selectedSuffixes={selectedSuffixes}
+          setSelectedSuffixes={setSelectedSuffixes}
+          addSuffix={addSuffix}
+          ignoredSuffixes={reviewSuffixes}
           applyProposals={saveAutomaticMappings}
           toggleProposal={toggleProposal}
         />

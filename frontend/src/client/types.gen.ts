@@ -303,6 +303,22 @@ export type HttpValidationError = {
 };
 
 /**
+ * HealthResponse
+ *
+ * Identify a responsive FMU Settings API.
+ */
+export type HealthResponse = {
+    /**
+     * Status
+     */
+    status?: 'ok';
+    /**
+     * Application
+     */
+    application?: 'fmu-settings';
+};
+
+/**
  * InternalMappings
  *
  * Represents the .fmu/mappings.json storage schema.
@@ -654,6 +670,12 @@ export type MatchRequest = {
      * Prefixes to remove from the text before the first digit.
      */
     prefixes_to_remove?: Array<string>;
+    /**
+     * Suffixes To Remove
+     *
+     * Suffixes to remove from the end of names.
+     */
+    suffixes_to_remove?: Array<string>;
 };
 
 /**
@@ -4306,7 +4328,7 @@ export type HealthHealthCheckResponses = {
     /**
      * Successful Response
      */
-    200: Ok;
+    200: HealthResponse;
 };
 
 export type HealthHealthCheckResponse = HealthHealthCheckResponses[keyof HealthHealthCheckResponses];

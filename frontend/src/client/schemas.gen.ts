@@ -450,6 +450,26 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
+export const HealthResponseSchema = {
+    properties: {
+        status: {
+            type: 'string',
+            const: 'ok',
+            title: 'Status',
+            default: 'ok'
+        },
+        application: {
+            type: 'string',
+            const: 'fmu-settings',
+            title: 'Application',
+            default: 'fmu-settings'
+        }
+    },
+    type: 'object',
+    title: 'HealthResponse',
+    description: 'Identify a responsive FMU Settings API.'
+} as const;
+
 export const InternalMappingsSchema = {
     properties: {
         schema_version: {
@@ -728,7 +748,7 @@ export const LockInfoSchema = {
             type: 'string',
             pattern: '(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)',
             title: 'Version',
-            default: '1.7.0'
+            default: '1.7.1.dev3+g4d0102041.d20261021'
         }
     },
     type: 'object',
@@ -958,6 +978,14 @@ export const MatchRequestSchema = {
             type: 'array',
             title: 'Prefixes To Remove',
             description: 'Prefixes to remove from the text before the first digit.'
+        },
+        suffixes_to_remove: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Suffixes To Remove',
+            description: 'Suffixes to remove from the end of names.'
         }
     },
     type: 'object',

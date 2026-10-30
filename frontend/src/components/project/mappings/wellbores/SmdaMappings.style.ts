@@ -19,12 +19,14 @@ export const MappingDialog = styled(EditDialog)`
 `;
 
 export const MappingParametersRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: start;
   gap: ${tokens.spacings.comfortable.medium};
 
+  /* Aligns the button with the inputs above the prefix helper text. */
   && > button {
+    align-self: end;
     margin-bottom: ${tokens.spacings.comfortable.large};
   }
 `;
@@ -100,9 +102,4 @@ export const ConfidenceBadge = styled.span<{
   }};
   color: ${tokens.colors.text.static_icons__default.hex};
   font-weight: 500;
-`;
-
-export const PrefixSelector = styled.div`
-  width: 100%;
-  max-width: 22rem;
 `;

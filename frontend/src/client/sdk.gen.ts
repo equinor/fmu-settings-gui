@@ -414,7 +414,7 @@ export const projectPostCacheRestore = <ThrowOnError extends boolean = false>(op
  *
  * Checks if the project has a config migration backup that validates with
  * the installed schema. Use this when the project config was migrated by a
- * newer version and cannot be loaded.
+ * newer schema version and cannot be loaded.
  */
 export const projectGetMigrationBackupCheck = <ThrowOnError extends boolean = false>(options?: Options<ProjectGetMigrationBackupCheckData, ThrowOnError>): RequestResult<ProjectGetMigrationBackupCheckResponses, ProjectGetMigrationBackupCheckErrors, ThrowOnError> => (options?.client ?? client).get<ProjectGetMigrationBackupCheckResponses, ProjectGetMigrationBackupCheckErrors, ThrowOnError>({
     responseType: 'json',
@@ -911,7 +911,7 @@ export const smdaPostWellHeaders = <ThrowOnError extends boolean = false>(option
  *
  * The endpoint is a pure matching utility. Callers provide both the
  * source names and target names, and can optionally provide string
- * replacement rules and prefix removal options to apply before matching.
+ * replacement rules and prefix or suffix removal options before matching.
  *
  * Names are normalized before matching by lowercasing, replacing
  * underscores, dots, dashes, and slashes with spaces, collapsing
@@ -924,6 +924,13 @@ export const smdaPostWellHeaders = <ThrowOnError extends boolean = false>(option
  * are removed only from the text before the first digit and match
  * normalized tokens. Prefix removal changes only the values used for
  * comparison. The original names remain in the response.
+ *
+ * Callers can provide a list of suffixes to remove before comparison.
+ * For example, providing `GL` means `30_9-B-21_C_GL` is compared as `30_9-B-21_C`.
+ * Suffixes match complete normalized tokens at the end of a name.
+ * Only the longest matching token sequence is removed, once per name.
+ * For example, providing `GL` and `BY1H_GL` means `30_9-B-21_C_BY1H_GL` is
+ * compared as `30_9-B-21_C`. The original names remain in the response.
  *
  * The response contains one result per source. Each result contains up
  * to three target matches, ordered from highest to lowest score.

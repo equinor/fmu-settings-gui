@@ -3571,7 +3571,7 @@
           "project"
         ],
         "summary": "Checks if a compatible project config migration backup exists",
-        "description": "Checks if the project has a config migration backup that validates with\nthe installed schema. Use this when the project config was migrated by a\nnewer version and cannot be loaded.",
+        "description": "Checks if the project has a config migration backup that validates with\nthe installed schema. Use this when the project config was migrated by a\nnewer schema version and cannot be loaded.",
         "operationId": "project-get_migration_backup_check",
         "parameters": [
           {
@@ -7658,7 +7658,7 @@
           "match"
         ],
         "summary": "Match source names to target names",
-        "description": "Match source names to target names using strict name similarity.\n\nThe endpoint is a pure matching utility. Callers provide both the\nsource names and target names, and can optionally provide string\nreplacement rules and prefix removal options to apply before matching.\n\nNames are normalized before matching by lowercasing, replacing\nunderscores, dots, dashes, and slashes with spaces, collapsing\nwhitespace, and applying optional replacement rules. Replacement\nrules match whole normalized token sequences only, so a rule like\n`Fm -> Formation` changes `Tarbert Fm` to `Tarbert Formation`,\nwhile `Top -> \"\"` leaves `Stop Viking` unchanged.\n\nCallers can provide a list of individual prefixes to remove. Prefixes\nare removed only from the text before the first digit and match\nnormalized tokens. Prefix removal changes only the values used for\ncomparison. The original names remain in the response.\n\nThe response contains one result per source. Each result contains up\nto three target matches, ordered from highest to lowest score.\n\nConfidence levels:\n- 'high': score > 80\n- 'medium': score 50-80\n- 'low': score < 50",
+        "description": "Match source names to target names using strict name similarity.\n\nThe endpoint is a pure matching utility. Callers provide both the\nsource names and target names, and can optionally provide string\nreplacement rules and prefix or suffix removal options before matching.\n\nNames are normalized before matching by lowercasing, replacing\nunderscores, dots, dashes, and slashes with spaces, collapsing\nwhitespace, and applying optional replacement rules. Replacement\nrules match whole normalized token sequences only, so a rule like\n`Fm -> Formation` changes `Tarbert Fm` to `Tarbert Formation`,\nwhile `Top -> \"\"` leaves `Stop Viking` unchanged.\n\nCallers can provide a list of individual prefixes to remove. Prefixes\nare removed only from the text before the first digit and match\nnormalized tokens. Prefix removal changes only the values used for\ncomparison. The original names remain in the response.\n\nCallers can provide a list of suffixes to remove before comparison.\nFor example, providing `GL` means `30_9-B-21_C_GL` is compared as `30_9-B-21_C`.\nSuffixes match complete normalized tokens at the end of a name.\nOnly the longest matching token sequence is removed, once per name.\nFor example, providing `GL` and `BY1H_GL` means `30_9-B-21_C_BY1H_GL` is\ncompared as `30_9-B-21_C`. The original names remain in the response.\n\nThe response contains one result per source. Each result contains up\nto three target matches, ordered from highest to lowest score.\n\nConfidence levels:\n- 'high': score > 80\n- 'medium': score 50-80\n- 'low': score < 50",
         "operationId": "match-post_match",
         "requestBody": {
           "content": {
@@ -7806,7 +7806,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Ok"
+                  "$ref": "#/components/schemas/HealthResponse"
                 }
               }
             }
@@ -8246,6 +8246,25 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status",
+            "default": "ok"
+          },
+          "application": {
+            "type": "string",
+            "const": "fmu-settings",
+            "title": "Application",
+            "default": "fmu-settings"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse",
+        "description": "Identify a responsive FMU Settings API."
+      },
       "InternalMappings": {
         "properties": {
           "schema_version": {
@@ -8516,7 +8535,7 @@
             "type": "string",
             "pattern": "(\\d+(\\.\\d+){0,2}|\\d+\\.\\d+\\.[a-z0-9]+\\+[a-z0-9.]+)",
             "title": "Version",
-            "default": "1.7.0"
+            "default": "1.7.1.dev3+g4d0102041.d20261021"
           }
         },
         "type": "object",
@@ -8739,6 +8758,14 @@
             "type": "array",
             "title": "Prefixes To Remove",
             "description": "Prefixes to remove from the text before the first digit."
+          },
+          "suffixes_to_remove": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suffixes To Remove",
+            "description": "Suffixes to remove from the end of names."
           }
         },
         "type": "object",
