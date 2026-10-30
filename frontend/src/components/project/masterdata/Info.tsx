@@ -1,7 +1,8 @@
 import type React from "react";
 
 import type { Smda } from "#client";
-import { ChipsContainer, InfoChip } from "#styles/common";
+import { ElementName } from "#components/common";
+import { ElementNamesContainer } from "#styles/common";
 import { stringCompare } from "#utils/string";
 import { MasterdataInfoBox } from "./Info.style";
 
@@ -13,49 +14,61 @@ export function Info({ masterdata }: { masterdata: Smda }) {
           <tr>
             <th>Field</th>
             <td>
-              <ChipsContainer>
+              <ElementNamesContainer>
                 {masterdata.field
                   .sort((a, b) => stringCompare(a.identifier, b.identifier))
                   .map<React.ReactNode>((field) => (
-                    <InfoChip key={field.uuid}>{field.identifier}</InfoChip>
+                    <ElementName key={field.uuid} system="smda">
+                      {field.identifier}
+                    </ElementName>
                   ))}
-              </ChipsContainer>
+              </ElementNamesContainer>
             </td>
           </tr>
           <tr>
             <th>Country</th>
             <td>
-              <ChipsContainer>
+              <ElementNamesContainer>
                 {masterdata.country
                   .sort((a, b) => stringCompare(a.identifier, b.identifier))
                   .map<React.ReactNode>((country) => (
-                    <InfoChip key={country.uuid}>{country.identifier}</InfoChip>
+                    <ElementName key={country.uuid} system="smda">
+                      {country.identifier}
+                    </ElementName>
                   ))}
-              </ChipsContainer>
+              </ElementNamesContainer>
             </td>
           </tr>
           <tr>
             <th>Coordinate system</th>
-            <td>{masterdata.coordinate_system.identifier}</td>
+            <td>
+              <ElementName system="smda">
+                {masterdata.coordinate_system.identifier}
+              </ElementName>
+            </td>
           </tr>
           <tr>
             <th>Stratigraphic column</th>
-            <td>{masterdata.stratigraphic_column.identifier}</td>
+            <td>
+              <ElementName system="smda">
+                {masterdata.stratigraphic_column.identifier}
+              </ElementName>
+            </td>
           </tr>
           <tr>
             <th>Discoveries</th>
             <td>
-              <ChipsContainer>
+              <ElementNamesContainer>
                 {masterdata.discovery
                   .sort((a, b) =>
                     stringCompare(a.short_identifier, b.short_identifier),
                   )
                   .map<React.ReactNode>((discovery) => (
-                    <InfoChip key={discovery.uuid}>
+                    <ElementName key={discovery.uuid} system="smda">
                       {discovery.short_identifier}
-                    </InfoChip>
+                    </ElementName>
                   ))}
-              </ChipsContainer>
+              </ElementNamesContainer>
             </td>
           </tr>
         </tbody>

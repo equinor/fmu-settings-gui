@@ -9,6 +9,7 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 
 import type { SmdaFieldSearchResult, SmdaFieldUuid } from "#client";
 import { smdaPostFieldOptions } from "#client/@tanstack/react-query.gen";
+import { ElementName } from "#components/common";
 import { CancelButton, GeneralButton } from "#components/form/button";
 import { SearchFieldForm } from "#components/form/form";
 import { EditDialog, PageSectionSpacer, PageText } from "#styles/common";
@@ -99,7 +100,7 @@ function FieldResults({
                   <span className="disabled-cell">{String(getValue())}</span>
                 </Tooltip>
               ) : (
-                String(getValue())
+                <ElementName system="smda">{getValue<string>()}</ElementName>
               );
             },
           }}

@@ -1,4 +1,5 @@
-import { Button, Dialog, Label, Typography } from "@equinor/eds-core-react";
+import { Button, Dialog, Icon, Label, Tooltip } from "@equinor/eds-core-react";
+import { close } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -10,17 +11,16 @@ import {
   projectGetProjectQueryKey,
   projectPatchAssociatedFieldsMutation,
 } from "#client/@tanstack/react-query.gen";
-import { ConfirmCloseDialog } from "#components/common";
+import { ConfirmCloseDialog, ElementName } from "#components/common";
 import {
   CancelButton,
   GeneralButton,
   SubmitButton,
 } from "#components/form/button";
 import {
-  ChipsContainer,
   EditDialog,
+  ElementNamesContainer,
   GenericBox,
-  InfoChip,
   PageHeader,
   PageSectionSpacer,
   PageText,
@@ -30,6 +30,8 @@ import { stringCompare } from "#utils/string";
 import { useConfirmClose } from "#utils/ui";
 import { FieldSearch } from "./FieldSearch";
 import { MasterdataInfoBox } from "./Info.style";
+
+Icon.add({ close });
 
 const { useAppForm } = createFormHook({
   fieldContext,
@@ -161,26 +163,37 @@ function AssociatedFieldsDialog({
                 <>
                   <Label label="Associated fields" />
                   <GenericBox>
-                    <ChipsContainer>
+                    <ElementNamesContainer>
                       {field.state.value.length ? (
                         field.state.value.map((associated) => (
-                          <InfoChip
+                          <ElementName
                             key={associated.uuid}
-                            onDelete={() => {
-                              field.handleChange(
-                                field.state.value.filter(
-                                  (item) => item.uuid !== associated.uuid,
-                                ),
-                              );
-                            }}
+                            system="smda"
+                            rightIcon={
+                              <Tooltip title="Remove associated field">
+                                <Icon
+                                  name="close"
+                                  onClick={() => {
+                                    field.handleChange(
+                                      field.state.value.filter(
+                                        (item) => item.uuid !== associated.uuid,
+                                      ),
+                                    );
+                                  }}
+                                />
+                              </Tooltip>
+                            }
+                            hasClickableIcon
                           >
                             {associated.identifier}
-                          </InfoChip>
+                          </ElementName>
                         ))
                       ) : (
-                        <Typography>none</Typography>
+                        <ElementName system="smda" isNoElement="info">
+                          (none)
+                        </ElementName>
                       )}
-                    </ChipsContainer>
+                    </ElementNamesContainer>
                   </GenericBox>
                 </>
               )}
@@ -266,11 +279,13 @@ export function AssociatedFields({
               <tr>
                 <th>Associated fields</th>
                 <td>
-                  <ChipsContainer>
+                  <ElementNamesContainer>
                     {sortFields(associatedFields).map((field) => (
-                      <InfoChip key={field.uuid}>{field.identifier}</InfoChip>
+                      <ElementName key={field.uuid} system="smda">
+                        {field.identifier}
+                      </ElementName>
                     ))}
-                  </ChipsContainer>
+                  </ElementNamesContainer>
                 </td>
               </tr>
             </tbody>

@@ -1,5 +1,4 @@
 import {
-  Chip,
   Dialog,
   Banner as EdsBanner,
   List,
@@ -10,6 +9,7 @@ import styled from "styled-components";
 
 const WidthConstraint = "60em";
 const NotWidthConstrainedName = "notWidthConstrained";
+const ElementNamesContainerName = "elementNamesContainer";
 
 export const PageContainer = styled.div`
   &:not(:has(> .${NotWidthConstrainedName})) {
@@ -70,6 +70,10 @@ export const PageList = styled(List).attrs<{
   $marginBottom: props.$marginBottom ?? tokens.spacings.comfortable.medium,
 }))`
   margin-bottom: ${({ $marginBottom }) => $marginBottom};
+
+  li:has(> .${ElementNamesContainerName}) {
+    margin-bottom: ${tokens.spacings.comfortable.small};
+  }
 
   .emphasis {
     font-weight: 500;
@@ -154,20 +158,12 @@ export const OrphanWarningList = styled(List)`
   padding-right: ${tokens.spacings.comfortable.small};
 `;
 
-export const ChipsContainer = styled.div`
+export const ElementNamesContainer = styled.div.attrs({
+  className: ElementNamesContainerName,
+})`
   display: flex;
   flex-wrap: wrap;
-  gap: ${tokens.spacings.comfortable.small}
-`;
-
-export const InfoChip = styled(Chip)`
-  padding-left: ${tokens.spacings.comfortable.small};
-  background-color: ${tokens.colors.ui.background__medium.hex};
-
-  &, svg {
-    color: ${tokens.colors.text.static_icons__default.hex};
-    fill: ${tokens.colors.text.static_icons__default.hex};
-  }
+  gap: ${tokens.spacings.comfortable.small};
 `;
 
 export const GenericDialog = styled(Dialog).attrs<{

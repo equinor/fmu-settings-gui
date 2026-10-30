@@ -1,11 +1,4 @@
-import {
-  Button,
-  Dialog,
-  Icon,
-  Label,
-  List,
-  Typography,
-} from "@equinor/eds-core-react";
+import { Button, Dialog, Icon, Label, List } from "@equinor/eds-core-react";
 import { arrow_back, arrow_forward } from "@equinor/eds-icons";
 import { createFormHook } from "@tanstack/react-form";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
@@ -26,7 +19,7 @@ import {
   projectPatchMasterdataMutation,
   smdaPostMasterdataOptions,
 } from "#client/@tanstack/react-query.gen";
-import { ConfirmCloseDialog } from "#components/common";
+import { ConfirmCloseDialog, ElementName } from "#components/common";
 import {
   CancelButton,
   GeneralButton,
@@ -38,10 +31,9 @@ import type {
   MutationCallbackProps,
 } from "#components/form/form";
 import {
-  ChipsContainer,
   EditDialog,
+  ElementNamesContainer,
   GenericDialog,
-  InfoChip,
   PageHeader,
   PageList,
   PageText,
@@ -157,9 +149,10 @@ function ConfirmItemsOperationDialog({
       </Dialog.Header>
 
       <Dialog.CustomContent>
-        <PageText>
-          The {textItemType} <span className="emphasis">{textItemName}</span>{" "}
-          has been selected for{" "}
+        <PageText $hasDivContent>
+          The {textItemType}{" "}
+          <ElementName system="smda">{textItemName}</ElementName> has been
+          selected for{" "}
           {selectedItems.operation === "addition"
             ? "addition to"
             : "removal from"}{" "}
@@ -180,29 +173,47 @@ function ConfirmItemsOperationDialog({
             <PageList>
               {affectedItems.field.length > 0 && (
                 <List.Item>
-                  Field:{" "}
-                  {affectedItems.field
-                    .map((f) => f.identifier)
-                    .sort((a, b) => stringCompare(a, b))
-                    .join(", ")}
+                  <ElementNamesContainer>
+                    Field:{" "}
+                    {affectedItems.field
+                      .map((f) => f.identifier)
+                      .sort((a, b) => stringCompare(a, b))
+                      .map((f) => (
+                        <ElementName key={f} system="smda">
+                          {f}
+                        </ElementName>
+                      ))}
+                  </ElementNamesContainer>
                 </List.Item>
               )}
               {affectedItems.country.length > 0 && (
                 <List.Item>
-                  Country:{" "}
-                  {affectedItems.country
-                    .map((c) => c.identifier)
-                    .sort((a, b) => stringCompare(a, b))
-                    .join(", ")}
+                  <ElementNamesContainer>
+                    Country:{" "}
+                    {affectedItems.country
+                      .map((c) => c.identifier)
+                      .sort((a, b) => stringCompare(a, b))
+                      .map((c) => (
+                        <ElementName key={c} system="smda">
+                          {c}
+                        </ElementName>
+                      ))}
+                  </ElementNamesContainer>
                 </List.Item>
               )}
               {(affectedItems.discovery[DUMMYGROUP_NAME] ?? []).length > 0 && (
                 <List.Item>
-                  Discovery:{" "}
-                  {(affectedItems.discovery[DUMMYGROUP_NAME] ?? [])
-                    .map((d) => d.short_identifier)
-                    .sort((a, b) => stringCompare(a, b))
-                    .join(", ")}
+                  <ElementNamesContainer>
+                    Discovery:{" "}
+                    {(affectedItems.discovery[DUMMYGROUP_NAME] ?? [])
+                      .map((d) => d.short_identifier)
+                      .sort((a, b) => stringCompare(a, b))
+                      .map((d) => (
+                        <ElementName key={d} system="smda">
+                          {d}
+                        </ElementName>
+                      ))}
+                  </ElementNamesContainer>
                 </List.Item>
               )}
             </PageList>
@@ -266,7 +277,7 @@ function Items({
                 group}
             </PageHeader>
           )}
-          <ChipsContainer>
+          <ElementNamesContainer>
             {group in itemListGrouped &&
             (itemListGrouped[group] ?? []).length > 0 ? (
               (itemListGrouped[group] ?? [])
@@ -276,38 +287,34 @@ function Items({
                     getNameFromNameUuidValue(b),
                   ),
                 )
-                .map<React.ReactNode>((item) => {
-                  const contents = [];
-                  if (operation === "addition") {
-                    contents.push(<Icon key="arrow_back" name="arrow_back" />);
-                  }
-                  contents.push(getNameFromNameUuidValue(item));
-                  if (operation === "removal") {
-                    contents.push(
-                      <Icon key="arrow_forward" name="arrow_forward" />,
-                    );
-                  }
-
-                  return (
-                    <InfoChip
-                      key={item.uuid}
-                      onClick={() => {
-                        prepareSelectedItems(
-                          operation,
-                          itemType,
-                          item,
-                          setSelectedItems,
-                        );
-                      }}
-                    >
-                      {...contents}
-                    </InfoChip>
-                  );
-                })
+                .map<React.ReactNode>((item) => (
+                  <ElementName
+                    key={item.uuid}
+                    system="smda"
+                    leftIcon={
+                      operation === "addition" && <Icon name="arrow_back" />
+                    }
+                    rightIcon={
+                      operation === "removal" && <Icon name="arrow_forward" />
+                    }
+                    onClick={() => {
+                      prepareSelectedItems(
+                        operation,
+                        itemType,
+                        item,
+                        setSelectedItems,
+                      );
+                    }}
+                  >
+                    {getNameFromNameUuidValue(item)}
+                  </ElementName>
+                ))
             ) : (
-              <Typography>none</Typography>
+              <ElementName system="smda" isNoElement="info">
+                (none)
+              </ElementName>
             )}
-          </ChipsContainer>
+          </ElementNamesContainer>
         </div>
       ))}
     </>

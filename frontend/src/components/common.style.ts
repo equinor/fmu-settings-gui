@@ -72,6 +72,8 @@ export const ElementNameDisplay = styled.div<{
   $system: DataSystem;
   $isNoElement?: ElementNameIsNoElement;
   $systemNameShown?: boolean;
+  $hasClickableContent?: boolean;
+  $hasClickableIcon?: boolean;
 }>`
   width: fit-content;
   padding: ${tokens.spacings.comfortable.x_small} ${tokens.spacings.comfortable.small};
@@ -87,8 +89,15 @@ export const ElementNameDisplay = styled.div<{
   font-style: ${(props) => (props.$isNoElement ? "italic" : "normal")};
   line-height: ${tokens.typography.navigation.button.lineHeight};
   white-space: nowrap;
+  cursor: ${(props) => (props.$hasClickableContent ? "pointer" : undefined)};
 
   ${(props) => getColors(props.$system, props.$isNoElement)}
+
+  svg {
+    width: 16px;
+    height: 16px;
+    cursor: ${(props) => (props.$hasClickableIcon ? "pointer" : undefined)};
+  }
 
   .aliases {
     color: ${tokens.colors.infographic.substitute__purple_berry.hex}

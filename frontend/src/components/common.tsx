@@ -315,16 +315,24 @@ export function SmdaHealthCheckInfo({
 export function ElementName({
   system,
   aliases = [],
+  leftIcon,
+  rightIcon,
   isNoElement,
   showSystemName = false,
   noSystemNameBorder = false,
+  hasClickableIcon = false,
+  onClick,
   children,
 }: {
   system: DataSystem;
   aliases?: string[];
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
   isNoElement?: ElementNameIsNoElement;
   showSystemName?: boolean;
   noSystemNameBorder?: boolean;
+  hasClickableIcon?: boolean;
+  onClick?: () => void;
   children?: ReactNode;
 }) {
   return (
@@ -341,7 +349,11 @@ export function ElementName({
         $system={system}
         $isNoElement={isNoElement}
         $systemNameShown={showSystemName}
+        $hasClickableContent={Boolean(onClick)}
+        $hasClickableIcon={hasClickableIcon}
+        onClick={onClick}
       >
+        {leftIcon}
         {children}
         {aliases.length > 0 && (
           <Icon
@@ -351,6 +363,7 @@ export function ElementName({
             size={16}
           />
         )}
+        {rightIcon}
       </ElementNameDisplay>
     </ElementSystem>
   );
