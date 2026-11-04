@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { HealthHealthCheckData, HealthHealthCheckResponses, HealthV1HealthCheckData, HealthV1HealthCheckErrors, HealthV1HealthCheckResponses, MatchPostMatchData, MatchPostMatchErrors, MatchPostMatchResponses, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionErrors, ProjectDeleteProjectSessionResponses, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffErrors, ProjectGetCacheDiffResponses, ProjectGetCacheErrors, ProjectGetCacheResponses, ProjectGetCacheRevisionData, ProjectGetCacheRevisionErrors, ProjectGetCacheRevisionResponses, ProjectGetChangelogData, ProjectGetChangelogErrors, ProjectGetChangelogResponses, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusErrors, ProjectGetGlobalConfigStatusResponses, ProjectGetLockStatusData, ProjectGetLockStatusErrors, ProjectGetLockStatusResponses, ProjectGetMappingsData, ProjectGetMappingsErrors, ProjectGetMappingsResponses, ProjectGetMigrationBackupCheckData, ProjectGetMigrationBackupCheckErrors, ProjectGetMigrationBackupCheckResponses, ProjectGetProjectData, ProjectGetProjectErrors, ProjectGetProjectResponses, ProjectGetRestoreCheckData, ProjectGetRestoreCheckErrors, ProjectGetRestoreCheckResponses, ProjectGetRmsProjectsData, ProjectGetRmsProjectsErrors, ProjectGetRmsProjectsResponses, ProjectPatchAccessData, ProjectPatchAccessErrors, ProjectPatchAccessResponses, ProjectPatchAssociatedFieldsData, ProjectPatchAssociatedFieldsErrors, ProjectPatchAssociatedFieldsResponses, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsErrors, ProjectPatchCacheMaxRevisionsResponses, ProjectPatchMasterdataData, ProjectPatchMasterdataErrors, ProjectPatchMasterdataResponses, ProjectPatchModelData, ProjectPatchModelErrors, ProjectPatchModelResponses, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemErrors, ProjectPatchRmsCoordinateSystemResponses, ProjectPatchRmsData, ProjectPatchRmsErrors, ProjectPatchRmsResponses, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkErrors, ProjectPatchRmsStratigraphicFrameworkResponses, ProjectPatchRmsWellsData, ProjectPatchRmsWellsErrors, ProjectPatchRmsWellsResponses, ProjectPostCacheRestoreData, ProjectPostCacheRestoreErrors, ProjectPostCacheRestoreResponses, ProjectPostGlobalConfigData, ProjectPostGlobalConfigErrors, ProjectPostGlobalConfigResponses, ProjectPostInitProjectData, ProjectPostInitProjectErrors, ProjectPostInitProjectResponses, ProjectPostLockAcquireData, ProjectPostLockAcquireErrors, ProjectPostLockAcquireResponses, ProjectPostLockRefreshData, ProjectPostLockRefreshErrors, ProjectPostLockRefreshResponses, ProjectPostLockReleaseData, ProjectPostLockReleaseErrors, ProjectPostLockReleaseResponses, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableErrors, ProjectPostMappingsExportRmsSimulatorRenamingTableResponses, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvErrors, ProjectPostMappingsImportRmsEclipseCsvResponses, ProjectPostMigrationBackupRestoreData, ProjectPostMigrationBackupRestoreErrors, ProjectPostMigrationBackupRestoreResponses, ProjectPostProjectData, ProjectPostProjectErrors, ProjectPostProjectResponses, ProjectPostRestoreData, ProjectPostRestoreErrors, ProjectPostRestoreResponses, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaErrors, ProjectPostValidateMasterdataSmdaResponses, ProjectPutMappingsData, ProjectPutMappingsErrors, ProjectPutMappingsResponses, RmsDeleteRmsProjectData, RmsDeleteRmsProjectErrors, RmsDeleteRmsProjectResponses, RmsGetCoordinateSystemData, RmsGetCoordinateSystemErrors, RmsGetCoordinateSystemResponses, RmsGetHorizonsData, RmsGetHorizonsErrors, RmsGetHorizonsResponses, RmsGetWellsData, RmsGetWellsErrors, RmsGetWellsResponses, RmsGetZonesData, RmsGetZonesErrors, RmsGetZonesResponses, RmsPostRmsProjectData, RmsPostRmsProjectErrors, RmsPostRmsProjectResponses, RmsPostValidateRmsProjectData, RmsPostValidateRmsProjectErrors, RmsPostValidateRmsProjectResponses, SessionGetRestoreCheckData, SessionGetRestoreCheckErrors, SessionGetRestoreCheckResponses, SessionGetSessionData, SessionGetSessionErrors, SessionGetSessionResponses, SessionPatchAccessTokenData, SessionPatchAccessTokenErrors, SessionPatchAccessTokenResponses, SessionPostRestoreData, SessionPostRestoreErrors, SessionPostRestoreResponses, SessionPostSessionData, SessionPostSessionErrors, SessionPostSessionResponses, SmdaGetHealthData, SmdaGetHealthErrors, SmdaGetHealthResponses, SmdaPostFieldData, SmdaPostFieldErrors, SmdaPostFieldResponses, SmdaPostMasterdataData, SmdaPostMasterdataErrors, SmdaPostMasterdataResponses, SmdaPostStratUnitsData, SmdaPostStratUnitsErrors, SmdaPostStratUnitsResponses, SmdaPostWellHeadersData, SmdaPostWellHeadersErrors, SmdaPostWellHeadersResponses, SumoGetAssetsData, SumoGetAssetsErrors, SumoGetAssetsResponses, SumoPostLoginData, SumoPostLoginErrors, SumoPostLoginResponses, UserGetUserData, UserGetUserErrors, UserGetUserResponses, UserPatchApiKeyData, UserPatchApiKeyErrors, UserPatchApiKeyResponses } from './types.gen';
+import type { ErtGetErtConfigData, ErtGetErtConfigErrors, ErtGetErtConfigResponses, ErtGetErtConfigsData, ErtGetErtConfigsErrors, ErtGetErtConfigsResponses, ErtGetErtRmsProjectsData, ErtGetErtRmsProjectsErrors, ErtGetErtRmsProjectsResponses, ErtPostOpenErtGuiData, ErtPostOpenErtGuiErrors, ErtPostOpenErtGuiResponses, ErtPostValidateErtConfigData, ErtPostValidateErtConfigErrors, ErtPostValidateErtConfigResponses, ErtPutErtConfigData, ErtPutErtConfigErrors, ErtPutErtConfigResponses, HealthHealthCheckData, HealthHealthCheckResponses, HealthV1HealthCheckData, HealthV1HealthCheckErrors, HealthV1HealthCheckResponses, MatchPostMatchData, MatchPostMatchErrors, MatchPostMatchResponses, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionErrors, ProjectDeleteProjectSessionResponses, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffErrors, ProjectGetCacheDiffResponses, ProjectGetCacheErrors, ProjectGetCacheResponses, ProjectGetCacheRevisionData, ProjectGetCacheRevisionErrors, ProjectGetCacheRevisionResponses, ProjectGetChangelogData, ProjectGetChangelogErrors, ProjectGetChangelogResponses, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusErrors, ProjectGetGlobalConfigStatusResponses, ProjectGetLockStatusData, ProjectGetLockStatusErrors, ProjectGetLockStatusResponses, ProjectGetMappingsData, ProjectGetMappingsErrors, ProjectGetMappingsResponses, ProjectGetMigrationBackupCheckData, ProjectGetMigrationBackupCheckErrors, ProjectGetMigrationBackupCheckResponses, ProjectGetProjectData, ProjectGetProjectErrors, ProjectGetProjectResponses, ProjectGetRestoreCheckData, ProjectGetRestoreCheckErrors, ProjectGetRestoreCheckResponses, ProjectGetRmsProjectsData, ProjectGetRmsProjectsErrors, ProjectGetRmsProjectsResponses, ProjectPatchAccessData, ProjectPatchAccessErrors, ProjectPatchAccessResponses, ProjectPatchAssociatedFieldsData, ProjectPatchAssociatedFieldsErrors, ProjectPatchAssociatedFieldsResponses, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsErrors, ProjectPatchCacheMaxRevisionsResponses, ProjectPatchMasterdataData, ProjectPatchMasterdataErrors, ProjectPatchMasterdataResponses, ProjectPatchModelData, ProjectPatchModelErrors, ProjectPatchModelResponses, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemErrors, ProjectPatchRmsCoordinateSystemResponses, ProjectPatchRmsData, ProjectPatchRmsErrors, ProjectPatchRmsResponses, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkErrors, ProjectPatchRmsStratigraphicFrameworkResponses, ProjectPatchRmsWellsData, ProjectPatchRmsWellsErrors, ProjectPatchRmsWellsResponses, ProjectPostCacheRestoreData, ProjectPostCacheRestoreErrors, ProjectPostCacheRestoreResponses, ProjectPostGlobalConfigData, ProjectPostGlobalConfigErrors, ProjectPostGlobalConfigResponses, ProjectPostInitProjectData, ProjectPostInitProjectErrors, ProjectPostInitProjectResponses, ProjectPostLockAcquireData, ProjectPostLockAcquireErrors, ProjectPostLockAcquireResponses, ProjectPostLockRefreshData, ProjectPostLockRefreshErrors, ProjectPostLockRefreshResponses, ProjectPostLockReleaseData, ProjectPostLockReleaseErrors, ProjectPostLockReleaseResponses, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableErrors, ProjectPostMappingsExportRmsSimulatorRenamingTableResponses, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvErrors, ProjectPostMappingsImportRmsEclipseCsvResponses, ProjectPostMigrationBackupRestoreData, ProjectPostMigrationBackupRestoreErrors, ProjectPostMigrationBackupRestoreResponses, ProjectPostProjectData, ProjectPostProjectErrors, ProjectPostProjectResponses, ProjectPostRestoreData, ProjectPostRestoreErrors, ProjectPostRestoreResponses, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaErrors, ProjectPostValidateMasterdataSmdaResponses, ProjectPutMappingsData, ProjectPutMappingsErrors, ProjectPutMappingsResponses, RmsDeleteRmsProjectData, RmsDeleteRmsProjectErrors, RmsDeleteRmsProjectResponses, RmsGetCoordinateSystemData, RmsGetCoordinateSystemErrors, RmsGetCoordinateSystemResponses, RmsGetHorizonsData, RmsGetHorizonsErrors, RmsGetHorizonsResponses, RmsGetWellsData, RmsGetWellsErrors, RmsGetWellsResponses, RmsGetZonesData, RmsGetZonesErrors, RmsGetZonesResponses, RmsPostRmsProjectData, RmsPostRmsProjectErrors, RmsPostRmsProjectResponses, RmsPostValidateRmsProjectData, RmsPostValidateRmsProjectErrors, RmsPostValidateRmsProjectResponses, SessionGetRestoreCheckData, SessionGetRestoreCheckErrors, SessionGetRestoreCheckResponses, SessionGetSessionData, SessionGetSessionErrors, SessionGetSessionResponses, SessionPatchAccessTokenData, SessionPatchAccessTokenErrors, SessionPatchAccessTokenResponses, SessionPostRestoreData, SessionPostRestoreErrors, SessionPostRestoreResponses, SessionPostSessionData, SessionPostSessionErrors, SessionPostSessionResponses, SmdaGetHealthData, SmdaGetHealthErrors, SmdaGetHealthResponses, SmdaPostFieldData, SmdaPostFieldErrors, SmdaPostFieldResponses, SmdaPostMasterdataData, SmdaPostMasterdataErrors, SmdaPostMasterdataResponses, SmdaPostStratUnitsData, SmdaPostStratUnitsErrors, SmdaPostStratUnitsResponses, SmdaPostWellHeadersData, SmdaPostWellHeadersErrors, SmdaPostWellHeadersResponses, SumoGetAssetsData, SumoGetAssetsErrors, SumoGetAssetsResponses, SumoPostLoginData, SumoPostLoginErrors, SumoPostLoginResponses, UserGetUserData, UserGetUserErrors, UserGetUserResponses, UserPatchApiKeyData, UserPatchApiKeyErrors, UserPatchApiKeyResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -541,6 +541,92 @@ export const projectPostMappingsExportRmsSimulatorRenamingTable = <ThrowOnError 
 export const projectGetChangelog = <ThrowOnError extends boolean = false>(options?: Options<ProjectGetChangelogData, ThrowOnError>): RequestResult<ProjectGetChangelogResponses, ProjectGetChangelogErrors, ThrowOnError> => (options?.client ?? client).get<ProjectGetChangelogResponses, ProjectGetChangelogErrors, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/project/changelog',
+    ...options
+});
+
+/**
+ * Lists the ERT config files in the project ert/model directory
+ *
+ * Lists the ERT config files in the project ert/model directory. Also starts
+ * the ERT validator in the background, if not already running, so that
+ * subsequent validations are fast.
+ */
+export const ertGetErtConfigs = <ThrowOnError extends boolean = false>(options?: Options<ErtGetErtConfigsData, ThrowOnError>): RequestResult<ErtGetErtConfigsResponses, ErtGetErtConfigsErrors, ThrowOnError> => (options?.client ?? client).get<ErtGetErtConfigsResponses, ErtGetErtConfigsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/v1/project/ert/configs',
+    ...options
+});
+
+/**
+ * Returns the content of an ERT config file in ert/model
+ *
+ * Returns the content of an ERT config file in ert/model.
+ */
+export const ertGetErtConfig = <ThrowOnError extends boolean = false>(options: Options<ErtGetErtConfigData, ThrowOnError>): RequestResult<ErtGetErtConfigResponses, ErtGetErtConfigErrors, ThrowOnError> => (options.client ?? client).get<ErtGetErtConfigResponses, ErtGetErtConfigErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/v1/project/ert/configs/{name}',
+    ...options
+});
+
+/**
+ * Validates and saves an ERT config file to ert/model
+ *
+ * Validates the ERT config content with ERT and, if valid, writes it to the
+ * project ert/model directory, replacing any existing file with the same
+ * name. If ERT reports errors, nothing is written and 422 is returned with
+ * the validation result.
+ */
+export const ertPutErtConfig = <ThrowOnError extends boolean = false>(options: Options<ErtPutErtConfigData, ThrowOnError>): RequestResult<ErtPutErtConfigResponses, ErtPutErtConfigErrors, ThrowOnError> => (options.client ?? client).put<ErtPutErtConfigResponses, ErtPutErtConfigErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/v1/project/ert/configs/{name}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Validates an ERT config with ERT without saving it
+ *
+ * Validates the ERT config content with ERT and the installed site plugins,
+ * as if it was saved with the given name in the project ert/model directory.
+ * Relative paths in the config are resolved from that location.
+ * Validation runs ERT in a separate process and may take some time.
+ */
+export const ertPostValidateErtConfig = <ThrowOnError extends boolean = false>(options: Options<ErtPostValidateErtConfigData, ThrowOnError>): RequestResult<ErtPostValidateErtConfigResponses, ErtPostValidateErtConfigErrors, ThrowOnError> => (options.client ?? client).post<ErtPostValidateErtConfigResponses, ErtPostValidateErtConfigErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/v1/project/ert/validate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Lists the RMS projects in rms/model with their RMS versions
+ *
+ * Lists the RMS projects in the project rms/model directory, with the RMS
+ * version detected from each project's .master file. If the version cannot
+ * be detected, `version` is null and `error` describes why.
+ */
+export const ertGetErtRmsProjects = <ThrowOnError extends boolean = false>(options?: Options<ErtGetErtRmsProjectsData, ThrowOnError>): RequestResult<ErtGetErtRmsProjectsResponses, ErtGetErtRmsProjectsErrors, ThrowOnError> => (options?.client ?? client).get<ErtGetErtRmsProjectsResponses, ErtGetErtRmsProjectsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/v1/project/ert/rms_projects',
+    ...options
+});
+
+/**
+ * Opens a saved ERT config in the ERT GUI
+ *
+ * Starts `ert gui` for the saved config file in the project ert/model
+ * directory. ERT is started on the machine and display running the API,
+ * using the same ERT as for validation. Unsaved changes are not included.
+ */
+export const ertPostOpenErtGui = <ThrowOnError extends boolean = false>(options: Options<ErtPostOpenErtGuiData, ThrowOnError>): RequestResult<ErtPostOpenErtGuiResponses, ErtPostOpenErtGuiErrors, ThrowOnError> => (options.client ?? client).post<ErtPostOpenErtGuiResponses, ErtPostOpenErtGuiErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/v1/project/ert/configs/{name}/gui',
     ...options
 });
 

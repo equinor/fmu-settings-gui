@@ -324,6 +324,229 @@ export const DiscoveryItemSchema = {
     description: 'A single discovery in the ``masterdata.smda.discovery`` list of discoveries\nknown to SMDA.'
 } as const;
 
+export const ErtConfigContentSchema = {
+    properties: {
+        content: {
+            type: 'string',
+            title: 'Content',
+            description: 'The complete file content.'
+        }
+    },
+    type: 'object',
+    required: [
+        'content'
+    ],
+    title: 'ErtConfigContent',
+    description: 'The content of an ERT config file.'
+} as const;
+
+export const ErtConfigInvalidDetailSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message',
+            description: 'A summary of the failure.'
+        },
+        validation: {
+            $ref: '#/components/schemas/ErtConfigValidationResult',
+            description: 'The validation result from ERT.'
+        }
+    },
+    type: 'object',
+    required: [
+        'message',
+        'validation'
+    ],
+    title: 'ErtConfigInvalidDetail',
+    description: 'Detail returned when saving an ERT config that fails validation.'
+} as const;
+
+export const ErtConfigIssueSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message',
+            description: 'The message from ERT.'
+        },
+        line: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Line',
+            description: '1-based line number, if known.'
+        },
+        column: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Column',
+            description: '1-based column number, if known.'
+        },
+        filename: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Filename',
+            description: 'The file the issue originated from, if known.'
+        }
+    },
+    type: 'object',
+    required: [
+        'message'
+    ],
+    title: 'ErtConfigIssue',
+    description: 'A single error or warning reported by ERT.'
+} as const;
+
+export const ErtConfigListSchema = {
+    properties: {
+        files: {
+            items: {
+                type: 'string'
+            },
+            type: 'array',
+            title: 'Files',
+            description: 'File names of .ert files in ert/model.'
+        }
+    },
+    type: 'object',
+    required: [
+        'files'
+    ],
+    title: 'ErtConfigList',
+    description: 'The ERT config files found in the project ert/model directory.'
+} as const;
+
+export const ErtConfigValidateRequestSchema = {
+    properties: {
+        content: {
+            type: 'string',
+            title: 'Content',
+            description: 'The complete file content.'
+        },
+        name: {
+            type: 'string',
+            maxLength: 255,
+            pattern: '^[A-Za-z0-9][A-Za-z0-9_.-]*\\.ert$',
+            title: 'Name',
+            description: 'The file name the config would be saved as in ert/model.'
+        }
+    },
+    type: 'object',
+    required: [
+        'content',
+        'name'
+    ],
+    title: 'ErtConfigValidateRequest',
+    description: 'Request to validate an ERT config as if saved with the given name.'
+} as const;
+
+export const ErtConfigValidationResultSchema = {
+    properties: {
+        valid: {
+            type: 'boolean',
+            title: 'Valid',
+            description: 'True if ERT reported no errors.'
+        },
+        errors: {
+            items: {
+                $ref: '#/components/schemas/ErtConfigIssue'
+            },
+            type: 'array',
+            title: 'Errors',
+            description: 'Errors reported by ERT.'
+        },
+        warnings: {
+            items: {
+                $ref: '#/components/schemas/ErtConfigIssue'
+            },
+            type: 'array',
+            title: 'Warnings',
+            description: 'Warnings reported by ERT.'
+        }
+    },
+    type: 'object',
+    required: [
+        'valid'
+    ],
+    title: 'ErtConfigValidationResult',
+    description: 'Result of validating an ERT config with ERT.'
+} as const;
+
+export const ErtRmsProjectSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            title: 'Name',
+            description: 'The RMS project directory name in rms/model, used as <RMS_NAME>.'
+        },
+        version: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Version',
+            description: 'The RMS version detected from the project\'s .master file, if possible.'
+        },
+        error: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Error',
+            description: 'Why the RMS version could not be detected, if it could not.'
+        }
+    },
+    type: 'object',
+    required: [
+        'name'
+    ],
+    title: 'ErtRmsProject',
+    description: 'An RMS project in rms/model that can be used in an ERT config.'
+} as const;
+
+export const ErtRmsProjectListSchema = {
+    properties: {
+        projects: {
+            items: {
+                $ref: '#/components/schemas/ErtRmsProject'
+            },
+            type: 'array',
+            title: 'Projects',
+            description: 'RMS projects sorted by name.'
+        }
+    },
+    type: 'object',
+    required: [
+        'projects'
+    ],
+    title: 'ErtRmsProjectList',
+    description: 'The RMS projects in the project rms/model directory.'
+} as const;
+
 export const FMUDirPathSchema = {
     properties: {
         path: {

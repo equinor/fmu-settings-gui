@@ -16,6 +16,7 @@ import { Route as ProjectHistoryRouteImport } from "./routes/project/history";
 import { Route as ProjectMasterdataRouteImport } from "./routes/project/masterdata";
 import { Route as UserKeysRouteImport } from "./routes/user/keys";
 import { Route as UserRecoveryRouteImport } from "./routes/user/recovery";
+import { Route as ProjectErtConfigRouteImport } from "./routes/project/ert/config";
 import { Route as ProjectMappingsStratigraphyRouteImport } from "./routes/project/mappings/stratigraphy";
 import { Route as ProjectMappingsWellboresRouteImport } from "./routes/project/mappings/wellbores";
 import { Route as ProjectRmsIndexRouteImport } from "./routes/project/rms/index";
@@ -57,6 +58,11 @@ const UserRecoveryRoute = UserRecoveryRouteImport.update({
   path: "/user/recovery",
   getParentRoute: () => rootRouteImport,
 } as any);
+const ProjectErtConfigRoute = ProjectErtConfigRouteImport.update({
+  id: "/project/ert/config",
+  path: "/project/ert/config",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const ProjectMappingsStratigraphyRoute =
   ProjectMappingsStratigraphyRouteImport.update({
     id: "/project/mappings/stratigraphy",
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
+  "/project/ert/config": typeof ProjectErtConfigRoute;
   "/project/mappings/stratigraphy": typeof ProjectMappingsStratigraphyRoute;
   "/project/mappings/wellbores": typeof ProjectMappingsWellboresRoute;
   "/project/rms/stratigraphy": typeof ProjectRmsStratigraphyRoute;
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project": typeof ProjectIndexRoute;
+  "/project/ert/config": typeof ProjectErtConfigRoute;
   "/project/mappings/stratigraphy": typeof ProjectMappingsStratigraphyRoute;
   "/project/mappings/wellbores": typeof ProjectMappingsWellboresRoute;
   "/project/rms/stratigraphy": typeof ProjectRmsStratigraphyRoute;
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   "/user/keys": typeof UserKeysRoute;
   "/user/recovery": typeof UserRecoveryRoute;
   "/project/": typeof ProjectIndexRoute;
+  "/project/ert/config": typeof ProjectErtConfigRoute;
   "/project/mappings/stratigraphy": typeof ProjectMappingsStratigraphyRoute;
   "/project/mappings/wellbores": typeof ProjectMappingsWellboresRoute;
   "/project/rms/stratigraphy": typeof ProjectRmsStratigraphyRoute;
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | "/user/keys"
     | "/user/recovery"
     | "/project/"
+    | "/project/ert/config"
     | "/project/mappings/stratigraphy"
     | "/project/mappings/wellbores"
     | "/project/rms/stratigraphy"
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | "/user/keys"
     | "/user/recovery"
     | "/project"
+    | "/project/ert/config"
     | "/project/mappings/stratigraphy"
     | "/project/mappings/wellbores"
     | "/project/rms/stratigraphy"
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | "/user/keys"
     | "/user/recovery"
     | "/project/"
+    | "/project/ert/config"
     | "/project/mappings/stratigraphy"
     | "/project/mappings/wellbores"
     | "/project/rms/stratigraphy"
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   UserKeysRoute: typeof UserKeysRoute;
   UserRecoveryRoute: typeof UserRecoveryRoute;
   ProjectIndexRoute: typeof ProjectIndexRoute;
+  ProjectErtConfigRoute: typeof ProjectErtConfigRoute;
   ProjectMappingsStratigraphyRoute: typeof ProjectMappingsStratigraphyRoute;
   ProjectMappingsWellboresRoute: typeof ProjectMappingsWellboresRoute;
   ProjectRmsStratigraphyRoute: typeof ProjectRmsStratigraphyRoute;
@@ -239,6 +252,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UserRecoveryRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/project/ert/config": {
+      id: "/project/ert/config";
+      path: "/project/ert/config";
+      fullPath: "/project/ert/config";
+      preLoaderRoute: typeof ProjectErtConfigRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/project/mappings/stratigraphy": {
       id: "/project/mappings/stratigraphy";
       path: "/project/mappings/stratigraphy";
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   UserKeysRoute: UserKeysRoute,
   UserRecoveryRoute: UserRecoveryRoute,
   ProjectIndexRoute: ProjectIndexRoute,
+  ProjectErtConfigRoute: ProjectErtConfigRoute,
   ProjectMappingsStratigraphyRoute: ProjectMappingsStratigraphyRoute,
   ProjectMappingsWellboresRoute: ProjectMappingsWellboresRoute,
   ProjectRmsStratigraphyRoute: ProjectRmsStratigraphyRoute,

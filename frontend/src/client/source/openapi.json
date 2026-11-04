@@ -5060,6 +5060,903 @@
         }
       }
     },
+    "/api/v1/project/ert/configs": {
+      "get": {
+        "tags": [
+          "ert"
+        ],
+        "summary": "Lists the ERT config files in the project ert/model directory",
+        "description": "Lists the ERT config files in the project ert/model directory. Also starts\nthe ERT validator in the background, if not already running, so that\nsubsequent validations are fast.",
+        "operationId": "ert-get_ert_configs",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErtConfigList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The OS returned a permissions error while locating or creating .fmu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied locating .fmu"
+                    },
+                    {
+                      "detail": "Permission denied accessing .fmu at {path}"
+                    },
+                    {
+                      "detail": "Permission denied creating .fmu at {path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "\nThe .fmu directory was unable to be found at or above a given path, or\nthe requested path to create a project .fmu directory at does not exist.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No .fmu directory found from {path}"
+                    },
+                    {
+                      "detail": "No .fmu directory found at {path}"
+                    },
+                    {
+                      "detail": "Path {path} does not exist"
+                    },
+                    {
+                      "detail": "Project .fmu directory not found. It may have been deleted."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/project/ert/configs/{name}": {
+      "get": {
+        "tags": [
+          "ert"
+        ],
+        "summary": "Returns the content of an ERT config file in ert/model",
+        "description": "Returns the content of an ERT config file in ert/model.",
+        "operationId": "ert-get_ert_config",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*\\.ert$",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErtConfigContent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The OS returned a permissions error while locating or creating .fmu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied locating .fmu"
+                    },
+                    {
+                      "detail": "Permission denied accessing .fmu at {path}"
+                    },
+                    {
+                      "detail": "Permission denied creating .fmu at {path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The config file does not exist",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "{name} not found"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ert"
+        ],
+        "summary": "Validates and saves an ERT config file to ert/model",
+        "description": "Validates the ERT config content with ERT and, if valid, writes it to the\nproject ert/model directory, replacing any existing file with the same\nname. If ERT reports errors, nothing is written and 422 is returned with\nthe validation result.",
+        "operationId": "ert-put_ert_config",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*\\.ert$",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErtConfigContent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErtConfigValidationResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The OS returned a permissions error while locating or creating .fmu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied locating .fmu"
+                    },
+                    {
+                      "detail": "Permission denied accessing .fmu at {path}"
+                    },
+                    {
+                      "detail": "Permission denied creating .fmu at {path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "\nThe .fmu directory was unable to be found at or above a given path, or\nthe requested path to create a project .fmu directory at does not exist.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No .fmu directory found from {path}"
+                    },
+                    {
+                      "detail": "No .fmu directory found at {path}"
+                    },
+                    {
+                      "detail": "Path {path} does not exist"
+                    },
+                    {
+                      "detail": "Project .fmu directory not found. It may have been deleted."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The ERT config failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErtConfigInvalidDetail"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "\nThe project is locked by another process and cannot be modified.\nThe project can still be read but write operations are blocked.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Project lock conflict: {error_message}"
+                    },
+                    {
+                      "detail": "Project is read-only. Cannot write to project that is locked by another process."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "ERT is not available in the environment running fmu-settings.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "ERT is not available. ..."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "ERT config validation timed out.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "ERT config validation timed out"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/project/ert/validate": {
+      "post": {
+        "tags": [
+          "ert"
+        ],
+        "summary": "Validates an ERT config with ERT without saving it",
+        "description": "Validates the ERT config content with ERT and the installed site plugins,\nas if it was saved with the given name in the project ert/model directory.\nRelative paths in the config are resolved from that location.\nValidation runs ERT in a separate process and may take some time.",
+        "operationId": "ert-post_validate_ert_config",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErtConfigValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErtConfigValidationResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The OS returned a permissions error while locating or creating .fmu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied locating .fmu"
+                    },
+                    {
+                      "detail": "Permission denied accessing .fmu at {path}"
+                    },
+                    {
+                      "detail": "Permission denied creating .fmu at {path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "\nThe .fmu directory was unable to be found at or above a given path, or\nthe requested path to create a project .fmu directory at does not exist.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No .fmu directory found from {path}"
+                    },
+                    {
+                      "detail": "No .fmu directory found at {path}"
+                    },
+                    {
+                      "detail": "Path {path} does not exist"
+                    },
+                    {
+                      "detail": "Project .fmu directory not found. It may have been deleted."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "ERT is not available in the environment running fmu-settings.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "ERT is not available. ..."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "ERT config validation timed out.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "ERT config validation timed out"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/project/ert/rms_projects": {
+      "get": {
+        "tags": [
+          "ert"
+        ],
+        "summary": "Lists the RMS projects in rms/model with their RMS versions",
+        "description": "Lists the RMS projects in the project rms/model directory, with the RMS\nversion detected from each project's .master file. If the version cannot\nbe detected, `version` is null and `error` describes why.",
+        "operationId": "ert-get_ert_rms_projects",
+        "parameters": [
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErtRmsProjectList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The OS returned a permissions error while locating or creating .fmu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied locating .fmu"
+                    },
+                    {
+                      "detail": "Permission denied accessing .fmu at {path}"
+                    },
+                    {
+                      "detail": "Permission denied creating .fmu at {path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "\nThe .fmu directory was unable to be found at or above a given path, or\nthe requested path to create a project .fmu directory at does not exist.\n",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No .fmu directory found from {path}"
+                    },
+                    {
+                      "detail": "No .fmu directory found at {path}"
+                    },
+                    {
+                      "detail": "Path {path} does not exist"
+                    },
+                    {
+                      "detail": "Project .fmu directory not found. It may have been deleted."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something unexpected has happened",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Session error: {string content of exception}"
+                    },
+                    {
+                      "detail": "{string content of exception}"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/project/ert/configs/{name}/gui": {
+      "post": {
+        "tags": [
+          "ert"
+        ],
+        "summary": "Opens a saved ERT config in the ERT GUI",
+        "description": "Starts `ert gui` for the saved config file in the project ert/model\ndirectory. ERT is started on the machine and display running the API,\nusing the same ERT as for validation. Unsaved changes are not included.",
+        "operationId": "ert-post_open_ert_gui",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*\\.ert$",
+              "title": "Name"
+            }
+          },
+          {
+            "name": "fmu_settings_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fmu Settings Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No active or valid session was found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "No active session found"
+                    },
+                    {
+                      "detail": "Invalid or expired session"
+                    },
+                    {
+                      "detail": "No FMU project directory open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The OS returned a permissions error while locating or creating .fmu",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "Permission denied locating .fmu"
+                    },
+                    {
+                      "detail": "Permission denied accessing .fmu at {path}"
+                    },
+                    {
+                      "detail": "Permission denied creating .fmu at {path}"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The config file does not exist",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "{name} not found"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The ERT GUI could not be started",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "ERT GUI exited immediately (code 1). ..."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "ERT or a display is not available to the API",
+            "content": {
+              "application/json": {
+                "example": {
+                  "examples": [
+                    {
+                      "detail": "ERT is not available. ..."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/user/": {
       "get": {
         "tags": [
@@ -8125,6 +9022,221 @@
         ],
         "title": "DiscoveryItem",
         "description": "A single discovery in the ``masterdata.smda.discovery`` list of discoveries\nknown to SMDA."
+      },
+      "ErtConfigContent": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "The complete file content."
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "ErtConfigContent",
+        "description": "The content of an ERT config file."
+      },
+      "ErtConfigInvalidDetail": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "A summary of the failure."
+          },
+          "validation": {
+            "$ref": "#/components/schemas/ErtConfigValidationResult",
+            "description": "The validation result from ERT."
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "validation"
+        ],
+        "title": "ErtConfigInvalidDetail",
+        "description": "Detail returned when saving an ERT config that fails validation."
+      },
+      "ErtConfigIssue": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "The message from ERT."
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line",
+            "description": "1-based line number, if known."
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Column",
+            "description": "1-based column number, if known."
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename",
+            "description": "The file the issue originated from, if known."
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ErtConfigIssue",
+        "description": "A single error or warning reported by ERT."
+      },
+      "ErtConfigList": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Files",
+            "description": "File names of .ert files in ert/model."
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "ErtConfigList",
+        "description": "The ERT config files found in the project ert/model directory."
+      },
+      "ErtConfigValidateRequest": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "The complete file content."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*\\.ert$",
+            "title": "Name",
+            "description": "The file name the config would be saved as in ert/model."
+          }
+        },
+        "type": "object",
+        "required": [
+          "content",
+          "name"
+        ],
+        "title": "ErtConfigValidateRequest",
+        "description": "Request to validate an ERT config as if saved with the given name."
+      },
+      "ErtConfigValidationResult": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid",
+            "description": "True if ERT reported no errors."
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ErtConfigIssue"
+            },
+            "type": "array",
+            "title": "Errors",
+            "description": "Errors reported by ERT."
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/ErtConfigIssue"
+            },
+            "type": "array",
+            "title": "Warnings",
+            "description": "Warnings reported by ERT."
+          }
+        },
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "title": "ErtConfigValidationResult",
+        "description": "Result of validating an ERT config with ERT."
+      },
+      "ErtRmsProject": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The RMS project directory name in rms/model, used as <RMS_NAME>."
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version",
+            "description": "The RMS version detected from the project's .master file, if possible."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "Why the RMS version could not be detected, if it could not."
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ErtRmsProject",
+        "description": "An RMS project in rms/model that can be used in an ERT config."
+      },
+      "ErtRmsProjectList": {
+        "properties": {
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/ErtRmsProject"
+            },
+            "type": "array",
+            "title": "Projects",
+            "description": "RMS projects sorted by name."
+          }
+        },
+        "type": "object",
+        "required": [
+          "projects"
+        ],
+        "title": "ErtRmsProjectList",
+        "description": "The RMS projects in the project rms/model directory."
       },
       "FMUDirPath": {
         "properties": {

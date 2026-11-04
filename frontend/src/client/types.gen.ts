@@ -217,6 +217,170 @@ export type DiscoveryItem = {
 };
 
 /**
+ * ErtConfigContent
+ *
+ * The content of an ERT config file.
+ */
+export type ErtConfigContent = {
+    /**
+     * Content
+     *
+     * The complete file content.
+     */
+    content: string;
+};
+
+/**
+ * ErtConfigInvalidDetail
+ *
+ * Detail returned when saving an ERT config that fails validation.
+ */
+export type ErtConfigInvalidDetail = {
+    /**
+     * Message
+     *
+     * A summary of the failure.
+     */
+    message: string;
+    /**
+     * The validation result from ERT.
+     */
+    validation: ErtConfigValidationResult;
+};
+
+/**
+ * ErtConfigIssue
+ *
+ * A single error or warning reported by ERT.
+ */
+export type ErtConfigIssue = {
+    /**
+     * Message
+     *
+     * The message from ERT.
+     */
+    message: string;
+    /**
+     * Line
+     *
+     * 1-based line number, if known.
+     */
+    line?: number | null;
+    /**
+     * Column
+     *
+     * 1-based column number, if known.
+     */
+    column?: number | null;
+    /**
+     * Filename
+     *
+     * The file the issue originated from, if known.
+     */
+    filename?: string | null;
+};
+
+/**
+ * ErtConfigList
+ *
+ * The ERT config files found in the project ert/model directory.
+ */
+export type ErtConfigList = {
+    /**
+     * Files
+     *
+     * File names of .ert files in ert/model.
+     */
+    files: Array<string>;
+};
+
+/**
+ * ErtConfigValidateRequest
+ *
+ * Request to validate an ERT config as if saved with the given name.
+ */
+export type ErtConfigValidateRequest = {
+    /**
+     * Content
+     *
+     * The complete file content.
+     */
+    content: string;
+    /**
+     * Name
+     *
+     * The file name the config would be saved as in ert/model.
+     */
+    name: string;
+};
+
+/**
+ * ErtConfigValidationResult
+ *
+ * Result of validating an ERT config with ERT.
+ */
+export type ErtConfigValidationResult = {
+    /**
+     * Valid
+     *
+     * True if ERT reported no errors.
+     */
+    valid: boolean;
+    /**
+     * Errors
+     *
+     * Errors reported by ERT.
+     */
+    errors?: Array<ErtConfigIssue>;
+    /**
+     * Warnings
+     *
+     * Warnings reported by ERT.
+     */
+    warnings?: Array<ErtConfigIssue>;
+};
+
+/**
+ * ErtRmsProject
+ *
+ * An RMS project in rms/model that can be used in an ERT config.
+ */
+export type ErtRmsProject = {
+    /**
+     * Name
+     *
+     * The RMS project directory name in rms/model, used as <RMS_NAME>.
+     */
+    name: string;
+    /**
+     * Version
+     *
+     * The RMS version detected from the project's .master file, if possible.
+     */
+    version?: string | null;
+    /**
+     * Error
+     *
+     * Why the RMS version could not be detected, if it could not.
+     */
+    error?: string | null;
+};
+
+/**
+ * ErtRmsProjectList
+ *
+ * The RMS projects in the project rms/model directory.
+ */
+export type ErtRmsProjectList = {
+    /**
+     * Projects
+     *
+     * RMS projects sorted by name.
+     */
+    projects: Array<ErtRmsProject>;
+};
+
+/**
  * FMUDirPath
  *
  * Path where a .fmu directory may exist.
@@ -3323,6 +3487,306 @@ export type ProjectGetChangelogResponses = {
 };
 
 export type ProjectGetChangelogResponse = ProjectGetChangelogResponses[keyof ProjectGetChangelogResponses];
+
+export type ErtGetErtConfigsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/ert/configs';
+};
+
+export type ErtGetErtConfigsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ErtGetErtConfigsError = ErtGetErtConfigsErrors[keyof ErtGetErtConfigsErrors];
+
+export type ErtGetErtConfigsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ErtConfigList;
+};
+
+export type ErtGetErtConfigsResponse = ErtGetErtConfigsResponses[keyof ErtGetErtConfigsResponses];
+
+export type ErtGetErtConfigData = {
+    body?: never;
+    path: {
+        /**
+         * Name
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/api/v1/project/ert/configs/{name}';
+};
+
+export type ErtGetErtConfigErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * The config file does not exist
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ErtGetErtConfigError = ErtGetErtConfigErrors[keyof ErtGetErtConfigErrors];
+
+export type ErtGetErtConfigResponses = {
+    /**
+     * Successful Response
+     */
+    200: ErtConfigContent;
+};
+
+export type ErtGetErtConfigResponse = ErtGetErtConfigResponses[keyof ErtGetErtConfigResponses];
+
+export type ErtPutErtConfigData = {
+    body: ErtConfigContent;
+    path: {
+        /**
+         * Name
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/api/v1/project/ert/configs/{name}';
+};
+
+export type ErtPutErtConfigErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * The ERT config failed validation
+     */
+    422: ErtConfigInvalidDetail;
+    /**
+     *
+     * The project is locked by another process and cannot be modified.
+     * The project can still be read but write operations are blocked.
+     *
+     */
+    423: unknown;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * ERT is not available in the environment running fmu-settings.
+     */
+    503: unknown;
+    /**
+     * ERT config validation timed out.
+     */
+    504: unknown;
+};
+
+export type ErtPutErtConfigError = ErtPutErtConfigErrors[keyof ErtPutErtConfigErrors];
+
+export type ErtPutErtConfigResponses = {
+    /**
+     * Successful Response
+     */
+    200: ErtConfigValidationResult;
+};
+
+export type ErtPutErtConfigResponse = ErtPutErtConfigResponses[keyof ErtPutErtConfigResponses];
+
+export type ErtPostValidateErtConfigData = {
+    body: ErtConfigValidateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/ert/validate';
+};
+
+export type ErtPostValidateErtConfigErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+    /**
+     * ERT is not available in the environment running fmu-settings.
+     */
+    503: unknown;
+    /**
+     * ERT config validation timed out.
+     */
+    504: unknown;
+};
+
+export type ErtPostValidateErtConfigError = ErtPostValidateErtConfigErrors[keyof ErtPostValidateErtConfigErrors];
+
+export type ErtPostValidateErtConfigResponses = {
+    /**
+     * Successful Response
+     */
+    200: ErtConfigValidationResult;
+};
+
+export type ErtPostValidateErtConfigResponse = ErtPostValidateErtConfigResponses[keyof ErtPostValidateErtConfigResponses];
+
+export type ErtGetErtRmsProjectsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/project/ert/rms_projects';
+};
+
+export type ErtGetErtRmsProjectsErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     *
+     * The .fmu directory was unable to be found at or above a given path, or
+     * the requested path to create a project .fmu directory at does not exist.
+     *
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * Something unexpected has happened
+     */
+    500: unknown;
+};
+
+export type ErtGetErtRmsProjectsError = ErtGetErtRmsProjectsErrors[keyof ErtGetErtRmsProjectsErrors];
+
+export type ErtGetErtRmsProjectsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ErtRmsProjectList;
+};
+
+export type ErtGetErtRmsProjectsResponse = ErtGetErtRmsProjectsResponses[keyof ErtGetErtRmsProjectsResponses];
+
+export type ErtPostOpenErtGuiData = {
+    body?: never;
+    path: {
+        /**
+         * Name
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/api/v1/project/ert/configs/{name}/gui';
+};
+
+export type ErtPostOpenErtGuiErrors = {
+    /**
+     * No active or valid session was found
+     */
+    401: unknown;
+    /**
+     * The OS returned a permissions error while locating or creating .fmu
+     */
+    403: unknown;
+    /**
+     * The config file does not exist
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+    /**
+     * The ERT GUI could not be started
+     */
+    500: unknown;
+    /**
+     * ERT or a display is not available to the API
+     */
+    503: unknown;
+};
+
+export type ErtPostOpenErtGuiError = ErtPostOpenErtGuiErrors[keyof ErtPostOpenErtGuiErrors];
+
+export type ErtPostOpenErtGuiResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type ErtPostOpenErtGuiResponse = ErtPostOpenErtGuiResponses[keyof ErtPostOpenErtGuiResponses];
 
 export type UserGetUserData = {
     body?: never;

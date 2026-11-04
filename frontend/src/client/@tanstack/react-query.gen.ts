@@ -4,8 +4,8 @@ import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanst
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { healthHealthCheck, healthV1HealthCheck, matchPostMatch, type Options, projectDeleteProjectSession, projectGetCache, projectGetCacheDiff, projectGetCacheRevision, projectGetChangelog, projectGetGlobalConfigStatus, projectGetLockStatus, projectGetMappings, projectGetMigrationBackupCheck, projectGetProject, projectGetRestoreCheck, projectGetRmsProjects, projectPatchAccess, projectPatchAssociatedFields, projectPatchCacheMaxRevisions, projectPatchMasterdata, projectPatchModel, projectPatchRms, projectPatchRmsCoordinateSystem, projectPatchRmsStratigraphicFramework, projectPatchRmsWells, projectPostCacheRestore, projectPostGlobalConfig, projectPostInitProject, projectPostLockAcquire, projectPostLockRefresh, projectPostLockRelease, projectPostMappingsExportRmsSimulatorRenamingTable, projectPostMappingsImportRmsEclipseCsv, projectPostMigrationBackupRestore, projectPostProject, projectPostRestore, projectPostValidateMasterdataSmda, projectPutMappings, rmsDeleteRmsProject, rmsGetCoordinateSystem, rmsGetHorizons, rmsGetWells, rmsGetZones, rmsPostRmsProject, rmsPostValidateRmsProject, sessionGetRestoreCheck, sessionGetSession, sessionPatchAccessToken, sessionPostRestore, sessionPostSession, smdaGetHealth, smdaPostField, smdaPostMasterdata, smdaPostStratUnits, smdaPostWellHeaders, sumoGetAssets, sumoPostLogin, userGetUser, userPatchApiKey } from '../sdk.gen';
-import type { HealthHealthCheckData, HealthHealthCheckResponse, HealthV1HealthCheckData, HealthV1HealthCheckError, HealthV1HealthCheckResponse, MatchPostMatchData, MatchPostMatchResponse, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionError, ProjectDeleteProjectSessionResponse, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffResponse, ProjectGetCacheError, ProjectGetCacheResponse, ProjectGetCacheRevisionData, ProjectGetCacheRevisionResponse, ProjectGetChangelogData, ProjectGetChangelogResponse, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusResponse, ProjectGetLockStatusData, ProjectGetLockStatusError, ProjectGetLockStatusResponse, ProjectGetMappingsData, ProjectGetMappingsResponse, ProjectGetMigrationBackupCheckData, ProjectGetMigrationBackupCheckError, ProjectGetMigrationBackupCheckResponse, ProjectGetProjectData, ProjectGetProjectError, ProjectGetProjectResponse, ProjectGetRestoreCheckData, ProjectGetRestoreCheckError, ProjectGetRestoreCheckResponse, ProjectGetRmsProjectsData, ProjectGetRmsProjectsError, ProjectGetRmsProjectsResponse, ProjectPatchAccessData, ProjectPatchAccessError, ProjectPatchAccessResponse, ProjectPatchAssociatedFieldsData, ProjectPatchAssociatedFieldsError, ProjectPatchAssociatedFieldsResponse, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsError, ProjectPatchCacheMaxRevisionsResponse, ProjectPatchMasterdataData, ProjectPatchMasterdataError, ProjectPatchMasterdataResponse, ProjectPatchModelData, ProjectPatchModelError, ProjectPatchModelResponse, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemResponse, ProjectPatchRmsData, ProjectPatchRmsError, ProjectPatchRmsResponse, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkResponse, ProjectPatchRmsWellsData, ProjectPatchRmsWellsResponse, ProjectPostCacheRestoreData, ProjectPostCacheRestoreResponse, ProjectPostGlobalConfigData, ProjectPostGlobalConfigResponse, ProjectPostInitProjectData, ProjectPostInitProjectResponse, ProjectPostLockAcquireData, ProjectPostLockAcquireError, ProjectPostLockAcquireResponse, ProjectPostLockRefreshData, ProjectPostLockRefreshError, ProjectPostLockRefreshResponse, ProjectPostLockReleaseData, ProjectPostLockReleaseError, ProjectPostLockReleaseResponse, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableResponse, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvResponse, ProjectPostMigrationBackupRestoreData, ProjectPostMigrationBackupRestoreError, ProjectPostMigrationBackupRestoreResponse, ProjectPostProjectData, ProjectPostProjectError, ProjectPostProjectResponse, ProjectPostRestoreData, ProjectPostRestoreError, ProjectPostRestoreResponse, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaResponse, ProjectPutMappingsData, ProjectPutMappingsResponse, RmsDeleteRmsProjectData, RmsDeleteRmsProjectError, RmsDeleteRmsProjectResponse, RmsGetCoordinateSystemData, RmsGetCoordinateSystemError, RmsGetCoordinateSystemResponse, RmsGetHorizonsData, RmsGetHorizonsError, RmsGetHorizonsResponse, RmsGetWellsData, RmsGetWellsError, RmsGetWellsResponse, RmsGetZonesData, RmsGetZonesError, RmsGetZonesResponse, RmsPostRmsProjectData, RmsPostRmsProjectResponse, RmsPostValidateRmsProjectData, RmsPostValidateRmsProjectResponse, SessionGetRestoreCheckData, SessionGetRestoreCheckError, SessionGetRestoreCheckResponse, SessionGetSessionData, SessionGetSessionError, SessionGetSessionResponse, SessionPatchAccessTokenData, SessionPatchAccessTokenError, SessionPatchAccessTokenResponse, SessionPostRestoreData, SessionPostRestoreError, SessionPostRestoreResponse, SessionPostSessionData, SessionPostSessionError, SessionPostSessionResponse, SmdaGetHealthData, SmdaGetHealthError, SmdaGetHealthResponse, SmdaPostFieldData, SmdaPostFieldError, SmdaPostFieldResponse, SmdaPostMasterdataData, SmdaPostMasterdataResponse, SmdaPostStratUnitsData, SmdaPostStratUnitsResponse, SmdaPostWellHeadersData, SmdaPostWellHeadersResponse, SumoGetAssetsData, SumoGetAssetsError, SumoGetAssetsResponse, SumoPostLoginData, SumoPostLoginError, SumoPostLoginResponse, UserGetUserData, UserGetUserError, UserGetUserResponse, UserPatchApiKeyData, UserPatchApiKeyError, UserPatchApiKeyResponse } from '../types.gen';
+import { ertGetErtConfig, ertGetErtConfigs, ertGetErtRmsProjects, ertPostOpenErtGui, ertPostValidateErtConfig, ertPutErtConfig, healthHealthCheck, healthV1HealthCheck, matchPostMatch, type Options, projectDeleteProjectSession, projectGetCache, projectGetCacheDiff, projectGetCacheRevision, projectGetChangelog, projectGetGlobalConfigStatus, projectGetLockStatus, projectGetMappings, projectGetMigrationBackupCheck, projectGetProject, projectGetRestoreCheck, projectGetRmsProjects, projectPatchAccess, projectPatchAssociatedFields, projectPatchCacheMaxRevisions, projectPatchMasterdata, projectPatchModel, projectPatchRms, projectPatchRmsCoordinateSystem, projectPatchRmsStratigraphicFramework, projectPatchRmsWells, projectPostCacheRestore, projectPostGlobalConfig, projectPostInitProject, projectPostLockAcquire, projectPostLockRefresh, projectPostLockRelease, projectPostMappingsExportRmsSimulatorRenamingTable, projectPostMappingsImportRmsEclipseCsv, projectPostMigrationBackupRestore, projectPostProject, projectPostRestore, projectPostValidateMasterdataSmda, projectPutMappings, rmsDeleteRmsProject, rmsGetCoordinateSystem, rmsGetHorizons, rmsGetWells, rmsGetZones, rmsPostRmsProject, rmsPostValidateRmsProject, sessionGetRestoreCheck, sessionGetSession, sessionPatchAccessToken, sessionPostRestore, sessionPostSession, smdaGetHealth, smdaPostField, smdaPostMasterdata, smdaPostStratUnits, smdaPostWellHeaders, sumoGetAssets, sumoPostLogin, userGetUser, userPatchApiKey } from '../sdk.gen';
+import type { ErtGetErtConfigData, ErtGetErtConfigError, ErtGetErtConfigResponse, ErtGetErtConfigsData, ErtGetErtConfigsError, ErtGetErtConfigsResponse, ErtGetErtRmsProjectsData, ErtGetErtRmsProjectsError, ErtGetErtRmsProjectsResponse, ErtPostOpenErtGuiData, ErtPostOpenErtGuiError, ErtPostOpenErtGuiResponse, ErtPostValidateErtConfigData, ErtPostValidateErtConfigError, ErtPostValidateErtConfigResponse, ErtPutErtConfigData, ErtPutErtConfigError, ErtPutErtConfigResponse, HealthHealthCheckData, HealthHealthCheckResponse, HealthV1HealthCheckData, HealthV1HealthCheckError, HealthV1HealthCheckResponse, MatchPostMatchData, MatchPostMatchResponse, ProjectDeleteProjectSessionData, ProjectDeleteProjectSessionError, ProjectDeleteProjectSessionResponse, ProjectGetCacheData, ProjectGetCacheDiffData, ProjectGetCacheDiffResponse, ProjectGetCacheError, ProjectGetCacheResponse, ProjectGetCacheRevisionData, ProjectGetCacheRevisionResponse, ProjectGetChangelogData, ProjectGetChangelogResponse, ProjectGetGlobalConfigStatusData, ProjectGetGlobalConfigStatusResponse, ProjectGetLockStatusData, ProjectGetLockStatusError, ProjectGetLockStatusResponse, ProjectGetMappingsData, ProjectGetMappingsResponse, ProjectGetMigrationBackupCheckData, ProjectGetMigrationBackupCheckError, ProjectGetMigrationBackupCheckResponse, ProjectGetProjectData, ProjectGetProjectError, ProjectGetProjectResponse, ProjectGetRestoreCheckData, ProjectGetRestoreCheckError, ProjectGetRestoreCheckResponse, ProjectGetRmsProjectsData, ProjectGetRmsProjectsError, ProjectGetRmsProjectsResponse, ProjectPatchAccessData, ProjectPatchAccessError, ProjectPatchAccessResponse, ProjectPatchAssociatedFieldsData, ProjectPatchAssociatedFieldsError, ProjectPatchAssociatedFieldsResponse, ProjectPatchCacheMaxRevisionsData, ProjectPatchCacheMaxRevisionsError, ProjectPatchCacheMaxRevisionsResponse, ProjectPatchMasterdataData, ProjectPatchMasterdataError, ProjectPatchMasterdataResponse, ProjectPatchModelData, ProjectPatchModelError, ProjectPatchModelResponse, ProjectPatchRmsCoordinateSystemData, ProjectPatchRmsCoordinateSystemResponse, ProjectPatchRmsData, ProjectPatchRmsError, ProjectPatchRmsResponse, ProjectPatchRmsStratigraphicFrameworkData, ProjectPatchRmsStratigraphicFrameworkResponse, ProjectPatchRmsWellsData, ProjectPatchRmsWellsResponse, ProjectPostCacheRestoreData, ProjectPostCacheRestoreResponse, ProjectPostGlobalConfigData, ProjectPostGlobalConfigResponse, ProjectPostInitProjectData, ProjectPostInitProjectResponse, ProjectPostLockAcquireData, ProjectPostLockAcquireError, ProjectPostLockAcquireResponse, ProjectPostLockRefreshData, ProjectPostLockRefreshError, ProjectPostLockRefreshResponse, ProjectPostLockReleaseData, ProjectPostLockReleaseError, ProjectPostLockReleaseResponse, ProjectPostMappingsExportRmsSimulatorRenamingTableData, ProjectPostMappingsExportRmsSimulatorRenamingTableResponse, ProjectPostMappingsImportRmsEclipseCsvData, ProjectPostMappingsImportRmsEclipseCsvResponse, ProjectPostMigrationBackupRestoreData, ProjectPostMigrationBackupRestoreError, ProjectPostMigrationBackupRestoreResponse, ProjectPostProjectData, ProjectPostProjectError, ProjectPostProjectResponse, ProjectPostRestoreData, ProjectPostRestoreError, ProjectPostRestoreResponse, ProjectPostValidateMasterdataSmdaData, ProjectPostValidateMasterdataSmdaResponse, ProjectPutMappingsData, ProjectPutMappingsResponse, RmsDeleteRmsProjectData, RmsDeleteRmsProjectError, RmsDeleteRmsProjectResponse, RmsGetCoordinateSystemData, RmsGetCoordinateSystemError, RmsGetCoordinateSystemResponse, RmsGetHorizonsData, RmsGetHorizonsError, RmsGetHorizonsResponse, RmsGetWellsData, RmsGetWellsError, RmsGetWellsResponse, RmsGetZonesData, RmsGetZonesError, RmsGetZonesResponse, RmsPostRmsProjectData, RmsPostRmsProjectResponse, RmsPostValidateRmsProjectData, RmsPostValidateRmsProjectResponse, SessionGetRestoreCheckData, SessionGetRestoreCheckError, SessionGetRestoreCheckResponse, SessionGetSessionData, SessionGetSessionError, SessionGetSessionResponse, SessionPatchAccessTokenData, SessionPatchAccessTokenError, SessionPatchAccessTokenResponse, SessionPostRestoreData, SessionPostRestoreError, SessionPostRestoreResponse, SessionPostSessionData, SessionPostSessionError, SessionPostSessionResponse, SmdaGetHealthData, SmdaGetHealthError, SmdaGetHealthResponse, SmdaPostFieldData, SmdaPostFieldError, SmdaPostFieldResponse, SmdaPostMasterdataData, SmdaPostMasterdataResponse, SmdaPostStratUnitsData, SmdaPostStratUnitsResponse, SmdaPostWellHeadersData, SmdaPostWellHeadersResponse, SumoGetAssetsData, SumoGetAssetsError, SumoGetAssetsResponse, SumoPostLoginData, SumoPostLoginError, SumoPostLoginResponse, UserGetUserData, UserGetUserError, UserGetUserResponse, UserPatchApiKeyData, UserPatchApiKeyError, UserPatchApiKeyResponse } from '../types.gen';
 
 /**
  * Removes a project .fmu directory from a session
@@ -788,6 +788,135 @@ export const projectGetChangelogOptions = (options?: Options<ProjectGetChangelog
     },
     queryKey: projectGetChangelogQueryKey(options)
 });
+
+export const ertGetErtConfigsQueryKey = (options?: Options<ErtGetErtConfigsData>) => createQueryKey('ertGetErtConfigs', options);
+
+/**
+ * Lists the ERT config files in the project ert/model directory
+ *
+ * Lists the ERT config files in the project ert/model directory. Also starts
+ * the ERT validator in the background, if not already running, so that
+ * subsequent validations are fast.
+ */
+export const ertGetErtConfigsOptions = (options?: Options<ErtGetErtConfigsData>) => queryOptions<ErtGetErtConfigsResponse, AxiosError<ErtGetErtConfigsError>, ErtGetErtConfigsResponse, ReturnType<typeof ertGetErtConfigsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await ertGetErtConfigs({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: ertGetErtConfigsQueryKey(options)
+});
+
+export const ertGetErtConfigQueryKey = (options: Options<ErtGetErtConfigData>) => createQueryKey('ertGetErtConfig', options);
+
+/**
+ * Returns the content of an ERT config file in ert/model
+ *
+ * Returns the content of an ERT config file in ert/model.
+ */
+export const ertGetErtConfigOptions = (options: Options<ErtGetErtConfigData>) => queryOptions<ErtGetErtConfigResponse, AxiosError<ErtGetErtConfigError>, ErtGetErtConfigResponse, ReturnType<typeof ertGetErtConfigQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await ertGetErtConfig({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: ertGetErtConfigQueryKey(options)
+});
+
+/**
+ * Validates and saves an ERT config file to ert/model
+ *
+ * Validates the ERT config content with ERT and, if valid, writes it to the
+ * project ert/model directory, replacing any existing file with the same
+ * name. If ERT reports errors, nothing is written and 422 is returned with
+ * the validation result.
+ */
+export const ertPutErtConfigMutation = (options?: Partial<Options<ErtPutErtConfigData>>): UseMutationOptions<ErtPutErtConfigResponse, AxiosError<ErtPutErtConfigError>, Options<ErtPutErtConfigData>> => {
+    const mutationOptions: UseMutationOptions<ErtPutErtConfigResponse, AxiosError<ErtPutErtConfigError>, Options<ErtPutErtConfigData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await ertPutErtConfig({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Validates an ERT config with ERT without saving it
+ *
+ * Validates the ERT config content with ERT and the installed site plugins,
+ * as if it was saved with the given name in the project ert/model directory.
+ * Relative paths in the config are resolved from that location.
+ * Validation runs ERT in a separate process and may take some time.
+ */
+export const ertPostValidateErtConfigMutation = (options?: Partial<Options<ErtPostValidateErtConfigData>>): UseMutationOptions<ErtPostValidateErtConfigResponse, AxiosError<ErtPostValidateErtConfigError>, Options<ErtPostValidateErtConfigData>> => {
+    const mutationOptions: UseMutationOptions<ErtPostValidateErtConfigResponse, AxiosError<ErtPostValidateErtConfigError>, Options<ErtPostValidateErtConfigData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await ertPostValidateErtConfig({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const ertGetErtRmsProjectsQueryKey = (options?: Options<ErtGetErtRmsProjectsData>) => createQueryKey('ertGetErtRmsProjects', options);
+
+/**
+ * Lists the RMS projects in rms/model with their RMS versions
+ *
+ * Lists the RMS projects in the project rms/model directory, with the RMS
+ * version detected from each project's .master file. If the version cannot
+ * be detected, `version` is null and `error` describes why.
+ */
+export const ertGetErtRmsProjectsOptions = (options?: Options<ErtGetErtRmsProjectsData>) => queryOptions<ErtGetErtRmsProjectsResponse, AxiosError<ErtGetErtRmsProjectsError>, ErtGetErtRmsProjectsResponse, ReturnType<typeof ertGetErtRmsProjectsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await ertGetErtRmsProjects({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: ertGetErtRmsProjectsQueryKey(options)
+});
+
+/**
+ * Opens a saved ERT config in the ERT GUI
+ *
+ * Starts `ert gui` for the saved config file in the project ert/model
+ * directory. ERT is started on the machine and display running the API,
+ * using the same ERT as for validation. Unsaved changes are not included.
+ */
+export const ertPostOpenErtGuiMutation = (options?: Partial<Options<ErtPostOpenErtGuiData>>): UseMutationOptions<ErtPostOpenErtGuiResponse, AxiosError<ErtPostOpenErtGuiError>, Options<ErtPostOpenErtGuiData>> => {
+    const mutationOptions: UseMutationOptions<ErtPostOpenErtGuiResponse, AxiosError<ErtPostOpenErtGuiError>, Options<ErtPostOpenErtGuiData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await ertPostOpenErtGui({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 export const userGetUserQueryKey = (options?: Options<UserGetUserData>) => createQueryKey('userGetUser', options);
 
