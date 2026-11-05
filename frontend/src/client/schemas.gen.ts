@@ -2426,6 +2426,20 @@ export const SumoAssetSchema = {
     description: 'A Sumo asset available to the user.'
 } as const;
 
+export const SumoLoginRequestSchema = {
+    properties: {
+        force_refresh: {
+            type: 'boolean',
+            title: 'Force Refresh',
+            description: 'Invalidate cached Microsoft access tokens before login.',
+            default: false
+        }
+    },
+    type: 'object',
+    title: 'SumoLoginRequest',
+    description: 'Options for logging in to Sumo.'
+} as const;
+
 export const UserAPIKeysSchema = {
     properties: {
         smda_subscription: {

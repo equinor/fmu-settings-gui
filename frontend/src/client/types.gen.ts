@@ -1588,6 +1588,20 @@ export type SumoAsset = {
 };
 
 /**
+ * SumoLoginRequest
+ *
+ * Options for logging in to Sumo.
+ */
+export type SumoLoginRequest = {
+    /**
+     * Force Refresh
+     *
+     * Invalidate cached Microsoft access tokens before login.
+     */
+    force_refresh?: boolean;
+};
+
+/**
  * UserAPIKeys
  *
  * Known API keys stored in a user config.
@@ -3989,7 +4003,10 @@ export type SumoGetAssetsResponses = {
 export type SumoGetAssetsResponse = SumoGetAssetsResponses[keyof SumoGetAssetsResponses];
 
 export type SumoPostLoginData = {
-    body?: never;
+    /**
+     * Login Request
+     */
+    body?: SumoLoginRequest | null;
     path?: never;
     query?: never;
     url: '/api/v1/sumo/login';
