@@ -6829,7 +6829,7 @@
           "sumo"
         ],
         "summary": "Logs in to Sumo.",
-        "description": "Starts an interactive Sumo login if no cached token is available.",
+        "description": "Starts an interactive Sumo login if no cached token is available. Set force_refresh to true in the request body to invalidate cached Microsoft access tokens before authentication.",
         "operationId": "sumo-post_login",
         "parameters": [
           {
@@ -6849,6 +6849,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SumoLoginRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Login Request"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -10170,6 +10187,19 @@
         ],
         "title": "SumoAsset",
         "description": "A Sumo asset available to the user."
+      },
+      "SumoLoginRequest": {
+        "properties": {
+          "force_refresh": {
+            "type": "boolean",
+            "title": "Force Refresh",
+            "description": "Invalidate cached Microsoft access tokens before login.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "SumoLoginRequest",
+        "description": "Options for logging in to Sumo."
       },
       "UserAPIKeys": {
         "properties": {

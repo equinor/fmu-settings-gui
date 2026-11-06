@@ -49,6 +49,7 @@ import {
 import { fieldContext, formContext } from "#utils/form";
 import { stringCompare } from "#utils/string";
 import { requiredStringValidator } from "#utils/validator";
+import { AssetHelp, AssetRefreshError } from "./Access.style";
 
 type AccessEditorProps = {
   accessData: Access | null | undefined;
@@ -163,6 +164,36 @@ function AccessEditor({
     },
   });
 
+  const sumoRefreshMutation = useMutation({
+    ...sumoPostLoginMutation(),
+    onSuccess: async () => {
+      await sumoAssetsQuery.refetch();
+    },
+    onError: (error) => {
+      // The refresh may have deleted the cached tokens. Reload the assets so the
+      // dialog shows the "Log in" button if Sumo now requires a login.
+      if (error.response?.status === HTTP_STATUS_424_FAILED_DEPENDENCY) {
+        void sumoAssetsQuery.refetch();
+      }
+    },
+    meta: {
+      errorPrefix: "Error refreshing Sumo access",
+      preventDefaultErrorHandling: [
+        HTTP_STATUS_424_FAILED_DEPENDENCY,
+        HTTP_STATUS_503_SERVICE_UNAVAILABLE,
+      ],
+    },
+  });
+
+  const { isPending: refreshPending, reset: resetRefresh } =
+    sumoRefreshMutation;
+
+  useEffect(() => {
+    if (!isDialogOpen && !refreshPending) {
+      resetRefresh();
+    }
+  }, [isDialogOpen, refreshPending, resetRefresh]);
+
   if (!isDialogOpen) {
     return null;
   }
@@ -171,10 +202,10 @@ function AccessEditor({
     ? sumoAssetsQuery.error.response?.status
     : undefined;
   const loginRequired = errorStatus === HTTP_STATUS_424_FAILED_DEPENDENCY;
-  const isLoading = sumoAssetsQuery.isFetching;
+  const isLoading = sumoAssetsQuery.isFetching || refreshPending;
   const sumoAssetsLoaded =
     sumoAssetsQuery.data !== undefined &&
-    !sumoAssetsQuery.isFetching &&
+    !isLoading &&
     !sumoAssetsQuery.isError;
   const errorText = sumoLoginMutation.error
     ? getHttpErrorDetail(sumoLoginMutation.error, "Sumo login failed")
@@ -193,10 +224,27 @@ function AccessEditor({
       errorText={errorText}
       loginPending={sumoLoginMutation.isPending}
       loginToSumo={() => {
+        resetRefresh();
         sumoLoginMutation.mutate({});
       }}
       retrySumoAssets={() => {
+        resetRefresh();
         void sumoAssetsQuery.refetch();
+      }}
+      refreshPending={refreshPending}
+      refreshError={
+        // The warning box shows 424 errors and asks for a Sumo login instead.
+        sumoRefreshMutation.error &&
+        sumoRefreshMutation.error.response?.status !==
+          HTTP_STATUS_424_FAILED_DEPENDENCY
+          ? getHttpErrorDetail(
+              sumoRefreshMutation.error,
+              "Unable to refresh Sumo access",
+            )
+          : null
+      }
+      refreshSumoAccess={() => {
+        sumoRefreshMutation.mutate({ body: { force_refresh: true } });
       }}
       projectReadOnly={projectReadOnly}
       isDialogOpen={isDialogOpen}
@@ -215,6 +263,9 @@ function AccessEditorForm({
   loginPending,
   loginToSumo,
   retrySumoAssets,
+  refreshPending,
+  refreshError,
+  refreshSumoAccess,
   projectReadOnly,
   isDialogOpen,
   setIsDialogOpen,
@@ -227,6 +278,9 @@ function AccessEditorForm({
   loginPending: boolean;
   loginToSumo: () => void;
   retrySumoAssets: () => void;
+  refreshPending: boolean;
+  refreshError: string | null;
+  refreshSumoAccess: () => void;
 }) {
   const closeDialog = ({ formReset }: { formReset: () => void }) => {
     formReset();
@@ -306,7 +360,7 @@ function AccessEditorForm({
   }, [form, sumoAssetsLoaded]);
 
   return (
-    <EditDialog open={isDialogOpen} $minWidth="25em">
+    <EditDialog open={isDialogOpen} $minWidth="30em">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -347,7 +401,31 @@ function AccessEditorForm({
             )}
           </form.AppField>
 
-          <PageSectionSpacer />
+          {sumoAssetsLoaded || refreshPending || refreshError !== null ? (
+            <AssetHelp>
+              <summary>Missing an asset from the list?</summary>
+
+              <PageText>
+                If you recently received access to an asset, refresh your Sumo
+                access to update the asset list.
+              </PageText>
+
+              {refreshError && (
+                <AssetRefreshError role="alert">
+                  {refreshError}
+                </AssetRefreshError>
+              )}
+
+              <GeneralButton
+                label="Refresh Sumo access"
+                isPending={refreshPending}
+                disabled={isLoading || loginPending}
+                onClick={refreshSumoAccess}
+              />
+            </AssetHelp>
+          ) : (
+            <PageSectionSpacer />
+          )}
 
           <form.AppField
             name="classification"

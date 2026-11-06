@@ -772,12 +772,16 @@ export const sumoGetAssets = <ThrowOnError extends boolean = false>(options?: Op
 /**
  * Logs in to Sumo.
  *
- * Starts an interactive Sumo login if no cached token is available.
+ * Starts an interactive Sumo login if no cached token is available. Set force_refresh to true in the request body to invalidate cached Microsoft access tokens before authentication.
  */
 export const sumoPostLogin = <ThrowOnError extends boolean = false>(options?: Options<SumoPostLoginData, ThrowOnError>): RequestResult<SumoPostLoginResponses, SumoPostLoginErrors, ThrowOnError> => (options?.client ?? client).post<SumoPostLoginResponses, SumoPostLoginErrors, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/sumo/login',
-    ...options
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
 });
 
 /**

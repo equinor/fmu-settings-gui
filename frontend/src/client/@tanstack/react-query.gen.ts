@@ -1132,7 +1132,7 @@ export const sumoGetAssetsOptions = (options?: Options<SumoGetAssetsData>) => qu
 /**
  * Logs in to Sumo.
  *
- * Starts an interactive Sumo login if no cached token is available.
+ * Starts an interactive Sumo login if no cached token is available. Set force_refresh to true in the request body to invalidate cached Microsoft access tokens before authentication.
  */
 export const sumoPostLoginMutation = (options?: Partial<Options<SumoPostLoginData>>): UseMutationOptions<SumoPostLoginResponse, AxiosError<SumoPostLoginError>, Options<SumoPostLoginData>> => {
     const mutationOptions: UseMutationOptions<SumoPostLoginResponse, AxiosError<SumoPostLoginError>, Options<SumoPostLoginData>> = {
